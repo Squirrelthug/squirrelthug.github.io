@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Writings | [Your Name/Handle]</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
+        :root {
+            --bg-color: #1a1b26;
+            --text-color: #c0caf5;
+            --header-color: #ffffff;
+            --accent-color: #bb9af7;
+            --card-bg-color: #24283b;
+            --border-color: #3b4261;
+            --subtle-text-color: #787c99;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            margin: 0; padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px; /* Single column, so we don't need the wider layout */
+            width: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        h1, h2, h3 {
+            font-family: 'Rubik', sans-serif;
+            color: var(--header-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        a { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
+        a:hover { opacity: 0.8; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 2rem;
+        }
+        .header .name { font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--header-color); }
+        .header nav a { margin-left: 1.5rem; font-weight: 500; }
+        
+        /* --- NEW STYLES FOR BLOG POST LIST --- */
+        .post-list-card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: border-color 0.3s ease;
+        }
+        .post-list-card:hover {
+            border-color: var(--accent-color);
+        }
+        .post-list-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        .post-list-card h3 a {
+            color: var(--header-color);
+            font-size: 1.5rem;
+        }
+        .post-meta {
+            font-size: 0.9rem;
+            color: var(--subtle-text-color);
+            margin-bottom: 1rem;
+        }
+        .post-excerpt {
+            margin-bottom: 1.5rem;
+        }
+        .read-more {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 500;
+            color: var(--accent-color);
+        }
+
+        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="name">[SquirrelThug]</div>
+           <nav>
+                <a href="Announcements">Announcements</a>
+                <a href="Blogs">Blogs</a>
+                <a href="Gists">Gists</a>
+                <a href="#projects">Projects</a>
+                <a href="#contact">Contact</a>
+            </nav> 
+        </header>
+
+        <main>
+            <section id="writings">
+                <h2>Writings & Articles</h2>
+                <p>A collection of posts detailing my development process, architectural decisions, and learnings from the Lilith project and beyond.</p>
+                
+                <div class="post-list">
+
+                    <div class="post-list-card">
+                        <h3><a href="/posts/[your-post-file-name].html">[How I Built a Stateful API with FastAPI]</a></h3>
+                        <div class="post-meta">
+                            <span>Posted on [August 1, 2025]</span>
+                        </div>
+                        <p class="post-excerpt">
+                           [A deep dive into the design and implementation of the lilith-context-manager, focusing on its 'Zero Intelligence' philosophy, Pydantic data contracts, and the use of atomic writes for data integrity.]
+                        </p>
+                        <a href="/posts/[your-post-file-name].html" class="read-more">Read More &rarr;</a>
+                    </div>
+                    <div class="post-list-card">
+                        <h3><a href="/posts/[your-post-file-name-2].html">[Why I Chose a 'Hub-and-Spoke' Architecture for My AI]</a></h3>
+                        <div class="post-meta">
+                            <span>Posted on [July 15, 2025]</span>
+                        </div>
+                        <p class="post-excerpt">
+                            [An analysis of the design decisions that led to the v3.0 architecture, focusing on the importance of data integrity and creating a single-source-of-truth through a central orchestrator.]
+                        </p>
+                        <a href="/posts/[your-post-file-name-2].html" class="read-more">Read More &rarr;</a>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 [SquirrelThug]. Designed with simplicity.</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
