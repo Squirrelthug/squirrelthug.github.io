@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Blog Post Title] | [Your Name/Handle]</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
+        :root {
+            --bg-color: #1a1b26;
+            --text-color: #c0caf5;
+            --header-color: #ffffff;
+            --accent-color: #bb9af7;
+            --card-bg-color: #24283b;
+            --border-color: #3b4261;
+            --subtle-text-color: #787c99;
+        }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; line-height: 1.7; margin: 0; padding: 0; display: flex; justify-content: center; }
+        .container { max-width: 1100px; width: 100%; padding: 2rem; box-sizing: border-box; }
+        h1, h2, h3, h4 { font-family: 'Rubik', sans-serif; color: var(--header-color); margin-top: 2.5rem; margin-bottom: 1rem; }
+        h1 { font-size: 3rem; line-height: 1.2; }
+        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+        h3 { font-size: 1.4rem; }
+        p { margin-bottom: 1.2rem; }
+        a { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
+        a:hover { opacity: 0.8; }
+        strong { color: var(--header-color); font-weight: 700; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 2rem; }
+        .header .name { font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--header-color); }
+        .header nav a { margin-left: 1.5rem; font-weight: 500; }
+
+        /* --- NEW: POST-SPECIFIC LAYOUT --- */
+        .post-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3rem;
+            align-items: flex-start;
+        }
+        .post-content {
+            flex: 3;
+            min-width: 300px;
+        }
+        .post-sidebar {
+            flex: 1;
+            min-width: 250px;
+            position: sticky; /* Makes sidebar stick on scroll */
+            top: 2rem;
+        }
+        .post-meta {
+            color: var(--subtle-text-color);
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+        blockquote {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1.5rem;
+            margin-left: 0;
+            font-style: italic;
+            color: var(--text-color);
+        }
+        pre {
+            background-color: #16161e;
+            color: #dcdcdc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto; /* Allows scrolling for long code lines */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--border-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        /* --- NEW: TABLE OF CONTENTS CARD --- */
+        .toc-card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .toc-card h3 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .toc-card ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .toc-card li {
+            padding: 0.5rem 0;
+        }
+        .toc-card a {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="name">[SquirrelThug]</div>
+            <nav>
+                <a href="/index.html">Home</a>
+                <a href="/blog.html">All Writings</a>
+            </nav>
+        </header>
+
+        <main class="post-layout">
+            
+            <article class="post-content">
+                <h1>[Your Incredible Blog Post Title]</h1>
+                <div class="post-meta">
+                    <span>Posted on [June 24, 2025]</span> &middot; <span>Approx. 5 min read</span>
+                </div>
+
+                <p>
+                    [This is the opening paragraph of your blog post. It should be engaging and state the main purpose of the article. For example: "When I set out to build the `lilith-context-manager`, one of my core requirements was ensuring data integrity. A service crash during a file write could corrupt a user's entire session history, which is unacceptable. This led me down the path of implementing **atomic writes**, a powerful pattern that guarantees a file is either fully written or not at all." This is an example of an introductory paragraph.]
+                </p>
+                
+                <p>
+                    You can use <strong>strong tags</strong> for emphasis and <code>inline code blocks</code> for mentioning variable names or file paths like <code>service/main.py</code>.
+                </p>
+
+                <h2 id="the-problem-with-standard-writes">The Problem with Standard Writes</h2>
+                <p>
+                    [Explain the first major point of your article here. Describe the problem you are trying to solve in more detail.]
+                </p>
+
+                <blockquote>
+                    This is a blockquote. It's great for quoting documentation, highlighting a key insight, or adding a note that stands out from the main text.
+                </blockquote>
+
+                <h2 id="implementing-the-solution">Implementing the Solution</h2>
+                <p>
+                    [Explain your solution here. This is a great place to put a code block to show your work.]
+                </p>
+
+                <pre><code># This is a Python code block.
+# You can paste your code directly here.
+def atomic_write(filepath: str, data: str):
+    temp_path = f"{filepath}.tmp"
+    try:
+        with open(temp_path, "w", encoding="utf-8") as f:
+            f.write(data)
+        # The key step: rename is an atomic operation on most OS
+        os.rename(temp_path, filepath)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        # Clean up the temp file if it exists
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+</code></pre>
+
+                <h2 id="conclusion-and-next-steps">Conclusion and Next Steps</h2>
+                <p>
+                    [Summarize your article and talk about what this solution enables for the future of your project.]
+                </p>
+
+            </article>
+
+            <aside class="post-sidebar">
+                <div class="toc-card">
+                    <h3>In This Article</h3>
+                    <ul>
+                        <li><a href="#the-problem-with-standard-writes">The Problem with Standard Writes</a></li>
+                        <li><a href="#implementing-the-solution">Implementing the Solution</a></li>
+                        <li><a href="#conclusion-and-next-steps">Conclusion and Next Steps</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 [SquirrelThug]. Designed with simplicity.</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
