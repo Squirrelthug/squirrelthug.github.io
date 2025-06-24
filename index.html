@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[Your Name/Handle] - Python & AI Developer</title>
+    <style>
+        /* --- FONT IMPORT --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
+
+        /* --- CSS VARIABLES (Easy to change colors) --- */
+        :root {
+            --bg-color: #1a1b26;
+            --text-color: #c0caf5;
+            --header-color: #ffffff;
+            --accent-color: #bb9af7;
+            --card-bg-color: #24283b;
+            --border-color: #3b4261;
+        }
+
+        /* --- GENERAL STYLES & TYPOGRAPHY --- */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Rubik', sans-serif;
+            color: var(--header-color);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 { font-size: 2.5rem; }
+        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        /* --- HEADER / NAVIGATION --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 2rem;
+        }
+        .header .name {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--header-color);
+        }
+        .header nav a {
+            margin-left: 1.5rem;
+            font-weight: 500;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero h1 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--header-color);
+            max-width: 600px;
+        }
+
+        /* --- PROJECT STYLES --- */
+        .project-card, .module-card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .project-card h3, .module-card h3 {
+            margin-top: 0;
+            font-size: 1.3rem;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .module-card p {
+            font-size: 0.9rem;
+            flex-grow: 1; /* Makes description take up available space */
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .tech-tag {
+            background-color: var(--border-color);
+            color: var(--text-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .project-links {
+            margin-top: 1.5rem;
+        }
+        .button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 700;
+            display: inline-block;
+            margin-right: 1rem;
+            text-align: center;
+        }
+        .button:hover {
+            color: var(--bg-color);
+            opacity: 0.9;
+        }
+        .button.secondary {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+        }
+        .button.disabled {
+            background-color: #414868;
+            color: #787c99;
+            cursor: not-allowed;
+            border: none;
+        }
+
+
+        /* --- CONTACT & SOCIALS --- */
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+        .social-links a svg {
+            fill: var(--text-color);
+            width: 32px;
+            height: 32px;
+            transition: fill 0.2s, transform 0.2s;
+        }
+        .social-links a:hover svg {
+            fill: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="name">[Your Name / SquirrelThug]</div>
+            <nav>
+                <a href="#projects">Projects</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </header>
+
+        <main>
+
+            <section class="hero">
+                <h1>A Developer Building Intelligent Systems.</h1>
+                <p>I architect and build thoughtful, local-first AI systems with Python, focusing on modularity and clear design principles.</p>
+            </section>
+
+            <section id="projects">
+                <h2>The Lilith Ecosystem</h2>
+
+                <div class="project-card">
+                    <h3>The Lilith AI System (Vision)</h3>
+                    <p>
+                        Lilith is a conceptual ecosystem for a next-generation AI assistant. The vision is a modular, privacy-focused system where individual, open-source components work in concert to create a cohesive and intelligent experience. The architecture is designed around a central Orchestrator and a Universal Conversation Log, ensuring every action is transparent and auditable.
+                    </p>
+                    <div class="project-links">
+                        <a href="#" class="button disabled">View Project (Coming Soon)</a>
+                        <a href="[Link to a specific design doc, maybe the PDF or a file in the repo]" class="button secondary">Read the Vision</a>
+                    </div>
+                </div>
+
+                <h3>Open-Source Modules</h3>
+                <div class="module-grid">
+                    
+                    <div class="module-card">
+                        <h3>lilith-context-manager</h3>
+                        <p>A 'Zero Intelligence' state-tracking service that manages the structure of conversations. It functions as a stateful cache for the Orchestrator, handling context compression and summarization to provide clean context windows to the LLM.</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">FastAPI</span>
+                            <span class="tech-tag">Pydantic</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/squirrelthug/lilith-context-manager" class="button">View Code</a>
+                        </div>
+                    </div>
+
+                    <div class="module-card">
+                        <h3>lilith-memory-sdk</h3>
+                        <p>The sole, sanctioned gateway to Lilith's memory core. This SDK provides a high-level abstraction layer for all data persistence, managing the dual-log system (Primary Conversation Log and System Action Log) and enforcing data contracts.</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                             <span class="tech-tag">Pydantic</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="button disabled">Coming Soon</a>
+                        </div>
+                    </div>
+
+                    <div class="module-card">
+                        <h3>lilith-scl-engine</h3>
+                        <p>A standalone service that hosts and executes the Synthetic Conscious Loops (SCLs). It provides proactive insights to the Orchestrator by running background analysis on memory and generating standardized `SCLReport` objects.</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">FastAPI</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="button disabled">Coming Soon</a>
+                        </div>
+                    </div>
+
+                    <div class="module-card">
+                        <h3>lilith-orchestrator</h3>
+                        <p>The operational heart of the system. This central conductor receives all inputs, queries the SCL-Engine for insights, commands the CWM for context, and is the sole author of the Universal Conversation Log, ensuring a chronologically consistent system-wide narrative.</p>
+                        <div class="tech-stack">
+                            <span class="tech-tag">Python</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="#" class="button disabled">Coming Soon</a>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+
+            <section id="contact">
+                <h2>Connect With Me</h2>
+                <p>
+                    I'm always open to connecting with fellow developers and builders. You can find me on the platforms below.
+                </p>
+                 <div class="social-links">
+                    <a href="https://github.com/squirrelthug" title="GitHub">
+                        <svg viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    </a>
+                    <a href="[Your LinkedIn Profile URL]" title="LinkedIn">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-name="Layer 1"><path d="M20.47,2H3.53A1.53,1.53,0,0,0,2,3.53V20.47A1.53,1.53,0,0,0,3.53,22H20.47A1.53,1.53,0,0,0,22,20.47V3.53A1.53,1.53,0,0,0,20.47,2ZM8,19H5V8H8ZM6.5,6.73A1.73,1.73,0,1,1,8.23,5,1.73,1.73,0,0,1,6.5,6.73ZM19,19H16V13.35c0-1.42-.49-2.38-1.76-2.38a1.9,1.9,0,0,0-1.74,1.26,2.4,2.4,0,0,0-.11.85V19H9V8h3v1.32h.05c.4-.7,1.32-1.16,2.65-1.16,2.83,0,3.3,1.86,3.3,4.28Z"/></svg>
+                    </a>
+                    <a href="mailto:[contact@your-domain.dev]" title="Email">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="mail"><path d="M20,4H4A2,2,0,0,0,2,6V18a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V6A2,2,0,0,0,20,4Zm0,2L12,11,4,6ZM4,18V8l8,5,8-5v10Z"></path></svg>
+                    </a>
+                 </div>
+            </section>
+
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 [Your Name / SquirrelThug]. Designed with simplicity.</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
