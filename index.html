@@ -13,9 +13,10 @@
             --bg-color: #1a1b26;
             --text-color: #c0caf5;
             --header-color: #ffffff;
-            --accent-color: #bb9af7;
-            --card-bg-color: #24283b;
+            --accent-color: #bb9af7; /* A vibrant purple for links and highlights */
+            --card-bg-color: #24283b; /* A slightly lighter background for cards */
             --border-color: #3b4261;
+            --subtle-text-color: #787c99;
         }
 
         /* --- GENERAL STYLES & TYPOGRAPHY --- */
@@ -31,7 +32,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1100px; /* Increased max-width for two columns */
             width: 100%;
             padding: 2rem;
             box-sizing: border-box;
@@ -43,19 +44,15 @@
             margin-top: 2rem;
             margin-bottom: 1rem;
         }
-
         h1 { font-size: 2.5rem; }
         h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
-
+        
         a {
             color: var(--accent-color);
             text-decoration: none;
             transition: opacity 0.2s;
         }
-
-        a:hover {
-            opacity: 0.8;
-        }
+        a:hover { opacity: 0.8; }
 
         /* --- HEADER / NAVIGATION --- */
         .header {
@@ -74,7 +71,7 @@
             margin-left: 1.5rem;
             font-weight: 500;
         }
-
+        
         /* --- HERO SECTION --- */
         .hero h1 {
             margin-top: 1rem;
@@ -86,7 +83,57 @@
             max-width: 600px;
         }
 
-        /* --- PROJECT STYLES --- */
+        /* --- TWO-COLUMN LAYOUT --- */
+        .main-layout {
+            display: flex;
+            flex-wrap: wrap; /* Allows stacking on smaller screens */
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .main-content {
+            flex: 3; /* Takes up more space */
+            min-width: 300px; 
+        }
+        .activity-feed {
+            flex: 1; /* Takes up less space */
+            min-width: 280px;
+        }
+
+        /* --- LILITH ECOSYSTEM SHOWCASE --- */
+        .ecosystem-showcase {
+            background-color: #16161e; /* A slightly darker, distinct background */
+            border-radius: 10px;
+            padding: 1rem 2rem 2rem 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .ecosystem-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .ecosystem-showcase h2 { /* Override default h2 for this section */
+            border-bottom: none;
+            font-size: 2rem;
+        }
+        .ecosystem-header p {
+            max-width: 600px;
+            margin: 0.5rem auto 0 auto;
+            color: var(--subtle-text-color);
+            font-size: 1.1rem;
+        }
+        .ecosystem-showcase .project-card,
+        .ecosystem-showcase .module-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .ecosystem-showcase .project-card:hover,
+        .ecosystem-showcase .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        /* --- PROJECT & MODULE CARDS --- */
         .project-card, .module-card {
             background-color: var(--card-bg-color);
             border: 1px solid var(--border-color);
@@ -96,96 +143,44 @@
             display: flex;
             flex-direction: column;
         }
-        
-        .project-card h3, .module-card h3 {
-            margin-top: 0;
-            font-size: 1.3rem;
-        }
-
         .module-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1rem;
             margin-top: 1rem;
         }
+        .module-card p { font-size: 0.9rem; flex-grow: 1; }
+        .project-card h3, .module-card h3 { margin-top: 0; font-size: 1.3rem; }
+        .tech-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+        .tech-tag { background-color: var(--border-color); color: var(--text-color); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500; }
+        .project-links { margin-top: 1.5rem; }
+        .button { background-color: var(--accent-color); color: #15161E; padding: 0.75rem 1.5rem; border-radius: 5px; font-weight: 700; display: inline-block; margin-right: 1rem; text-align: center; }
+        .button:hover { color: #15161E; opacity: 0.9; }
+        .button.secondary { background-color: transparent; color: var(--accent-color); border: 2px solid var(--accent-color); }
+        .button.disabled { background-color: #414868; color: var(--subtle-text-color); cursor: not-allowed; border: none; }
 
-        .module-card p {
-            font-size: 0.9rem;
-            flex-grow: 1; /* Makes description take up available space */
+        /* --- ACTIVITY FEED STYLES --- */
+        .feed-section {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        .tech-tag {
-            background-color: var(--border-color);
-            color: var(--text-color);
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-        .project-links {
-            margin-top: 1.5rem;
-        }
-        .button {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
-            font-weight: 700;
-            display: inline-block;
-            margin-right: 1rem;
-            text-align: center;
-        }
-        .button:hover {
-            color: var(--bg-color);
-            opacity: 0.9;
-        }
-        .button.secondary {
-            background-color: transparent;
-            color: var(--accent-color);
-            border: 2px solid var(--accent-color);
-        }
-        .button.disabled {
-            background-color: #414868;
-            color: #787c99;
-            cursor: not-allowed;
-            border: none;
-        }
-
+        .feed-section h3 { margin-top: 0; font-size: 1.2rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
+        .feed-list { list-style-type: none; padding: 0; margin: 0; }
+        .feed-list li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        .feed-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        .feed-list a { font-weight: 500; display: block; }
+        .feed-list .meta { font-size: 0.8rem; color: var(--subtle-text-color); margin-top: 0.25rem; }
 
         /* --- CONTACT & SOCIALS --- */
-        .social-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-            margin-top: 1.5rem;
-        }
-        .social-links a svg {
-            fill: var(--text-color);
-            width: 32px;
-            height: 32px;
-            transition: fill 0.2s, transform 0.2s;
-        }
-        .social-links a:hover svg {
-            fill: var(--accent-color);
-            transform: scale(1.1);
-        }
+        .social-links { display: flex; gap: 1.5rem; align-items: center; margin-top: 1.5rem; }
+        .social-links a svg { fill: var(--text-color); width: 32px; height: 32px; transition: fill 0.2s, transform 0.2s; }
+        .social-links a:hover svg { fill: var(--accent-color); transform: translateY(-2px); }
 
         /* --- FOOTER --- */
-        .footer {
-            text-align: center;
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.9rem;
-            opacity: 0.7;
-        }
-
+        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -193,8 +188,11 @@
     <div class="container">
 
         <header class="header">
-            <div class="name">[Your Name / SquirrelThug]</div>
+            <div class="name">[SquirrelThug]</div>
             <nav>
+                <a href="Announcements">Announcements</a>
+                <a href="Blogs">Blogs</a>
+                <a href="Gists">Gists</a>
                 <a href="#projects">Projects</a>
                 <a href="#contact">Contact</a>
             </nav>
@@ -207,74 +205,119 @@
                 <p>I architect and build thoughtful, local-first AI systems with Python, focusing on modularity and clear design principles.</p>
             </section>
 
-            <section id="projects">
-                <h2>The Lilith Ecosystem</h2>
+            <div class="main-layout">
 
-                <div class="project-card">
-                    <h3>The Lilith AI System (Vision)</h3>
-                    <p>
-                        Lilith is a conceptual ecosystem for a next-generation AI assistant. The vision is a modular, privacy-focused system where individual, open-source components work in concert to create a cohesive and intelligent experience. The architecture is designed around a central Orchestrator and a Universal Conversation Log, ensuring every action is transparent and auditable.
-                    </p>
-                    <div class="project-links">
-                        <a href="#" class="button disabled">View Project (Coming Soon)</a>
-                        <a href="[Link to a specific design doc, maybe the PDF or a file in the repo]" class="button secondary">Read the Vision</a>
-                    </div>
-                </div>
-
-                <h3>Open-Source Modules</h3>
-                <div class="module-grid">
+                <div class="main-content">
+                    <section id="about">
+                        <h2>About Me</h2>
+                        <p>
+                            [This is where you tell your story. Example: "My journey into software development started not in a classroom, but from a desire to build smarter, more personalized tools. My background in [Your Previous Field] taught me the importance of clear communication and structured thinking, principles I now apply to writing clean code and designing robust systems. I am passionate about the potential of local-first AI and am documenting my entire learning process through the creation of the Lilith project."]
+                        </p>
+                    </section>
                     
-                    <div class="module-card">
-                        <h3>lilith-context-manager</h3>
-                        <p>A 'Zero Intelligence' state-tracking service that manages the structure of conversations. It functions as a stateful cache for the Orchestrator, handling context compression and summarization to provide clean context windows to the LLM.</p>
-                        <div class="tech-stack">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">FastAPI</span>
-                            <span class="tech-tag">Pydantic</span>
+                    <section id="projects" class="ecosystem-showcase">
+                        
+                        <div class="ecosystem-header">
+                            <h2>The Lilith Ecosystem</h2>
+                            <p>A modular, privacy-focused AI assistant built from the ground up with open-source components and a transparent design philosophy.</p>
                         </div>
-                        <div class="project-links">
-                            <a href="https://github.com/squirrelthug/lilith-context-manager" class="button">View Code</a>
-                        </div>
-                    </div>
 
-                    <div class="module-card">
-                        <h3>lilith-memory-sdk</h3>
-                        <p>The sole, sanctioned gateway to Lilith's memory core. This SDK provides a high-level abstraction layer for all data persistence, managing the dual-log system (Primary Conversation Log and System Action Log) and enforcing data contracts.</p>
-                        <div class="tech-stack">
-                            <span class="tech-tag">Python</span>
-                             <span class="tech-tag">Pydantic</span>
+                        <div class="project-card">
+                            <h3>The Lilith AI System (Vision)</h3>
+                            <p>
+                                Lilith is a conceptual ecosystem for a next-generation AI assistant. The vision is a modular, privacy-focused system where individual, open-source components work in concert to create a cohesive and intelligent experience. The architecture is designed around a central Orchestrator and a Universal Conversation Log, ensuring every action is transparent and auditable.
+                            </p>
+                            <div class="project-links">
+                                <a href="#" class="button disabled">View Project (Coming Soon)</a>
+                                <a href="[Link to a specific design doc]" class="button secondary">Read the Vision</a>
+                            </div>
                         </div>
-                        <div class="project-links">
-                            <a href="#" class="button disabled">Coming Soon</a>
-                        </div>
-                    </div>
 
-                    <div class="module-card">
-                        <h3>lilith-scl-engine</h3>
-                        <p>A standalone service that hosts and executes the Synthetic Conscious Loops (SCLs). It provides proactive insights to the Orchestrator by running background analysis on memory and generating standardized `SCLReport` objects.</p>
-                        <div class="tech-stack">
-                            <span class="tech-tag">Python</span>
-                            <span class="tech-tag">FastAPI</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="#" class="button disabled">Coming Soon</a>
-                        </div>
-                    </div>
+                        <h3 style="margin-top: 2.5rem; text-align: center;">Core Open-Source Modules</h3>
+                        <div class="module-grid">
+                            
+                            <div class="module-card">
+                                <h3>lilith-context-manager</h3>
+                                <p>A 'Zero Intelligence' state-tracking service that manages the structure of conversations. It functions as a stateful cache for the Orchestrator, handling context compression and summarization.</p>
+                                <div class="project-links">
+                                    <a href="https://github.com/squirrelthug/lilith-context-manager" class="button">View Code</a>
+                                </div>
+                            </div>
 
-                    <div class="module-card">
-                        <h3>lilith-orchestrator</h3>
-                        <p>The operational heart of the system. This central conductor receives all inputs, queries the SCL-Engine for insights, commands the CWM for context, and is the sole author of the Universal Conversation Log, ensuring a chronologically consistent system-wide narrative.</p>
-                        <div class="tech-stack">
-                            <span class="tech-tag">Python</span>
-                        </div>
-                        <div class="project-links">
-                            <a href="#" class="button disabled">Coming Soon</a>
-                        </div>
-                    </div>
+                            <div class="module-card">
+                                <h3>lilith-memory-sdk</h3>
+                                <p>The sole, sanctioned gateway to Lilith's memory core. This SDK provides a high-level abstraction layer for all data persistence and enforces the canonical data contracts for the entire system.</p>
+                                <div class="project-links">
+                                    <a href="#" class="button disabled">Coming Soon</a>
+                                </div>
+                            </div>
 
+                            <div class="module-card">
+                                <h3>lilith-scl-engine</h3>
+                                <p>A standalone service that hosts and executes Synthetic Conscious Loops (SCLs). It provides proactive insights to the Orchestrator by running background analysis on memory and user interactions.</p>
+                                <div class="project-links">
+                                    <a href="#" class="button disabled">Coming Soon</a>
+                                </div>
+                            </div>
+
+                            <div class="module-card">
+                                <h3>lilith-orchestrator</h3>
+                                <p>The operational heart of the system. This central conductor makes all decisions, routes all data, and is the sole author of the Universal Conversation Log, ensuring a chronologically consistent narrative.</p>
+                                <div class="project-links">
+                                    <a href="#" class="button disabled">Coming Soon</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
                 </div>
-            </section>
 
+                <aside class="activity-feed">
+                    
+                    <div class="feed-section">
+                        <h3>Announcements</h3>
+                        <ul class="feed-list">
+                            <li>
+                                <a href="#">[Lilith Context Manager v1.0 Released!]</a>
+                                <div class="meta">[Date, e.g., July 2025] - The first major component of the Lilith ecosystem is now available.</div>
+                            </li>
+                             <li>
+                                <a href="#">[Project Lilith has a new Architectural Vision]</a>
+                                <div class="meta">[Date] - Read the v3.0 design document.</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="feed-section">
+                        <h3>Featured Writings</h3>
+                        <ul class="feed-list">
+                            <li>
+                                <a href="#">[How I Built a Stateful API with FastAPI]</a>
+                                <div class="meta">Blog Post</div>
+                            </li>
+                            <li>
+                                <a href="#">[Why I Chose a 'Hub-and-Spoke' Architecture]</a>
+                                <div class="meta">Blog Post</div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="feed-section">
+                        <h3>Latest Gists (TILs)</h3>
+                        <ul class="feed-list">
+                            <li>
+                                <a href="#">[How to do Atomic File Writes in Python]</a>
+                                <div class="meta">Gist / Today I Learned</div>
+                            </li>
+                             <li>
+                                <a href="#">[Useful Pytest Fixture for FastAPI]</a>
+                                 <div class="meta">Gist / Today I Learned</div>
+                            </li>
+                        </ul>
+                        <a href="[Link to your main Gists page on GitHub]" style="display: block; text-align: right; margin-top: 1rem; font-weight: 500;">View all gists &rarr;</a>
+                    </div>
+                </aside>
+            </div>
 
             <section id="contact">
                 <h2>Connect With Me</h2>
@@ -293,11 +336,10 @@
                     </a>
                  </div>
             </section>
-
         </main>
 
         <footer class="footer">
-            <p>&copy; 2025 [Your Name / SquirrelThug]. Designed with simplicity.</p>
+            <p>&copy; 2025 [SquirrelThug]. Designed with simplicity.</p>
         </footer>
 
     </div>
