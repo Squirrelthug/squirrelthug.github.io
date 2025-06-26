@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Genesis of Lilith: Why I'm Building My Own AI | Squirrelthug</title>
+    <title>The Genesis of L.I.L.I.T.H.: Why I'm Building My Own AI | Squirrelthug</title>
     <!-- We are using the exact same style block as other pages for consistency -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
@@ -49,6 +49,40 @@
         .toc-card a { font-weight: 500; font-size: 0.9rem; }
 
         .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
+
+        /* --- MERMAID DIAGRAM STYLES --- */
+        .architecture-diagram {
+            background-color: #16161e;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .mermaid {
+            background-color: transparent !important;
+        }
+        /* Override Mermaid's default styles to match our theme */
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node ellipse,
+        .mermaid .node polygon {
+            fill: var(--card-bg-color) !important;
+            stroke: var(--border-color) !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node .label {
+            color: var(--text-color) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .mermaid .edgePath .path {
+            stroke: var(--accent-color) !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .arrowheadPath {
+            fill: var(--accent-color) !important;
+            stroke: var(--accent-color) !important;
+        }
     </style>
 </head>
 <body>
@@ -66,7 +100,7 @@
         <main class="post-layout">
             
             <article class="post-content">
-                <h1>The Genesis of Lilith: Why I'm Building My Own AI</h1>
+                <h1>The Genesis of L.I.L.I.T.H.: Why I'm Building My Own AI</h1>
                 <div class="post-meta">
                     <span>Posted on June 25, 2025</span> &middot; <span>Approx. 7 min read</span>
                 </div>
@@ -101,35 +135,32 @@
                 </p>
                 <p>This led me to the core design. I needed to keep it tight, secure. I imagined the "Triforce" architecture: Working Memory, a Chat Interface, and a Synthetic Conscious Loop. And this core would be guarded by a kind of shield—the API Integration Layer that reaches out to the world and brings back data in a structured, controlled way. Anything coming in can only write to a designated space; the core intelligence then decides what to do with that structured data. It just seemed like a solid plan for security and stability.
                 </p>
-                <pre><code>+--------------------------------------------------------------------------+
-|                 Lilith v3.0 Hub-and-Spoke Architecture                   |
-+--------------------------------------------------------------------------+
 
-
-       [ User Interface ]      [ lilith-scl-engine ]      [ LCM (Cache) ]
-              |                        |                        |
-         (User Input)         (Proactive Insights)     (Compressed Context)
-              |                        |                        |
-              v                        v                        v
-      +-------+------------------------+------------------------+-------+
-      |                                                                 |
-      |                 +---------------------------+                   |
-      |---------------> |  lilith-orchestrator (HUB)  | <------------------+
-      |                 +---------------------------+                    |  (Tool Results)
-      |                           |                                      |
-      |                           | (Sole Writer)                        |
-      |                           v                                      |
-      |                 +---------------------------+                    |
-      |                 |  Persistent Memory Core   |                    |
-      |                 | (via lilith-memory-sdk)   |                    |
-      |                 +---------------------------+                    |
-      |                                                                  |
-      +------------------------------------------------------------------+
-                                                                         ^
-                                                                         |
-                                                            [ API Integration Layer ]
-
-</code></pre>
+                <div class="architecture-diagram">
+                    <div class="mermaid">
+graph TB
+    UI[User Interface]
+    SCL[lilith-scl-engine]
+    LCM[LCM Cache]
+    ORCH[lilith-orchestrator<br/>HUB]
+    MEM[Persistent Memory Core<br/>via lilith-memory-sdk]
+    API[API Integration Layer]
+    
+    UI -->|User Input| ORCH
+    SCL -->|Proactive Insights| ORCH
+    LCM -->|Compressed Context| ORCH
+    ORCH -->|Sole Writer| MEM
+    MEM -->|Memory Retrieval| ORCH
+    API -->|Tool Results| ORCH
+    
+    style ORCH fill:#bb9af7,stroke:#bb9af7,stroke-width:3px,color:#15161E
+    style MEM fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style UI fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style SCL fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style LCM fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style API fill:#24283b,stroke:#3b4261,stroke-width:2px
+                    </div>
+                </div>
 
                 <h2 id="method">The Method: Building a Developer, Not Just a Project</h2>
                 <p>
@@ -172,6 +203,52 @@
         </footer>
 
     </div>
+
+    <!-- Mermaid.js for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        // Initialize Mermaid with proper configuration to avoid errors
+        document.addEventListener('DOMContentLoaded', function() {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'dark',
+                themeVariables: {
+                    primaryColor: '#bb9af7',
+                    primaryTextColor: '#c0caf5',
+                    primaryBorderColor: '#3b4261',
+                    lineColor: '#bb9af7',
+                    secondaryColor: '#24283b',
+                    tertiaryColor: '#1a1b26',
+                    background: '#1a1b26',
+                    mainBkg: '#24283b',
+                    secondBkg: '#16161e',
+                    tertiaryBkg: '#1a1b26'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'cardinal'
+                },
+                securityLevel: 'loose',
+                fontFamily: 'Inter, sans-serif'
+            });
+            
+            // Force re-render if needed
+            try {
+                mermaid.init(undefined, '.mermaid');
+            } catch (error) {
+                console.warn('Mermaid initialization warning:', error);
+                // Fallback: try to render again after a short delay
+                setTimeout(() => {
+                    try {
+                        mermaid.init(undefined, '.mermaid');
+                    } catch (fallbackError) {
+                        console.error('Mermaid fallback failed:', fallbackError);
+                    }
+                }, 100);
+            }
+        });
+    </script>
 
 </body>
 </html>
