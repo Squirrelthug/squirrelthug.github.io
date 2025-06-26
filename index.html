@@ -181,6 +181,40 @@
 
         /* --- FOOTER --- */
         .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
+
+        /* --- MERMAID DIAGRAM STYLES --- */
+        .architecture-diagram {
+            background-color: #16161e;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .mermaid {
+            background-color: transparent !important;
+        }
+        /* Override Mermaid's default styles to match our theme */
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node ellipse,
+        .mermaid .node polygon {
+            fill: var(--card-bg-color) !important;
+            stroke: var(--border-color) !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .node .label {
+            color: var(--text-color) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .mermaid .edgePath .path {
+            stroke: var(--accent-color) !important;
+            stroke-width: 2px !important;
+        }
+        .mermaid .arrowheadPath {
+            fill: var(--accent-color) !important;
+            stroke: var(--accent-color) !important;
+        }
     </style>
 </head>
 <body>
@@ -190,11 +224,10 @@
         <header class="header">
             <div class="name">[SquirrelThug]</div>
             <nav>
-                <a href="Announcements">Announcements</a>
+                <a href="index.html">Announcements</a>
                 <a href="blog.html">Blogs</a>
-                <a href="Gists">Gists</a>
+                <a href="https://gist.github.com/Squirrelthug">Gists</a>
                 <a href="#projects">Projects</a>
-                <a href="#contact">Contact</a>
             </nav>
         </header>
 
@@ -229,9 +262,36 @@ I am passionate about the potential of local-first AI to create smarter, more pe
                             <p>
                                 Lilith is a conceptual ecosystem for a next-generation AI assistant. The vision is a modular, privacy-focused system where individual, open-source components work in concert to create a cohesive and intelligent experience. The architecture is designed around a central Orchestrator and a Universal Conversation Log, ensuring every action is transparent and auditable.
                             </p>
+                            
+                            <div class="architecture-diagram">
+                                <div class="mermaid">
+graph TB
+    UI[User Interface]
+    SCL[lilith-scl-engine]
+    LCM[LCM Cache]
+    ORCH[lilith-orchestrator<br/>HUB]
+    MEM[Persistent Memory Core<br/>via lilith-memory-sdk]
+    API[API Integration Layer]
+    
+    UI -->|User Input| ORCH
+    SCL -->|Proactive Insights| ORCH
+    LCM -->|Compressed Context| ORCH
+    ORCH -->|Sole Writer| MEM
+    MEM -->|Memory Retrieval| ORCH
+    API -->|Tool Results| ORCH
+    
+    style ORCH fill:#bb9af7,stroke:#bb9af7,stroke-width:3px,color:#15161E
+    style MEM fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style UI fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style SCL fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style LCM fill:#24283b,stroke:#3b4261,stroke-width:2px
+    style API fill:#24283b,stroke:#3b4261,stroke-width:2px
+                                </div>
+                            </div>
+                            
                             <div class="project-links">
                                 <a href="#" class="button disabled">View Project (Coming Soon)</a>
-                                <a href="[Link to a specific design doc]" class="button secondary">Read the Vision</a>
+                                <a href="posts/2025-06-25_the_genesis_of_lilith.html" class="button secondary">Read the Vision</a>
                             </div>
                         </div>
 
@@ -345,6 +405,52 @@ I am passionate about the potential of local-first AI to create smarter, more pe
         </footer>
 
     </div>
+
+    <!-- Mermaid.js for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        // Initialize Mermaid with proper configuration to avoid errors
+        document.addEventListener('DOMContentLoaded', function() {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'dark',
+                themeVariables: {
+                    primaryColor: '#bb9af7',
+                    primaryTextColor: '#c0caf5',
+                    primaryBorderColor: '#3b4261',
+                    lineColor: '#bb9af7',
+                    secondaryColor: '#24283b',
+                    tertiaryColor: '#1a1b26',
+                    background: '#1a1b26',
+                    mainBkg: '#24283b',
+                    secondBkg: '#16161e',
+                    tertiaryBkg: '#1a1b26'
+                },
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'cardinal'
+                },
+                securityLevel: 'loose',
+                fontFamily: 'Inter, sans-serif'
+            });
+            
+            // Force re-render if needed
+            try {
+                mermaid.init(undefined, '.mermaid');
+            } catch (error) {
+                console.warn('Mermaid initialization warning:', error);
+                // Fallback: try to render again after a short delay
+                setTimeout(() => {
+                    try {
+                        mermaid.init(undefined, '.mermaid');
+                    } catch (fallbackError) {
+                        console.error('Mermaid fallback failed:', fallbackError);
+                    }
+                }, 100);
+            }
+        });
+    </script>
 
 </body>
 </html>
