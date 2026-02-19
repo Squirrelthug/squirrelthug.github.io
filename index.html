@@ -1,462 +1,590 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[Squirrelthug] - Python & AI Developer</title>
-    <style>
-        /* --- FONT IMPORT --- */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Squirrelthug — Systems Developer</title>
 
-        /* --- CSS VARIABLES (Easy to change colors) --- */
-        :root {
-            --bg-color: #1a1b26;
-            --text-color: #c0caf5;
-            --header-color: #ffffff;
-            --accent-color: #bb9af7; /* A vibrant purple for links and highlights */
-            --card-bg-color: #24283b; /* A slightly lighter background for cards */
-            --border-color: #3b4261;
-            --subtle-text-color: #787c99;
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
 
-        /* --- GENERAL STYLES & TYPOGRAPHY --- */
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.7;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
-        .container {
-            max-width: 1100px; /* Increased max-width for two columns */
-            width: 100%;
-            padding: 2rem;
-            box-sizing: border-box;
-        }
+  <style>
+    :root {
+      --bg:        #0e0d0c;
+      --bg-2:      #141311;
+      --bg-card:   #1a1815;
+      --border:    #2e2b27;
+      --text:      #d8cfbf;
+      --text-dim:  #8a8070;
+      --gold:      #c8943a;
+      --gold-dim:  #8a6228;
+      --gold-glow: rgba(200, 148, 58, 0.12);
+      --red-dim:   #6b3a3a;
+    }
 
-        h1, h2, h3 {
-            font-family: 'Rubik', sans-serif;
-            color: var(--header-color);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-        h1 { font-size: 2.5rem; }
-        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
-        
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-        a:hover { opacity: 0.8; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* --- HEADER / NAVIGATION --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 2rem;
-        }
-        .header .name {
-            font-family: 'Rubik', sans-serif;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--header-color);
-        }
-        .header nav a {
-            margin-left: 1.5rem;
-            font-weight: 500;
-        }
-        
-        /* --- HERO SECTION --- */
-        .hero h1 {
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--header-color);
-            max-width: 600px;
-        }
+    html { scroll-behavior: smooth; }
 
-        /* --- TWO-COLUMN LAYOUT --- */
-        .main-layout {
-            display: flex;
-            flex-wrap: wrap; /* Allows stacking on smaller screens */
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        .main-content {
-            flex: 3; /* Takes up more space */
-            min-width: 300px; 
-        }
-        .activity-feed {
-            flex: 1; /* Takes up less space */
-            min-width: 280px;
-        }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.75;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        /* --- LILITH ECOSYSTEM SHOWCASE --- */
-        .ecosystem-showcase {
-            background-color: #16161e; /* A slightly darker, distinct background */
-            border-radius: 10px;
-            padding: 1rem 2rem 2rem 2rem;
-            border: 1px solid var(--border-color);
-        }
-        .ecosystem-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .ecosystem-showcase h2 { /* Override default h2 for this section */
-            border-bottom: none;
-            font-size: 2rem;
-        }
-        .ecosystem-header p {
-            max-width: 600px;
-            margin: 0.5rem auto 0 auto;
-            color: var(--subtle-text-color);
-            font-size: 1.1rem;
-        }
-        .ecosystem-showcase .project-card,
-        .ecosystem-showcase .module-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-        .ecosystem-showcase .project-card:hover,
-        .ecosystem-showcase .module-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            border-color: var(--accent-color);
-        }
+    /* ─── NOISE OVERLAY ──────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
 
-        /* --- PROJECT & MODULE CARDS --- */
-        .project-card, .module-card {
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-        }
-        .module-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .module-card p { font-size: 0.9rem; flex-grow: 1; }
-        .project-card h3, .module-card h3 { margin-top: 0; font-size: 1.3rem; }
-        .tech-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
-        .tech-tag { background-color: var(--border-color); color: var(--text-color); padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem; font-weight: 500; }
-        .project-links { margin-top: 1.5rem; }
-        .button { background-color: var(--accent-color); color: #15161E; padding: 0.75rem 1.5rem; border-radius: 5px; font-weight: 700; display: inline-block; margin-right: 1rem; text-align: center; }
-        .button:hover { color: #15161E; opacity: 0.9; }
-        .button.secondary { background-color: transparent; color: var(--accent-color); border: 2px solid var(--accent-color); }
-        .button.disabled { background-color: #414868; color: var(--subtle-text-color); cursor: not-allowed; border: none; }
+    /* ─── LAYOUT ─────────────────────────────────────────────────── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
 
-        /* --- ACTIVITY FEED STYLES --- */
-        .feed-section {
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .feed-section h3 { margin-top: 0; font-size: 1.2rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
-        .feed-list { list-style-type: none; padding: 0; margin: 0; }
-        .feed-list li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
-        .feed-list li:last-child { border-bottom: none; padding-bottom: 0; }
-        .feed-list a { font-weight: 500; display: block; }
-        .feed-list .meta { font-size: 0.8rem; color: var(--subtle-text-color); margin-top: 0.25rem; }
+    /* ─── NAV ────────────────────────────────────────────────────── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(14, 13, 12, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
 
-        /* --- CONTACT & SOCIALS --- */
-        .social-links { display: flex; gap: 1.5rem; align-items: center; margin-top: 1.5rem; }
-        .social-links a svg { fill: var(--text-color); width: 32px; height: 32px; transition: fill 0.2s, transform 0.2s; }
-        .social-links a:hover svg { fill: var(--accent-color); transform: translateY(-2px); }
+    nav .inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        /* --- FOOTER --- */
-        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
 
-        /* --- MERMAID DIAGRAM STYLES --- */
-        .architecture-diagram {
-            background-color: #16161e;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            text-align: center;
-        }
-        .mermaid {
-            background-color: transparent !important;
-        }
-        /* Override Mermaid's default styles to match our theme */
-        .mermaid .node rect,
-        .mermaid .node circle,
-        .mermaid .node ellipse,
-        .mermaid .node polygon {
-            fill: var(--card-bg-color) !important;
-            stroke: var(--border-color) !important;
-            stroke-width: 2px !important;
-        }
-        .mermaid .node .label {
-            color: var(--text-color) !important;
-            font-family: 'Inter', sans-serif !important;
-        }
-        .mermaid .edgePath .path {
-            stroke: var(--accent-color) !important;
-            stroke-width: 2px !important;
-        }
-        .mermaid .arrowheadPath {
-            fill: var(--accent-color) !important;
-            stroke: var(--accent-color) !important;
-        }
-    </style>
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ─── HERO ───────────────────────────────────────────────────── */
+    .hero {
+      padding: 6rem 0 4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      font-weight: 600;
+      line-height: 1.12;
+      color: var(--text);
+      margin-bottom: 1.8rem;
+      letter-spacing: -0.01em;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text-dim);
+      max-width: 580px;
+      line-height: 1.8;
+    }
+
+    /* ─── SECTIONS ───────────────────────────────────────────────── */
+    section {
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.6rem;
+    }
+
+    p { margin-bottom: 1.1rem; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+
+    /* ─── MERMAID DIAGRAM ────────────────────────────────────────── */
+    .diagram-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2.5rem 1.5rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ─── DESIGN PRINCIPLES ──────────────────────────────────────── */
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .principle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--gold-dim);
+      padding: 1.4rem 1.4rem 1.6rem;
+      border-radius: 2px;
+    }
+
+    .principle-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .principle h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .principle p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+
+    /* ─── ROADMAP ────────────────────────────────────────────────── */
+    .roadmap {
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .roadmap::before {
+      content: '';
+      position: absolute;
+      left: 1.25rem;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--gold-dim), transparent);
+    }
+
+    .phase {
+      padding: 0 0 2rem 3.5rem;
+      position: relative;
+    }
+
+    .phase::before {
+      content: '';
+      position: absolute;
+      left: 0.75rem;
+      top: 0.45rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold-dim);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--gold-dim);
+    }
+
+    .phase.active::before { background: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 12px var(--gold-dim); }
+    .phase.future::before { background: var(--bg-card); border-color: var(--border); box-shadow: none; }
+
+    .phase-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+
+    .phase.future .phase-tag { color: var(--text-dim); }
+
+    .phase h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+
+    .phase p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+
+    /* ─── BLOG POSTS ─────────────────────────────────────────────── */
+    .post-list { list-style: none; margin-top: 1.5rem; }
+
+    .post-list li {
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 0;
+    }
+
+    .post-list li:first-child { border-top: 1px solid var(--border); }
+
+    .post-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .post-list a {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .post-list a:hover { color: var(--gold); }
+
+    .post-desc {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+    }
+
+    /* ─── LINKS ──────────────────────────────────────────────────── */
+    a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+
+    /* ─── FOOTER ─────────────────────────────────────────────────── */
+    footer {
+      padding: 3rem 0;
+      text-align: center;
+    }
+
+    footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .nav-links { gap: 1.2rem; }
+      .hero { padding: 4rem 0 3rem; }
+      .roadmap::before { display: none; }
+      .phase { padding-left: 0; }
+      .phase::before { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
+  <!-- ─── NAV ──────────────────────────────────────────────────── -->
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="blog.html">Writing</a></li>
+        <li><a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        <header class="header">
-            <div class="name">Squirrelthug</div>
-            <nav>
-                <a href="index.html">Announcements</a>
-                <a href="blog.html">Blog</a>
-                <a href="https://gist.github.com/Squirrelthug">Gists</a>
-                <a href="#projects">Projects</a>
-            </nav>
-        </header>
-
-        <main>
-
-            <section class="hero">
-                <h1>A Developer Building Intelligent Systems.</h1>
-                <p>I architect and build thoughtful, local-first AI systems with Python, focusing on modularity and clear design principles.</p>
-            </section>
-
-            <div class="main-layout">
-
-                <div class="main-content">
-                    <section id="about">
-                        <h2>About Me</h2>
-                        <p>
-                            My journey into software development started not in a classroom, but from a foundational belief in digital self-reliance. In a world of massive, impersonal systems, I felt a growing need for tools that prioritize individual control and data privacy. This conviction, combined with the exciting rise of open-source AI, inspired me to learn to code.
-
-I am passionate about the potential of local-first AI to create smarter, more personalized systems without compromising personal data. The Lilith project is my first step in this direction—an open-source, modular AI assistant designed from the ground up to be a trustworthy and powerful tool for the individual. This site documents my process of learning to build that vision, one line of code at a time.
-                        </p>
-                    </section>
-                    
-                    <section id="projects" class="ecosystem-showcase">
-                        
-                        <div class="ecosystem-header">
-                            <h2>The Lilith Ecosystem</h2>
-                            <p>A modular, privacy-focused AI assistant built from the ground up with open-source components and a transparent design philosophy.</p>
-                        </div>
-
-                        <div class="project-card">
-                            <h3>The Lilith AI System (Vision)</h3>
-                            <p>
-                                Lilith is a conceptual ecosystem for a next-generation AI assistant. The vision is a modular, privacy-focused system where individual, open-source components work in concert to create a cohesive and intelligent experience. The architecture is designed around a central Orchestrator and a Universal Conversation Log, ensuring every action is transparent and auditable.
-                            </p>
-                            
-                            <div class="architecture-diagram">
-                                <div class="mermaid">
-graph TB
-    UI[User Interface]
-    SCL[lilith-scl-engine]
-    LCM[LCM Cache]
-    ORCH[lilith-orchestrator<br/>HUB]
-    MEM[Persistent Memory Core<br/>via lilith-memory-sdk]
-    API[API Integration Layer]
-    
-    UI -->|User Input| ORCH
-    SCL -->|Proactive Insights| ORCH
-    LCM -->|Compressed Context| ORCH
-    ORCH -->|Sole Writer| MEM
-    MEM -->|Memory Retrieval| ORCH
-    API -->|Tool Results| ORCH
-    
-    style ORCH fill:#bb9af7,stroke:#bb9af7,stroke-width:3px,color:#15161E
-    style MEM fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style UI fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style SCL fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style LCM fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style API fill:#24283b,stroke:#3b4261,stroke-width:2px
-                                </div>
-                            </div>
-                            
-                            <div class="project-links">
-                                <a href="#" class="button disabled">View Project (Coming Soon)</a>
-                                <a href="posts/2025-06-25_the_genesis_of_lilith.html" class="button secondary">Read the Vision</a>
-                            </div>
-                        </div>
-
-                        <h3 style="margin-top: 2.5rem; text-align: center;">Core Open-Source Modules</h3>
-                        <div class="module-grid">
-                            
-                            <div class="module-card">
-                                <h3>lilith-context-manager</h3>
-                                <p>A 'Zero Intelligence' state-tracking service that manages the structure of conversations. It functions as a stateful cache for the Orchestrator, handling context compression and summarization.</p>
-                                <div class="project-links">
-                                    <a href="https://github.com/squirrelthug/lilith-context-manager" class="button">View Code</a>
-                                </div>
-                            </div>
-
-                            <div class="module-card">
-                                <h3>lilith-memory-sdk</h3>
-                                <p>The sole, sanctioned gateway to Lilith's memory core. This SDK provides a high-level abstraction layer for all data persistence and enforces the canonical data contracts for the entire system.</p>
-                                <div class="project-links">
-                                    <a href="#" class="button disabled">Coming Soon</a>
-                                </div>
-                            </div>
-
-                            <div class="module-card">
-                                <h3>lilith-scl-engine</h3>
-                                <p>A standalone service that hosts and executes Synthetic Conscious Loops (SCLs). It provides proactive insights to the Orchestrator by running background analysis on memory and user interactions.</p>
-                                <div class="project-links">
-                                    <a href="#" class="button disabled">Coming Soon</a>
-                                </div>
-                            </div>
-
-                            <div class="module-card">
-                                <h3>lilith-orchestrator</h3>
-                                <p>The operational heart of the system. This central conductor makes all decisions, routes all data, and is the sole author of the Universal Conversation Log, ensuring a chronologically consistent narrative.</p>
-                                <div class="project-links">
-                                    <a href="#" class="button disabled">Coming Soon</a>
-                                </div>
-                            </div>
-
-                        </div>
-                    </section>
-                </div>
-
-                <aside class="activity-feed">
-                    
-                    <div class="feed-section">
-                        <h3>Announcements</h3>
-                        <p style="color: var(--subtle-text-color); font-style: italic; text-align: center; padding: 2rem 0;">
-                            Coming Soon - Stay tuned for project updates and releases!
-                        </p>
-                    </div>
-                    
-                    <!-- COMMENTED OUT - Edit when ready to add real announcements
-                    <div class="feed-section">
-                        <h3>Announcements</h3>
-                        <ul class="feed-list">
-                            <li>
-                                <a href="#">[Lilith Context Manager v1.0 Released!]</a>
-                                <div class="meta">[Date, e.g., July 2025] - The first major component of the Lilith ecosystem is now available.</div>
-                            </li>
-                             <li>
-                                <a href="#">[Project Lilith has a new Architectural Vision]</a>
-                                <div class="meta">[Date] - Read the v3.0 design document.</div>
-                            </li>
-                        </ul>
-                    </div>
-                    -->
-
-                    <div class="feed-section">
-                        <h3>Featured Writings</h3>
-                        <ul class="feed-list">
-                            <li>
-                                <a href="posts/2025-06-25_the_genesis_of_lilith.html">[The Genesis of L.I.L.I.T.H.]</a>
-                                <div class="meta">Blog Post</div>
-                            </li>
-                            <li>
-                                <a href="posts/2025-06-26_dumb_modules_smart_core.html">[Dumb Modules, Smart Core]</a>
-                                <div class="meta">Blog Post</div>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="feed-section">
-                        <h3>Project Badges</h3>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
-                            <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="Apache 2.0 License" style="max-width: 100%;">
-                            <img src="https://img.shields.io/badge/Documentation-In%20Progress-yellow?logo=gitbook&logoColor=white" alt="Documentation In Progress" style="max-width: 100%;">
-                            <img src="https://img.shields.io/badge/Code%20Style-Black-000000?logo=python&logoColor=white" alt="Code Style: Black" style="max-width: 100%;">
-                            <img src="https://img.shields.io/badge/Kubernetes-Ready-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes" style="max-width: 100%;">
-                            <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white" alt="Python 3.9+" style="max-width: 100%;">
-                            <a href="https://discord.gg/msxrpayZvB" target="_blank"><img src="https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white" alt="Discord" style="max-width: 100%;"></a>
-                        </div>
-                    </div>
-                </aside>
-            </div>
-
-            <section id="contact">
-                <h2>Connect With Me</h2>
-                <p>
-                    I'm always open to connecting with fellow developers and builders. You can find me on the platforms below.
-                </p>
-                 <div class="social-links">
-                    <a href="https://github.com/squirrelthug" title="GitHub">
-                        <svg viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
-                    </a>
-                    <a href="http://linkedin.com/in/steven-gonzales-datascibio" title="LinkedIn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-name="Layer 1"><path d="M20.47,2H3.53A1.53,1.53,0,0,0,2,3.53V20.47A1.53,1.53,0,0,0,3.53,22H20.47A1.53,1.53,0,0,0,22,20.47V3.53A1.53,1.53,0,0,0,20.47,2ZM8,19H5V8H8ZM6.5,6.73A1.73,1.73,0,1,1,8.23,5,1.73,1.73,0,0,1,6.5,6.73ZM19,19H16V13.35c0-1.42-.49-2.38-1.76-2.38a1.9,1.9,0,0,0-1.74,1.26,2.4,2.4,0,0,0-.11.85V19H9V8h3v1.32h.05c.4-.7,1.32-1.16,2.65-1.16,2.83,0,3.3,1.86,3.3,4.28Z"/></svg>
-                    </a>
-                    <a href="mailto:squirrelthug@gmail.com" title="Email">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" id="mail"><path d="M20,4H4A2,2,0,0,0,2,6V18a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V6A2,2,0,0,0,20,4Zm0,2L12,11,4,6ZM4,18V8l8,5,8-5v10Z"></path></svg>
-                    </a>
-                 </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <p>&copy; 2025 [Squirrelthug]. Designed with simplicity.</p>
-        </footer>
-
+  <!-- ─── HERO ──────────────────────────────────────────────────── -->
+  <div class="container">
+    <div class="hero">
+      <p class="hero-label">Systems Developer · Python · Local-First AI</p>
+      <h1>Building an AI that lives<br />on hardware <em>you own.</em></h1>
+      <p class="hero-sub">
+        I design and build ambient, voice-first AI systems with a focus on privacy, modularity, and
+        long-term architectural integrity. The work documented here is serious, ongoing, and
+        grounded in a specific philosophy: the foundation has to carry the full weight of the final vision.
+      </p>
     </div>
 
-    <!-- Mermaid.js for diagrams -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-    <script>
-        // Initialize Mermaid with proper configuration to avoid errors
-        document.addEventListener('DOMContentLoaded', function() {
-            mermaid.initialize({
-                startOnLoad: true,
-                theme: 'dark',
-                themeVariables: {
-                    primaryColor: '#bb9af7',
-                    primaryTextColor: '#c0caf5',
-                    primaryBorderColor: '#3b4261',
-                    lineColor: '#bb9af7',
-                    secondaryColor: '#24283b',
-                    tertiaryColor: '#1a1b26',
-                    background: '#1a1b26',
-                    mainBkg: '#24283b',
-                    secondBkg: '#16161e',
-                    tertiaryBkg: '#1a1b26'
-                },
-                flowchart: {
-                    useMaxWidth: true,
-                    htmlLabels: true,
-                    curve: 'cardinal'
-                },
-                securityLevel: 'loose',
-                fontFamily: 'Inter, sans-serif'
-            });
-            
-            // Force re-render if needed
-            try {
-                mermaid.init(undefined, '.mermaid');
-            } catch (error) {
-                console.warn('Mermaid initialization warning:', error);
-                // Fallback: try to render again after a short delay
-                setTimeout(() => {
-                    try {
-                        mermaid.init(undefined, '.mermaid');
-                    } catch (fallbackError) {
-                        console.error('Mermaid fallback failed:', fallbackError);
-                    }
-                }, 100);
-            }
-        });
-    </script>
+    <!-- ─── ARCHITECTURE ────────────────────────────────────────── -->
+    <section id="architecture">
+      <p class="section-label">Current Architecture</p>
+      <h2>L.I.L.I.T.H. — Core System</h2>
+      <p>
+        A voice-first, locally-hosted AI assistant built as a modular monolith. A single Python
+        process with a clean internal event bus routes speech to reasoning, reasoning to personality,
+        and personality to voice — invisibly, with sub-second latency on local hardware.
+        All complexity is hidden behind a conversation.
+      </p>
 
+      <div class="diagram-wrap">
+        <div class="mermaid">
+graph TD
+    A((Voice Input)) -->|STT| B(Event Bus)
+    B -->|User Turn| C(Cognitive Core)
+    C -->|Local Reasoning| D(Personality Engine)
+    C -->|Complex Task| E(Cloud Router)
+    D -->|Styled Response| F((Voice Output))
+    E -->|Async Result| D
+    C -->|Tool Request| G(Airlock)
+    G -->|Validated Execution| H[(Tool Registry)]
+    H -->|Result| B
+    C -->|Write| I[(Memory / SQLite)]
+    I -->|Session Resume| C
+        </div>
+      </div>
+
+      <p>
+        The Personality Engine sits between all reasoning and all output — ensuring a consistent
+        voice and identity regardless of which model is actually doing the work. The Airlock pattern
+        sandboxes every tool execution. The Cloud Router escalates only what local hardware cannot
+        handle. The result is a system that feels singular, even when it isn't.
+      </p>
+    </section>
+
+    <!-- ─── PRINCIPLES ──────────────────────────────────────────── -->
+    <section id="principles">
+      <p class="section-label">Design Philosophy</p>
+      <h2>The Principles Behind the Work</h2>
+      <p>
+        Every architectural decision in this project is evaluated against a fixed hierarchy. These
+        are not aspirational values — they are active constraints that govern tradeoffs.
+      </p>
+
+      <div class="principles">
+        <div class="principle">
+          <span class="principle-num">01</span>
+          <h3>Voice is the product</h3>
+          <p>Everything else is secondary. Any feature that degrades the voice experience doesn't get built until the voice experience is right.</p>
+        </div>
+        <div class="principle">
+          <span class="principle-num">02</span>
+          <h3>The foundation carries full weight</h3>
+          <p>No shortcuts that close off future phases. The modular monolith, the event bus, the hot/cold domain separation — these don't change. The models and interfaces that plug into them do.</p>
+        </div>
+        <div class="principle">
+          <span class="principle-num">03</span>
+          <h3>Simplicity wins every tie</h3>
+          <p>The developer has to be able to read, understand, modify, and debug any code in the system. Complexity without near-term value is the wrong choice, every time.</p>
+        </div>
+        <div class="principle">
+          <span class="principle-num">04</span>
+          <h3>Privacy is a constraint, not a feature</h3>
+          <p>No user data leaves the local system without explicit action and understanding. This is not a selling point — it is a precondition of the entire design.</p>
+        </div>
+        <div class="principle">
+          <span class="principle-num">05</span>
+          <h3>Daily use is the feedback loop</h3>
+          <p>The developer is the primary user. A feature that isn't in daily use isn't a real feature yet. The system has to earn its way into the workflow before it earns resources toward the next layer.</p>
+        </div>
+        <div class="principle">
+          <span class="principle-num">06</span>
+          <h3>Pour the foundation knowing the building</h3>
+          <p>Frame walls after the foundation cures, not before. The current implementation is small. The foundation is sized for what this becomes — not just what it is today.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ROADMAP ─────────────────────────────────────────────── -->
+    <section id="roadmap">
+      <p class="section-label">Development Roadmap</p>
+      <h2>Where This Is Going</h2>
+      <p>
+        The project builds in phases, each one delivering a working, daily-use system before
+        the next layer is added. What follows is the shape of the plan — not the full detail of it.
+      </p>
+
+      <div class="roadmap">
+        <div class="phase active">
+          <p class="phase-tag">Phase 1–4 · In Progress</p>
+          <h3>Alpha — A Real Tool in Daily Use</h3>
+          <p>
+            Voice pipeline, cognitive core, personality engine, memory layer, tool registry with
+            sandboxed execution. Running on personal hardware. Used daily. Refined through use,
+            not through planning.
+          </p>
+        </div>
+
+        <div class="phase">
+          <p class="phase-tag">Phase 5</p>
+          <h3>Cloud Gateway Service</h3>
+          <p>
+            A token routing layer that simplifies access to multiple AI providers through a single
+            payment relationship and a single endpoint. Privacy-preserving by design — the gateway
+            routes tokens without reading them.
+          </p>
+        </div>
+
+        <div class="phase">
+          <p class="phase-tag">Phase 5.x</p>
+          <h3>Companion Hardware</h3>
+          <p>
+            Compact form-factor devices designed to carry the personality and voice of LILITH into
+            contexts where a full local stack isn't practical. Local-first reasoning with optional
+            escalation to the cloud gateway. One for the pocket. One for the vehicle.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 6 · Future</p>
+          <h3>Three-Dimensional World Interface</h3>
+          <p>
+            A spatial environment for interacting with information that has no natural physical form.
+            The system's state — knowledge, memory, inference, conversation — made visible in three
+            dimensions. Built on a WebSocket event bus completely decoupled from the Python backend.
+            May require outside funding to reach this phase at the intended fidelity.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── WRITING ──────────────────────────────────────────────── -->
+    <section id="writing">
+      <p class="section-label">Writing</p>
+      <h2>Notes on the Build</h2>
+      <p>
+        Design thinking, architectural decisions, and lessons from building a complex system alone.
+        Written as the work happens.
+      </p>
+
+      <ul class="post-list">
+        <li>
+          <p class="post-meta">February 2026 · Architecture</p>
+          <a href="posts/2026-02-19_why_i_started_over.html">Why I Started Over — Again</a>
+          <p class="post-desc">On moving from distributed microservices to a modular monolith, and why the distinction matters more than it sounds.</p>
+        </li>
+        <li>
+          <p class="post-meta">June 2025 · Architecture</p>
+          <a href="posts/2025-06-26_dumb_modules_smart_core.html">Dumb Modules, Smart Core</a>
+          <p class="post-desc">The principle that keeps complexity manageable when building alone.</p>
+        </li>
+        <li>
+          <p class="post-meta">June 2025 · Origin</p>
+          <a href="posts/2025-06-25_the_genesis_of_lilith.html">The Genesis of L.I.L.I.T.H.</a>
+          <p class="post-desc">Where this project came from and what it's actually trying to be.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ─── FOOTER ───────────────────────────────────────────────── -->
+    <footer>
+      <p>SQUIRRELTHUG &nbsp;·&nbsp; Systems Developer &nbsp;·&nbsp;
+        <a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a>
+        &nbsp;·&nbsp;
+        <a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a>
+        &nbsp;·&nbsp;
+        <a href="https://discord.gg/msxrpayZvB" target="_blank" rel="noopener">Discord</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        background:      '#1a1815',
+        primaryColor:    '#2a2520',
+        primaryBorderColor: '#c8943a',
+        primaryTextColor:   '#d8cfbf',
+        secondaryColor:     '#1a1815',
+        secondaryBorderColor: '#2e2b27',
+        secondaryTextColor: '#8a8070',
+        tertiaryColor:    '#1a1815',
+        tertiaryBorderColor: '#2e2b27',
+        tertiaryTextColor:  '#d8cfbf',
+        lineColor:       '#c8943a',
+        edgeLabelBackground: '#1a1815',
+        fontFamily:      'IBM Plex Mono, monospace',
+        fontSize:        '13px',
+        nodeBorder:      '#c8943a',
+        clusterBkg:      '#14120f',
+        titleColor:      '#d8cfbf',
+        labelBackground: '#1a1815',
+        labelTextColor:  '#d8cfbf',
+      },
+      flowchart: {
+        htmlLabels: true,
+        curve: 'basis',
+      }
+    });
+  </script>
 </body>
 </html>
