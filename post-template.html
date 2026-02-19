@@ -1,196 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[Blog Post Title] | [Your Name/Handle]</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
-        :root {
-            --bg-color: #1a1b26;
-            --text-color: #c0caf5;
-            --header-color: #ffffff;
-            --accent-color: #bb9af7;
-            --card-bg-color: #24283b;
-            --border-color: #3b4261;
-            --subtle-text-color: #787c99;
-        }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; line-height: 1.7; margin: 0; padding: 0; display: flex; justify-content: center; }
-        .container { max-width: 1100px; width: 100%; padding: 2rem; box-sizing: border-box; }
-        h1, h2, h3, h4 { font-family: 'Rubik', sans-serif; color: var(--header-color); margin-top: 2.5rem; margin-bottom: 1rem; }
-        h1 { font-size: 3rem; line-height: 1.2; }
-        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
-        h3 { font-size: 1.4rem; }
-        p { margin-bottom: 1.2rem; }
-        a { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
-        a:hover { opacity: 0.8; }
-        strong { color: var(--header-color); font-weight: 700; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 2rem; }
-        .header .name { font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--header-color); }
-        .header nav a { margin-left: 1.5rem; font-weight: 500; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>[Blog Post Title] | Squirrelthug</title>
 
-        /* --- NEW: POST-SPECIFIC LAYOUT --- */
-        .post-layout {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3rem;
-            align-items: flex-start;
-        }
-        .post-content {
-            flex: 3;
-            min-width: 300px;
-        }
-        .post-sidebar {
-            flex: 1;
-            min-width: 250px;
-            position: sticky; /* Makes sidebar stick on scroll */
-            top: 2rem;
-        }
-        .post-meta {
-            color: var(--subtle-text-color);
-            margin-top: -1rem;
-            margin-bottom: 2rem;
-        }
-        blockquote {
-            border-left: 4px solid var(--accent-color);
-            padding-left: 1.5rem;
-            margin-left: 0;
-            font-style: italic;
-            color: var(--text-color);
-        }
-        pre {
-            background-color: #16161e;
-            color: #dcdcdc;
-            padding: 1.5rem;
-            border-radius: 8px;
-            overflow-x: auto; /* Allows scrolling for long code lines */
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: var(--border-color);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-        }
-        pre code {
-            background-color: transparent;
-            padding: 0;
-        }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
 
-        /* --- NEW: TABLE OF CONTENTS CARD --- */
-        .toc-card {
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-        }
-        .toc-card h3 {
-            margin-top: 0;
-            font-size: 1.2rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .toc-card ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-        .toc-card li {
-            padding: 0.5rem 0;
-        }
-        .toc-card a {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
+  <!-- Uncomment the next line only if this post contains a Mermaid diagram -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script> -->
 
-        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
-    </style>
+  <style>
+    :root {
+      --bg:        #0e0d0c;
+      --bg-card:   #1a1815;
+      --border:    #2e2b27;
+      --text:      #d8cfbf;
+      --text-dim:  #8a8070;
+      --gold:      #c8943a;
+      --gold-dim:  #8a6228;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.85;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* ─── NAV ──────────────────────────────────────── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(14, 13, 12, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    nav .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ─── LAYOUT ────────────────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .post-layout {
+      display: flex;
+      gap: 4rem;
+      align-items: flex-start;
+      padding: 4rem 0;
+    }
+
+    .post-content { flex: 3; min-width: 0; }
+    .post-sidebar { flex: 1; min-width: 220px; position: sticky; top: 5rem; }
+
+    /* ─── POST HEADER ────────────────────────────────── */
+    .post-header {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* post-label: "Month Year · Category" */
+    .post-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 1rem;
+    }
+
+    /* post-meta-line: "Posted [Date] · Approx. X min read" */
+    .post-meta-line {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    /* ─── POST BODY ──────────────────────────────────── */
+    .post-body p { margin-bottom: 1.5rem; }
+
+    /* Section headings — add id="" for TOC anchor links */
+    .post-body h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.2;
+    }
+
+    .post-body h3 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 2rem 0 0.6rem;
+    }
+
+    .post-body strong { color: var(--text); font-weight: 600; }
+
+    /* Pull quote / callout */
+    .post-body blockquote {
+      border-left: 2px solid var(--gold-dim);
+      margin: 2rem 0;
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* Inline code */
+    .post-body code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      color: var(--gold);
+    }
+
+    /* Code block */
+    .post-body pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 2px;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    .post-body pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    /* Mermaid diagram wrapper — use when embedding architecture diagrams */
+    .diagram-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 2rem 1rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .mermaid { display: flex; justify-content: center; }
+
+    /* ─── SIDEBAR TOC ─────────────────────────────────── */
+    .toc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--gold-dim);
+      padding: 1.4rem;
+    }
+
+    .toc-card h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-card ul { list-style: none; }
+
+    .toc-card li {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-card li:last-child { border-bottom: none; }
+
+    .toc-card a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc-card a:hover { color: var(--gold); }
+
+    /* ─── FOOTER / BACK LINK ─────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      margin-top: 1rem;
+    }
+
+    .back-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      text-decoration: none;
+    }
+
+    .back-link:hover { color: var(--gold); }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      .post-layout { flex-direction: column; gap: 2rem; padding: 2rem 0; }
+      .post-sidebar { position: static; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="../index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../blog.html">Writing</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        <header class="header">
-            <div class="name">[Squirrelthug]</div>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="blog.html">Blog</a>
-            </nav>
-        </header>
+  <div class="container">
+    <div class="post-layout">
 
-        <main class="post-layout">
-            
-            <article class="post-content">
-                <h1>[Your Incredible Blog Post Title]</h1>
-                <div class="post-meta">
-                    <span>Posted on [June 24, 2025]</span> &middot; <span>Approx. 5 min read</span>
-                </div>
+      <article class="post-content">
 
-                <p>
-                    [This is the opening paragraph of your blog post. It should be engaging and state the main purpose of the article. For example: "When I set out to build the `lilith-context-manager`, one of my core requirements was ensuring data integrity. A service crash during a file write could corrupt a user's entire session history, which is unacceptable. This led me down the path of implementing **atomic writes**, a powerful pattern that guarantees a file is either fully written or not at all." This is an example of an introductory paragraph.]
-                </p>
-                
-                <p>
-                    You can use <strong>strong tags</strong> for emphasis and <code>inline code blocks</code> for mentioning variable names or file paths like <code>service/main.py</code>.
-                </p>
+        <!-- ── HEADER: Update date, category, title, read time ── -->
+        <div class="post-header">
+          <p class="post-label">[Month Year] &nbsp;·&nbsp; [Category]</p>
+          <h1>[Your Blog Post Title]</h1>
+          <p class="post-meta-line">Posted [Month DD, YYYY] &nbsp;·&nbsp; Approx. X min read</p>
+        </div>
 
-                <h2 id="the-problem-with-standard-writes">The Problem with Standard Writes</h2>
-                <p>
-                    [Explain the first major point of your article here. Describe the problem you are trying to solve in more detail.]
-                </p>
+        <!-- ── BODY: Write your post content here ── -->
+        <div class="post-body">
 
-                <blockquote>
-                    This is a blockquote. It's great for quoting documentation, highlighting a key insight, or adding a note that stands out from the main text.
-                </blockquote>
+          <p>
+            This is the opening paragraph of your blog post. It should be engaging and make clear
+            what this piece is about and why the reader should care. Lead with the problem, the
+            tension, or the decision — not with preamble.
+          </p>
 
-                <h2 id="implementing-the-solution">Implementing the Solution</h2>
-                <p>
-                    [Explain your solution here. This is a great place to put a code block to show your work.]
-                </p>
+          <!-- Section: add id to match TOC anchor links below -->
+          <h2 id="section-one">[First Section Heading]</h2>
+          <p>
+            Explain the first major point here. You can use <strong>strong tags</strong> for emphasis
+            and <code>inline code</code> for variable names, file paths, or technical terms.
+          </p>
 
-                <pre><code># This is a Python code block.
-# You can paste your code directly here.
-def atomic_write(filepath: str, data: str):
-    temp_path = f"{filepath}.tmp"
-    try:
-        with open(temp_path, "w", encoding="utf-8") as f:
-            f.write(data)
-        # The key step: rename is an atomic operation on most OS
-        os.rename(temp_path, filepath)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        # Clean up the temp file if it exists
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
-</code></pre>
+          <!-- Pull quote -->
+          <blockquote>
+            This is a blockquote. Use it to highlight a key insight, a design principle, or something
+            worth standing on its own.
+          </blockquote>
 
-                <h2 id="conclusion-and-next-steps">Conclusion and Next Steps</h2>
-                <p>
-                    [Summarize your article and talk about what this solution enables for the future of your project.]
-                </p>
+          <h2 id="section-two">[Second Section Heading]</h2>
+          <p>
+            Continue the narrative. Show your work. If you're describing a decision, explain the
+            options you considered and why you landed where you did.
+          </p>
 
-            </article>
+          <!-- Code block -->
+          <pre><code># Python example
+def example_function(param: str) -> str:
+    """Docstring here."""
+    result = do_something(param)
+    return result</code></pre>
 
-            <aside class="post-sidebar">
-                <div class="toc-card">
-                    <h3>In This Article</h3>
-                    <ul>
-                        <li><a href="#the-problem-with-standard-writes">The Problem with Standard Writes</a></li>
-                        <li><a href="#implementing-the-solution">Implementing the Solution</a></li>
-                        <li><a href="#conclusion-and-next-steps">Conclusion and Next Steps</a></li>
-                    </ul>
-                </div>
-            </aside>
+          <!-- Mermaid diagram — uncomment the script tag in <head> if using this -->
+          <!--
+          <div class="diagram-wrap">
+            <div class="mermaid">
+graph TD
+    A[Start] - ->|event| B[End]
+            </div>
+          </div>
+          -->
 
-        </main>
+          <h2 id="section-three">[Conclusion / Next Steps]</h2>
+          <p>
+            Wrap up with what this section of work enables, what comes next, or what you'd do
+            differently in retrospect. Avoid vague sign-offs — end on something concrete.
+          </p>
 
-        <footer class="footer">
-            <p>&copy; 2025 [SquirrelThug]. Designed with simplicity.</p>
+        </div>
+        <!-- end .post-body -->
+
+        <footer>
+          <a class="back-link" href="../blog.html">← All Writing</a>
         </footer>
 
+      </article>
+
+      <!-- ── SIDEBAR TOC: Mirror the h2 id values above ── -->
+      <aside class="post-sidebar">
+        <div class="toc-card">
+          <h3>In This Article</h3>
+          <ul>
+            <li><a href="#section-one">[First Section]</a></li>
+            <li><a href="#section-two">[Second Section]</a></li>
+            <li><a href="#section-three">[Conclusion]</a></li>
+            <!-- Add more <li> entries to match your h2 headings -->
+          </ul>
+        </div>
+      </aside>
+
     </div>
+  </div>
+
+  <!--
+    MERMAID INIT — uncomment this entire block if your post uses diagrams.
+    Also uncomment the <script> tag in <head> above.
+  -->
+  <!--
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        background:           '#1a1815',
+        primaryColor:         '#2a2520',
+        primaryBorderColor:   '#c8943a',
+        primaryTextColor:     '#d8cfbf',
+        secondaryColor:       '#1a1815',
+        secondaryBorderColor: '#2e2b27',
+        secondaryTextColor:   '#8a8070',
+        tertiaryColor:        '#1a1815',
+        tertiaryBorderColor:  '#2e2b27',
+        tertiaryTextColor:    '#d8cfbf',
+        lineColor:            '#c8943a',
+        edgeLabelBackground:  '#1a1815',
+        fontFamily:           'IBM Plex Mono, monospace',
+        fontSize:             '13px',
+      },
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      securityLevel: 'loose',
+    });
+  </script>
+  -->
 
 </body>
 </html>
