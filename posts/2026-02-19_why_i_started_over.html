@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why I Started Over — Again · Squirrelthug</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0e0d0c;
+      --bg-card:   #1a1815;
+      --border:    #2e2b27;
+      --text:      #d8cfbf;
+      --text-dim:  #8a8070;
+      --gold:      #c8943a;
+      --gold-dim:  #8a6228;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.85;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(14, 13, 12, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    nav .inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ARTICLE */
+    article {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .post-header {
+      padding: 5rem 0 3.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .post-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 600;
+      line-height: 1.12;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.4rem;
+    }
+
+    .post-dek {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 580px;
+    }
+
+    /* BODY */
+    .post-body p {
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .post-body h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 2.8rem 0 1rem;
+      line-height: 1.2;
+    }
+
+    .post-body blockquote {
+      border-left: 2px solid var(--gold-dim);
+      margin: 2rem 0;
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      color: var(--gold);
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .post-footer {
+      margin-top: 4rem;
+      padding: 2.5rem 0 4rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .post-footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    .back-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="../index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="../blog.html">Writing</a></li>
+        <li><a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <article>
+    <div class="post-header">
+      <p class="post-label">February 2026 &nbsp;·&nbsp; Architecture</p>
+      <h1>Why I Started Over — Again</h1>
+      <p class="post-dek">On moving from distributed microservices to a modular monolith, and why the distinction matters more than it sounds.</p>
+    </div>
+
+    <div class="post-body">
+
+      <p>
+        There's a version of this project that lived as four separate GitHub repositories. Each one
+        was a standalone service with its own dependencies, its own API surface, its own deployment
+        concerns. <code>lilith-context-manager</code>. <code>lilith-memory-sdk</code>.
+        <code>lilith-orchestrator</code>. <code>lilith-scl-engine</code>. It looked clean on a
+        diagram. It looked like something a real company would ship.
+      </p>
+
+      <p>
+        I threw all of it away.
+      </p>
+
+      <p>
+        This is the explanation of why, because I think the reasoning is worth writing down — both
+        for anyone following along and for myself, so that the next time I'm tempted by an
+        architecture that looks good in a box diagram, I have somewhere to point back to.
+      </p>
+
+      <h2>The Problem With Building What Looks Right</h2>
+
+      <p>
+        Microservices are the correct answer for a team of engineers managing independent domains
+        that need to scale and deploy independently. I am not a team. I am one person who works in
+        construction during the day and writes code at night.
+      </p>
+
+      <p>
+        The overhead of running four services during development is not theoretical friction — it is
+        actual, daily friction. Every time I wanted to trace a bug across a request lifecycle, I was
+        looking at four log streams. Every time I wanted to change a data contract, I was touching
+        four repositories. Every time I wanted to understand whether a performance issue was in the
+        context manager or the orchestrator, I was doing archaeology.
+      </p>
+
+      <p>
+        I had designed a system that looked like what I wanted to build eventually, not what I
+        needed to build right now. The distinction is important.
+      </p>
+
+      <blockquote>
+        You don't frame walls before the foundation cures. And you don't design the foundation for
+        the shed when you're planning to build the house.
+      </blockquote>
+
+      <p>
+        The microservice architecture was the second of those mistakes. I was building the
+        infrastructure for a distributed system that multiple engineers would work on, before I had
+        proven that the core loop — voice in, reasoning, voice out, personality consistent — worked
+        the way I needed it to work.
+      </p>
+
+      <h2>What a Modular Monolith Actually Is</h2>
+
+      <p>
+        There's a misconception that "monolith" means "unstructured mess." It doesn't. A modular
+        monolith is a single deployable process with clean internal module boundaries — enforced by
+        code discipline rather than by network calls. The modules can't import each other's internals.
+        They communicate through a shared internal event bus. The data contracts are just as strict
+        as they would be in a distributed system. But there's no HTTP overhead on every internal
+        call. There's no serialization tax. There's no network partition to worry about. And there
+        is exactly one log stream.
+      </p>
+
+      <p>
+        If I ever need to pull a module out into its own service — because some specific component
+        genuinely needs to scale independently, or because a future version of this runs on multiple
+        physical devices — the module boundary is already there. The separation already exists. I
+        just add a network layer on top of an interface that already exists. I don't have to
+        restructure anything.
+      </p>
+
+      <p>
+        That's the key insight. I'm not giving up the option to distribute later. I'm just not
+        paying the cost of distribution before I need it.
+      </p>
+
+      <h2>The Deeper Lesson</h2>
+
+      <p>
+        The architecture I was building before was impressive-looking. It had the kind of diagram
+        that makes sense to an interviewer or a senior engineer who works with distributed systems
+        professionally. It signaled competence in the right vocabulary.
+      </p>
+
+      <p>
+        But I kept catching myself optimizing for the diagram instead of for the working system.
+        That is a reliable early warning sign that something has gone wrong in the design process.
+        When you're making decisions to make the architecture look correct rather than to make it
+        work correctly for your actual situation, you've already lost the thread.
+      </p>
+
+      <p>
+        So: new foundation. Same final vision. But a foundation designed for a solo developer who
+        needs to be able to hold the entire system in his head, debug it alone, change it quickly,
+        and actually use it every day. The v5 documents describe that architecture in detail. What
+        I'm building now is what v5 describes — not what the old repos implied.
+      </p>
+
+      <p>
+        The system is smaller now than it was when it had four repositories. It will be much
+        larger soon. But this time, it'll be built in the right order.
+      </p>
+
+    </div>
+
+    <div class="post-footer">
+      <p><a class="back-link" href="../blog.html">← All Writing</a></p>
+    </div>
+  </article>
+
+</body>
+</html>
