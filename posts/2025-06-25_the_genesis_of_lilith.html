@@ -1,143 +1,341 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Genesis of L.I.L.I.T.H.: Why I'm Building My Own AI | Squirrelthug</title>
-    <!-- We are using the exact same style block as other pages for consistency -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
-        :root {
-            --bg-color: #1a1b26;
-            --text-color: #c0caf5;
-            --header-color: #ffffff;
-            --accent-color: #bb9af7;
-            --card-bg-color: #24283b;
-            --border-color: #3b4261;
-            --subtle-text-color: #787c99;
-        }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Inter', sans-serif; line-height: 1.7; margin: 0; padding: 0; display: flex; justify-content: center; }
-        .container { max-width: 1100px; width: 100%; padding: 2rem; box-sizing: border-box; }
-        h1, h2, h3, h4 { font-family: 'Rubik', sans-serif; color: var(--header-color); margin-top: 2.5rem; margin-bottom: 1rem; }
-        h1 { font-size: 3rem; line-height: 1.2; text-align: center; }
-        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
-        h3 { font-size: 1.4rem; }
-        p { margin-bottom: 1.2rem; }
-        a { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
-        a:hover { opacity: 0.8; }
-        strong { color: var(--header-color); font-weight: 700; }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 2rem; }
-        .header .name { font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--header-color); }
-        .header nav a { margin-left: 1.5rem; font-weight: 500; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Genesis of L.I.L.I.T.H. | Squirrelthug</title>
 
-        /* --- POST-SPECIFIC LAYOUT --- */
-        .post-layout { display: flex; flex-wrap: wrap; gap: 3rem; align-items: flex-start; }
-        .post-content { flex: 3; min-width: 300px; }
-        .post-sidebar { flex: 1; min-width: 250px; position: sticky; top: 2rem; }
-        .post-meta { color: var(--subtle-text-color); margin-top: -1rem; margin-bottom: 2rem; text-align: center; }
-        blockquote { border-left: 4px solid var(--accent-color); padding-left: 1.5rem; margin-left: 0; font-style: italic; color: var(--text-color); }
-        pre { background-color: #16161e; color: #dcdcdc; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; }
-        code { font-family: 'Courier New', Courier, monospace; background-color: var(--border-color); padding: 0.2rem 0.4rem; border-radius: 4px; }
-        pre code { background-color: transparent; padding: 0; }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
-        /* --- TABLE OF CONTENTS CARD --- */
-        .toc-card { background-color: var(--card-bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
-        .toc-card h3 { margin-top: 0; font-size: 1.2rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); }
-        .toc-card ul { list-style-type: none; padding: 0; margin: 0; }
-        .toc-card li { padding: 0.5rem 0; }
-        .toc-card a { font-weight: 500; font-size: 0.9rem; }
+  <style>
+    :root {
+      --bg:        #0e0d0c;
+      --bg-card:   #1a1815;
+      --border:    #2e2b27;
+      --text:      #d8cfbf;
+      --text-dim:  #8a8070;
+      --gold:      #c8943a;
+      --gold-dim:  #8a6228;
+    }
 
-        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        /* --- MERMAID DIAGRAM STYLES --- */
-        .architecture-diagram {
-            background-color: #16161e;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            text-align: center;
-        }
-        .mermaid {
-            background-color: transparent !important;
-        }
-        /* Override Mermaid's default styles to match our theme */
-        .mermaid .node rect,
-        .mermaid .node circle,
-        .mermaid .node ellipse,
-        .mermaid .node polygon {
-            fill: var(--card-bg-color) !important;
-            stroke: var(--border-color) !important;
-            stroke-width: 2px !important;
-        }
-        .mermaid .node .label {
-            color: var(--text-color) !important;
-            font-family: 'Inter', sans-serif !important;
-        }
-        .mermaid .edgePath .path {
-            stroke: var(--accent-color) !important;
-            stroke-width: 2px !important;
-        }
-        .mermaid .arrowheadPath {
-            fill: var(--accent-color) !important;
-            stroke: var(--accent-color) !important;
-        }
-    </style>
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.85;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(14, 13, 12, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    nav .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* POST LAYOUT */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .post-layout {
+      display: flex;
+      gap: 4rem;
+      align-items: flex-start;
+      padding: 4rem 0;
+    }
+
+    .post-content { flex: 3; min-width: 0; }
+    .post-sidebar { flex: 1; min-width: 220px; position: sticky; top: 5rem; }
+
+    /* HEADER */
+    .post-header {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .post-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 1rem;
+    }
+
+    .post-meta-line {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    /* BODY */
+    .post-body p { margin-bottom: 1.5rem; }
+
+    .post-body h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.2;
+    }
+
+    .post-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .post-body blockquote {
+      border-left: 2px solid var(--gold-dim);
+      margin: 2rem 0;
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .post-body code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      color: var(--gold);
+    }
+
+    .post-body pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 2px;
+      overflow-x: auto;
+      margin: 1.5rem 0;
+    }
+
+    .post-body pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    /* MERMAID */
+    .diagram-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 2rem 1rem;
+      margin: 2rem 0;
+      overflow-x: auto;
+    }
+
+    .mermaid { display: flex; justify-content: center; }
+
+    /* SIDEBAR TOC */
+    .toc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--gold-dim);
+      padding: 1.4rem;
+    }
+
+    .toc-card h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-card ul { list-style: none; }
+
+    .toc-card li {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc-card li:last-child { border-bottom: none; }
+
+    .toc-card a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .toc-card a:hover { color: var(--gold); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      margin-top: 1rem;
+    }
+
+    .back-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      text-decoration: none;
+    }
+
+    .back-link:hover { color: var(--gold); }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 700px) {
+      .post-layout { flex-direction: column; gap: 2rem; padding: 2rem 0; }
+      .post-sidebar { position: static; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="../index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../blog.html">Writing</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        <header class="header">
-            <div class="name">Squirrelthug</div>
-            <nav>
-                <a href="../index.html">Home</a>
-                <a href="../blog.html">Blog</a>
-            </nav>
-        </header>
+  <div class="container">
+    <div class="post-layout">
 
-        <main class="post-layout">
-            
-            <article class="post-content">
-                <h1>The Genesis of L.I.L.I.T.H.: Why I'm Building My Own AI</h1>
-                <div class="post-meta">
-                    <span>Posted on June 25, 2025</span> &middot; <span>Approx. 7 min read</span>
-                </div>
+      <article class="post-content">
 
-                <p>
-                    I need to be honest about why I started this project. It didn’t begin in a classroom or a corporate hackathon. It started from a place of frustration and a foundational belief that the current state of our digital lives is fundamentally broken.
-                </p>
-                <p>
-                    I don’t trust large systems—be they corporations or governments—to protect me as an individual. Their goals are for the masses, and more often than not, for monetary gain. I dislike that anyone but myself has access to my own data, my own patterns, my own life. If an advertiser wants to know what I’m thinking, they can pay me directly for that premium data. I should be the one in control. I should be the sole arbiter.
-                </p>
-                <p>This project, <strong>Lilith</strong>, stems from that single desire: to take all the control back. To build an intelligent system that silos my sensitive data and acts on my behalf, with my interests at its core.</p>
+        <div class="post-header">
+          <p class="post-label">June 2025 &nbsp;·&nbsp; Origin</p>
+          <h1>The Genesis of L.I.L.I.T.H.: Why I'm Building My Own AI</h1>
+          <p class="post-meta-line">Posted June 25, 2025 &nbsp;·&nbsp; Approx. 7 min read</p>
+        </div>
 
-                <h2 id="catalyst">The Catalyst: A Series of Missed Boats</h2>
-                <p>
-                    This isn't my first time feeling this way. The feeling of being on the outside looking in, knowing you have good ideas but lacking the tools to act, is a powerful and frustrating motivator.
-                </p>
-                <p>
-                    When the Llama model was first leaked onto the internet, the excitement was palpable. But as a MacBook M1 user, I felt left behind. The entire developer world seemed to be running on Windows machines, and there was maybe one person out there figuring out how to get it working on my hardware. I realized then, if I wanted to be on the front lines of these technological waves, I couldn't wait for someone else to build the tools for me. I had to learn to code so I could make it work myself.
-                </p>
-                <p>It reminded me of the crypto boom. I was interested in Bitcoin early on. When NFTs came around, I was on the ground floor, I saw the potential, but I had no coding experience. I watched friends and strangers spin up projects and come out a little richer, while I lamented that I hadn't started learning to code sooner.
-                </p>
-                <p>
-                </p>
+        <div class="post-body">
 
-                <h2 id="evolution">The Idea's Evolution: From Podcast Visualizer to Digital Butler</h2>
-                <p>
-                    My initial ideas were creative but unfocused. I first imagined what is now the <code>lilith-context-manager</code> as a tool to keep track of voice input from unstructured podcasts. It would create a visual map of the conversation, showing where tangents forked and merged with colorful lines. But then I started thinking bigger. I looked at the cluttered world of home automation, where every device has its own cumbersome app. I saw people building simple AI models to interface with all of it, creating a sort of "poor man's JARVIS." That resonated deeply. I realized I should build a system that, at its core, could connect to the back-end tools of my digital life and give me direct access, without the cluttered screens.
-                </p> 
+          <p>
+            I need to be honest about why I started this project. It didn't begin in a classroom or a corporate hackathon. It started from a place of frustration and a foundational belief that the current state of our digital lives is fundamentally broken.
+          </p>
+          <p>
+            I don't trust large systems — be they corporations or governments — to protect me as an individual. Their goals are for the masses, and more often than not, for monetary gain. I dislike that anyone but myself has access to my own data, my own patterns, my own life. If an advertiser wants to know what I'm thinking, they can pay me directly for that premium data. I should be the one in control. I should be the sole arbiter.
+          </p>
+          <p>
+            This project, <strong>Lilith</strong>, stems from that single desire: to take all the control back. To build an intelligent system that silos my sensitive data and acts on my behalf, with my interests at its core.
+          </p>
 
-                <h2 id="strategy">The Strategy: Competing with Giants by Not Competing</h2>
-                <p>I also knew I couldn't compete with the big dogs. I don’t have billions to build a foundational model. But I could leverage their hard work. My system could run a simple, private model locally for personal queries, and for anything more complex, it could reach out to services like ChatGPT or Grok through an API, sending only sanitized, necessary data. It would be far cheaper than a monthly subscription and infinitely more private.
-                </p>
-                <p>This led me to the core design. I needed to keep it tight, secure. I imagined the "Triforce" architecture: Working Memory, a Chat Interface, and a Synthetic Conscious Loop. And this core would be guarded by a kind of shield—the API Integration Layer that reaches out to the world and brings back data in a structured, controlled way. Anything coming in can only write to a designated space; the core intelligence then decides what to do with that structured data. It just seemed like a solid plan for security and stability.
-                </p>
+          <h2 id="catalyst">The Catalyst: A Series of Missed Boats</h2>
+          <p>
+            This isn't my first time feeling this way. The feeling of being on the outside looking in, knowing you have good ideas but lacking the tools to act, is a powerful and frustrating motivator.
+          </p>
+          <p>
+            When the Llama model was first leaked onto the internet, the excitement was palpable. But as a MacBook M1 user, I felt left behind. The entire developer world seemed to be running on Windows machines, and there was maybe one person out there figuring out how to get it working on my hardware. I realized then, if I wanted to be on the front lines of these technological waves, I couldn't wait for someone else to build the tools for me. I had to learn to code so I could make it work myself.
+          </p>
+          <p>
+            It reminded me of the crypto boom. I was interested in Bitcoin early on. When NFTs came around, I was on the ground floor — I saw the potential, but I had no coding experience. I watched friends and strangers spin up projects and come out a little richer, while I lamented that I hadn't started learning to code sooner.
+          </p>
 
-                <div class="architecture-diagram">
-                    <div class="mermaid">
+          <h2 id="evolution">The Idea's Evolution: From Podcast Visualizer to Digital Butler</h2>
+          <p>
+            My initial ideas were creative but unfocused. I first imagined what is now the <code>lilith-context-manager</code> as a tool to keep track of voice input from unstructured podcasts. It would create a visual map of the conversation, showing where tangents forked and merged with colorful lines. But then I started thinking bigger. I looked at the cluttered world of home automation, where every device has its own cumbersome app. I saw people building simple AI models to interface with all of it, creating a sort of "poor man's JARVIS." That resonated deeply. I realized I should build a system that, at its core, could connect to the back-end tools of my digital life and give me direct access, without the cluttered screens.
+          </p>
+
+          <h2 id="strategy">The Strategy: Competing with Giants by Not Competing</h2>
+          <p>
+            I also knew I couldn't compete with the big dogs. I don't have billions to build a foundational model. But I could leverage their hard work. My system could run a simple, private model locally for personal queries, and for anything more complex, it could reach out to services like ChatGPT or Grok through an API, sending only sanitized, necessary data. It would be far cheaper than a monthly subscription and infinitely more private.
+          </p>
+          <p>
+            This led me to the core design. I needed to keep it tight, secure. I imagined the "Triforce" architecture: Working Memory, a Chat Interface, and a Synthetic Conscious Loop. And this core would be guarded by a kind of shield — the API Integration Layer that reaches out to the world and brings back data in a structured, controlled way. Anything coming in can only write to a designated space; the core intelligence then decides what to do with that structured data. It just seemed like a solid plan for security and stability.
+          </p>
+
+          <div class="diagram-wrap">
+            <div class="mermaid">
 graph TB
     UI[User Interface]
     SCL[lilith-scl-engine]
@@ -145,110 +343,85 @@ graph TB
     ORCH[lilith-orchestrator<br/>HUB]
     MEM[Persistent Memory Core<br/>via lilith-memory-sdk]
     API[API Integration Layer]
-    
     UI -->|User Input| ORCH
     SCL -->|Proactive Insights| ORCH
     LCM -->|Compressed Context| ORCH
     ORCH -->|Sole Writer| MEM
     MEM -->|Memory Retrieval| ORCH
     API -->|Tool Results| ORCH
-    
-    style ORCH fill:#bb9af7,stroke:#bb9af7,stroke-width:3px,color:#15161E
-    style MEM fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style UI fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style SCL fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style LCM fill:#24283b,stroke:#3b4261,stroke-width:2px
-    style API fill:#24283b,stroke:#3b4261,stroke-width:2px
-                    </div>
-                </div>
+            </div>
+          </div>
 
-                <h2 id="method">The Method: Building a Developer, Not Just a Project</h2>
-                <p>
-                    I knew that just having ideas and using AI to help me wasn't enough. If I wanted to turn this into a career, I had to prove not only that I could build something complex, but that I could think and act like a professional software engineer.
-                </p>
-                <p>So, my educational strategy became building this project as if it were for a real company.
-                </p>
-                <p>I’m not just writing code. I am the owner, the architect, and the junior developer, and I take all three roles seriously. I started by creating the kind of in-depth design documentation I’d want to receive as a new hire. I then translated that architecture into a formal project plan on GitHub.
-                </p>
-                <p>
-                    I use <strong>GitHub Projects</strong> to run a proper Kanban board. Every single piece of work gets its own <strong>Issue</strong> with a clear description and a detailed list of <strong>Acceptance Criteria</strong>, so the "junior dev" me knows exactly what "done" looks like. I've even created a "Daily Developer Grind" playbook for myself—a checklist I follow every day that includes creating feature branches, writing tests, and creating Pull Requests for my own review. Why do all this when I'm working alone? Because I know I don't have a formal education in this field. The only way to prove to a future employer that I can seamlessly assimilate into their culture is to have already built that culture for myself.
-                </p>
-                <blockquote>
-                     The AI bots I use are not just code generators; they are my Socratic mentors. I don't just accept the code they suggest. I have a class on <em>why</em> it's written that way.
-                </blockquote>
-                <p>I’m learning the workflow, the discipline, and the communication patterns of a professional team so that when I get a shot, I'm ready to contribute from day one.
-                </p>
-                <p>
-                    This entire project is my resume, my education, and my passion, all rolled into one. I invite you to follow along on GitHub as I continue to build Lilith, one line of code at a time.
-                </p>
+          <h2 id="method">The Method: Building a Developer, Not Just a Project</h2>
+          <p>
+            I knew that just having ideas and using AI to help me wasn't enough. If I wanted to turn this into a career, I had to prove not only that I could build something complex, but that I could think and act like a professional software engineer.
+          </p>
+          <p>
+            So, my educational strategy became building this project as if it were for a real company.
+          </p>
+          <p>
+            I'm not just writing code. I am the owner, the architect, and the junior developer, and I take all three roles seriously. I started by creating the kind of in-depth design documentation I'd want to receive as a new hire. I then translated that architecture into a formal project plan on GitHub.
+          </p>
+          <p>
+            I use <strong>GitHub Projects</strong> to run a proper Kanban board. Every single piece of work gets its own <strong>Issue</strong> with a clear description and a detailed list of <strong>Acceptance Criteria</strong>, so the "junior dev" me knows exactly what "done" looks like. I've even created a "Daily Developer Grind" playbook for myself — a checklist I follow every day that includes creating feature branches, writing tests, and creating Pull Requests for my own review. Why do all this when I'm working alone? Because I know I don't have a formal education in this field. The only way to prove to a future employer that I can seamlessly assimilate into their culture is to have already built that culture for myself.
+          </p>
+          <blockquote>
+            The AI bots I use are not just code generators; they are my Socratic mentors. I don't just accept the code they suggest. I have a class on <em>why</em> it's written that way.
+          </blockquote>
+          <p>
+            I'm learning the workflow, the discipline, and the communication patterns of a professional team so that when I get a shot, I'm ready to contribute from day one.
+          </p>
+          <p>
+            This entire project is my resume, my education, and my passion, all rolled into one. I invite you to follow along on GitHub as I continue to build Lilith, one line of code at a time.
+          </p>
 
-            </article>
+        </div>
 
-            <aside class="post-sidebar">
-                <div class="toc-card">
-                    <h3>In This Article</h3>
-                    <ul>
-                        <li><a href="#catalyst">The Catalyst: A Series of Missed Boats</a></li>
-                        <li><a href="#evolution">The Idea's Evolution</a></li>
-                        <li><a href="#strategy">The Strategy: Competing by Not Competing</a></li>
-                        <li><a href="#method">The Method: Building a Developer</a></li>
-                    </ul>
-                </div>
-            </aside>
-
-        </main>
-
-        <footer class="footer">
-            <p>&copy; 2025 Squirrelthug. Designed with simplicity.</p>
+        <footer>
+          <a class="back-link" href="../blog.html">← All Writing</a>
         </footer>
 
-    </div>
+      </article>
 
-    <!-- Mermaid.js for diagrams -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
-    <script>
-        // Initialize Mermaid with proper configuration to avoid errors
-        document.addEventListener('DOMContentLoaded', function() {
-            mermaid.initialize({
-                startOnLoad: true,
-                theme: 'dark',
-                themeVariables: {
-                    primaryColor: '#bb9af7',
-                    primaryTextColor: '#c0caf5',
-                    primaryBorderColor: '#3b4261',
-                    lineColor: '#bb9af7',
-                    secondaryColor: '#24283b',
-                    tertiaryColor: '#1a1b26',
-                    background: '#1a1b26',
-                    mainBkg: '#24283b',
-                    secondBkg: '#16161e',
-                    tertiaryBkg: '#1a1b26'
-                },
-                flowchart: {
-                    useMaxWidth: true,
-                    htmlLabels: true,
-                    curve: 'cardinal'
-                },
-                securityLevel: 'loose',
-                fontFamily: 'Inter, sans-serif'
-            });
-            
-            // Force re-render if needed
-            try {
-                mermaid.init(undefined, '.mermaid');
-            } catch (error) {
-                console.warn('Mermaid initialization warning:', error);
-                // Fallback: try to render again after a short delay
-                setTimeout(() => {
-                    try {
-                        mermaid.init(undefined, '.mermaid');
-                    } catch (fallbackError) {
-                        console.error('Mermaid fallback failed:', fallbackError);
-                    }
-                }, 100);
-            }
-        });
-    </script>
+      <aside class="post-sidebar">
+        <div class="toc-card">
+          <h3>In This Article</h3>
+          <ul>
+            <li><a href="#catalyst">The Catalyst: Missed Boats</a></li>
+            <li><a href="#evolution">The Idea's Evolution</a></li>
+            <li><a href="#strategy">Competing by Not Competing</a></li>
+            <li><a href="#method">The Method: Building a Developer</a></li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        background:           '#1a1815',
+        primaryColor:         '#2a2520',
+        primaryBorderColor:   '#c8943a',
+        primaryTextColor:     '#d8cfbf',
+        secondaryColor:       '#1a1815',
+        secondaryBorderColor: '#2e2b27',
+        secondaryTextColor:   '#8a8070',
+        tertiaryColor:        '#1a1815',
+        tertiaryBorderColor:  '#2e2b27',
+        tertiaryTextColor:    '#d8cfbf',
+        lineColor:            '#c8943a',
+        edgeLabelBackground:  '#1a1815',
+        fontFamily:           'IBM Plex Mono, monospace',
+        fontSize:             '13px',
+      },
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      securityLevel: 'loose',
+    });
+  </script>
 
 </body>
 </html>
