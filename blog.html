@@ -1,139 +1,301 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog | [Squirrelthug]</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Rubik:wght@500;700&display=swap');
-        :root {
-            --bg-color: #1a1b26;
-            --text-color: #c0caf5;
-            --header-color: #ffffff;
-            --accent-color: #bb9af7;
-            --card-bg-color: #24283b;
-            --border-color: #3b4261;
-            --subtle-text-color: #787c99;
-        }
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.7;
-            margin: 0; padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            max-width: 800px; /* Single column, so we don't need the wider layout */
-            width: 100%;
-            padding: 2rem;
-            box-sizing: border-box;
-        }
-        h1, h2, h3 {
-            font-family: 'Rubik', sans-serif;
-            color: var(--header-color);
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-        }
-        h1 { font-size: 2.5rem; }
-        h2 { font-size: 1.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
-        a { color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; }
-        a:hover { opacity: 0.8; }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 2rem;
-        }
-        .header .name { font-family: 'Rubik', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--header-color); }
-        .header nav a { margin-left: 1.5rem; font-weight: 500; }
-        
-        /* --- NEW STYLES FOR BLOG POST LIST --- */
-        .post-list-card {
-            background-color: var(--card-bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            transition: border-color 0.3s ease;
-        }
-        .post-list-card:hover {
-            border-color: var(--accent-color);
-        }
-        .post-list-card h3 {
-            margin-top: 0;
-            margin-bottom: 0.5rem;
-        }
-        .post-list-card h3 a {
-            color: var(--header-color);
-            font-size: 1.5rem;
-        }
-        .post-meta {
-            font-size: 0.9rem;
-            color: var(--subtle-text-color);
-            margin-bottom: 1rem;
-        }
-        .post-excerpt {
-            margin-bottom: 1.5rem;
-        }
-        .read-more {
-            font-family: 'Rubik', sans-serif;
-            font-weight: 500;
-            color: var(--accent-color);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing | Squirrelthug</title>
 
-        .footer { text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; opacity: 0.7; }
-    </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0e0d0c;
+      --bg-2:      #141311;
+      --bg-card:   #1a1815;
+      --border:    #2e2b27;
+      --text:      #d8cfbf;
+      --text-dim:  #8a8070;
+      --gold:      #c8943a;
+      --gold-dim:  #8a6228;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.75;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(14, 13, 12, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    nav .inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* LAYOUT */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 5rem 0 3rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .page-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.8rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .page-desc {
+      color: var(--text-dim);
+      font-size: 1rem;
+      max-width: 540px;
+    }
+
+    /* POST CARDS */
+    .post-list { list-style: none; }
+
+    .post-card {
+      border-bottom: 1px solid var(--border);
+      padding: 2.2rem 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0 2rem;
+      align-items: start;
+      transition: background 0.15s;
+    }
+
+    .post-card:first-child { border-top: 1px solid var(--border); }
+
+    .post-card:hover { background: rgba(200, 148, 58, 0.03); }
+
+    .post-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .post-card h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+
+    .post-card h2 a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .post-card h2 a:hover { color: var(--gold); }
+
+    .post-excerpt {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .read-more {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .read-more:hover { color: var(--gold); }
+
+    .post-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 0.25em 0.6em;
+      white-space: nowrap;
+      align-self: start;
+      margin-top: 0.2rem;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 3rem 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .post-card { grid-template-columns: 1fr; }
+      .post-tag { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="container">
-
-        <header class="header">
-            <div class="name">[Squirrelthug]</div>
-            <nav>
-                <a href="index.html">Home</a>
-            </nav>
-        </header>
-
-        <main>
-            <section id="writings">
-                <h2>Blog</h2>
-                <p>A collection of posts detailing my development process, architectural decisions, and learnings from the Lilith project and beyond.</p>
-               
-                    <div class="post-list-card">
-                        <h3><a href="posts/2025-06-26_dumb_modules_smart_core.html">[Dumb Modules, Smart Core: My Architectural Pivot to Build a Reliable AI]</a></h3>
-                        <div class="post-meta">
-                            <span>Posted on [June 26, 2025]</span>
-                        </div>
-                        <p class="post-excerpt">
-                            [An analysis of the design decisions that led to the latest iteration of the architecture, focusing on the importance of data integrity and creating a single-source-of-truth through a central orchestrator.]
-                        </p>
-                        <a href="posts/2025-06-26_dumb_modules_smart_core.html" class="read-more">Read More &rarr;</a>
-                    </div> 
-                <div class="post-list">
-
-                    <div class="post-list-card">
-                        <h3><a href="posts/2025-06-25_the_genesis_of_lilith.html">[The Genisis of L.I.L.I.T.H.]</a></h3>
-                        <div class="post-meta">
-                            <span>Posted on [June 25, 2025]</span>
-                        </div>
-                        <p class="post-excerpt">
-                           [A dive into the design and implementation of the Lilith, focusing on her origins and what motivated me to pursue this project without knowing how to code.]
-                        </p>
-                        <a href="posts/2025-06-25_the_genesis_of_lilith.html" class="read-more">Read More &rarr;</a>
-                    </div>
-
-                </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <p>&copy; 2025 [Squirrelthug]. Designed with simplicity.</p>
-        </footer>
-
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
     </div>
+  </nav>
+
+  <div class="container">
+
+    <div class="page-header">
+      <p class="page-label">All Writing</p>
+      <h1>Notes on the Build</h1>
+      <p class="page-desc">Design thinking, architectural decisions, and lessons from building a complex system alone. Written as the work happens.</p>
+    </div>
+
+    <ul class="post-list">
+
+      <li class="post-card">
+        <div>
+          <p class="post-meta">February 2026 &nbsp;·&nbsp; Architecture</p>
+          <h2><a href="posts/2026-02-19_why_i_started_over.html">Why I Started Over — Again</a></h2>
+          <p class="post-excerpt">On moving from distributed microservices to a modular monolith, and why the distinction matters more than it sounds.</p>
+          <a href="posts/2026-02-19_why_i_started_over.html" class="read-more">Read &rarr;</a>
+        </div>
+        <span class="post-tag">Architecture</span>
+      </li>
+
+      <li class="post-card">
+        <div>
+          <p class="post-meta">June 2025 &nbsp;·&nbsp; Architecture</p>
+          <h2><a href="posts/2025-06-26_dumb_modules_smart_core.html">Dumb Modules, Smart Core</a></h2>
+          <p class="post-excerpt">An analysis of the design decisions that led to the latest iteration of the architecture, focusing on data integrity and creating a single source of truth through a central orchestrator.</p>
+          <a href="posts/2025-06-26_dumb_modules_smart_core.html" class="read-more">Read &rarr;</a>
+        </div>
+        <span class="post-tag">Architecture</span>
+      </li>
+
+      <li class="post-card">
+        <div>
+          <p class="post-meta">June 2025 &nbsp;·&nbsp; Origin</p>
+          <h2><a href="posts/2025-06-25_the_genesis_of_lilith.html">The Genesis of L.I.L.I.T.H.</a></h2>
+          <p class="post-excerpt">A dive into the origins of Lilith — what motivated a contractor with no formal CS background to start building a complex AI system from scratch.</p>
+          <a href="posts/2025-06-25_the_genesis_of_lilith.html" class="read-more">Read &rarr;</a>
+        </div>
+        <span class="post-tag">Origin</span>
+      </li>
+
+    </ul>
+
+    <footer>
+      <p>SQUIRRELTHUG &nbsp;·&nbsp;
+        <a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a>
+        &nbsp;·&nbsp;
+        <a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a>
+        &nbsp;·&nbsp;
+        <a href="https://discord.gg/msxrpayZvB" target="_blank" rel="noopener">Discord</a>
+      </p>
+    </footer>
+
+  </div>
 
 </body>
 </html>
