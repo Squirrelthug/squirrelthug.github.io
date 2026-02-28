@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TWW Retrospective — Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111318;
+    --surface: #1a1d24;
+    --border: #262a35;
+    --text: #bfc5d2;
+    --text-bright: #e8ecf4;
+    --text-dim: #5c6370;
+
+```
+/* 5 broad topic colors — that's it */
+--c-expansion: #c0a04f;   /* gold — expansion/features/zones */
+--c-seasons: #5b9bd5;     /* blue — all season content */
+--c-controversy: #d4644e; /* warm red — belt, siren isle, addon stuff */
+--c-business: #6bc77a;    /* green — microsoft, layoffs, leadership */
+--c-timeline: #9b7ed8;    /* purple — dates, quick reference */
+```
+
+}
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+font-family: ‘IBM Plex Sans’, sans-serif;
+background: var(–bg);
+color: var(–text);
+font-size: 16px;
+line-height: 1.5;
+padding-bottom: 160px;
+-webkit-font-smoothing: antialiased;
+}
+
+/* ── STICKY HEADER ── */
+header {
+position: sticky;
+top: 0;
+z-index: 50;
+background: rgba(17,19,24,0.94);
+backdrop-filter: blur(10px);
+padding: 10px 16px;
+border-bottom: 1px solid var(–border);
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+header .logo {
+font-weight: 700;
+font-size: 13px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: var(–c-expansion);
+}
+header .ep {
+font-size: 12px;
+color: var(–text-dim);
+}
+
+/* ── LEGEND BAR ── */
+.legend {
+display: flex;
+gap: 4px;
+padding: 10px 16px;
+background: var(–surface);
+border-bottom: 1px solid var(–border);
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
+}
+.legend a {
+flex-shrink: 0;
+font-size: 11px;
+font-weight: 700;
+text-decoration: none;
+padding: 5px 10px;
+border-radius: 4px;
+letter-spacing: 0.5px;
+text-transform: uppercase;
+border: 1.5px solid transparent;
+}
+.legend a:active { opacity: 0.7; }
+.leg-exp { color: var(–c-expansion); border-color: var(–c-expansion) !important; }
+.leg-sea { color: var(–c-seasons); border-color: var(–c-seasons) !important; }
+.leg-con { color: var(–c-controversy); border-color: var(–c-controversy) !important; }
+.leg-biz { color: var(–c-business); border-color: var(–c-business) !important; }
+.leg-time { color: var(–c-timeline); border-color: var(–c-timeline) !important; }
+
+/* ── NOTE CARD ── */
+.card {
+margin: 12px 12px 0;
+background: var(–surface);
+border-radius: 8px;
+border: 1px solid var(–border);
+overflow: hidden;
+}
+.card-head {
+padding: 12px 14px 10px;
+font-weight: 700;
+font-size: 14px;
+letter-spacing: 1px;
+text-transform: uppercase;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.card-head .dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+flex-shrink: 0;
+}
+
+/* color classes for cards */
+.card-exp .card-head { color: var(–c-expansion); border-bottom: 1px solid #3a351f; }
+.card-exp .dot { background: var(–c-expansion); }
+.card-sea .card-head { color: var(–c-seasons); border-bottom: 1px solid #1e2e42; }
+.card-sea .dot { background: var(–c-seasons); }
+.card-con .card-head { color: var(–c-controversy); border-bottom: 1px solid #3d2420; }
+.card-con .dot { background: var(–c-controversy); }
+.card-biz .card-head { color: var(–c-business); border-bottom: 1px solid #1f3522; }
+.card-biz .dot { background: var(–c-business); }
+.card-time .card-head { color: var(–c-timeline); border-bottom: 1px solid #2a2340; }
+.card-time .dot { background: var(–c-timeline); }
+
+.card-body {
+padding: 10px 14px 14px;
+}
+
+/* ── NOTE LINES ── */
+.n {
+padding: 4px 0;
+font-size: 15px;
+color: var(–text);
+line-height: 1.45;
+}
+.n + .n { border-top: 1px solid rgba(255,255,255,0.03); }
+.n b, .n strong { color: var(–text-bright); font-weight: 700; }
+.n em { font-style: normal; color: var(–text-dim); font-size: 13px; }
+
+/* date/number callout inline */
+.d {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 13px;
+font-weight: 500;
+color: var(–c-timeline);
+margin-right: 2px;
+}
+
+/* a subtle visual break between groups inside a card */
+.gap { height: 10px; }
+
+/* section spacer between color groups */
+.spacer {
+height: 20px;
+position: relative;
+}
+.spacer::after {
+content: ‘’;
+position: absolute;
+left: 24px; right: 24px;
+top: 50%;
+height: 1px;
+background: var(–border);
+}
+
+/* ── RESPONSIVE ── */
+@media (min-width: 600px) {
+.card { margin: 14px auto 0; max-width: 560px; }
+.spacer { height: 28px; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="logo">TWW Notes</div>
+  <div class="ep">Last Attempt — Retrospective</div>
+</header>
+
+<nav class="legend">
+  <a href="#exp-features" class="leg-exp">Expansion</a>
+  <a href="#s1-notes" class="leg-sea">Seasons</a>
+  <a href="#belt-notes" class="leg-con">Controversies</a>
+  <a href="#msft-acq" class="leg-biz">Business</a>
+  <a href="#timeline" class="leg-time">Timeline</a>
+</nav>
+
+<!-- ════════════════════════════════════════════════ -->
+
+<!--  EXPANSION / FEATURES                          -->
+
+<!-- ════════════════════════════════════════════════ -->
+
+<div class="card card-exp" id="exp-features">
+  <div class="card-head"><span class="dot"></span>The War Within — Big Picture</div>
+  <div class="card-body">
+    <div class="n"><b>10th expansion</b> — launched <span class="d">Aug 26, 2024</span></div>
+    <div class="n">First chapter of the <b>Worldsoul Saga</b> trilogy (TWW → Midnight → Last Titan, all before 2030)</div>
+    <div class="n">Announced BlizzCon Nov 2023 — Metzen back — "We ain't screwin' around"</div>
+    <div class="n">First full expansion cycle under Microsoft ownership</div>
+    <div class="n"><b>Metacritic 85</b> — 97% recommended — IGN 9/10 — one of the best-reviewed expansions ever</div>
+    <div class="n">Setting: <b>Khaz Algar</b>, subterranean continent. Level 70→80</div>
+  </div>
+</div>
+
+<div class="card card-exp">
+  <div class="card-head"><span class="dot"></span>Major Features</div>
+  <div class="card-body">
+    <div class="n"><b>Delves</b> — 1-4 player solo-friendly PvE. Brann companion with his own talent tree. Role-agnostic</div>
+    <div class="n"><b>Warbands</b> — account-wide everything. Shared bank, rep, achievements. Pre-patch Jul 23</div>
+    <div class="n"><b>Hero Talents</b> — 11-node sub-spec trees (71-80). Mountain Thane, Templar, Dark Ranger, etc.</div>
+    <div class="n"><b>Earthen</b> — titan-forged stone dwarves. Both factions, 9 classes. Unlock after campaign</div>
+    <div class="n"><b>Skyriding</b> — dragonriding on ALL mounts, ALL zones</div>
+    <div class="n"><b>Cross-Realm Guilds</b> — different servers, same guild. Mythic raiding day one</div>
+    <div class="n"><b>Arachnophobia Mode</b> — spiders become crabs. Great accessibility call</div>
+  </div>
+</div>
+
+<div class="card card-exp">
+  <div class="card-head"><span class="dot"></span>Zones &amp; Story</div>
+  <div class="card-body">
+    <div class="n"><b>Isle of Dorn</b> — surface start. Earthen homeland. Hub: Dornogal</div>
+    <div class="n"><b>Ringing Deeps</b> — underground. Titan machines. Kobold allies</div>
+    <div class="n"><b>Hallowfall</b> — Beledar crystal (Light↔Void). Arathi people, Faerin Lothar. <b>Best zone of the expansion</b></div>
+    <div class="n"><b>Azj-Kahet</b> — nerubian kingdom. Queen Ansurek. Dark and gloomy</div>
+    <div class="gap"></div>
+    <div class="n">Villain: <b>Xal'atath</b> — Harbinger of the Void. Destroys Dalaran, seemingly kills Khadgar</div>
+    <div class="n">Anduin reconnects with the Light. Alleria hunts Xal'atath throughout</div>
+    <div class="n">Arc goes: Ansurek defeated → Gallywix arc → Ethereals steal Dark Heart → K'aresh → Dimensius killed</div>
+    <div class="n">Khadgar found alive inside the Dark Heart — now wheelchair-bound</div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ════════════════════════════════════════════════ -->
+
+<!--  SEASONS                                        -->
+
+<!-- ════════════════════════════════════════════════ -->
+
+<div class="card card-sea" id="s1-notes">
+  <div class="card-head"><span class="dot"></span>Season 1 — Nerub'ar Palace</div>
+  <div class="card-body">
+    <div class="n">Starts <span class="d">Sep 10, 2024</span> — Mythic+M raid <span class="d">Sep 17</span></div>
+    <div class="n">8 bosses — final boss <b>Queen Ansurek</b></div>
+    <div class="n">World First: <b>Liquid</b>, Sep 29, <b>404 pulls</b> on Ansurek. Echo 2nd, Method 3rd</div>
+    <div class="n">M+ pool: Ara-Kara, City of Threads, Stonevault, Dawnbreaker + Mists, Necrotic Wake, Siege of Boralus, Grim Batol</div>
+    <div class="n">New affix system: Xal'atath's Bargain (rotating weekly)</div>
+  </div>
+</div>
+
+<div class="card card-sea">
+  <div class="card-head"><span class="dot"></span>20th Anniversary</div>
+  <div class="card-body">
+    <div class="n"><span class="d">Oct 22 – Jan 6</span> (Patch 11.0.5) — longest anniversary event ever</div>
+    <div class="n">Hub outside <b>Caverns of Time</b> — Bronze Dragonflight phased the celebration into reality</div>
+    <div class="n">BRD reimagined as 10-15 player raid. Codex of Chromie (AQ scenario). Classic Timewalking. Korrak's Revenge</div>
+    <div class="n"><b>HD Tier 2 sets</b> for all 13 classes — huge nostalgia</div>
+    <div class="n">Came back as <b>21st Anniversary</b> (Nov 2025) — now annual, recurring. Same hub, slightly scaled back</div>
+    <div class="n"><em>It was the 20th, not the 25th — WoW launched Nov 2004</em></div>
+  </div>
+</div>
+
+<div class="card card-sea">
+  <div class="card-head"><span class="dot"></span>Season 2 — Liberation of Undermine</div>
+  <div class="card-body">
+    <div class="n">Patch 11.1 <span class="d">Feb 25</span> — Season 2 starts <span class="d">Mar 4, 2025</span></div>
+    <div class="n"><b>Undermine</b> — goblin city. 4 cartels, weekly alignment. Gallywix vs Gazlowe revolution</div>
+    <div class="n">8 bosses — final boss <b>Chrome King Gallywix</b> (massive mech suit)</div>
+    <div class="n">WFR: <b>Liquid again</b> — Day 12, only <b>100 pulls</b> on Gallywix. Mid-bosses harder (Stix 116, Mug'Zee 149)</div>
+    <div class="gap"></div>
+    <div class="n"><b>D.R.I.V.E.</b> — customizable kart mount (G-99 Breakneck). Up to 670% speed. Drifting, turbo, racing courses</div>
+    <div class="n"><b>Operation: Floodgate</b> — first brand-new dungeon ever to go straight into M+ rotation</div>
+    <div class="n">M+ also had MOTHERLODE!!, Theater of Pain, Mechagon Workshop</div>
+  </div>
+</div>
+
+<div class="card card-sea">
+  <div class="card-head"><span class="dot"></span>Season 3 — Manaforge Omega</div>
+  <div class="card-body">
+    <div class="n">Patch 11.2 <span class="d">Aug 5</span> — Season 3 starts <span class="d">Aug 12, 2025</span></div>
+    <div class="n"><b>K'aresh</b> — shattered Ethereal homeworld (from BC Netherstorm lore). Destroyed by Dimensius</div>
+    <div class="n">Reshii Wraps (artifact cloak) — transforms into ethereal form. "Phase Diving" for hidden content</div>
+    <div class="n">8 bosses — <b>optional boss</b> (Soul Hunters, first since Ulduar) — final boss <b>Dimensius</b> (largest raid boss ever)</div>
+    <div class="n">New dungeon: Eco-Dome Al'dani. M+ also had Tazavesh (both wings), Halls of Atonement</div>
+    <div class="gap"></div>
+    <div class="n"><b>Patch 11.2.7</b> <span class="d">Dec 2, 2025</span> — Player Housing (Midnight pre-purchasers). Brawler's Guild returns</div>
+    <div class="n">Midnight expansion revealed at <b>Gamescom Aug 2025</b></div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ════════════════════════════════════════════════ -->
+
+<!--  CONTROVERSIES / HOT TAKES                      -->
+
+<!-- ════════════════════════════════════════════════ -->
+
+<div class="card card-con" id="belt-notes">
+  <div class="card-head"><span class="dot"></span>Siren Isle</div>
+  <div class="card-body">
+    <div class="n">Patch 11.0.7 — <span class="d">Dec 17, 2024</span>. Small storm-wrecked island, weekly rotating enemies</div>
+    <div class="n"><b>Cyrce's Circlet</b> — upgradeable ring (not belt), ilvl 639→658. Gem sockets, weekly boons</div>
+    <div class="n">Reception: <b>lackluster</b>. Small, barren, ghost town fast. Forums: "aggressively lame"</div>
+    <div class="n">Some defended it — ring was decent catch-up, secrets were fun. Filler content between seasons</div>
+  </div>
+</div>
+
+<div class="card card-con">
+  <div class="card-head"><span class="dot"></span>The D.I.S.C. Belt</div>
+  <div class="card-body">
+    <div class="n">Patch 11.1.7 — <span class="d">Jun 2025</span>. D.I.S.C. = Durable Information Securing Container</div>
+    <div class="n">Upgradeable waist from Overcharged Delves. ilvl 691→701. Swappable active effects (9 powers)</div>
+    <div class="n">Best power: <b>Charged Bolts</b> — so strong it was mandatory. Later nerfed 62%</div>
+    <div class="gap"></div>
+    <div class="n"><b>The real problem: same slot as Engineering Nitro Boosts (rocket boots)</b></div>
+    <div class="n">Belt has a "Use" effect → can't tinker Nitro Boosts onto it. Can't swap belts in M+</div>
+    <div class="n">So much power you HAD to use it — but losing rocket boots felt terrible for mobility</div>
+    <div class="n">Turned Delves from fun to a chore. Every belt drop from other content felt wasted</div>
+    <div class="gap"></div>
+    <div class="n"><b>Resolution:</b> Bolts nerfed, then in Season 3 Overcharged Delves removed. Raid belts could replace it. Relief</div>
+    <div class="n"><em>I took a hard stance against it — same slot as rocket boots for getting around</em></div>
+  </div>
+</div>
+
+<div class="card card-con">
+  <div class="card-head"><span class="dot"></span>The Addon Apocalypse</div>
+  <div class="card-body">
+    <div class="n">Midnight pre-patch <span class="d">Jan 20, 2026</span>. Blizzard called it "addon disarmament"</div>
+    <div class="n">Ion: possibly "the single largest change an expansion has ever made"</div>
+    <div class="n">Long telegraphed: hints Apr 2025 → Alpha Oct → Ion blog Nov 19 → pre-patch Jan 20</div>
+    <div class="gap"></div>
+    <div class="n"><b>What changed:</b> combat data became "secret values" — addons can display but can't process</div>
+    <div class="n">CAN: resize, re-skin, reposition UI frames. Visual customization only</div>
+    <div class="n">CANNOT: conditional logic, automated rotations, enemy CD tracking, addon-to-addon comms in instances</div>
+    <div class="gap"></div>
+    <div class="n"><b>WeakAuras — dead for retail.</b> Core functionality impossible. Continues in Classic only</div>
+    <div class="n"><b>ElvUI</b> — paused, then reversed. Survived with reduced features after Blizzard loosened restrictions</div>
+    <div class="n">Also dead: Healbot, GTFO, Raider.IO, World Quest Tracker, Mythic Dungeon Tools</div>
+    <div class="n">DBM, BigWigs, Details — survived but now just skins over Blizzard's built-in systems</div>
+    <div class="n">Only <b>1,158 addons</b> compatible by pre-patch week</div>
+    <div class="gap"></div>
+    <div class="n"><b>Performance:</b> WeakAuras was #1 CPU hog — 50-70 FPS loss documented, 18% CPU in raids</div>
+    <div class="n">Addons estimated to cost 20-30% performance in heavy combat. Performance went up without them</div>
+    <div class="n"><em>I never really used them so didn't care — but massive deal for most players</em></div>
+    <div class="gap"></div>
+    <div class="n"><b>Talent reworks came with pre-patch too:</b> level 80→90, 10 new points, Apex Talents</div>
+    <div class="n">New spec: Devourer Demon Hunter. Classes pruned — devs admitted they designed around addon use</div>
+    <div class="n"><em>Overlap area — technically Midnight pre-patch, not TWW, but the transition point</em></div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ════════════════════════════════════════════════ -->
+
+<!--  BUSINESS / MICROSOFT                           -->
+
+<!-- ════════════════════════════════════════════════ -->
+
+<div class="card card-biz" id="msft-acq">
+  <div class="card-head"><span class="dot"></span>Microsoft &amp; Activision</div>
+  <div class="card-body">
+    <div class="n">Acquisition completed <span class="d">Oct 13, 2023</span> — <b>$75.4 billion</b>, largest gaming deal ever</div>
+    <div class="n">Kotick out Dec 2023. Cloud rights sold to Ubisoft for UK regulatory approval</div>
+    <div class="n">TWW was already deep in development — launched 10 months post-acquisition</div>
+    <div class="n">Microsoft → Activision → Blizzard → WoW. Decisions trickle down</div>
+  </div>
+</div>
+
+<div class="card card-biz">
+  <div class="card-head"><span class="dot"></span>Layoffs</div>
+  <div class="card-body">
+    <div class="n"><span class="d">Jan 2024</span> — <b>1,900</b> cut. Mike Ybarra + Allen Adham (co-founder) gone. Survival game killed</div>
+    <div class="n"><span class="d">Sep 2024</span> — <b>650</b> more (corporate/support)</div>
+    <div class="n"><span class="d">Jul 2025</span> — <b>9,000+</b> Microsoft-wide. Warcraft Rumble dev stops. ~100 Blizzard hit. Perfect Dark cancelled</div>
+    <div class="n">Total: roughly <b>4,150+</b> gaming jobs cut in ~18 months</div>
+  </div>
+</div>
+
+<div class="card card-biz">
+  <div class="card-head"><span class="dot"></span>Phil Spencer Retires</div>
+  <div class="card-body">
+    <div class="n"><span class="d">Feb 20, 2026</span> — memo leaked, confirmed on X. Official retirement Feb 23</div>
+    <div class="n">38 years at Microsoft (intern 1988). Xbox since 2001. Head of Xbox 2014. CEO MS Gaming 2022</div>
+    <div class="n">Advisory role through summer to help transition</div>
+    <div class="n">Sarah Bond (Xbox President) also resigned same day</div>
+    <div class="n"><em>Jul 2025 Xbox comms denied retirement rumors — timetable apparently changed</em></div>
+  </div>
+</div>
+
+<div class="card card-biz">
+  <div class="card-head"><span class="dot"></span>Asha Sharma — New CEO</div>
+  <div class="card-body">
+    <div class="n">Named CEO of Microsoft Gaming <span class="d">Feb 20, 2026</span></div>
+    <div class="n">Born 1989. <b>No gaming industry experience</b> — AI/tech background. Reports to Nadella</div>
+    <div class="n">Career: S.C. Johnson → Microsoft marketing → Porch Group → VP at Meta (Messenger) → COO Instacart → Microsoft CoreAI → here</div>
+    <div class="n">Memo: "We will not chase short-term efficiency or flood our ecosystem with soulless AI slop"</div>
+    <div class="n"><b>Matt Booty</b> promoted to EVP & Chief Content Officer under her</div>
+    <div class="n"><em>An AI exec with no gaming experience now sits above all of Blizzard — worth watching</em></em></div>
+  </div>
+</div>
+
+<div class="card card-biz">
+  <div class="card-head"><span class="dot"></span>BlizzCon</div>
+  <div class="card-body">
+    <div class="n"><b>2023</b> — held, Worldsoul announced. $300 tickets, didn't sell out (first time ever)</div>
+    <div class="n"><b>2024</b> — cancelled</div>
+    <div class="n"><b>2025</b> — cancelled (announced Mar 11, 2025)</div>
+    <div class="n"><b>2026</b> — announced same day. <b>Sep 12-13</b>, Anaheim. It's back</div>
+    <div class="n">Two consecutive years skipped — unprecedented. Surprise it's returning at all under Microsoft</div>
+  </div>
+</div>
+
+<div class="card card-biz">
+  <div class="card-head"><span class="dot"></span>Blizzard Leadership &amp; WoW China</div>
+  <div class="card-body">
+    <div class="n"><b>Johanna Faries</b> — Blizzard President since Feb 2024. Previously GM of Call of Duty. First pres under MS</div>
+    <div class="n">WoW China relaunched <span class="d">Aug 1, 2024</span> (NetEase deal renewed Apr 2024) — 25 days before TWW</div>
+    <div class="n">China historically about half of WoW's playerbase at peak</div>
+    <div class="gap"></div>
+    <div class="n">TWW launch quarter: $5.6B gaming revenue, +43% YoY. WoW ~$680M in 2024</div>
+    <div class="n">~9.7M monthly active users by Jan 2026 (pre-patch spike). Game Pass 34M subs</div>
+  </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- ════════════════════════════════════════════════ -->
+
+<!--  TIMELINE QUICK REFERENCE                       -->
+
+<!-- ════════════════════════════════════════════════ -->
+
+<div class="card card-time" id="timeline">
+  <div class="card-head"><span class="dot"></span>Quick Timeline</div>
+  <div class="card-body">
+    <div class="n"><span class="d">Oct 13, 2023</span> Microsoft acquisition closes</div>
+    <div class="n"><span class="d">Nov 3, 2023</span> BlizzCon — Worldsoul Saga announced</div>
+    <div class="n"><span class="d">Jan 25, 2024</span> 1,900 layoffs — Ybarra/Adham gone</div>
+    <div class="n"><span class="d">Feb 5, 2024</span> Johanna Faries starts as Blizzard President</div>
+    <div class="n"><span class="d">Jul 23, 2024</span> TWW pre-patch (Warbands, Cross-Realm Guilds)</div>
+    <div class="n"><span class="d">Aug 1, 2024</span> WoW relaunches in China</div>
+    <div class="n"><span class="d">Aug 26, 2024</span> <b>The War Within launches</b></div>
+    <div class="n"><span class="d">Sep 10, 2024</span> Season 1 — Nerub'ar Palace</div>
+    <div class="n"><span class="d">Oct 22, 2024</span> 20th Anniversary Event starts</div>
+    <div class="n"><span class="d">Dec 17, 2024</span> Siren Isle (11.0.7)</div>
+    <div class="n"><span class="d">Feb 25, 2025</span> Undermine(d) patch (11.1)</div>
+    <div class="n"><span class="d">Mar 4, 2025</span> Season 2 — Liberation of Undermine</div>
+    <div class="n"><span class="d">Mar 11, 2025</span> BlizzCon 2025 cancelled / 2026 announced</div>
+    <div class="n"><span class="d">Jun 17, 2025</span> D.I.S.C. Belt (11.1.7)</div>
+    <div class="n"><span class="d">Jul 2, 2025</span> 9,000+ Microsoft layoffs</div>
+    <div class="n"><span class="d">Aug 5, 2025</span> Ghosts of K'aresh (11.2)</div>
+    <div class="n"><span class="d">Aug 12, 2025</span> Season 3 — Manaforge Omega</div>
+    <div class="n"><span class="d">Aug 20, 2025</span> Gamescom — Midnight revealed</div>
+    <div class="n"><span class="d">Nov 16, 2025</span> 21st Anniversary (recurring)</div>
+    <div class="n"><span class="d">Dec 2, 2025</span> Player Housing (11.2.7)</div>
+    <div class="n"><span class="d">Jan 20, 2026</span> <b>Midnight pre-patch / Addon Apocalypse</b></div>
+    <div class="n"><span class="d">Feb 20, 2026</span> Phil Spencer retires / Asha Sharma named</div>
+    <div class="n"><span class="d">Mar 2, 2026</span> Midnight launches</div>
+  </div>
+</div>
+
+</body>
+</html>
