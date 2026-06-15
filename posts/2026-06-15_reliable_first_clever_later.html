@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reliable First, Clever Later · Squirrelthug</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0e0d0c;
+      --bg-card:   #1a1815;
+      --border:    #2e2b27;
+      --text:      #d8cfbf;
+      --text-dim:  #8a8070;
+      --gold:      #c8943a;
+      --gold-dim:  #8a6228;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.85;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(14, 13, 12, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    nav .inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ARTICLE */
+    article {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .post-header {
+      padding: 5rem 0 3.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .post-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 600;
+      line-height: 1.12;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.4rem;
+    }
+
+    .post-dek {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 580px;
+    }
+
+    /* BODY */
+    .post-body p {
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .post-body h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 2.8rem 0 1rem;
+      line-height: 1.2;
+    }
+
+    .post-body blockquote {
+      border-left: 2px solid var(--gold-dim);
+      margin: 2rem 0;
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      color: var(--gold);
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .post-footer {
+      margin-top: 4rem;
+      padding: 2.5rem 0 4rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .post-footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    .back-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="../index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="../blog.html">Writing</a></li>
+        <li><a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <article>
+    <div class="post-header">
+      <p class="post-label">June 2026 &nbsp;·&nbsp; Philosophy</p>
+      <h1>Reliable First, Clever Later</h1>
+      <p class="post-dek">On the realization that an AI collaborator must be reliable before it can be clever, and what that means for design.</p>
+    </div>
+
+    <div class="post-body">
+
+      <p>
+        Last February I wrote that I'd been building the architecture for the system I wanted to have instead of the system I needed right now. Tearing down the microservices and starting over on a modular monolith was me admitting that. The obvious question, the one I've been quietly afraid of for a few months, is whether I just made the same mistake again pointed in a new direction. So here is an honest accounting of where things actually stand.
+      </p>
+
+      <p>
+        The short version is that the lesson held, mostly, but it taught me a second thing I didn't expect: I'd been assuming Lilith and I would build her together, side by side, and that the whole point of getting her running was to gain a collaborator. It turns out the order is reversed. She has to be reliable before she can help me, not the other way around. Everything below is what I learned chasing that realization.
+      </p>
+
+      <p>
+        So far the redesign is holding up and the only issues are working out bugs where something doesn't work at all or I'm getting results that don't quite meet expectations. Tuning a system like LILITH has been a learning experience in just that endeavor alone. Her design is simpler but the velocity I've gained from a well rounded plan, some minor experience and a renewed ambition for finishing this project has been a boon for me. Just simply experiencing Lilith respond to me and see how she interprets the information she has that is personal to me is so helpful for shifting my design focus.
+      </p>
+
+      <p>
+        I felt the pain of having questions and no answers and from some Oxide podcasts I've listened to I know a little about telemetry. So we got that integrated and continue to wire things into that system but it's really just a database holding log data of what I wire into it. I try to have a broad scope so there is a lot of data to work with and my intention is to be familiar enough with navigating that data that I can automate it in design. But for now it was an answer to getting the CLI tools I am using to understand how Lilith is functioning even if she has no errors to throw. So that was very helpful in getting some of the silent errors that were growing in the background.
+      </p>
+
+      <p>
+        After getting more insight into the system I started to think about how difficult it was to actually put my data in the system and how conversation is nice for anything after an on-boarding experience but not great for the primary initialization. So that will be part of the on-boarding experience later and will likely rely heavily on an app for convenience since phones are good access points for personal data.
+      </p>
+
+      <p>
+        I also had to think about how I have no good way to see the personal data she is holding, see her system in a way that is total and complete and then make sure she has the same ability to be informed as I do. There are now planned sprints to add a narrative conscious train of thought on the core system(s) running and so there is an "opinionated" log of what has been happening so Lilith can operate in terms of thinking about her own system in a personal way rather than giving stats on machines. It's interpreted as her.
+      </p>
+
+      <p>
+        I had to refine the briefing and honestly at this point it still needs work. I don't know what a good brief feels like and I think that may be the case no matter what I build so it is likely to be a per user experience to build those out. But having good examples will go far which will be true about many things for Lilith. This would include her personality or the theme/colors for the UI in the applications.
+      </p>
+
+    </div>
+
+    <div class="post-footer">
+      <p><a class="back-link" href="../blog.html">← All Writing</a></p>
+    </div>
+  </article>
+
+</body>
+</html>
