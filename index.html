@@ -389,26 +389,24 @@
       <p class="section-label">Current Architecture</p>
       <h2>L.I.L.I.T.H. — Core System</h2>
       <p>
-        A voice-first, locally-hosted AI assistant built as a modular monolith. A single Python
-        process with a clean internal event bus routes speech to reasoning, reasoning to personality,
-        and personality to voice — invisibly, with sub-second latency on local hardware.
-        All complexity is hidden behind a conversation.
+        An App-first, locally-hosted personal OS built as a modular monolith. The app is the new face, featuring a voice orb interface with an optional chat page, while the CLI remains the primary tool for development. A single Python process with a clean internal event bus routes input to reasoning, reasoning to personality, and personality to output — invisibly, with sub-second latency on local hardware. All complexity is hidden behind a modern mobile OS-like application whose primary intention is to organize all your personal data, while an ambient autonomy engine handles background tasks.
       </p>
 
       <div class="diagram-wrap">
         <div class="mermaid">
 graph TD
-    A((Voice Input)) -->|STT| B(Event Bus)
+    A((Input Channels)) --> B(Event Bus)
     B -->|User Turn| C(Cognitive Core)
     C -->|Local Reasoning| D(Personality Engine)
     C -->|Complex Task| E(Cloud Router)
-    D -->|Styled Response| F((Voice Output))
+    D -->|Styled Response| F((Output Channels))
     E -->|Async Result| D
     C -->|Tool Request| G(Airlock)
     G -->|Validated Execution| H[(Tool Registry)]
     H -->|Result| B
-    C -->|Write| I[(Memory / SQLite)]
-    I -->|Session Resume| C
+    C -->|Write| I[(Tiered Memory)]
+    I -->|Recall| C
+    J(Autonomy Engine) -->|Background Jobs| I
         </div>
       </div>
 
@@ -474,32 +472,42 @@ graph TD
 
       <div class="roadmap">
         <div class="phase active">
-          <p class="phase-tag">Phase 1–4 · In Progress</p>
-          <h3>Alpha — A Real Tool in Daily Use</h3>
+          <p class="phase-tag">Phase 1 · Complete</p>
+          <h3>Alpha — The Foundation</h3>
           <p>
-            Voice pipeline, cognitive core, personality engine, memory layer, tool registry with
-            sandboxed execution. Running on personal hardware. Used daily. Refined through use,
-            not through planning.
+            Voice loop, local LLM, personality, conversation persistence, cloud escalation, and basic tools.
+          </p>
+        </div>
+
+        <div class="phase active">
+          <p class="phase-tag">Phase 2 · In Progress</p>
+          <h3>Beta — Pair Programmer Capability</h3>
+          <p>
+            Tool execution engine, Terminal management, GitHub CLI integration, Token/Rate-limit tracking, and Research pipelines.
+          </p>
+        </div>
+
+        <div class="phase">
+          <p class="phase-tag">Phase 3</p>
+          <h3>Sandboxed Execution</h3>
+          <p>
+            Sandboxed tool execution (subprocess / Docker), medium and high-risk tool categories.
+          </p>
+        </div>
+
+        <div class="phase">
+          <p class="phase-tag">Phase 4</p>
+          <h3>Proactive Autonomy</h3>
+          <p>
+            Proactive awareness, semantic memory expansion, user state tracking.
           </p>
         </div>
 
         <div class="phase">
           <p class="phase-tag">Phase 5</p>
-          <h3>Cloud Gateway Service</h3>
+          <h3>Web & Companion Apps</h3>
           <p>
-            A token routing layer that simplifies access to multiple AI providers through a single
-            payment relationship and a single endpoint. Privacy-preserving by design — the gateway
-            routes tokens without reading them.
-          </p>
-        </div>
-
-        <div class="phase">
-          <p class="phase-tag">Phase 5.x</p>
-          <h3>Companion Hardware</h3>
-          <p>
-            Compact form-factor devices designed to carry the personality and voice of LILITH into
-            contexts where a full local stack isn't practical. Local-first reasoning with optional
-            escalation to the cloud gateway. One for the pocket. One for the vehicle.
+            Web interface, mobile companion (Pocket LILITH), and Cloud Gateway Service.
           </p>
         </div>
 
@@ -508,9 +516,7 @@ graph TD
           <h3>Three-Dimensional World Interface</h3>
           <p>
             A spatial environment for interacting with information that has no natural physical form.
-            The system's state — knowledge, memory, inference, conversation — made visible in three
-            dimensions. Built on a WebSocket event bus completely decoupled from the Python backend.
-            May require outside funding to reach this phase at the intended fidelity.
+            Built on a WebSocket event bus completely decoupled from the Python backend.
           </p>
         </div>
       </div>
