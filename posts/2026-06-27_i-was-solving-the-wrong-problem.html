@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I Was Solving the Wrong Problem · Squirrelthug</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #12151C;
+      --bg-2:      #1A1F29;
+      --bg-card:   #1A1F29;
+      --border:    #252B3A;
+      --text:      #E8EAF0;
+      --text-dim:  #7A8094;
+      --gold:      #4FC3C9;
+      --gold-dim:  #3b9b9f;
+      --gold-glow: rgba(79, 195, 201, 0.12);
+      --red-dim:   #C25B4E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Lora', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.85;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* NAV */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      background-color: rgba(18, 21, 28, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+
+    nav .inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ARTICLE */
+    article {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .post-header {
+      padding: 5rem 0 3.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .post-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      margin-bottom: 1.2rem;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 600;
+      line-height: 1.12;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.4rem;
+    }
+
+    .post-dek {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 580px;
+    }
+
+    /* BODY */
+    .post-body p {
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .post-body h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 2.8rem 0 1rem;
+      line-height: 1.2;
+    }
+
+    .post-body blockquote {
+      border-left: 2px solid var(--gold-dim);
+      margin: 2rem 0;
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    code {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.82rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.4em;
+      border-radius: 2px;
+      color: var(--gold);
+    }
+
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .post-footer {
+      margin-top: 4rem;
+      padding: 2.5rem 0 4rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .post-footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+    }
+
+    .back-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="inner">
+      <a class="nav-brand" href="../index.html">SQUIRRELTHUG</a>
+      <ul class="nav-links">
+        <li><a href="../blog.html">Writing</a></li>
+        <li><a href="https://gist.github.com/Squirrelthug" target="_blank" rel="noopener">Gists</a></li>
+        <li><a href="https://github.com/squirrelthug" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <article>
+    <div class="post-header">
+      <p class="post-label">June 2026 &nbsp;·&nbsp; Architecture</p>
+      <h1>I Was Solving the Wrong Problem</h1>
+      <p class="post-dek">Four years into building a personal AI assistant, I hit a wall I thought was hardware. It wasn't. It was the way I was thinking about the whole thing.</p>
+    </div>
+
+    <div class="post-body">
+
+      <p>
+        I work in construction. I'm not a professional developer, nobody's hiring me to write code at a company somewhere. What I do is come home and build things on my own time because I have a very specific idea of what a personal AI assistant is supposed to be, and I haven't seen anyone actually build that yet. Not really. So I'm building it myself.
+      </p>
+
+      <p>
+        The project is called Lilith. It's been going for about four years now, across a bunch of different repos and rewrites and false starts, and the only piece that made it through all of that was something I built in the very first version: a context window manager. The idea was that if you're going to have a model that really knows you and can respond to anything, you need to be smart about what information you put in front of it at any given moment. Not just dump everything in there, but actually figure out what's relevant to what you're asking right now. That was the theory, anyway.
+      </p>
+
+      <p>
+        The implementation has been giving me trouble ever since.
+      </p>
+
+      <h2>The Hardware Wall I Hit</h2>
+
+      <p>
+        I'm running Lilith's local model on an RTX 3060 12GB. The model is <code>mistral-nemo:12b</code>, quantized down to about 7GB so it fits alongside Kokoro, which is the text-to-speech engine. It works, but it's tight. And for a while it was fast enough that I wasn't thinking too hard about it.
+      </p>
+
+      <p>
+        Then I found out Lilith was answering some things wrong, and when I dug into the telemetry, the reason was pretty embarrassing. The local model's context window was set to 8,192 tokens by default, but the actual prompt I was sending it was over 12,000 tokens. System instructions, calendar data, weather, recent transactions, conversation history, all of it. The model was just silently cutting off whatever didn't fit and answering from what it had, and it was doing it confidently, which is the worst way for that to go wrong.
+      </p>
+
+      <p>
+        So I bumped the context window from 8K up to 32K, which gave it room to actually see the whole prompt. The answers got better. The response time went to 47 seconds.
+      </p>
+
+      <p>
+        The way a local model handles a prompt is that it has to build up a big internal memory structure for every token in the context, and it does this from scratch every single time you send something. There's no warm state between requests. So when I went from an 8K context to a 32K context, I was basically tripling the work the GPU had to do just to start generating a response. And a 3060 can do a lot of things, but it can't do that in under 3 seconds. It just can't.
+      </p>
+
+      <p>
+        The temporary fix was to drop the routing threshold way down so nearly everything goes to the cloud model, which doesn't have that problem. That worked, but it felt wrong. I'd built this whole pipeline of background providers pulling in enriched, fresh data to inject into the model's context, and now I was routing around all of it because the prompt it produced was too expensive to run locally.
+      </p>
+
+      <p>
+        So I kept thinking: the answer is a smarter context window manager. Something that pulls in only what's relevant to what you're actually asking about. You're asking about the weather, it gives you weather data, not your financial history. You're asking about your schedule, it gives you calendar context, not the news. That's the fix, right?
+      </p>
+
+      <p>
+        I spent a lot of time in that frame. And it wasn't wrong exactly, that work still needs to happen, but I was thinking about it as the main problem to solve. It wasn't.
+      </p>
+
+      <h2>What I Actually Realized</h2>
+
+      <p>
+        I was in the middle of a long conversation working through all of this, basically just talking out loud and thinking through the architecture, and I said something like: if she's a personality and you come to trust her, saying something's going to get done means it's going to get done. Continuing a conversation is a completely different thing than relaying information.
+      </p>
+
+      <p>
+        And I had to think about that for a minute, because I think that's actually the whole thing right there.
+      </p>
+
+      <blockquote>
+        "Continuing a conversation is a different art than relaying information. And the information can be relayed, but after it's been pulled into an artifact."
+      </blockquote>
+
+      <p>
+        The way I'd been designing Lilith, every response she gives has to come from the same pipeline. You ask something, the system assembles this big block of context, sends it to a model, waits for the whole response, runs it through the voice system, and then she talks. And if any part of that is slow, the whole thing is slow, and from your side it just looks like she's frozen for 47 seconds before saying anything.
+      </p>
+
+      <p>
+        But that's not how a good assistant actually operates, right? If you ask a capable person to pull together a summary of your finances for the month, they don't stare at you in silence for 45 seconds and then monologue at you. They say "give me a second, I'll pull that together" and then they go do it while you're still in the room together. And when it's done, they give you the short version and hand you the full thing so you can look at it yourself. The conversation keeps moving. The work happens in parallel.
+      </p>
+
+      <p>
+        The problem with Lilith wasn't the context window size. The problem was I was trying to make one pipeline do two things that have completely different requirements. Fast, conversational replies need a small context and a quick turnaround. Dense, information-heavy responses need full context and don't need to be fast at all, they just need to be good. Those two things can't both be true in the same call to the same model at the same time.
+      </p>
+
+      <p>
+        So I stopped thinking about it as a context window optimization problem and started thinking about it as a design question about what Lilith actually is. And I think the answer is: she's the conversational presence in the foreground, and everything else is a background process. She's not the computation. She's the assistant who talks to you while the computation is happening and delivers the results when it comes back.
+      </p>
+
+      <h2>Two Modes, One Assistant</h2>
+
+      <p>
+        The way this actually breaks down is pretty simple once you think about it from the user's side. Kokoro, at natural cadence, speaks at about 135 words per minute. If a response is going to take more than about 25 seconds to say out loud, it stops feeling like a conversation and starts feeling like someone reading you a report. That's around 56 words, something like 42 to 50 tokens. That's the ceiling for what I'm calling conversational mode.
+      </p>
+
+      <p>
+        Anything that fits under that ceiling, Lilith handles directly. Small context, fast model call, response out in under 3 seconds, keeps the conversation moving. You ask what the weather looks like, she tells you. You ask what's on the calendar tomorrow, she tells you. Quick, present, feels like talking to someone.
+      </p>
+
+      <p>
+        Anything that's going to go over that ceiling, or that needs tools running or data being pulled from multiple places, that becomes what I'm calling an artifact. And the key thing about an artifact is that Lilith doesn't generate it in the conversational path at all. She says something immediately, like "I'm pulling that together, give me a second," and then the actual work happens in the background while the conversation can still keep going. When it comes back, it lands in a panel in the UI and she gives you the short version out loud. You can read the full thing yourself, which is always faster than hearing it spoken anyway.
+      </p>
+
+      <blockquote>
+        An artifact is something that comes back from a system she has access to. She receives it and delivers it. She's not the one generating it in the moment you're talking to her.
+      </blockquote>
+
+      <p>
+        This matters for how she talks about it too. If something is an artifact from a tool or a cloud model or a background process, she treats it that way. "That came back from the finance system" rather than "here's what I calculated." The framing sets the right expectation. It's not that she's slow, it's that she queued something up and it finished. That's a completely different experience.
+      </p>
+
+      <p>
+        And the thing I realized is that this is actually how trust works with an assistant. The trust isn't built by being fast at everything. It's built by being present and following through. If you say you're on something, and then you actually come back with it, that's the whole thing. The latency becomes irrelevant because the expectation is set correctly.
+      </p>
+
+      <h2>The Personality Consistency Problem</h2>
+
+      <p>
+        There's something else I've been thinking about that's related to all of this, and it comes from watching how people interact with AI assistants over time. People who use ChatGPT a lot, for instance, they notice when the model changes. The tone shifts a little, certain phrases disappear, the way it handles uncertainty is different. And for most people that's maybe a minor annoyance, but for someone who's actually formed a working relationship with an assistant and calibrated to how it operates, that's genuinely disorienting.
+      </p>
+
+      <p>
+        Right now Lilith's personality is baked into the system prompt that goes to whatever model is handling the request. EDICTS, VOICE files, identity context, all of it. And the problem with that is every model interprets those instructions differently. Route something to a high reasoning cloud model and you get one version of Lilith. Route something to the local model and you get another. Most of the time the differences are subtle, but over time, if you're talking to her every day, you're going to feel it.
+      </p>
+
+      <p>
+        The way I want to fix this is to pull the personality layer out of the main inference pipeline entirely and give it its own dedicated model. A small one, 3 to 7 billion parameters, whose only job is to take whatever content was generated and run it through Lilith's voice before it hits the speaker. The reasoning model upstream doesn't have to think about personality at all, it just focuses on getting the content right. Then the personality model handles how she actually says it, and that part stays consistent no matter what model is doing the reasoning.
+      </p>
+
+      <p>
+        On better hardware that model runs alongside Kokoro on the GPU. On current hardware it's a future thing, but the architecture is designed around it from the start.
+      </p>
+
+      <h2>Personal Truths</h2>
+
+      <p>
+        Working through all of this made me think differently about the personality documents that already exist. There are edicts, which are basically hard rules that nobody changes. There's a voice file that defines how she writes and speaks. But there's a third thing that I think is actually the most important one and doesn't have a home yet, which is what I'd call personal truths.
+      </p>
+
+      <p>
+        Personal truths are different from rules and different from style. They're more like the things that someone just knows about themselves and that drive how they respond in all kinds of situations. Things like: I'm direct about what I don't have access to. I don't pretend to be something I'm not. I treat whoever I'm working with like they're capable of handling real information. That kind of thing. Those are the values that produce a distinct personality, not the surface-level things like word choice or tone.
+      </p>
+
+      <p>
+        And I think those are actually the thing you'd change if you wanted Lilith to feel more like a specific kind of character. You wouldn't try to copy the lines. You'd figure out what values and beliefs that character actually has that make them respond the way they do across many different situations, and then encode those as personal truths. Then you run example prompts through, see if the outputs feel right, adjust, and dial it in.
+      </p>
+
+      <p>
+        The personal truths are also things that can change over time through actual conversation, which is different from the edicts. If you tell Lilith you don't like something and she keeps doing it, that's a failure. But if you hint at a preference enough times, she should be picking that up and adjusting, and actually writing it down somewhere so she doesn't have to relearn it next time. That's a big part of what makes an assistant actually feel like it knows you over time.
+      </p>
+
+      <h2>Where the Context Window Work Fits Now</h2>
+
+      <p>
+        None of the work I was originally planning on the context window manager went away. Dynamic retrieval, query-aware block selection, conversation compression, all of it still needs to happen. But the framing changed a lot.
+      </p>
+
+      <p>
+        Before, I was trying to build something that could handle all types of queries efficiently in the same pipeline. The assumption was that if I could just get smarter about what to inject into the context, everything would work. And maybe it would have eventually, but I was basically trying to make the slow path fast, which is really hard and kind of missing the point.
+      </p>
+
+      <p>
+        Now the context window manager has one primary job: keep the conversational path small. Under around 1,200 tokens if I can help it. Everything that doesn't fit that constraint goes to the artifact path, where there's no token budget pressure because the user isn't waiting on it in real time. The efficiency work is in service of one very specific thing, which is making the fast path actually fast, and that's a much more tractable problem.
+      </p>
+
+      <p>
+        The 3060 can handle a 1,200 token context in well under 3 seconds. It cannot handle a 22,000 token context in under 3 seconds. So the answer is to stop sending it 22,000 token contexts for conversational replies, not to make the 22,000 token case faster. I was solving it from the wrong end.
+      </p>
+
+      <p>
+        I've been on this project for four years and I'm still pouring concrete for a living. I don't say that like it's some kind of obstacle I'm fighting through, it's just the reality of what this is. Something I'm building on my own time because I think it's worth building.
+      </p>
+
+      <p>
+        The thing that's kept it going is that the vision has always been really clear to me even when the implementation was a mess. An assistant that genuinely knows you, that's there when you need it, that doesn't require you to context-switch into some web app and rephrase your thoughts into a prompt. Just there, in the background, and when you need it, it's useful without friction.
+      </p>
+
+      <p>
+        Getting to this point in the design took a lot of wrong turns and a 47-second response that made me question a lot of things. But I think I actually have a cleaner picture now of what I'm building and how it fits together than I've had at any point in the four years. So that's something.
+      </p>
+
+    </div>
+
+    <div class="post-footer">
+      <p><a class="back-link" href="../blog.html">← All Writing</a></p>
+    </div>
+  </article>
+
+</body>
+</html>
