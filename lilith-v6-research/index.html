@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Research Reports</title>
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #111118; --surface2: #16161f; --border: #1e1e2e;
+    --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9; --amber: #f59e0b;
+    --green: #10b981; --red: #ef4444; --purple: #a78bfa; --blue: #60a5fa; --orange: #fb923c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.7; max-width: 1060px; margin: 0 auto; padding: 56px 40px; }
+  h1 { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .doc-subtitle { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+  .status-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 28px; display: flex; align-items: center; gap: 20px; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .stat-num.red { color: var(--red); }
+  .stat-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-divider { width: 1px; height: 40px; background: var(--border); }
+
+  h2 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin: 32px 0 12px; }
+  .report-row { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 14px 18px; margin-bottom: 6px; transition: border-color 0.15s; }
+  .report-row:hover { border-color: #2a2a3e; }
+  .report-row.done { border-left: 3px solid var(--green); }
+  .report-row.blocker { border-left: 3px solid var(--red); }
+  .r-id { font-size: 0.7rem; font-weight: 700; color: var(--muted); width: 44px; flex-shrink: 0; }
+  .r-info { flex: 1; }
+  .r-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+  .r-topic { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .r-status { flex-shrink: 0; }
+  .pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 10px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .p-done    { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--green); }
+  .p-blocker { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+  .r-link { color: var(--accent); text-decoration: none; font-size: 0.78rem; flex-shrink: 0; }
+  .r-link:hover { text-decoration: underline; }
+  .agent-badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 8px; font-size: 0.65rem; font-weight: 700; margin-right: 6px; }
+  .a1 { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.3); color: var(--blue); }
+  .a2 { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: var(--purple); }
+  .priority-high { color: var(--red); font-size: 0.72rem; font-weight: 700; }
+  .blocker-note { background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: 7px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #fca5a5; }
+  .blocker-note strong { color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>Lilith v6 — Research Reports</h1>
+<p class="doc-subtitle">Targeted research on specific technologies in the chosen stack. Research Sprint — Round 01.</p>
+
+<div class="status-bar">
+  <div class="stat"><div class="stat-num">10</div><div class="stat-label">Complete</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-label">In Progress</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num red">5</div><div class="stat-label">Blockers Found</div></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><div class="stat-num">15</div><div class="stat-label">Total Reports</div></div>
+</div>
+
+<div class="blocker-note">
+  <strong>5 reports flagged blockers.</strong> RES-01/03/15: Qt Quick 3D is GPLv3-only under open-source license — incompatible with closed-source distribution without a commercial Qt license. RES-02: <code>sqlcipher3</code> must be installed as <code>sqlcipher3-wheels</code> on Windows. RES-08: Google OAuth refresh tokens require publishing the app to Production (not Testing mode).
+</div>
+
+<h2>Agent 1 — Reports RES-01 to RES-07</h2>
+
+<div class="report-row blocker">
+  <div class="r-id">RES-01</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> Qt6 / PySide6 — Licensing for Commercial SaaS <span class="priority-high">⚠ BLOCKER</span></div>
+    <div class="r-topic">LGPL compliance · commercial license requirements · distribution terms · Qt Quick 3D GPL</div>
+  </div>
+  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <a href="res-01-qt6-licensing.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row blocker">
+  <div class="r-id">RES-02</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> Qt6 / PySide6 — Cross-Platform Build &amp; Packaging <span class="priority-high">⚠ BLOCKER</span></div>
+    <div class="r-topic">AppImage · .dmg · .exe · PyInstaller/cx_Freeze/Briefcase · sqlcipher3-wheels required on Windows</div>
+  </div>
+  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <a href="res-02-qt6-packaging.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row blocker">
+  <div class="r-id">RES-03</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> Qt Quick 3D — Orb Implementation Specifics <span class="priority-high">⚠ BLOCKER</span></div>
+    <div class="r-topic">PrincipledMaterial sphere · real-time animation · particle effects · GPLv3 license issue</div>
+  </div>
+  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <a href="res-03-qt-quick-3d-orb.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-04</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> SQLCipher Python Bindings — Cross-Platform Reality</div>
+    <div class="r-topic">sqlcipher3-wheels · pre-built on all platforms · PRAGMA hexkey · WAL mode</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-04-sqlcipher.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-05</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> faster-whisper — STT Integration &amp; Platform Support</div>
+    <div class="r-topic">CUDA pip install · Apple Silicon CPU · small model recommended · Windows DLL fix</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-05-faster-whisper.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-06</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> Kokoro TTS — Licensing, Performance, Streaming</div>
+    <div class="r-topic">Apache 2.0 · 150ms M1 CPU · streaming supported · orb amplitude extraction confirmed</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-06-kokoro-tts.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-07</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a1">A1</span> python-keyring — Cross-Platform Credential Storage</div>
+    <div class="r-topic">SecretService available on Ubuntu desktop · headless: refuse to run · macOS/Windows viable</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-07-python-keyring.html" class="r-link">View report →</a>
+</div>
+
+<h2>Agent 2 — Reports RES-08 to RES-15</h2>
+
+<div class="report-row blocker">
+  <div class="r-id">RES-08</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> Google OAuth + APIs — Scopes, Limits, Installed App Flow <span class="priority-high">⚠ BLOCKER</span></div>
+    <div class="r-topic">PKCE loopback flow · incremental sync tokens · refresh token requires Production publish</div>
+  </div>
+  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <a href="res-08-google-oauth.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-09</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> Silero VAD — Voice Activity Detection Integration</div>
+    <div class="r-topic">MIT license · 480-frame chunks at 16kHz · worker thread pattern · beats WebRTC VAD in noise</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-09-silero-vad.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-10</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> LLM Provider APIs — Claude, OpenAI, Streaming, Caching</div>
+    <div class="r-topic">Prompt caching confirmed · direct adapter over LiteLLM · Ollama via OpenAI-compat endpoint</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-10-llm-providers.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-11</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> Background Job Scheduling — Enhancement Layer Execution</div>
+    <div class="r-topic">APScheduler 3.x + internal queue · WAL mode · one connection per thread · clean SIGTERM shutdown</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-11-background-jobs.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-12</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> SQLite FTS5 — Full-Text Search for Conversation &amp; Memory</div>
+    <div class="r-topic">FTS5 viable in SQLCipher · must assert ENABLE_FTS5 at startup · sqlite-vec future path viable</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-12-sqlite-fts5.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-13</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> Argon2 Key Derivation — SQLCipher Passphrase Security</div>
+    <div class="r-topic">Argon2id t=3 m=65536 p=2 · per-database salts · PRAGMA hexkey pattern confirmed</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-13-argon2.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row done">
+  <div class="r-id">RES-14</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> sounddevice — Cross-Platform Audio I/O</div>
+    <div class="r-topic">PipeWire/PulseAudio/WASAPI/CoreAudio viable · OutputStream for streaming TTS · error recovery needed</div>
+  </div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-14-sounddevice.html" class="r-link">View report →</a>
+</div>
+
+<div class="report-row blocker">
+  <div class="r-id">RES-15</div>
+  <div class="r-info">
+    <div class="r-title"><span class="agent-badge a2">A2</span> Dependency License Audit — Full Stack <span class="priority-high">⚠ BLOCKER</span></div>
+    <div class="r-topic">Overall BLOCKED pending Qt Quick 3D resolution · 4 caution items · most deps permissive</div>
+  </div>
+  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <a href="res-15-license-audit.html" class="r-link">View report →</a>
+</div>
+
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center; margin-top: 40px;">
+  LILITH V6 · RESEARCH SPRINT · ROUND 01 · 15 reports · Agent 1: RES-01–07 · Agent 2: RES-08–15
+</p>
+</body>
+</html>

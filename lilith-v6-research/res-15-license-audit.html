@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-15 — Full Dependency License Audit</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 9px;text-align:left}td{padding:8px 9px;border-bottom:1px solid var(--border);vertical-align:top;font-size:.86rem}.ok{background:rgba(16,185,129,.14);color:var(--green);font-weight:700}.warncell{background:rgba(245,158,11,.14);color:var(--amber);font-weight:700}.bad{background:rgba(239,68,68,.14);color:var(--red);font-weight:700}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}.verdict.block{border-left-color:var(--red)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-15 — Full Dependency License Audit</h1>
+<div class="meta">Researched: June 28, 2026 · versions checked against PyPI/project docs as of this date</div>
+<p>This audit checks whether Lilith v6 can bundle each dependency into a closed-source commercial desktop installer with paid sync. "Commercial OK" means use and redistribution are allowed without a copyleft source-disclosure obligation, subject to license notices. This is not legal advice; red and amber items require owner/legal review before release.</p>
+
+<h2>Core Infrastructure</h2>
+<table><thead><tr><th>Dependency</th><th>License</th><th>Commercial OK?</th><th>Attribution Required?</th><th>Source Required?</th><th>Notes</th></tr></thead><tbody>
+<tr><td>PySide6 6.11.1</td><td>LGPL-3.0-only OR GPL/commercial</td><td class="warncell">Yes with conditions</td><td>Yes, LGPL/GPL texts and Qt notice</td><td>No proprietary source if dynamically replaceable</td><td>Use onedir/dynamic distribution; allow library replacement.</td></tr>
+<tr><td>Qt Quick 3D</td><td>GPL-3.0/commercial for some distributions per RES-01</td><td class="bad">Problematic</td><td>GPL notice if OSS</td><td>Yes if GPL path</td><td>RES-01 flagged a blocker: closed-source app likely needs commercial Qt license or no Qt Quick 3D.</td></tr>
+<tr><td>sqlcipher3 0.6.2</td><td>Unclear package metadata</td><td class="warncell">Needs verification</td><td>Match bundled license</td><td>No if permissive wrapper</td><td>Binding metadata is weak; audit exact source/wheel used.</td></tr>
+<tr><td>SQLCipher</td><td>BSD-style/commercial options</td><td class="warncell">Yes with notice</td><td>Yes</td><td>No</td><td>Confirm whether using Zetetic community source or commercial binary.</td></tr>
+<tr><td>python-keyring 25.7.0</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>argon2-cffi 25.1.0</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+</tbody></table>
+
+<h2>Voice Pipeline</h2>
+<table><thead><tr><th>Dependency</th><th>License</th><th>Commercial OK?</th><th>Attribution Required?</th><th>Source Required?</th><th>Notes</th></tr></thead><tbody>
+<tr><td>faster-whisper 1.2.1</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>CTranslate2 4.8.0</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>Whisper model weights</td><td>MIT</td><td class="ok">Yes</td><td>MIT/OpenAI notice</td><td>No</td><td>OpenAI Whisper repo uses MIT; include model attribution.</td></tr>
+<tr><td>Kokoro 0.9.4</td><td>Apache-2.0</td><td class="ok">Yes</td><td>Apache notice, preserve NOTICE if present</td><td>No</td><td>Permissive with patent/license notice conditions.</td></tr>
+<tr><td>Kokoro model weights</td><td>Apache-2.0 per package/model cards checked</td><td class="warncell">Yes with notice</td><td>Apache/model card attribution</td><td>No</td><td>Verify exact weight artifact license before bundling.</td></tr>
+<tr><td>Silero VAD 6.2.1</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>PyTorch 2.12.1</td><td>BSD-3-Clause</td><td class="ok">Yes</td><td>BSD notice</td><td>No</td><td>Permissive; include bundled CUDA component notices if shipping CUDA wheels.</td></tr>
+<tr><td>sounddevice 0.5.5</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>PortAudio</td><td>MIT-style PortAudio license</td><td class="ok">Yes</td><td>License notice</td><td>No</td><td>Permissive.</td></tr>
+</tbody></table>
+
+<h2>Cloud &amp; APIs</h2>
+<table><thead><tr><th>Dependency</th><th>License</th><th>Commercial OK?</th><th>Attribution Required?</th><th>Source Required?</th><th>Notes</th></tr></thead><tbody>
+<tr><td>anthropic 0.112.0</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>SDK permissive; API use governed by provider terms.</td></tr>
+<tr><td>openai 2.44.0</td><td>Apache-2.0</td><td class="ok">Yes</td><td>Apache notice</td><td>No</td><td>SDK permissive; API/model terms separate.</td></tr>
+<tr><td>google-auth-oauthlib 1.4.0</td><td>Apache-2.0</td><td class="ok">Yes</td><td>Apache notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>google-api-python-client 2.198.0</td><td>Apache-2.0</td><td class="ok">Yes</td><td>Apache notice</td><td>No</td><td>Permissive.</td></tr>
+</tbody></table>
+
+<h2>Data &amp; Security</h2>
+<table><thead><tr><th>Dependency</th><th>License</th><th>Commercial OK?</th><th>Attribution Required?</th><th>Source Required?</th><th>Notes</th></tr></thead><tbody>
+<tr><td>APScheduler 3.11.3</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
+<tr><td>SQLite FTS5</td><td>SQLite public domain blessing</td><td class="ok">Yes</td><td>Recommended attribution</td><td>No</td><td>Built into SQLite/SQLCipher when enabled.</td></tr>
+</tbody></table>
+
+<h2>Blockers</h2>
+<ul><li><strong>Qt Quick 3D:</strong> RES-01 indicates GPL/commercial licensing creates a blocker for closed-source distribution unless Lilith buys a commercial Qt license or avoids Qt Quick 3D.</li></ul>
+
+<h2>Caution Items</h2>
+<ul>
+<li><strong>PySide6:</strong> LGPL compliance requires dynamic/replaceable Qt libraries, license texts, and no onefile packaging that prevents replacement.</li>
+<li><strong>sqlcipher3 / SQLCipher:</strong> exact wheel/source license and bundled crypto notices must be audited in the packaging report.</li>
+<li><strong>Kokoro weights:</strong> verify the exact model-weight artifact license before bundling in installers.</li>
+<li><strong>PyTorch CUDA wheels:</strong> if shipped, include NVIDIA/CUDA third-party notices and check redistribution terms for bundled CUDA libraries.</li>
+</ul>
+
+<div class="verdict block"><strong>Overall verdict: blocked until Qt Quick 3D licensing is resolved.</strong> Most dependencies are permissive and compatible with closed-source commercial distribution. The decisive issue is Qt Quick 3D; the practical path is a commercial Qt license or replacing Qt Quick 3D with a permissively licensed rendering approach.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://pypi.org/project/PySide6/">PySide6 PyPI</a> · <a href="https://doc.qt.io/qt-6/licensing.html">Qt licensing</a></li>
+<li><a href="https://www.zetetic.net/sqlcipher/open-source/">SQLCipher open source</a> · <a href="https://github.com/coleifer/sqlcipher3">sqlcipher3 GitHub</a></li>
+<li><a href="https://pypi.org/project/keyring/">keyring PyPI</a> · <a href="https://github.com/hynek/argon2-cffi/blob/main/LICENSE">argon2-cffi license</a></li>
+<li><a href="https://github.com/SYSTRAN/faster-whisper">faster-whisper GitHub</a> · <a href="https://github.com/OpenNMT/CTranslate2">CTranslate2 GitHub</a> · <a href="https://github.com/openai/whisper">Whisper GitHub</a></li>
+<li><a href="https://pypi.org/project/kokoro/">Kokoro PyPI</a> · <a href="https://pypi.org/project/silero-vad/">Silero VAD PyPI</a> · <a href="https://github.com/pytorch/pytorch/blob/main/LICENSE">PyTorch license</a></li>
+<li><a href="https://pypi.org/project/sounddevice/">sounddevice PyPI</a> · <a href="https://www.portaudio.com/license.html">PortAudio license</a></li>
+<li><a href="https://pypi.org/project/anthropic/">anthropic PyPI</a> · <a href="https://pypi.org/project/openai/">openai PyPI</a> · <a href="https://pypi.org/project/google-auth-oauthlib/">google-auth-oauthlib PyPI</a> · <a href="https://pypi.org/project/google-api-python-client/">google-api-python-client PyPI</a></li>
+<li><a href="https://apscheduler.readthedocs.io/en/3.x/">APScheduler docs</a> · <a href="https://www.sqlite.org/copyright.html">SQLite copyright</a></li>
+</ul></body></html>

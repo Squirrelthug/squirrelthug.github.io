@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-13 — Argon2 Key Derivation</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.84em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-13 — Argon2 Key Derivation</h1>
+<div class="meta">Researched: June 28, 2026 · argon2-cffi 25.1.0 · SQLCipher 4.x API</div>
+
+<h2>Q1. Argon2id Recommended Parameters</h2>
+<p>Use Argon2id. OWASP's floor is lower than what a desktop app can afford; for Lilith, target 100-500 ms on first startup and measure per platform. Recommended default: <code>time_cost=3</code>, <code>memory_cost=65536</code> KiB (64 MiB), <code>parallelism=2</code>, <code>hash_len=32</code>. This uses about 64 MiB working memory per derivation plus overhead. If older hardware is slow, calibrate down to 32 MiB while keeping Argon2id.</p>
+<p>Derive the six database keys sequentially, not concurrently, to avoid multiplying memory usage during startup.</p>
+
+<h2>Q2. Salt Storage</h2>
+<p>Use a per-database random 16- or 32-byte salt, stored in a small encrypted-or-integrity-protected metadata file under Lilith's config directory or in the database metadata record outside the key derivation dependency loop. A salt is not secret; it must be stable and backed up with the database. Do not store the salt only in keychain, because database restores would then fail without keychain state. Do not use one salt for all six databases, because per-database salts give domain separation even with one master secret.</p>
+<p>SQLCipher's internal salt/header is for its own KDF path. If Lilith passes a raw derived key, keep Lilith's Argon2 salt explicit and versioned.</p>
+
+<h2>Q3. PRAGMA key vs PRAGMA hexkey</h2>
+<p>If Lilith derives a raw 32-byte key with Argon2id, pass it as a raw SQLCipher key using hex syntax: <code>PRAGMA key = "x'...64 hex chars...'"</code>. This bypasses SQLCipher's passphrase PBKDF2 derivation and uses the supplied bytes as key material. Do not also spend time in SQLCipher's passphrase KDF. Set SQLCipher compatibility/cipher settings before first access as required by the chosen SQLCipher version, then key the database and verify with a trivial query.</p>
+<pre><code>conn = sqlcipher3.connect(str(db_path))
+conn.execute(f"PRAGMA key = \"x'{hex_key}'\";")
+conn.execute("PRAGMA journal_mode=WAL;")
+conn.execute("PRAGMA foreign_keys=ON;")
+conn.execute("SELECT count(*) FROM sqlite_master;")</code></pre>
+
+<h2>Q4. Key Re-Derivation When Master Secret Changes</h2>
+<p>Changing the master secret means all six databases need new derived keys and must be re-encrypted. SQLCipher supports <code>PRAGMA rekey</code> on an open keyed database. Runtime depends on database size and disk speed; a 100 MB database is usually seconds, but Lilith should treat rekey as a blocking maintenance operation with progress and backup.</p>
+<p>There is no atomic transaction spanning six separate database files. Pattern: create verified backups, rekey one database at a time, write a rotation manifest, fsync/verify each database, and recover from the manifest on next startup if interrupted.</p>
+
+<h2>Q5. argon2-cffi API</h2>
+<pre><code>from __future__ import annotations
+from argon2.low_level import Type, hash_secret_raw
+
+ARGON2_TIME_COST = 3
+ARGON2_MEMORY_COST_KIB = 65536
+ARGON2_PARALLELISM = 2
+KEY_LEN = 32
+
+def derive_db_key(master_secret: bytes, db_salt: bytes, db_name: str) -&gt; str:
+    if len(db_salt) &lt; 16:
+        raise ValueError("Argon2 salt must be at least 16 bytes")
+    domain_salt = db_salt + b"lilith-v6:" + db_name.encode("utf-8")
+    key = hash_secret_raw(
+        secret=master_secret,
+        salt=domain_salt,
+        time_cost=ARGON2_TIME_COST,
+        memory_cost=ARGON2_MEMORY_COST_KIB,
+        parallelism=ARGON2_PARALLELISM,
+        hash_len=KEY_LEN,
+        type=Type.ID,
+    )
+    return key.hex()
+
+def open_sqlcipher(db_path, master_secret: bytes, salt: bytes, db_name: str):
+    import sqlcipher3
+    hex_key = derive_db_key(master_secret, salt, db_name)
+    conn = sqlcipher3.connect(str(db_path))
+    conn.execute(f"PRAGMA key = \"x'{hex_key}'\";")
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+    conn.execute("SELECT count(*) FROM sqlite_master;")
+    return conn</code></pre>
+<p><code>argon2-cffi</code> is MIT licensed and suitable for closed-source commercial distribution with attribution.</p>
+
+<div class="verdict"><strong>Final recommendation:</strong> Use Argon2id with 64 MiB memory, time cost 3, parallelism 2, and per-database salts stored with Lilith database metadata/backups. Pass the 32-byte derived key through SQLCipher hexkey syntax. No blocker found, but benchmark startup derivation on low-end hardware.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html">OWASP Password Storage Cheat Sheet</a></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc9106.html">RFC 9106 Argon2</a></li>
+<li><a href="https://argon2-cffi.readthedocs.io/en/stable/api.html">argon2-cffi API</a></li>
+<li><a href="https://github.com/hynek/argon2-cffi/blob/main/LICENSE">argon2-cffi license</a></li>
+<li><a href="https://www.zetetic.net/sqlcipher/sqlcipher-api/">SQLCipher API</a></li>
+</ul></body></html>

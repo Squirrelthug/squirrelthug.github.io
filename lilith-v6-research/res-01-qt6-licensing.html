@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RES-01 — Qt6 / PySide6 Licensing</title>
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --border: #1e1e2e;
+      --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9;
+      --green: #10b981; --red: #ef4444; --amber: #f59e0b;
+      --blue: #60a5fa; --purple: #a78bfa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif;
+           font-size: 15px; line-height: 1.6; padding: 48px 40px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.9rem; color: var(--accent); margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    h2 { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin: 28px 0 10px;
+         border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    p { margin-bottom: 10px; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    code { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+    pre { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 6px; overflow-x: auto; margin: 12px 0; font-size: 0.88em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    a { color: var(--blue); }
+    .verdict { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 16px 20px; border-radius: 6px; margin: 24px 0; }
+    .verdict.warn { border-left-color: var(--amber); }
+    .verdict.block { border-left-color: var(--red); }
+    .verdict strong { color: var(--text); display: block; margin-bottom: 6px; }
+    .source-list { font-size: 0.82rem; }
+    .source-list li { color: var(--muted); }
+    .source-list a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <h1>RES-01 — Qt6 / PySide6 Licensing</h1>
+  <div class="meta">
+    Sprint: Research · Agent 1 · Report 1 of 7<br>
+    Researched: June 28, 2026<br>
+    Library version: PySide6 6.11.1 (Qt 6.8+ LTS compatible)
+  </div>
+
+  <h2>Q1. LGPL v3 Requirements for a Closed-Source PySide6 App</h2>
+  <p>To use PySide6 (under LGPLv3) in a closed-source desktop application without releasing the proprietary source code, the following requirements must be met:</p>
+  <ul>
+    <li><strong>Relinking / Swapping:</strong> The end-user must have the technical ability to replace the PySide6 libraries with their own modified versions. Since Python is interpreted, importing PySide6 dynamically from the environment naturally meets this, provided the user can access and overwrite the PySide6 package directory.</li>
+    <li><strong>PyInstaller Caveat:</strong> Packaging the application as a single executable (<code>--onefile</code>) makes replacement extremely difficult, as it extracts to a temporary folder at runtime. To ensure LGPL compliance, we must:
+      <ol>
+        <li>Distribute the application using <strong>One-Folder mode (<code>--onedir</code>)</strong>, where the Python interpreter, proprietary code (compiled to <code>.pyc</code>), and PySide6 shared objects (<code>.so</code> / <code>.dll</code> / <code>.dylib</code>) are stored in separate files inside an accessible directory structure. This makes it trivial for users to swap files.</li>
+        <li>Alternatively, provide the PyInstaller <code>.spec</code> build script and intermediate object files (or instructions) so that an advanced user can re-bundle the application with a modified version of PySide6.</li>
+      </ol>
+    </li>
+  </ul>
+
+  <h2>Q2. Does the Paid-Sync SaaS Model Trigger Qt Commercial License?</h2>
+  <p>No, a paid cloud-sync service does not trigger commercial licensing requirements under LGPLv3. The GNU LGPLv3 obligations are triggered strictly by the <strong>distribution</strong> of the software to end users.
+  </p>
+  <ul>
+    <li>The server-side sync backend resides on our servers and is not distributed to the customer. Therefore, server-side code has zero LGPL/GPL copyleft obligations (often referred to as the "SaaS loophole").</li>
+    <li>Since Qt/PySide6 does not use the AGPL (Affero GPL), network access does not trigger any source-sharing obligations for the server or client sync components.</li>
+    <li>The local client application is distributed and must comply with LGPLv3, but its connection to a paid SaaS sync backend is perfectly valid under LGPL.</li>
+  </ul>
+
+  <h2>Q3. Static vs Dynamic Linking in Python / PyInstaller</h2>
+  <p>Python's import mechanism is dynamically resolved at runtime, which satisfies the LGPLv3 dynamic linking preference. However, the packaging step is where linking-equivalent issues arise:</p>
+  <ul>
+    <li><strong>Dynamic Linking:</strong> PySide6 contains compiled C++ extension modules (shared libraries). If these are distributed as separate files (e.g., <code>PySide6.QtCore.pyd</code>), it represents standard dynamic linking, and users can swap them.</li>
+    <li><strong>Static Linking Equivalent:</strong> Using PyInstaller's <code>--onefile</code> compiles all resources into a single monolithic binary. This acts as a static link equivalent because the user cannot swap out individual components without extracting and rebuilding the executable. To maintain LGPL compliance, <strong>One-Folder mode (<code>--onedir</code>)</strong> is required.</li>
+  </ul>
+
+  <h2>Q4. LGPL v3 Attribution and Distribution Requirements</h2>
+  <p>For compliant distribution of a closed-source app using PySide6 under LGPLv3, the application must include:</p>
+  <ul>
+    <li><strong>License Copies:</strong> Include the full text of the GNU GPLv3 and GNU LGPLv3 licenses in the application's installation folder and accessible via the UI.</li>
+    <li><strong>Prominent Attribution Notice:</strong> Place a notice in the application's "About" or "Legal" dialog stating: <em>"This application uses PySide6/Qt6, licensed under the GNU Lesser General Public License (LGPL) version 3. The Qt Toolkit and PySide6 are copyright of The Qt Company and/or its contributors."</em></li>
+    <li><strong>Source Code Offer:</strong> Provide a link to the official Qt source code repository and include instructions explaining how the user can modify and swap out the PySide6 libraries (e.g., by replacing the folder contents in a <code>--onedir</code> distribution).</li>
+  </ul>
+
+  <h2>Q5. Qt Quick 3D — Separate Licensing Terms?</h2>
+  <p><strong>CRITICAL BLOCKER:</strong> Yes. Unlike core Qt/PySide6 modules which are dual-licensed under LGPLv3 and Commercial, <strong>Qt Quick 3D is licensed under GPLv3 (and Commercial) only. It is NOT available under LGPLv3.</strong></p>
+  <p>If we distribute a closed-source desktop application that imports or links to Qt Quick 3D under the open-source license, the GPLv3's strong copyleft triggers. This would legally obligate us to release the <strong>entire proprietary source code of Lilith v6</strong> under the GPLv3. This directly conflicts with the closed-source business model of Lilith v6.</p>
+
+  <h2>Q6. Qt Commercial License — Cost and Scope</h2>
+  <p>If LGPLv3/GPLv3 is insufficient (due to the Qt Quick 3D blocker), a commercial license is required:</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Tier</th>
+        <th>Cost (Per Developer)</th>
+        <th>Key Features / Scope</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Qt for Application Development (Small Business)</strong></td>
+        <td>~$499 - $618 / year</td>
+        <td>For startups with &lt;$1M revenue/funding and &lt;5 employees (max 3 dev licenses). Permits closed-source use of GPL-only modules like Qt Quick 3D and static linking.</td>
+      </tr>
+      <tr>
+        <td><strong>Qt for Application Development (Standard)</strong></td>
+        <td>~$3,624+ / year (starts ~$302/mo)</td>
+        <td>For larger teams. Includes full Qt Commercial license, premium technical support, static linking, and proprietary module access.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><em>Note: PySide6 itself is included under the Qt for Application Development license. If PyQt6 from Riverbank Computing was used instead, a separate commercial license would have to be purchased from them.</em></p>
+
+  <h2>Q7. Official Guidance on Local App + Paid Cloud Sync Under LGPL</h2>
+  <p>There is extensive precedent for commercial, closed-source desktop apps using Qt under the LGPL and charging for supplementary services. Examples include:</p>
+  <ul>
+    <li><strong>Autodesk Maya:</strong> Uses PySide/Qt under LGPL for its UI extensions, while keeping the main program closed-source and commercial.</li>
+    <li><strong>Adobe Photoshop / Premiere Elements:</strong> Use dynamically linked Qt libraries under LGPL, distributed commercially as closed-source desktop applications.</li>
+    <li><strong>Plex Media Player:</strong> Closed-source desktop client that uses LGPL Qt libraries and interacts with the paid Plex Pass cloud subscription.</li>
+  </ul>
+
+  <div class="verdict block">
+    <strong>Recommendation: BLOCKER</strong>
+    While using PySide6 (core modules) is fully compliant under LGPLv3 via PyInstaller <code>--onedir</code> distribution, the inclusion of <strong>Qt Quick 3D is a hard blocker</strong>. Because Qt Quick 3D is GPLv3-only under the open-source license, distributing Lilith v6 with Qt Quick 3D forces the entire application to be open-sourced under GPLv3.
+    <br><br>
+    <strong>Resolution Path:</strong>
+    <ol>
+      <li><strong>Purchase a commercial Qt license</strong> (approx. $499-$618/year under the Small Business tier) to permit closed-source distribution with Qt Quick 3D.</li>
+      <li><strong>Drop Qt Quick 3D</strong> and implement the animated orb using dynamic 2D canvas shaders, a pre-rendered video/Lottie animation, or an MIT-licensed 3D library (e.g., PyOpenGL/ModernGL) embedded in a standard QWidget.</li>
+    </ol>
+  </div>
+
+  <h2>Sources</h2>
+  <div class="source-list">
+    <ul>
+      <li><a href="https://doc.qt.io/qt-6/licensing.html">Qt Licensing Information (doc.qt.io)</a></li>
+      <li><a href="https://doc.qt.io/qt-6/qtquick3d-index.html">Qt Quick 3D Licensing Terms (doc.qt.io)</a></li>
+      <li><a href="https://www.qt.io/faq/operating-under-the-lgpl">Qt FAQ: Operating Under the LGPL (qt.io)</a></li>
+      <li><a href="https://pypi.org/project/PySide6/">PySide6 PyPI Release Page</a></li>
+      <li><a href="https://pyinstaller.org/en/stable/license.html">PyInstaller Licensing & Redistribution (pyinstaller.org)</a></li>
+    </ul>
+  </div>
+</body>
+</html>

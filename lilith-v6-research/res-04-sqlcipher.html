@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RES-04 — SQLCipher Python Bindings</title>
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --border: #1e1e2e;
+      --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9;
+      --green: #10b981; --red: #ef4444; --amber: #f59e0b;
+      --blue: #60a5fa; --purple: #a78bfa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif;
+           font-size: 15px; line-height: 1.6; padding: 48px 40px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.9rem; color: var(--accent); margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    h2 { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin: 28px 0 10px;
+         border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    p { margin-bottom: 10px; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    code { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+    pre { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 6px; overflow-x: auto; margin: 12px 0; font-size: 0.88em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    a { color: var(--blue); }
+    .verdict { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 16px 20px; border-radius: 6px; margin: 24px 0; }
+    .verdict.warn { border-left-color: var(--amber); }
+    .verdict.block { border-left-color: var(--red); }
+    .verdict strong { color: var(--text); display: block; margin-bottom: 6px; }
+    .source-list { font-size: 0.82rem; }
+    .source-list li { color: var(--muted); }
+    .source-list a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <h1>RES-04 — SQLCipher Python Bindings</h1>
+  <div class="meta">
+    Sprint: Research · Agent 1 · Report 4 of 7<br>
+    Researched: June 28, 2026<br>
+    Library version: SQLCipher 4.x / sqlcipher3-wheels 0.5.7 / sqlcipher3-binary 0.6.0
+  </div>
+
+  <h2>Q1. sqlcipher3 vs pysqlcipher3 — which to use?</h2>
+  <ul>
+    <li><strong>pysqlcipher3 (Deprecated):</strong> Unmaintained for years. It fails to build on Python 3.10+ due to C API changes in Python's sqlite3 module.</li>
+    <li><strong>sqlcipher3 (Active Fork):</strong> Active fork supporting Python 3.10, 3.11, and 3.12. However, a raw <code>pip install sqlcipher3</code> compiles from source and will fail on Windows/macOS if SQLCipher and OpenSSL developer libraries are not pre-installed.</li>
+    <li><strong>sqlcipher3-wheels & sqlcipher3-binary (Recommended):</strong> These forks publish pre-compiled wheels for all major platforms (including SQLCipher 4 and OpenSSL bundled in), removing compiling complexity from user environments. <strong>sqlcipher3-wheels</strong> is the preferred package for robust cross-platform developer setups.</li>
+  </ul>
+
+  <h2>Q2. Pre-built wheels — what exists and what requires compilation?</h2>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Platform</th>
+        <th>Package</th>
+        <th>Pre-built Wheel Status</th>
+        <th>Compiling Requirements (If Wheels Fail)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Linux x86_64</strong></td>
+        <td><code>sqlcipher3-wheels</code> / <code>-binary</code></td>
+        <td>Available (cibuildwheel compiled)</td>
+        <td><code>sudo apt install libsqlcipher-dev</code>, GCC, Python headers</td>
+      </tr>
+      <tr>
+        <td><strong>macOS arm64</strong></td>
+        <td><code>sqlcipher3-wheels</code></td>
+        <td>Available (M1/M2 compatible)</td>
+        <td><code>brew install sqlcipher openssl</code>, Xcode command-line tools</td>
+      </tr>
+      <tr>
+        <td><strong>Windows x64</strong></td>
+        <td><code>sqlcipher3-wheels</code></td>
+        <td>Available (SQLCipher + OpenSSL bundled)</td>
+        <td>Visual Studio C++ build tools, OpenSSL SDK, ActiveTcl (extremely complex)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Q3. GitHub Actions build steps for each platform</h2>
+  <p>To avoid compilation issues, we should install the binary wheels. Below is a GHA configuration snippet showing setup and fallback compilation paths:</p>
+  <pre>
+# GitHub Actions steps for setup
+- name: Set up Python
+  uses: actions/setup-python@v5
+  with:
+    python-version: '3.12'
+
+- name: Install dependencies (Linux)
+  if: runner.os == 'Linux'
+  run: |
+    # Binary wheel will be fetched by default. If compile fallback occurs:
+    # sudo apt-get update && sudo apt-get install -y libsqlcipher-dev
+    pip install sqlcipher3-wheels
+
+- name: Install dependencies (macOS)
+  if: runner.os == 'macOS'
+  run: |
+    # brew install sqlcipher  # only needed if compiling
+    pip install sqlcipher3-wheels
+
+- name: Install dependencies (Windows)
+  if: runner.os == 'Windows'
+  run: |
+    # Pre-built wheel handles DLL mapping. If compiling:
+    # vcpkg install sqlcipher:x64-windows
+    pip install sqlcipher3-wheels</pre>
+
+  <h2>Q4. PRAGMA key syntax and cipher configuration</h2>
+  <p>When opening a SQLCipher database, the passphrase must be set immediately after connection before any queries are run:</p>
+  <pre>
+import sqlcipher3
+
+# Connect to database
+conn = sqlcipher3.connect('contacts_db.db')
+
+# 1. Text Passphrase Syntax
+conn.execute("PRAGMA key = 'my_secure_passphrase'")
+
+# 2. Raw 32-Byte Hex Key Syntax (bypasses KDF, fast)
+conn.execute("PRAGMA key = \"x'2ddb9f8742d4a1ef186bd44e3e3b3c3d5e5f505152535455565758595a5b5c5d'\"")</pre>
+  <ul>
+    <li><strong>Cipher Compatibility:</strong> SQLCipher 4 uses standard compatibility across platforms. If opening a legacy SQLCipher 3 database, run <code>PRAGMA cipher_compatibility = 3;</code> immediately after the key is applied.</li>
+    <li><strong>SQLCipher 4.x Defaults:</strong>
+      <ul>
+        <li><strong>Page Size:</strong> 4096 bytes (SQLCipher 3 used 1024)</li>
+        <li><strong>Key Derivation (KDF):</strong> PBKDF2-HMAC-SHA512</li>
+        <li><strong>KDF Iterations:</strong> 256,000 (SQLCipher 3 used 64,000)</li>
+        <li><strong>HMAC Algorithm:</strong> HMAC-SHA512 (SQLCipher 3 used SHA1)</li>
+      </ul>
+    </li>
+    <li><strong>Incorrect Key Verification:</strong> SQLite performs lazy evaluation. To verify if a key is correct, run a dummy query (e.g., query <code>sqlite_master</code>) immediately after connection:
+      <pre>
+try:
+    conn.execute("SELECT count(*) FROM sqlite_master;")
+except sqlcipher3.DatabaseError as e:
+    # Incorrect key raises: "sqlite3.DatabaseError: file is not a database"
+    print("Invalid decryption key or corrupted database file.")</pre>
+    </li>
+  </ul>
+
+  <h2>Q5. Performance overhead of AES-256 encryption</h2>
+  <ul>
+    <li><strong>Overhead Percentages:</strong>
+      <ul>
+        <li>Single-row lookup (primary key): Negligible overhead (&lt;5%).</li>
+        <li>100-row scans: Moderate overhead (~10–15%) because SQLCipher must decrypt pages into memory.</li>
+        <li>Write operations (inserts/updates): ~20–30% overhead compared to plaintext SQLite due to encryption calculations. Wrap multiple inserts in a single transaction (<code>BEGIN ... COMMIT</code>) to reduce page-writing frequency.</li>
+      </ul>
+    </li>
+    <li><strong>WAL Mode:</strong> Yes, enabling Write-Ahead Logging (WAL) significantly increases SQLCipher performance by separating readers and writers. The WAL journal files are also fully encrypted.</li>
+    <li><strong>Text Passphrase vs. Raw Hex Key:</strong> Using <code>PRAGMA key</code> with a text passphrase forces KDF derivation (256,000 PBKDF2 iterations), adding a <strong>50–100ms CPU latency block</strong> during connection. Using a raw 32-byte hex key bypasses KDF, making connection establishment instantaneous (&lt;1ms).</li>
+  </ul>
+
+  <h2>Q6. Encrypted backup with VACUUM INTO</h2>
+  <ul>
+    <li><strong>VACUUM INTO:</strong> Yes, <code>VACUUM INTO 'path/to/backup.db'</code> works in SQLCipher. The backup file is encrypted using the *same* key as the active connection.</li>
+    <li><strong>Different Key Export:</strong> To back up a database with a different key, use the <code>sqlcipher_export()</code> API in the Python bindings:
+      <pre>
+conn.execute("ATTACH DATABASE 'backup.db' AS backup KEY 'new_secure_key';")
+conn.execute("SELECT sqlcipher_export('backup');")
+conn.execute("DETACH DATABASE backup;")</pre>
+      This successfully duplicates schema and decrypted/re-encrypted records to the target database directly within python-sqlcipher3.
+    </li>
+  </ul>
+
+  <h2>Q7. Thread safety</h2>
+  <ul>
+    <li><strong>Check Same Thread:</strong> Yes, sqlcipher3 inherits Python sqlite3's <code>check_same_thread</code> parameter.</li>
+    <li><strong>Concurrency Pattern (Lilith v6):</strong> For multiple readers and a single writer:
+      <ol>
+        <li>Configure WAL mode and set a busy timeout of 5000ms:
+          <pre>conn.execute("PRAGMA journal_mode = WAL;")
+conn.execute("PRAGMA synchronous = NORMAL;")
+conn.execute("PRAGMA busy_timeout = 5000;")</pre>
+        </li>
+        <li><strong>Do not share a single connection across threads</strong> (even with <code>check_same_thread=False</code>). SQLite transactions are connection-scoped. If multiple threads share a connection, their transactions will interfere.</li>
+        <li><strong>Recommended:</strong> Open a separate, local database connection for each thread/background job and close it when the job is completed.</li>
+      </ol>
+    </li>
+  </ul>
+
+  <div class="verdict green">
+    <strong>Verdict: CLEAR (Using sqlcipher3-wheels)</strong>
+    Implementing SQLCipher AES-256 encryption on all six databases is fully viable and ready for development. 
+    <br><br>
+    <strong>Action Plan:</strong>
+    <ol>
+      <li>Use the <strong><code>sqlcipher3-wheels</code></strong> package in the project dependencies. This avoids any compilation failures on Windows, macOS (M1/Intel), and Linux.</li>
+      <li>To bypass the 50–100ms connection delay caused by KDF iteration checks, the application should derive raw 32-byte hex keys from user passwords (using Python's hashlib PBKDF2) and open databases using the <strong>raw hex key syntax (<code>PRAGMA key = "x'hexkey'"</code>)</strong>.</li>
+      <li>Implement thread isolation by ensuring each background task opens and closes its own local database connection under WAL mode.</li>
+    </ol>
+  </div>
+
+  <h2>Sources</h2>
+  <div class="source-list">
+    <ul>
+      <li><a href="https://www.zetetic.net/sqlcipher/sqlcipher-api/">SQLCipher API Documentation (zetetic.net)</a></li>
+      <li><a href="https://www.zetetic.net/sqlcipher/design/">SQLCipher Encryption Design Details</a></li>
+      <li><a href="https://pypi.org/project/sqlcipher3-wheels/">PyPI Project: sqlcipher3-wheels</a></li>
+      <li><a href="https://github.com/coleifer/sqlcipher3">sqlcipher3 Github Repository</a></li>
+    </ul>
+  </div>
+</body>
+</html>

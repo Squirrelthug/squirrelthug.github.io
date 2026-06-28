@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-14 — sounddevice Audio I/O</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.84em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-14 — sounddevice Audio I/O</h1>
+<div class="meta">Researched: June 28, 2026 · sounddevice 0.5.5 · PortAudio v19 API family</div>
+
+<h2>Q1. Linux Audio Backend — PulseAudio, PipeWire, ALSA</h2>
+<p>sounddevice uses PortAudio. On Linux, PortAudio commonly reaches consumer devices through ALSA; PipeWire systems usually provide compatibility through <code>pipewire-alsa</code> and/or <code>pipewire-pulse</code>. Ubuntu 22.04+ PipeWire setups generally work if those compatibility layers are installed. For consumer headsets, prefer the default input/output devices unless the user explicitly selects devices in Lilith settings. Avoid hard-coding ALSA device names.</p>
+<p>Sample-rate negotiation can differ between PulseAudio and PipeWire. Lilith should request 16 kHz mono for capture, but be ready to open the device at its default rate and resample to 16 kHz if PortAudio rejects the format.</p>
+
+<h2>Q2. WASAPI on Windows</h2>
+<p>PortAudio supports several Windows host APIs. sounddevice exposes host APIs through <code>query_hostapis()</code> and device records. To explicitly select WASAPI, choose a device whose <code>hostapi</code> points to the WASAPI host API or pass WASAPI-specific settings. WASAPI generally has lower latency and better modern-device behavior than MME; DirectSound/MME are fallback paths. Avoid exclusive mode by default because it can conflict with calls, browsers, and games.</p>
+
+<h2>Q3. CoreAudio on macOS / Apple Silicon</h2>
+<p>sounddevice wheels support macOS and use PortAudio/CoreAudio; Apple Silicon users should install native arm64 Python/wheels to avoid Rosetta. CoreAudio devices often run natively at 44.1 or 48 kHz. A MacBook built-in mic may not expose direct 16 kHz capture, so Lilith should test device support and resample to 16 kHz for VAD/Whisper when needed.</p>
+
+<h2>Platform Notes</h2>
+<table><thead><tr><th>Platform</th><th>Preferred Backend</th><th>Risk</th><th>Lilith Handling</th></tr></thead><tbody>
+<tr><td>Linux</td><td>Default PortAudio device via PipeWire/Pulse/ALSA</td><td>Missing compatibility packages; sample-rate rejection</td><td>Device test, fallback to default rate + resample</td></tr>
+<tr><td>Windows</td><td>WASAPI shared mode</td><td>Driver quirks, exclusive mode conflicts</td><td>Expose device selector; avoid exclusive by default</td></tr>
+<tr><td>macOS</td><td>CoreAudio</td><td>Default 44.1/48 kHz input</td><td>Native arm64 wheels; resample pipeline</td></tr>
+</tbody></table>
+
+<h2>Q4. Microphone Stream to VAD Pattern</h2>
+<p>The callback must do the minimum: copy the chunk and enqueue it. VAD and transcription run on worker threads. This prevents PortAudio underflow/overflow caused by model inference or database writes in the audio callback.</p>
+<pre><code>import queue, threading
+import numpy as np
+import sounddevice as sd
+
+SAMPLE_RATE = 16000
+BLOCKSIZE = 480
+audio_q: queue.Queue[np.ndarray] = queue.Queue(maxsize=128)
+utterance_q: queue.Queue[np.ndarray] = queue.Queue()
+stop = threading.Event()
+
+def mic_callback(indata, frames, time_info, status):
+    chunk = indata[:, 0].copy()
+    try:
+        audio_q.put_nowait(chunk)
+    except queue.Full:
+        pass
+
+def vad_loop(vad_iterator):
+    buffer = []
+    in_speech = False
+    while not stop.is_set():
+        try:
+            chunk = audio_q.get(timeout=0.1)
+        except queue.Empty:
+            continue
+        event = vad_iterator(chunk)
+        if event and "start" in event:
+            in_speech = True
+            buffer = [chunk]
+        elif in_speech:
+            buffer.append(chunk)
+        if event and "end" in event and in_speech:
+            utterance_q.put(np.concatenate(buffer))
+            buffer = []
+            in_speech = False
+
+def whisper_loop(model):
+    while not stop.is_set():
+        try:
+            utterance = utterance_q.get(timeout=0.1)
+        except queue.Empty:
+            continue
+        segments, _ = model.transcribe(utterance, language="en")
+        publish_transcript(" ".join(s.text for s in segments))
+
+stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32",
+                        blocksize=BLOCKSIZE, callback=mic_callback)</code></pre>
+
+<h2>Q5. Streaming TTS Playback</h2>
+<p>Use <code>sounddevice.OutputStream</code> with a callback and a bounded queue/ring buffer. <code>sounddevice.play()</code> is for complete arrays and is not the right primitive for streaming TTS. If synthesis outruns playback, the queue fills; either block the synthesis producer briefly or drop only after a policy decision. Track playback completion by counting queued samples and setting an event when the producer is done and the buffer drains.</p>
+<pre><code>import queue, threading
+import numpy as np
+import sounddevice as sd
+
+play_q: queue.Queue[np.ndarray] = queue.Queue(maxsize=32)
+producer_done = threading.Event()
+playback_done = threading.Event()
+
+def output_callback(outdata, frames, time_info, status):
+    out = np.zeros((frames, 1), dtype=np.float32)
+    filled = 0
+    while filled &lt; frames:
+        try:
+            chunk = play_q.get_nowait()
+        except queue.Empty:
+            break
+        n = min(len(chunk), frames - filled)
+        out[filled:filled+n, 0] = chunk[:n]
+        filled += n
+        if n &lt; len(chunk):
+            play_q.queue.appendleft(chunk[n:])  # use collections.deque in production
+            break
+    outdata[:] = out
+    if producer_done.is_set() and play_q.empty() and filled == 0:
+        playback_done.set()
+
+def kokoro_producer(kokoro_stream):
+    for samples in kokoro_stream:
+        play_q.put(samples.astype(np.float32))
+    producer_done.set()
+
+with sd.OutputStream(samplerate=24000, channels=1, dtype="float32",
+                     blocksize=1024, callback=output_callback):
+    playback_done.wait()</code></pre>
+
+<h2>Q6. Device Disconnection and Hot-Plug</h2>
+<p>PortAudio/sounddevice does not provide a simple cross-platform hot-plug callback at the Python level. A disconnected device can surface as callback status flags, stream errors, or exceptions on subsequent reads/writes. Lilith should catch stream failures, stop the stream, re-query devices, fall back to the current default device, and show a non-blocking UI notification. Polling device lists every few seconds while a stream is failed is acceptable.</p>
+
+<h2>Q7. License</h2>
+<p><code>sounddevice</code> is MIT licensed. PortAudio uses a permissive MIT-style license. Both are suitable for closed-source commercial distribution with attribution and license text.</p>
+
+<div class="verdict warn"><strong>Final recommendation:</strong> sounddevice is viable for v6. The main risks are platform audio configuration and hot-plug recovery, not license or core API capability. Build a device test panel, resampling fallback, and stream restart logic from the start.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://python-sounddevice.readthedocs.io/">sounddevice documentation</a></li>
+<li><a href="https://python-sounddevice.readthedocs.io/en/latest/api/streams.html">sounddevice streams API</a></li>
+<li><a href="https://python-sounddevice.readthedocs.io/en/latest/api/platform-specific-settings.html">sounddevice platform-specific settings</a></li>
+<li><a href="https://www.portaudio.com/docs/v19-doxydocs/">PortAudio v19 documentation</a></li>
+<li><a href="https://www.portaudio.com/license.html">PortAudio license</a></li>
+<li><a href="https://pypi.org/project/sounddevice/">sounddevice PyPI</a></li>
+</ul></body></html>

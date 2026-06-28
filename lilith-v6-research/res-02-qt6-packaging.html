@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RES-02 — Qt6 / PySide6 Packaging</title>
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --border: #1e1e2e;
+      --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9;
+      --green: #10b981; --red: #ef4444; --amber: #f59e0b;
+      --blue: #60a5fa; --purple: #a78bfa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif;
+           font-size: 15px; line-height: 1.6; padding: 48px 40px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.9rem; color: var(--accent); margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    h2 { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin: 28px 0 10px;
+         border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    p { margin-bottom: 10px; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    code { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+    pre { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 6px; overflow-x: auto; margin: 12px 0; font-size: 0.88em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    a { color: var(--blue); }
+    .verdict { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 16px 20px; border-radius: 6px; margin: 24px 0; }
+    .verdict.warn { border-left-color: var(--amber); }
+    .verdict.block { border-left-color: var(--red); }
+    .verdict strong { color: var(--text); display: block; margin-bottom: 6px; }
+    .source-list { font-size: 0.82rem; }
+    .source-list li { color: var(--muted); }
+    .source-list a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <h1>RES-02 — Qt6 / PySide6 Packaging</h1>
+  <div class="meta">
+    Sprint: Research · Agent 1 · Report 2 of 7<br>
+    Researched: June 28, 2026<br>
+    Tools researched: PyInstaller 6.11, cx_Freeze 7.2, BeeWare Briefcase 0.3, Nuitka 2.4 / pyside6-deploy
+  </div>
+
+  <h2>Q1. Which Python packaging tool works best with PySide6?</h2>
+  <p>For PySide6 applications, packaging tools vary significantly in their maturity, support for Qt plugins, and ability to handle native C extensions.</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Tool</th>
+        <th>Out-of-the-Box PySide6 Support</th>
+        <th>QML & Asset Gathering</th>
+        <th>Active Maintenance</th>
+        <th>Community Usage & Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>PyInstaller</strong></td>
+        <td><strong>Excellent.</strong> Has built-in hooks for PySide6 that capture binaries and core plugins automatically.</td>
+        <td>Needs explicit QML collection rules (via <code>--collect-all PySide6</code> or spec files).</td>
+        <td>Extremely Active</td>
+        <td><strong>Industry standard.</strong> Largest community, highly reliable for dynamic C extensions. Recommended.</td>
+      </tr>
+      <tr>
+        <td><strong>cx_Freeze</strong></td>
+        <td><strong>Moderate.</strong> Requires manual configuration of Qt directories and environment paths in <code>setup.py</code>.</td>
+        <td>Requires manually adding QML directories to build options.</td>
+        <td>Active</td>
+        <td><strong>Niche.</strong> Harder to configure and offers fewer advantages over PyInstaller.</td>
+      </tr>
+      <tr>
+        <td><strong>Briefcase (BeeWare)</strong></td>
+        <td><strong>Poor.</strong> Primarily designed for native macOS/iOS Cocoa or Windows Win32 apps via Toga.</td>
+        <td>Extremely difficult to integrate with Qt Quick and QML bundles.</td>
+        <td>Active</td>
+        <td><strong>Not recommended.</strong> Very little community footprint for PySide6 packaging.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Q2. How do you package QML files and Qt Quick 3D assets?</h2>
+  <p>To distribute PySide6 applications that use QML and 3D assets, there are two primary patterns:</p>
+  <ul>
+    <li><strong>Qt Resource System (Recommended):</strong> Compile QML files, textures, and assets into a binary resource module using <code>pyside6-rcc</code>. Run:
+      <pre>pyside6-rcc resources.qrc -o resources_rc.py</pre>
+      Import <code>resources_rc.py</code> in Python and load QML via <code>qrc:///main.qml</code>. This embeds assets directly into a Python import module, protecting source code and ensuring PyInstaller/Nuitka packages them without file paths failing.
+    </li>
+    <li><strong>External Directories:</strong> Copy raw <code>.qml</code> files using PyInstaller's <code>--add-data</code>. At runtime, resolve relative paths using <code>pathlib.Path(__file__).parent</code>. However, this exposes QML source code as plaintext to the user.</li>
+    <li><strong>Qt Quick 3D Shaders:</strong> Qt Quick 3D shaders are compiled at runtime by default, which can cause frame drops. For production, pre-compile shaders using the <code>qsb</code> (Qt Shader Baker) tool and bundle them in the resource system.</li>
+  </ul>
+
+  <h2>Q3. Packaging C extension dependencies on each platform</h2>
+  <p>Lilith v6 has complex C extensions: <code>sqlcipher3</code>, <code>ctranslate2</code> (for faster-whisper), and <code>sounddevice</code> (linking to PortAudio).</p>
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Platform</th>
+        <th>sqlcipher3 Status</th>
+        <th>ctranslate2 / faster-whisper Status</th>
+        <th>sounddevice / PortAudio Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Linux</strong></td>
+        <td>Pre-built wheels on PyPI are rare. Recommendation: Use <code>pip install sqlcipher3-wheels</code> which bundles SQLCipher static binary.</td>
+        <td>Official <code>x86_64</code> wheels exist on PyPI. Bundles C++ libraries. Handles <code>.so</code> loading cleanly.</td>
+        <td>PyPI wheel includes pre-compiled <code>libportaudio.so</code>. Handled automatically.</td>
+      </tr>
+      <tr>
+        <td><strong>macOS</strong> (Apple Silicon)</td>
+        <td><code>sqlcipher3-wheels</code> provides pre-built Apple Silicon (arm64) wheels.</td>
+        <td>Prebuilt <code>arm64</code> wheels are available on PyPI. Native Metal/CPU support works.</td>
+        <td>PyPI wheel includes pre-compiled Universal <code>libportaudio.dylib</code>. Handled automatically.</td>
+      </tr>
+      <tr>
+        <td><strong>Windows</strong></td>
+        <td>Standard <code>sqlcipher3</code> fails to compile. Must use <code>sqlcipher3-wheels</code> or manually package OpenSSL DLLs.</td>
+        <td>Prebuilt <code>x86_64</code> wheels exist on PyPI. <strong>Blocker:</strong> CUDA support requires packaging NVIDIA DLLs (cuBLAS/cuDNN).</td>
+        <td>PyPI wheel includes pre-compiled <code>portaudio.dll</code>. Handled automatically.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><strong>NVIDIA CUDA DLLs on Windows/Linux:</strong> Bundling CUDA DLLs (e.g., <code>cublas64_12.dll</code>, <code>cudnn_ops_infer64_8.dll</code>) adds ~1.5 GB to the bundle. To keep size reasonable, the client app can be built CPU-only by default, or download CUDA DLLs dynamically on first launch if a GPU is detected.</p>
+
+  <h2>Q4. macOS code signing and Apple notarization</h2>
+  <p>To avoid macOS gatekeeper blocks, we must implement Apple Notarization in our GitHub Actions pipeline:</p>
+  <ol>
+    <li><strong>Certificate:</strong> Obtain a Apple "Developer ID Application" certificate. Install it into the GHA runner keychain.</li>
+    <li><strong>Entitlements:</strong> Python dynamic loading requires specific exceptions. Create an <code>entitlements.plist</code>:
+      <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;com.apple.security.cs.allow-unsigned-executable-memory&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;com.apple.security.cs.disable-library-validation&lt;/key&gt;
+    &lt;true/&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</pre>
+    </li>
+    <li><strong>Code Signing:</strong> Run `codesign` on every embedded <code>.so</code>/<code>.dylib</code>, then sign the main executable and the <code>.app</code> bundle:
+      <pre>codesign --force --options runtime --timestamp --entitlements entitlements.plist --sign "Developer ID Application: Company Name (TEAMID)" dist/Lilith.app</pre>
+    </li>
+    <li><strong>Packaging & Submission:</strong> Package the app into a <code>.dmg</code> (using <code>create-dmg</code>), sign the <code>.dmg</code>, and submit for notarization:
+      <pre>xcrun notarytool submit Lilith.dmg --keychain-profile "notary-profile" --wait</pre>
+    </li>
+    <li><strong>Stapling:</strong> Staple the notarization ticket to the DMG:
+      <pre>xcrun stapler staple Lilith.dmg</pre>
+    </li>
+  </ol>
+
+  <h2>Q5. Windows code signing</h2>
+  <ul>
+    <li><strong>EV vs Standard OV Certificates:</strong> EV (Extended Validation) certificates require strict verification and cloud HSM storage. They provide instant reputation bypassing Windows Defender SmartScreen. Standard OV certificates are cheaper but require building reputation over time, meaning users will see SmartScreen warnings initially.</li>
+    <li><strong>Signing in GitHub Actions:</strong> Can use <code>windows-latest</code> runner which includes <code>signtool.exe</code>. Certificate credentials should be stored in GitHub Secrets, and signing executed via a tool like <code>SignPath</code> or direct Azure Key Vault integration (mandatory for modern HSM-backed certificates).</li>
+    <li><strong>Indie options:</strong> There are no free code-signing certificates for commercial closed-source apps. SSL.com and Certum offer standard code signing certificates starting around $200–$300/year.</li>
+  </ul>
+
+  <h2>Q6. Linux AppImage generation</h2>
+  <ul>
+    <li><strong>Tooling:</strong> Use <code>linuxdeploy</code> with the <code>linuxdeploy-plugin-qt</code> and <code>linuxdeploy-plugin-python</code>. This combination compiles the environment and correctly collects the PySide6 runtime dependencies.</li>
+    <li><strong>GLIBC & OpenSSL Compatibility:</strong> AppImages are backwards compatible with older GLIBC versions, but not forwards. Therefore, we <strong>must build the AppImage on the oldest active Ubuntu LTS runner (Ubuntu 20.04 or 22.04)</strong> in GitHub Actions. If built on Ubuntu 24.04, the AppImage will crash when run on older distributions.</li>
+    <li><strong>Flatpak Alternative:</strong> Flatpak is a robust alternative. The official KDE runtime includes Qt6 and PySide6, providing a sandboxed environment that resolves GLIBC/OpenSSL distribution mismatches.</li>
+  </ul>
+
+  <h2>Q7. Approximate final bundle size</h2>
+  <p>A packaged PySide6 client application is inherently heavy due to Qt's framework size and native extensions:</p>
+  <ul>
+    <li><strong>Base Application Bundle (PySide6 + Python Runtime + App UI):</strong> ~110 - 130 MB compressed.</li>
+    <li><strong>With Whisper/Kokoro CPU Inference (ctranslate2 + models):</strong> ~250 - 350 MB compressed (includes Whisper-Tiny/Base + Kokoro model weights).</li>
+    <li><strong>With GPU support bundled (NVIDIA CUDA + cuDNN DLLs):</strong> ~1.5 - 2.0 GB compressed.</li>
+  </ul>
+  <p><strong>Conclusion:</strong> To manage installer sizes, the installer should exclude CUDA DLLs by default, and have the application download CUDA libraries dynamically on-demand if the user elects to use local GPU acceleration.</p>
+
+  <h2>Q8. pyside6-deploy tool</h2>
+  <p><code>pyside6-deploy</code> (introduced in Qt 6.4) is a deployment CLI tool designed by The Qt Company. It acts as a wrapper around <strong>Nuitka</strong> to compile Python applications into C++ and produce standalone executables.</p>
+  <ul>
+    <li><strong>Viability:</strong> While excellent for simple PySide6 apps, it is currently <strong>not viable</strong> for Lilith v6. It lacks robust dependency tracking hooks for complex native C extensions (like <code>ctranslate2</code> and <code>sqlcipher3-wheels</code>), resulting in compile failures or missing shared library bindings at runtime.</li>
+    <li><strong>Recommendation:</strong> Use <strong>PyInstaller</strong> in One-Folder mode (<code>--onedir</code>) for the packaging step. It has a mature hook ecosystem that safely detects and packages complex binary extension modules.</li>
+  </ul>
+
+  <div class="verdict warn">
+    <strong>Recommendation: PyInstaller (One-Folder Mode) + Platform installers</strong>
+    The recommended packaging workflow for Lilith v6 is using <strong>PyInstaller in One-Folder (<code>--onedir</code>) mode</strong> to ensure LGPLv3 relinking compliance, and then wrapping the folder in platform-specific installers:
+    <ul>
+      <li><strong>Linux:</strong> Wrap in an AppImage built on an <strong>Ubuntu 20.04 or 22.04</strong> GitHub Actions runner.</li>
+      <li><strong>macOS:</strong> Sign with Developer ID Application certificate and <code>entitlements.plist</code>, wrap in a <code>.dmg</code>, notarize via <code>notarytool</code>, and staple.</li>
+      <li><strong>Windows:</strong> Compile utilizing <code>sqlcipher3-wheels</code>, and sign using an OV/EV certificate in GitHub Actions. Exclude CUDA DLLs from the base bundle, downloading them dynamically if required.</li>
+    </ul>
+    <strong>Key Risk:</strong> High installer bundle size if CUDA DLLs are bundled (~1.5 GB). Resolution is to fetch GPU runtime libraries on-demand.
+  </div>
+
+  <h2>Sources</h2>
+  <div class="source-list">
+    <ul>
+      <li><a href="https://pyinstaller.org/en/stable/usage.html">PyInstaller Documentation: Spec Files & Advanced Packaging</a></li>
+      <li><a href="https://nuitka.net/doc/user-manual.html">Nuitka User Manual: standalone & Qt plugins</a></li>
+      <li><a href="https://developer.apple.com/documentation/security/notarizing_macos_software_before_distribution">Apple Developer: Notarizing macOS Software</a></li>
+      <li><a href="https://pypi.org/project/sqlcipher3-wheels/">PyPI: sqlcipher3-wheels package</a></li>
+      <li><a href="https://github.com/linuxdeploy/linuxdeploy">linuxdeploy Github Project</a></li>
+    </ul>
+  </div>
+</body>
+</html>

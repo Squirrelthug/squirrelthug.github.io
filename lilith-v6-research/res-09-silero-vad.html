@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-09 — Silero VAD</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.84em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-09 — Silero VAD</h1>
+<div class="meta">Researched: June 28, 2026 · silero-vad 6.2.1 · PyTorch 2.12.1</div>
+
+<h2>Q1. Integration with sounddevice Audio Stream</h2>
+<p>Use <code>sounddevice.InputStream</code> at 16 kHz mono and keep its callback lightweight. Silero works naturally with 30 ms chunks at 16 kHz, which is <code>480</code> frames; 60 ms is <code>960</code> frames. The callback should push numpy chunks into a queue. A worker thread performs VAD and utterance buffering, then hands completed utterances to a transcription queue for faster-whisper.</p>
+<pre><code>import queue, threading, time
+import numpy as np
+import sounddevice as sd
+from silero_vad import load_silero_vad, VADIterator
+
+SAMPLE_RATE = 16000
+CHUNK = 480  # 30 ms
+audio_q: queue.Queue[np.ndarray] = queue.Queue(maxsize=100)
+utterance_q: queue.Queue[np.ndarray] = queue.Queue()
+shutdown = threading.Event()
+
+model = load_silero_vad()
+vad = VADIterator(model, threshold=0.5, sampling_rate=SAMPLE_RATE,
+                  min_silence_duration_ms=700, speech_pad_ms=250)
+
+def input_callback(indata, frames, time_info, status):
+    if status:
+        pass  # record status outside callback if needed
+    try:
+        audio_q.put_nowait(indata[:, 0].copy())
+    except queue.Full:
+        pass
+
+def vad_worker():
+    speech_chunks = []
+    recording = False
+    while not shutdown.is_set():
+        try:
+            chunk = audio_q.get(timeout=0.1).astype(np.float32)
+        except queue.Empty:
+            continue
+        event = vad(chunk, return_seconds=False)
+        if event and "start" in event:
+            recording = True
+            speech_chunks = [chunk]
+        elif recording:
+            speech_chunks.append(chunk)
+        if event and "end" in event and recording:
+            audio = np.concatenate(speech_chunks)
+            if len(audio) &gt;= int(0.25 * SAMPLE_RATE):
+                utterance_q.put(audio)
+            recording = False
+            speech_chunks = []
+
+def transcribe_worker(whisper_model):
+    while not shutdown.is_set():
+        try:
+            audio = utterance_q.get(timeout=0.1)
+        except queue.Empty:
+            continue
+        segments, info = whisper_model.transcribe(audio, language="en")
+        handle_transcript(" ".join(s.text for s in segments))
+
+threading.Thread(target=vad_worker, daemon=True).start()
+with sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32",
+                    blocksize=CHUNK, callback=input_callback):
+    while not shutdown.is_set():
+        time.sleep(0.1)</code></pre>
+
+<h2>Q2. End-of-Utterance Detection</h2>
+<p>Silero's <code>threshold</code> is the speech probability cutoff. Start with <code>0.5</code> for a home office and expose advanced tuning from roughly <code>0.35</code> to <code>0.65</code>. End-of-utterance is controlled by silence duration, commonly <code>min_silence_duration_ms=600-900</code>. Use <code>speech_pad_ms=200-300</code> to avoid clipped words and <code>min_speech_duration_ms</code> or an application-level duration check to ignore short noise bursts.</p>
+<p>For natural thinking pauses, do not end on the first silent chunk. A 700 ms silence window is a practical default; voice assistants that need more interruption tolerance can use 900-1200 ms.</p>
+
+<h2>Q3. Latency Overhead</h2>
+<p>Silero advertises sub-millisecond CPU inference for one audio chunk on common CPUs. In practice, Python overhead plus queueing is still small relative to the 30 ms chunk size. Do not run inference inside the PortAudio callback thread: it is probably fast enough, but callback rules require avoiding blocking work and allocations. Added start latency is one chunk, about 30 ms. Added end latency is the configured silence duration plus one chunk, so about 730 ms with a 700 ms silence rule.</p>
+
+<h2>Q4. CPU vs GPU</h2>
+<p>Silero VAD is a small PyTorch/TorchScript model. CPU inference is fast enough that CUDA or Metal adds no meaningful benefit for Lilith's VAD stage and may add transfer overhead. It can run on CPU even if a CUDA-enabled PyTorch build is installed; explicitly keep model and tensors on CPU.</p>
+
+<h2>Q5. License</h2>
+<p>The <code>silero-vad</code> PyPI package declares MIT license classifiers. The upstream Silero VAD repository also publishes the VAD code/model under permissive terms; include MIT attribution in Lilith's legal notices. Commercial closed-source distribution is allowed with attribution.</p>
+
+<h2>Q6. WebRTC VAD Comparison</h2>
+<table><thead><tr><th>Area</th><th>Silero VAD</th><th>WebRTC VAD / py-webrtcvad</th></tr></thead><tbody>
+<tr><td>Accuracy</td><td>ML model; generally better in non-stationary noise and home-office conditions.</td><td>Classic algorithm; fast but more false positives/negatives with typing, HVAC, music.</td></tr>
+<tr><td>Latency</td><td>30/60 ms chunks, sub-ms inference; end latency set by silence window.</td><td>10/20/30 ms frames; extremely low CPU.</td></tr>
+<tr><td>Maintenance</td><td>Active PyPI release 6.2.1.</td><td><code>py-webrtcvad</code> is older and historically sparse on modern wheels; forks such as <code>webrtcvad-wheels</code> exist.</td></tr>
+<tr><td>Dependencies</td><td>Requires PyTorch/ONNX path depending on install.</td><td>Small native extension, no ML weights.</td></tr>
+<tr><td>Recommendation</td><td>Default for Lilith.</td><td>Optional fallback only if PyTorch packaging becomes a blocker.</td></tr>
+</tbody></table>
+
+<div class="verdict"><strong>Final recommendation:</strong> Use Silero VAD as the default. It meets Tier 0 CPU requirements, integrates cleanly with sounddevice queues, and is permissively licensed. Keep WebRTC VAD as a possible fallback, not a first-class v6 v1 target.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://github.com/snakers4/silero-vad">Silero VAD GitHub</a></li>
+<li><a href="https://pypi.org/project/silero-vad/">silero-vad PyPI</a></li>
+<li><a href="https://python-sounddevice.readthedocs.io/en/latest/examples.html">sounddevice examples</a></li>
+<li><a href="https://pypi.org/project/webrtcvad/">py-webrtcvad PyPI</a></li>
+<li><a href="https://github.com/wiseman/py-webrtcvad">py-webrtcvad GitHub</a></li>
+</ul></body></html>

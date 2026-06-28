@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-11 — Background Jobs & Scheduling</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.84em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-11 — Background Jobs &amp; Scheduling</h1>
+<div class="meta">Researched: June 28, 2026 · APScheduler 3.11.3 · Python 3 sqlite3 docs checked</div>
+
+<h2>Q1. APScheduler vs Threading vs Asyncio</h2>
+<table><thead><tr><th>Approach</th><th>Fit for Lilith</th><th>Cancellation / Shutdown</th><th>Verdict</th></tr></thead><tbody>
+<tr><td>APScheduler 3.x BackgroundScheduler</td><td>Good for periodic Google sync and scheduled consolidation; can also enqueue immediate jobs with <code>add_job</code>.</td><td><code>shutdown(wait=True)</code> waits for running jobs; cooperative cancellation still needed for long API calls.</td><td>Recommended outer scheduler.</td></tr>
+<tr><td>Manual threading</td><td>Best for hot-path triggered enhancement queues and strict priority control.</td><td>Explicit events/queues give predictable app-exit behavior.</td><td>Use under a small job manager.</td></tr>
+<tr><td>asyncio + qasync</td><td>Viable with PySide6 but forces async design across UI/service code.</td><td>Cancellable tasks are good, but blocking DB/LLM libraries still need executors.</td><td>Do not make v6 v1 depend on async.</td></tr>
+</tbody></table>
+<p>Recommendation: APScheduler 3.x for timers plus a small internal priority queue for triggered L1/L2 jobs. Do not wait for APScheduler 4.0 unless the project is already on its stable release line; 3.x is mature and documented.</p>
+
+<h2>Q2. APScheduler Job Priorities and Ordering</h2>
+<p>APScheduler does not provide a general priority scheduler. It controls overlap with <code>max_instances</code>, missed-run behavior with coalescing/misfire settings, and execution pools. If a sync job takes longer than its interval, <code>max_instances=1</code> prevents pile-up; use <code>coalesce=True</code> so missed runs collapse into one run. Triggered jobs can be run immediately by calling <code>scheduler.add_job(func, trigger="date", run_date=None, args=[...])</code> or by pushing onto Lilith's own enhancement queue.</p>
+<pre><code>from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
+from datetime import datetime, timezone
+
+scheduler = BackgroundScheduler(
+    executors={"default": ThreadPoolExecutor(max_workers=4)},
+    job_defaults={"coalesce": True, "max_instances": 1, "misfire_grace_time": 60},
+)
+
+scheduler.add_job(sync_google_calendar, "interval", minutes=15, id="google_calendar")
+scheduler.add_job(consolidate_memory, "cron", minute="*/30", id="memory_consolidation")
+
+def trigger_enhancement(record_id: str):
+    scheduler.add_job(run_l1_l2_enhancement, "date", run_date=datetime.now(timezone.utc),
+                      args=[record_id], id=f"enhance:{record_id}", replace_existing=True)
+
+def stop_background_jobs():
+    request_shutdown.set()
+    scheduler.shutdown(wait=True)</code></pre>
+
+<h2>Q3. SQLite WAL Mode for Concurrent Reads</h2>
+<p>Enable WAL after opening and keying each SQLCipher database: <code>PRAGMA journal_mode=WAL;</code>. SQLite persists WAL mode in the database file after it is set, but Lilith should still assert it at open. WAL allows readers to continue while a writer appends to the WAL; checkpointing or schema changes can still cause brief contention. Use <code>PRAGMA busy_timeout=5000;</code> and short transactions.</p>
+<p>Use one SQLCipher connection per thread/job. Do not share a connection across worker threads. If pooling is added later, make it a pool of thread-local connections, not one global connection.</p>
+
+<h2>Q4. Graceful Shutdown on SIGTERM</h2>
+<p>On window close or SIGTERM, set a global shutdown event, stop accepting new jobs, cancel queued enhancement jobs, and call <code>scheduler.shutdown(wait=True)</code>. Python threads cannot be force-killed safely; long LLM/API calls must use client timeouts and periodically check the shutdown event between records. In-progress enhancement should be checkpointed using a job table with states such as <code>queued</code>, <code>running</code>, <code>succeeded</code>, <code>failed_retryable</code>. On next startup, reset stale <code>running</code> jobs to queued.</p>
+<p>In PySide6, call the shutdown routine from <code>closeEvent</code>, accept the event after shutdown completes, and keep the UI responsive by showing a short shutdown overlay if needed.</p>
+
+<h2>Q5. Threading and sqlite3 in Python</h2>
+<p>Python's sqlite3 module enforces <code>check_same_thread=True</code> by default, meaning a connection may only be used in the creating thread. The underlying SQLite library is usually serialized/thread-safe, but sharing connections still creates transaction and cursor hazards. <code>check_same_thread=False</code> is only safe when the application serializes all access with its own lock; Lilith should avoid that design.</p>
+<p>Best practice: each job opens its own keyed SQLCipher connection using <code>pathlib.Path</code>, sets required pragmas, runs a short transaction, closes the connection, and logs mutations via <code>log_event()</code>.</p>
+
+<div class="verdict"><strong>Final recommendation:</strong> Use APScheduler 3.x for periodic jobs and immediate timer-style triggers, backed by a small explicit enhancement queue where priority matters. Use connection-per-job SQLCipher access with WAL, busy timeout, and short transactions. No blocker found.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://apscheduler.readthedocs.io/en/3.x/userguide.html">APScheduler 3.x user guide</a></li>
+<li><a href="https://www.sqlite.org/wal.html">SQLite Write-Ahead Logging</a></li>
+<li><a href="https://www.zetetic.net/sqlcipher/sqlcipher-api/">SQLCipher API pragmas</a></li>
+<li><a href="https://docs.python.org/3/library/sqlite3.html">Python sqlite3 documentation</a></li>
+<li><a href="https://github.com/CabbageDevelopment/qasync">qasync</a></li>
+</ul></body></html>

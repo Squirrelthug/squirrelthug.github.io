@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-10 — LLM Providers & API Abstraction</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.84em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-10 — LLM Providers &amp; API Abstraction</h1>
+<div class="meta">Researched: June 28, 2026 · anthropic 0.112.0 · Claude Sonnet family pricing/model docs checked as current public docs</div>
+
+<h2>Q1. Anthropic Prompt Caching Implementation</h2>
+<p>Anthropic prompt caching is enabled by marking content blocks with <code>cache_control</code>. Cache breakpoints can be placed on system, tool, and message content blocks. For Lilith, cache the stable system/personality prompt and stable user context/personal-truths block. Do not cache the latest user turn or volatile database excerpts.</p>
+<p>Anthropic documents minimum cacheable prompt lengths by model family, with current Claude Sonnet/Opus cache blocks requiring at least about 1,024 tokens. The default cache TTL is 5 minutes; Anthropic also documents longer TTL options for supported models. The cache is server-side and keyed by prompt prefix, so it can be reused across Python process restarts as long as the exact prefix is sent again before TTL expiry.</p>
+<pre><code>from anthropic import Anthropic
+client = Anthropic()
+
+resp = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=300,
+    system=[
+        {
+            "type": "text",
+            "text": LILITH_SYSTEM_PROMPT,
+            "cache_control": {"type": "ephemeral"},
+        },
+        {
+            "type": "text",
+            "text": STABLE_USER_CONTEXT,
+            "cache_control": {"type": "ephemeral"},
+        },
+    ],
+    messages=[{"role": "user", "content": "What is next on my calendar?"}],
+)</code></pre>
+
+<h2>Q2. Cost Difference: Cached vs Uncached Tokens</h2>
+<p>Pricing changes, so Lilith should keep model pricing in configuration and label estimates by date. Anthropic's public pricing model has separate prices for base input, cache writes, cache reads, and output. Cache writes cost more than base input, but cache reads are much cheaper.</p>
+<table><thead><tr><th>Token Type</th><th>Typical Sonnet Public Pricing Pattern</th><th>Implication</th></tr></thead><tbody>
+<tr><td>Input tokens</td><td>Base input rate per MTok</td><td>Paid every uncached turn.</td></tr>
+<tr><td>Cache write</td><td>Higher than base input</td><td>Paid when warming/changing cached prompt.</td></tr>
+<tr><td>Cache read</td><td>Much lower than base input</td><td>Main savings for repeated Lilith system context.</td></tr>
+<tr><td>Output</td><td>Separate output rate per MTok</td><td>Unaffected by prompt caching.</td></tr>
+</tbody></table>
+<p>Example using the common Sonnet 5-minute cache pattern of <code>$3/MTok input</code>, <code>$3.75/MTok cache write</code>, <code>$0.30/MTok cache read</code>, and <code>$15/MTok output</code>: a 2,000-token system prompt over 1,000 turns costs about <code>$6.00</code> uncached input. With one cache write plus 999 reads, it costs about <code>$0.61</code>, saving roughly <code>$5.39</code> per 1,000 turns before output tokens.</p>
+
+<h2>Q3. Streaming with Anthropic SDK — Tool Call Deltas</h2>
+<p>Anthropic streaming emits typed events: message start, content block start, deltas, content block stop, and message stop. Text arrives as text deltas. Tool use arrives as a <code>tool_use</code> content block with incremental <code>input_json_delta</code> fragments. Lilith can stream text until a tool_use block is encountered; once a tool is requested, finish assembling the JSON, execute the tool, then send a follow-up <code>tool_result</code> message to resume generation.</p>
+<p>Do not execute a partial tool call before the content block is complete. For conversational latency, keep tool schemas small and prefer read-only internal queries.</p>
+
+<h2>Q4. Rate Limits for Claude Sonnet</h2>
+<p>Anthropic rate limits vary by usage tier and are documented in the console/docs as requests-per-minute, input-tokens-per-minute, and output-tokens-per-minute. A single-user personal assistant is unlikely to hit paid-tier limits except during batch enhancement jobs. Lilith should isolate artifact/enhancement work behind a scheduler so conversational calls get first use of the user's quota.</p>
+<p>The API returns HTTP <code>429</code> rate-limit errors and the SDK raises an API status/rate-limit exception. Lilith should retry background jobs with exponential backoff and show a short voice-safe error for conversational requests rather than spinning.</p>
+
+<h2>Q5. Provider Abstraction Layer</h2>
+<p>Use local adapters, not LiteLLM, for v6 v1. Anthropic prompt caching and streaming tool deltas are important enough that a lowest-common-denominator proxy adds risk. LiteLLM is useful for broad provider coverage, retries, and OpenAI-compatible normalization, but it introduces another dependency, another API surface, and possible feature lag for provider-specific capabilities. Anthropic does not provide a full OpenAI-compatible API as the primary integration path; use the official SDK.</p>
+<pre><code>from dataclasses import dataclass
+from typing import Iterable, Protocol, Literal
+
+@dataclass
+class LLMChunk:
+    type: Literal["text", "tool_call", "done", "error"]
+    text: str = ""
+    tool_name: str | None = None
+    tool_input: dict | None = None
+
+class LLMProvider(Protocol):
+    name: str
+    def count_tokens(self, messages: list[dict], system: list[dict] | None = None) -&gt; int: ...
+    def stream_conversation(self, *, system, messages, tools=None) -&gt; Iterable[LLMChunk]: ...
+    def complete_artifact(self, *, system, messages, tools=None, timeout_s: float | None = None) -&gt; str: ...
+</code></pre>
+
+<h2>Q6. Ollama for Local Inference</h2>
+<p>Ollama exposes its own REST API and an OpenAI-compatible endpoint at local base URLs, so Lilith can use either direct HTTP or the OpenAI SDK with a <code>base_url</code> override. Streaming responses are supported. For 8-20 GB VRAM, use small quantized models: Qwen2.5/3 7B, Llama 3.1/3.2 8B, Mistral 7B, or Phi-class models for fast conversational routing. First inference can take seconds to tens of seconds while the model loads; keep the model warm if Tier 1 conversational latency matters.</p>
+
+<h2>Q7. Token Counting for Anthropic</h2>
+<p>The Anthropic SDK/API includes message token counting. Lilith should count the exact conversational payload before sending and enforce a hard budget: system/cacheable blocks are separate from the volatile 1,200-token conversational context budget, while database-derived context must come only from L1/L2 enhanced data. If the count exceeds the budget, trim oldest conversational turns first, then low-priority context snippets.</p>
+
+<div class="verdict"><strong>Final recommendation:</strong> Build a small in-house adapter interface with provider-specific Anthropic and Ollama implementations. Do not adopt LiteLLM for v6 v1 because prompt caching, streaming tool deltas, and token counting should be controlled directly. No blocker found.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching">Anthropic prompt caching</a></li>
+<li><a href="https://docs.anthropic.com/en/docs/build-with-claude/streaming">Anthropic streaming</a></li>
+<li><a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use">Anthropic tool use</a></li>
+<li><a href="https://docs.anthropic.com/en/api/messages-count-tokens">Anthropic count message tokens API</a></li>
+<li><a href="https://docs.anthropic.com/en/api/rate-limits">Anthropic rate limits</a></li>
+<li><a href="https://docs.anthropic.com/en/docs/about-claude/pricing">Anthropic pricing</a></li>
+<li><a href="https://github.com/ollama/ollama/blob/main/docs/api.md">Ollama API</a></li>
+<li><a href="https://github.com/ollama/ollama/blob/main/docs/openai.md">Ollama OpenAI compatibility</a></li>
+</ul></body></html>

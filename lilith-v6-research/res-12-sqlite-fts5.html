@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-12 — SQLite FTS5 in SQLCipher</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.84em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-12 — SQLite FTS5 in SQLCipher</h1>
+<div class="meta">Researched: June 28, 2026 · SQLCipher 4.x API · SQLite FTS5 module</div>
+
+<h2>Q1. FTS5 Availability in SQLCipher Python Builds</h2>
+<p>FTS5 is a SQLite compile-time option. SQLCipher can include it, but Python package wheels are inconsistent; Lilith must verify the actual bundled build at startup and in CI. The check is:</p>
+<pre><code>SELECT * FROM pragma_compile_options
+WHERE compile_options LIKE 'ENABLE_FTS5%';</code></pre>
+<p>If no row is returned, building SQLCipher/sqlcipher3 from source with SQLite compiled using <code>-DSQLITE_ENABLE_FTS5</code> is required. Prebuilt wheel availability for <code>sqlcipher3</code> and <code>pysqlcipher3</code> is not strong enough to treat FTS5 as guaranteed across Linux, macOS, and Windows. This should be part of RES-04 packaging acceptance tests.</p>
+
+<h2>Q2. FTS5 Schema for Conversation Search</h2>
+<p>Use external-content FTS5 so the encrypted canonical message table owns storage and the FTS table owns the index. All tables live inside the same SQLCipher database file, so the index is encrypted at rest.</p>
+<pre><code>CREATE TABLE messages (
+    rowid INTEGER PRIMARY KEY,
+    message_id TEXT NOT NULL UNIQUE,
+    session_id TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
+    content TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE VIRTUAL TABLE messages_fts USING fts5(
+    content,
+    role UNINDEXED,
+    endpoint UNINDEXED,
+    created_at UNINDEXED,
+    content='messages',
+    content_rowid='rowid',
+    tokenize='unicode61'
+);
+
+CREATE TRIGGER messages_ai AFTER INSERT ON messages BEGIN
+  INSERT INTO messages_fts(rowid, content, role, endpoint, created_at)
+  VALUES (new.rowid, new.content, new.role, new.endpoint, new.created_at);
+END;
+
+CREATE TRIGGER messages_ad AFTER DELETE ON messages BEGIN
+  INSERT INTO messages_fts(messages_fts, rowid, content, role, endpoint, created_at)
+  VALUES ('delete', old.rowid, old.content, old.role, old.endpoint, old.created_at);
+END;
+
+CREATE TRIGGER messages_au AFTER UPDATE ON messages BEGIN
+  INSERT INTO messages_fts(messages_fts, rowid, content, role, endpoint, created_at)
+  VALUES ('delete', old.rowid, old.content, old.role, old.endpoint, old.created_at);
+  INSERT INTO messages_fts(rowid, content, role, endpoint, created_at)
+  VALUES (new.rowid, new.content, new.role, new.endpoint, new.created_at);
+END;</code></pre>
+<pre><code>-- Search with BM25 ranking.
+SELECT m.message_id, m.session_id, m.role, snippet(messages_fts, 0, '&lt;mark&gt;', '&lt;/mark&gt;', '...', 12) AS excerpt,
+       bm25(messages_fts) AS rank
+FROM messages_fts
+JOIN messages m ON m.rowid = messages_fts.rowid
+WHERE messages_fts MATCH :query
+ORDER BY rank
+LIMIT 20;
+
+-- Surrounding context for a hit.
+SELECT *
+FROM messages
+WHERE session_id = :session_id
+  AND created_at BETWEEN datetime(:hit_time, '-10 minutes') AND datetime(:hit_time, '+10 minutes')
+ORDER BY created_at;</code></pre>
+
+<h2>Q3. FTS5 Performance at Lilith Scale</h2>
+<p>100,000 messages averaging 80 words is small for SQLite FTS5. Expect keyword BM25 queries to complete in milliseconds to low tens of milliseconds on a desktop SSD when the database is warm. The index increases database size because token postings are stored in addition to message text; external-content mode avoids a second full content copy, but postings and segment metadata still add meaningful overhead. Plan for roughly tens of percent extra size, then measure with realistic transcripts.</p>
+
+<h2>Q4. FTS5 External Content Trade-Off</h2>
+<p>Default FTS5 stores indexed text in the virtual table, which simplifies snippet queries but duplicates content. <code>content='messages'</code> external-content mode avoids duplicate message text and keeps the canonical row in one table, but requires triggers or application-level synchronization. <code>content=''</code> contentless mode minimizes storage further but makes updates/deletes and snippet generation more awkward.</p>
+<p>Recommendation: external content. There is no SQLCipher-specific limitation because FTS pages are just database pages encrypted with the rest of the file.</p>
+
+<h2>Q5. Vector Search — sqlite-vec / sqlite-vss with SQLCipher</h2>
+<p><code>sqlite-vec</code> is the successor-style lightweight vector extension path and is MIT/Apache-style permissive depending on component; verify exact bundled artifact before shipping. Runtime extension loading can work with SQLCipher if the Python binding exposes <code>enable_load_extension(True)</code> and <code>load_extension()</code>, and if the packaged SQLCipher build allows extension loading. Some hardened builds disable it.</p>
+<p>Viable future path: keep FTS5 in the encrypted DB now, and later add an encrypted vector table with sqlite-vec if packaging tests pass. Do not choose a separate plaintext vector index.</p>
+
+<div class="verdict warn"><strong>Final recommendation:</strong> FTS5 inside SQLCipher is viable, but only if Lilith owns/verifies the SQLCipher build flags. Add a startup/CI assertion for <code>ENABLE_FTS5</code>. sqlite-vec is a plausible future path, with packaging and extension-loading tests required.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://www.sqlite.org/fts5.html">SQLite FTS5 documentation</a></li>
+<li><a href="https://www.sqlite.org/pragma.html#pragma_compile_options">SQLite pragma_compile_options</a></li>
+<li><a href="https://www.zetetic.net/sqlcipher/sqlcipher-api/">SQLCipher API</a></li>
+<li><a href="https://github.com/coleifer/sqlcipher3">sqlcipher3 GitHub</a></li>
+<li><a href="https://github.com/asg017/sqlite-vec">sqlite-vec GitHub</a></li>
+</ul></body></html>

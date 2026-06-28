@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>RES-08 — Google OAuth for Desktop Apps</title><style>
+:root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
+*{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul,ol{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.86em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}.verdict.block{border-left-color:var(--red)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style></head><body>
+<h1>RES-08 — Google OAuth for Desktop Apps</h1>
+<div class="meta">Researched: June 28, 2026 · google-auth-oauthlib 1.4.0 · google-api-python-client 2.198.0</div>
+
+<h2>Q1. Correct OAuth 2.0 Flow for Locally Installed Desktop Apps</h2>
+<p>Use Google's installed-app OAuth 2.0 authorization code flow with PKCE and a loopback redirect. The deprecated out-of-band redirect <code>urn:ietf:wg:oauth:2.0:oob</code> must not be used. Google documents that desktop apps open the system browser, start a temporary HTTP listener on <code>127.0.0.1</code> or <code>::1</code> using a random available port, and receive the authorization code on that loopback URL.</p>
+<p>The user should create an OAuth client of type <strong>Desktop app</strong>, not Web application. Installed apps cannot keep a client secret confidential; Google treats the downloaded secret as an app identifier, not a server-side secret. A local temporary port is normal for this flow; Lilith does not expose a persistent server.</p>
+<div class="verdict block"><strong>Publishing status caveat:</strong> The app should not remain in external <code>Testing</code> mode indefinitely if durable refresh tokens are required. Google documents refresh-token expiration for external apps in Testing; the user's OAuth consent app should be moved to Production or be an internal Workspace app.</div>
+
+<h2>Q2. Required OAuth Scopes</h2>
+<table><thead><tr><th>API</th><th>Purpose</th><th>Scope String</th></tr></thead><tbody>
+<tr><td>Google Calendar API</td><td>Read all calendars and events</td><td><code>https://www.googleapis.com/auth/calendar.readonly</code></td></tr>
+<tr><td>People API</td><td>Read all contacts/connections</td><td><code>https://www.googleapis.com/auth/contacts.readonly</code></td></tr>
+</tbody></table>
+
+<h2>Q3. API Rate Limits</h2>
+<p>Google exposes Calendar and People API quotas in each Google Cloud project's Quotas page; exact values can vary by project and can change. Historically, Calendar has default per-minute limits suitable for personal sync, and People API enforces per-user and per-project limits. For one local user syncing Calendar and Contacts every 15 minutes with incremental tokens, default quotas are sufficient by a wide margin.</p>
+<p>On quota exhaustion, Google APIs return HTTP <code>403</code> or <code>429</code> errors with reasons such as <code>rateLimitExceeded</code> or <code>userRateLimitExceeded</code>. Lilith should use exponential backoff with jitter and persist the last successful sync token so a failed poll does not force a full resync.</p>
+
+<h2>Q4. Incremental Sync for Google Calendar</h2>
+<p>Calendar incremental sync uses <code>nextSyncToken</code>. First, Lilith performs a full <code>events.list</code> request using the same stable query parameters it intends to use later, follows all <code>nextPageToken</code> pages, then stores the final <code>nextSyncToken</code>. Later polls call <code>events.list(syncToken=stored_token)</code>. Changed and deleted events are returned; deleted events have <code>status="cancelled"</code>, so Lilith must treat them as tombstones.</p>
+<p>If Calendar returns HTTP <code>410 Gone</code>, the sync token is invalid and the local cache must be cleared or reconciled by a new full sync. Token invalidation can happen after token expiration or query-parameter mismatch. Known issue to guard against: a calendar may omit some historical items if the initial full sync used restrictive time windows, so Lilith should document exactly what window it syncs and keep parameters stable.</p>
+<pre><code>from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+def sync_calendar(creds, calendar_id, state):
+    service = build("calendar", "v3", credentials=creds, cache_discovery=False)
+    params = {"calendarId": calendar_id, "singleEvents": True, "showDeleted": True}
+    if state.sync_token:
+        params["syncToken"] = state.sync_token
+    else:
+        params["timeMin"] = state.initial_time_min_iso
+
+    try:
+        while True:
+            resp = service.events().list(**params).execute()
+            for event in resp.get("items", []):
+                if event.get("status") == "cancelled":
+                    upsert_calendar_tombstone(event["id"])
+                else:
+                    upsert_calendar_event(event)
+            if "nextPageToken" not in resp:
+                state.sync_token = resp["nextSyncToken"]
+                save_sync_state(state)
+                break
+            params["pageToken"] = resp["nextPageToken"]
+    except HttpError as exc:
+        if exc.resp.status == 410:
+            clear_calendar_cache(calendar_id)
+            state.sync_token = None
+            save_sync_state(state)
+            return sync_calendar(creds, calendar_id, state)
+        raise</code></pre>
+
+<h2>Q5. Incremental Sync for Google Contacts</h2>
+<p>The People API <code>people.connections.list</code> supports <code>requestSyncToken=true</code> on the first full sync and returns <code>nextSyncToken</code> after all pages. Later calls pass <code>syncToken</code>. Deleted contacts are included as tombstones using <code>PersonMetadata.deleted</code>. Google documents that sync tokens expire after a limited period, so Lilith must handle <code>EXPIRED_SYNC_TOKEN</code>/<code>410</code>-style failures by running a new full sync.</p>
+<p>The deprecated Contacts API had features not mirrored one-for-one in People API. For v6 v1, People API is still the correct API because Lilith only needs read-only contact records and tombstones.</p>
+
+<h2>Q6. Refresh Token Shelf Life</h2>
+<p>For a Desktop app OAuth client in Production, refresh tokens are intended to last until revoked or invalidated. They can stop working if the user revokes consent, changes a password for sensitive scopes, the token is unused for an extended period, the app exceeds per-user refresh-token limits, the OAuth app is deleted, or the app remains in external Testing status. A user returning after six months should usually still work, but Lilith must be ready to re-authenticate.</p>
+<p>Graceful handling: catch <code>RefreshError</code>, clear only the stored Google token from keyring, mark sync disabled, and show a re-auth action. Do not delete local synced data unless the user asks.</p>
+
+<h2>Q7. BYOK OAuth Setup — User-Facing Flow</h2>
+<ol>
+<li>User creates a Google Cloud project.</li>
+<li>Enable Google Calendar API and People API.</li>
+<li>Configure OAuth consent screen, add themselves as a test user during setup, then publish to Production for durable tokens if using an external app.</li>
+<li>Create OAuth Client ID with application type Desktop app.</li>
+<li>Download <code>client_secret.json</code> and import it into Lilith. Lilith extracts client ID/secret, obtains a refresh token, then stores serialized credentials in OS keychain via RES-07.</li>
+</ol>
+<p>This is technically viable but high-friction for non-technical users. The simplification path is a guided setup wizard with screenshots, validation, and a future optional hosted OAuth broker if Lilith later wants first-party OAuth instead of strict BYOK.</p>
+<pre><code>import json
+import keyring
+from google.oauth2.credentials import Credentials
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/contacts.readonly",
+]
+SERVICE = "lilith.google.oauth"
+
+def authorize(client_secret_path: str, account: str) -&gt; Credentials:
+    flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, SCOPES)
+    creds = flow.run_local_server(host="127.0.0.1", port=0, access_type="offline", prompt="consent")
+    keyring.set_password(SERVICE, account, creds.to_json())
+    return creds
+
+def load_credentials(account: str) -&gt; Credentials:
+    raw = keyring.get_password(SERVICE, account)
+    if not raw:
+        raise RuntimeError("Google account is not authorized")
+    creds = Credentials.from_authorized_user_info(json.loads(raw), SCOPES)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+        keyring.set_password(SERVICE, account, creds.to_json())
+    return creds</code></pre>
+
+<div class="verdict warn"><strong>Final recommendation:</strong> Viable, with UX risk. Use Desktop app OAuth + loopback redirect + OS keychain refresh-token storage. The main caution is BYOK setup complexity and the need to move the user's OAuth consent app out of external Testing for durable refresh tokens.</div>
+
+<h2>Sources</h2><ul class="source-list">
+<li><a href="https://developers.google.com/identity/protocols/oauth2/native-app">Google OAuth 2.0 for iOS &amp; Desktop Apps</a></li>
+<li><a href="https://developers.google.com/identity/protocols/oauth2#expiration">Google OAuth 2.0 token expiration and revocation</a></li>
+<li><a href="https://developers.google.com/workspace/calendar/api/guides/sync">Google Calendar API incremental synchronization</a></li>
+<li><a href="https://developers.google.com/calendar/api/auth">Google Calendar API scopes</a></li>
+<li><a href="https://developers.google.com/people/api/rest/v1/people.connections/list">People API people.connections.list</a></li>
+<li><a href="https://google-auth-oauthlib.readthedocs.io/en/latest/reference/google_auth_oauthlib.flow.html">google-auth-oauthlib InstalledAppFlow</a></li>
+<li><a href="https://pypi.org/project/google-auth-oauthlib/">google-auth-oauthlib PyPI</a> · <a href="https://pypi.org/project/google-api-python-client/">google-api-python-client PyPI</a></li>
+</ul></body></html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RES-07 — python-keyring OS Keychain Integration</title>
+  <style>
+    :root {
+      --bg: #0a0a0f; --surface: #111118; --border: #1e1e2e;
+      --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9;
+      --green: #10b981; --red: #ef4444; --amber: #f59e0b;
+      --blue: #60a5fa; --purple: #a78bfa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif;
+           font-size: 15px; line-height: 1.6; padding: 48px 40px; max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.9rem; color: var(--accent); margin-bottom: 4px; }
+    .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    h2 { font-size: 1.05rem; font-weight: 700; color: var(--accent); margin: 28px 0 10px;
+         border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    p { margin-bottom: 10px; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; }
+    code { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+    pre { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 6px; overflow-x: auto; margin: 12px 0; font-size: 0.88em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+    th { background: var(--surface); color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    a { color: var(--blue); }
+    .verdict { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--green); padding: 16px 20px; border-radius: 6px; margin: 24px 0; }
+    .verdict.warn { border-left-color: var(--amber); }
+    .verdict.block { border-left-color: var(--red); }
+    .verdict strong { color: var(--text); display: block; margin-bottom: 6px; }
+    .source-list { font-size: 0.82rem; }
+    .source-list li { color: var(--muted); }
+    .source-list a { color: var(--blue); }
+  </style>
+</head>
+<body>
+  <h1>RES-07 — python-keyring</h1>
+  <div class="meta">
+    Sprint: Research · Agent 1 · Report 7 of 7<br>
+    Researched: June 28, 2026<br>
+    Library version: keyring 25.7.0 (OS Keychain API)
+  </div>
+
+  <h2>Q1. Linux backends — what is available and what is the default?</h2>
+  <p>On Linux, python-keyring interacts with multiple desktop-specific backends:</p>
+  <ul>
+    <li><strong>SecretService Backend (GNOME Keyring / KDE Wallet):</strong> Communicates via D-Bus with the Freedesktop.org Secret Service API. This is the **default and recommended** Linux backend.</li>
+    <li><strong>KWallet Backend:</strong> Directly communicates with KDE Wallet via custom D-Bus bindings.</li>
+    <li><strong>keyrings.alt (Plaintext Fallback):</strong> Stores passwords unencrypted in <code>~/.local/share/python_keyring/keyringrc.cfg</code>. <strong>This is insecure and unacceptable for Lilith.</strong></li>
+    <li><strong>Out-of-the-Box Availability:</strong> SecretService is available by default on a fresh installation of Ubuntu Desktop (22.04 and 24.04 LTS) and all GNOME-based distributions. No configuration is required.</li>
+    <li><strong>Forcing SecretService in Code:</strong> The active backend can be set programmatically during application boot:
+      <pre>
+import keyring
+from keyring.backends.SecretService import Keyring as SecretServiceKeyring
+
+# Force the SecretService backend
+keyring.set_keyring(SecretServiceKeyring())</pre>
+    </li>
+  </ul>
+
+  <h2>Q2. Headless Linux — what happens without a display or D-Bus session?</h2>
+  <ul>
+    <li><strong>Failure Behavior:</strong> If Lilith runs headlessly (e.g., via SSH, server, or Docker container with no D-Bus session), python-keyring fails to load SecretService and falls back to <code>PlaintextKeyring</code> (if <code>keyrings.alt</code> is installed) or returns a <code>fail.Keyring</code> which throws exceptions on read/write.</li>
+    <li><strong>Headless Detection & Safety:</strong> We must detect and block insecure fallback backends on startup, refusing to run if a secure keyring is unavailable:
+      <pre>
+import keyring
+from keyring.backends.fail import Keyring as FailKeyring
+
+def verify_keyring_security():
+    active_backend = keyring.get_keyring()
+    backend_name = type(active_backend).__name__
+    
+    # 1. Block keyrings.alt Plaintext fallback
+    if "Plaintext" in backend_name or "keyrings.alt" in active_backend.__class__.__module__:
+        raise RuntimeError("CRITICAL SECURITY ERROR: Insecure plaintext keyring detected. Refusing to start.")
+        
+    # 2. Block failed backends
+    if isinstance(active_backend, FailKeyring):
+        raise RuntimeError("CRITICAL SECURITY ERROR: No secure OS keychain backend is available on this system.")
+        
+    print(f"Secure keyring verified: {backend_name}")</pre>
+    </li>
+  </ul>
+
+  <h2>Q3. macOS Keychain — user-facing behavior</h2>
+  <ul>
+    <li><strong>User Authorization:</strong> If the application is **properly signed** (with a Developer ID Application certificate), macOS prompts the user for access **only on the first attempt** to read or write a secret. Selecting "Always Allow" whitelists the application binary, enabling silent background access on subsequent launches. Unsigned or self-signed apps will trigger security prompts repeatedly or fail.</li>
+    <li><strong>Keychain Item Class:</strong> python-keyring maps values to the **Generic Password** (<code>secGenericPassword</code>) class in macOS.</li>
+    <li><strong>Persistence:</strong> Stored credentials survive application reinstallation, updates, and macOS system upgrades.</li>
+  </ul>
+
+  <h2>Q4. Windows DPAPI / Windows Credential Manager</h2>
+  <ul>
+    <li><strong>Windows Backend:</strong> Uses <code>WinVaultKeyring</code> which calls the Windows Credential Manager.</li>
+    <li><strong>Security Properties:</strong> Windows Credential Manager encrypts credentials using the **Windows Data Protection API (DPAPI)**. DPAPI keys are derived directly from the user's Windows login credentials. This guarantees that credentials can only be decrypted when the user is logged into their Windows session.</li>
+    <li><strong>Persistence:</strong> Stored secrets survive Windows updates, application updates, and user profile migrations.</li>
+    <li><strong>Caveats:</strong> Entries are visible to users via the Windows Control Panel (under "Credential Manager"). A user can manually delete them, which the application must handle by prompting for re-encryption.</li>
+  </ul>
+
+  <h2>Q5. Size limits per keychain entry</h2>
+  <ul>
+    <li><strong>macOS Keychain:</strong> Up to 16 MB per entry (effectively unlimited).</li>
+    <li><strong>SecretService (Linux):</strong> No strict size limit (supports up to several MBs of payload).</li>
+    <li><strong>Windows Credential Manager:</strong> Modern Windows OS supports up to **2,560 bytes** (defined by <code>CRED_MAX_CREDENTIAL_BLOB_SIZE</code>). Older legacy APIs had a limit of 512 bytes.</li>
+    <li><strong>Lilith Credentials:</strong> 
+      <ul>
+        <li>The 32-byte Database Master Key (64 characters hex) is well within limits on all platforms.</li>
+        <li>Google OAuth Refresh Tokens (100–200 characters) are well within the 512-byte and 2,560-byte limits on Windows.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>Q6. Service name and username namespace</h2>
+  <ul>
+    <li><strong>Namespace Convention:</strong> Use reverse domain name style for the `service` parameter (e.g., <code>"com.squirrelthug.lilith"</code>) to prevent collisions.</li>
+    <li><strong>Enumeration Limitation:</strong> The python-keyring API **does not support enumerating credentials** under a service name (e.g. no `list_credentials` exists). To clear credentials, Lilith must maintain a list of stored secret keys inside its encrypted local database and delete them sequentially:
+      <pre>
+# Delete a secret
+try:
+    keyring.delete_password("com.squirrelthug.lilith", "database_master_key")
+except keyring.errors.PasswordDeleteError:
+    pass # Already deleted</pre>
+    </li>
+    <li><strong>Missing Secrets:</strong> If a credential is missing, <code>keyring.get_password()</code> returns <code>None</code>. It does not throw an exception.</li>
+  </ul>
+
+  <h2>Q7. License</h2>
+  <p>python-keyring is licensed under the **MIT License**. This is a highly permissive license that fully supports proprietary closed-source distribution and paid sync subscriptions.</p>
+
+  <h2>Platform Support Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Platform</th>
+        <th>Default Backend</th>
+        <th>Security Level</th>
+        <th>Availability Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>macOS</strong></td>
+        <td><code>macOS Keychain</code></td>
+        <td>High (OS sandboxed)</td>
+        <td>Out of the box. Requires Developer ID code signing for silent access.</td>
+      </tr>
+      <tr>
+        <td><strong>Windows</strong></td>
+        <td><code>Windows Credential Manager</code></td>
+        <td>High (DPAPI encrypted)</td>
+        <td>Out of the box. Stored credentials visible in Control Panel.</td>
+      </tr>
+      <tr>
+        <td><strong>Linux Desktop (GNOME/KDE)</strong></td>
+        <td><code>SecretService</code></td>
+        <td>High (Freedesktop API)</td>
+        <td>Out of the box on standard Ubuntu/KDE installs. Requires active D-Bus session.</td>
+      </tr>
+      <tr>
+        <td><strong>Linux Headless / Server</strong></td>
+        <td><code>Plaintext / Fail</code></td>
+        <td>None (Insecure / Fails)</td>
+        <td>No secure backend available. App must refuse to run to protect data.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="verdict green">
+    <strong>Verdict: CLEAR (Using python-keyring with safety guardrails)</strong>
+    python-keyring is the correct architecture choice for secure local-first credential storage in Lilith v6. It uses the MIT license and is highly compatible across macOS, Windows, and Linux desktops.
+    <br><br>
+    <strong>Action Plan:</strong>
+    <ol>
+      <li>Namespace all credentials under <code>"com.squirrelthug.lilith"</code>.</li>
+      <li>Add a **security verification wrapper** at boot to inspect <code>keyring.get_keyring()</code>, explicitly blocking <code>PlaintextKeyring</code> and preventing execution on headless Linux without a secure keyring daemon.</li>
+      <li>Store the list of active credential keys inside the encrypted database to allow for a clean "reset/clear all credentials" loop, since keyring enumeration is not supported.</li>
+    </ol>
+  </div>
+
+  <h2>Sources</h2>
+  <div class="source-list">
+    <ul>
+      <li><a href="https://github.com/jaraco/keyring">jaraco/keyring GitHub Repository</a></li>
+      <li><a href="https://specifications.freedesktop.org/secret-service/latest/">Freedesktop Secret Service API Specification</a></li>
+      <li><a href="https://learn.microsoft.com/en-us/windows/win32/api/wincred/ns-wincred-credentiala">Microsoft Docs: CREDENTIALA structure & sizes</a></li>
+      <li><a href="https://developer.apple.com/documentation/security/keychain_services">Apple Developer: Keychain Services</a></li>
+    </ul>
+  </div>
+</body>
+</html>
