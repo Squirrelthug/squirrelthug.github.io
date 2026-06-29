@@ -33,6 +33,13 @@
     .source-list { font-size: 0.82rem; }
     .source-list li { color: var(--muted); }
     .source-list a { color: var(--blue); }
+    .note { background: rgba(79,195,201,.06); border: 1px solid rgba(79,195,201,.2); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; line-height: 1.6; }
+    .note strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .action-plan { background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25); border-left: 3px solid #fb923c; padding: 18px 22px; border-radius: 6px; margin: 32px 0 8px; }
+    .action-plan .ap-head { color: #fb923c; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 12px; }
+    .action-plan li { margin-bottom: 7px; font-size: .9rem; }
+    .decision-pending { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-left: 3px solid #f59e0b; padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; }
+    .decision-pending strong { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -54,6 +61,11 @@
       </ol>
     </li>
   </ul>
+
+<div class="note">
+  <strong>Design note — LGPL compliance is friction only, not a code risk</strong>
+  Following LGPL v3 compliance has zero effect on Lilith's runtime behavior, codebase stability, or reliability. It is a distribution packaging requirement only. The practical steps: use PyInstaller <code>--onedir</code> (one folder) instead of <code>--onefile</code> (single executable), include attribution notices in an About dialog, and link to Qt source. The <code>--onedir</code> approach is actually preferable on its own merits — startup is faster because files don't need to be extracted at runtime, and the folder structure is easier to inspect and debug. None of this touches application code.
+</div>
 
   <h2>Q2. Does the Paid-Sync SaaS Model Trigger Qt Commercial License?</h2>
   <p>No, a paid cloud-sync service does not trigger commercial licensing requirements under LGPLv3. The GNU LGPLv3 obligations are triggered strictly by the <strong>distribution</strong> of the software to end users.
@@ -83,6 +95,11 @@
   <p><strong>CRITICAL BLOCKER:</strong> Yes. Unlike core Qt/PySide6 modules which are dual-licensed under LGPLv3 and Commercial, <strong>Qt Quick 3D is licensed under GPLv3 (and Commercial) only. It is NOT available under LGPLv3.</strong></p>
   <p>If we distribute a closed-source desktop application that imports or links to Qt Quick 3D under the open-source license, the GPLv3's strong copyleft triggers. This would legally obligate us to release the <strong>entire proprietary source code of Lilith v6</strong> under the GPLv3. This directly conflicts with the closed-source business model of Lilith v6.</p>
 
+<div class="decision-pending">
+  <strong>Pending decision — 3D renderer choice not yet made</strong>
+  Qt Quick 3D is technically capable of the orb (see RES-03), but GPLv3-only under open-source licensing. Two paths are under evaluation: (1) Qt Small Business commercial license (~$499–618/yr, resolves this blocker completely), (2) MIT-licensed 3D rendering within a PySide6 <code>QOpenGLWidget</code> (PyOpenGL, ModernGL, or Vispy). The orb specification — glowing sphere, amplitude-synced pulse, smooth positional movement — is achievable on either path. A decision must be made before RES-03 is finalized. This file and RES-03 will be updated once the decision is locked.
+</div>
+
   <h2>Q6. Qt Commercial License — Cost and Scope</h2>
   <p>If LGPLv3/GPLv3 is insufficient (due to the Qt Quick 3D blocker), a commercial license is required:</p>
   <table>
@@ -107,6 +124,11 @@
     </tbody>
   </table>
   <p><em>Note: PySide6 itself is included under the Qt for Application Development license. If PyQt6 from Riverbank Computing was used instead, a separate commercial license would have to be purchased from them.</em></p>
+
+<div class="note">
+  <strong>Considering — Qt Small Business license vs MIT 3D alternative</strong>
+  The $499–618/yr Small Business tier is viable if Lilith generates revenue — roughly 8–10 subscriptions at a typical indie pricing tier covers it annually. The question for the MIT alternative is not implementation complexity (a cloud reasoning model can handle custom GLSL shader code) but cross-platform rendering quality and consistency. Tools like ModernGL and Vispy are MIT-licensed and proven on Linux, macOS, and Windows. The orb requires: a sphere mesh, a GLSL emission/glow shader, real-time amplitude as a uniform, and smooth positional animation — all achievable without Qt Quick 3D. A decision will be logged in <code>decisions.md</code> and reflected in RES-03.
+</div>
 
   <h2>Q7. Official Guidance on Local App + Paid Cloud Sync Under LGPL</h2>
   <p>There is extensive precedent for commercial, closed-source desktop apps using Qt under the LGPL and charging for supplementary services. Examples include:</p>

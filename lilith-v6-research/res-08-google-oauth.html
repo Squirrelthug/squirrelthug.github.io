@@ -2,6 +2,14 @@
 <html lang="en"><head><meta charset="UTF-8"><title>RES-08 — Google OAuth for Desktop Apps</title><style>
 :root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
 *{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul,ol{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}pre{background:var(--surface);border:1px solid var(--border);padding:16px;border-radius:6px;overflow-x:auto;font-size:.86em}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;text-align:left}td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}.verdict.block{border-left-color:var(--red)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style><style>
+.note{background:rgba(79,195,201,.06);border:1px solid rgba(79,195,201,.2);border-left:3px solid var(--accent);padding:14px 18px;border-radius:6px;margin:16px 0;font-size:.88rem;line-height:1.6}
+.note strong{color:var(--accent);display:block;margin-bottom:4px}
+.action-plan{background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.25);border-left:3px solid #fb923c;padding:18px 22px;border-radius:6px;margin:32px 0 8px}
+.action-plan .ap-head{color:#fb923c;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:12px}
+.action-plan li{margin-bottom:7px;font-size:.9rem}
+.decision-pending{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-left:3px solid #f59e0b;padding:14px 18px;border-radius:6px;margin:16px 0;font-size:.88rem}
+.decision-pending strong{color:#f59e0b}
 </style></head><body>
 <h1>RES-08 — Google OAuth for Desktop Apps</h1>
 <div class="meta">Researched: June 28, 2026 · google-auth-oauthlib 1.4.0 · google-api-python-client 2.198.0</div>
@@ -100,6 +108,8 @@ def load_credentials(account: str) -&gt; Credentials:
         creds.refresh(Request())
         keyring.set_password(SERVICE, account, creds.to_json())
     return creds</code></pre>
+
+<div class="note"><strong>Architectural note — BYOK OAuth should be one option, not the only path</strong> The current design requires users to create their own Google Cloud project and OAuth credentials — high-friction for non-technical users. Both paths should be available: (1) Squirrelthug-managed OAuth app — user clicks "Connect Google" and authorizes via standard Google Sign-In; no GCP project needed, but requires Squirrelthug's app to pass Google verification and remain active. (2) BYOK OAuth — user creates their own GCP project and credentials, full independence, suitable for power users and privacy-focused users. This principle extends to LLM API key onboarding as well — the vertical slice should minimize friction for non-technical users while keeping BYOK as an option.</div>
 
 <div class="verdict warn"><strong>Final recommendation:</strong> Viable, with UX risk. Use Desktop app OAuth + loopback redirect + OS keychain refresh-token storage. The main caution is BYOK setup complexity and the need to move the user's OAuth consent app out of external Testing for durable refresh tokens.</div>
 

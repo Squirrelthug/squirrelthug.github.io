@@ -33,6 +33,13 @@
     .source-list { font-size: 0.82rem; }
     .source-list li { color: var(--muted); }
     .source-list a { color: var(--blue); }
+    .note { background: rgba(79,195,201,.06); border: 1px solid rgba(79,195,201,.2); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; line-height: 1.6; }
+    .note strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .action-plan { background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25); border-left: 3px solid #fb923c; padding: 18px 22px; border-radius: 6px; margin: 32px 0 8px; }
+    .action-plan .ap-head { color: #fb923c; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 12px; }
+    .action-plan li { margin-bottom: 7px; font-size: .9rem; }
+    .decision-pending { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-left: 3px solid #f59e0b; padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; }
+    .decision-pending strong { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -42,6 +49,11 @@
     Researched: June 28, 2026<br>
     Library version: Qt Quick 3D (Qt 6.8+ LTS)
   </div>
+
+<div class="decision-pending">
+  <strong>Status — awaiting 3D renderer decision</strong>
+  This report covers the Qt Quick 3D implementation of the orb and confirms it is technically capable. However, Qt Quick 3D is GPLv3-only under the open-source license — incompatible with closed-source distribution (see RES-01). A decision is pending on whether to: (a) purchase a Qt commercial license, (b) implement the orb with a MIT-licensed OpenGL library (PyOpenGL/ModernGL/Vispy) inside a PySide6 <code>QOpenGLWidget</code>, or (c) use a high-quality 2D animated alternative. Once that decision is made, this report either remains as the implementation path or is replaced with a new report covering the chosen alternative.
+</div>
 
   <h2>Q1. PrincipledMaterial animated sphere — what's the approach?</h2>
   <p>To implement the glowing animated sphere in QML, we define a 3D <code>Model</code> utilizing a built-in shape and applying a <code>PrincipledMaterial</code>. This material supports dynamic runtime animations on multiple properties:</p>

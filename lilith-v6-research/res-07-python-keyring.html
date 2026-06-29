@@ -33,6 +33,13 @@
     .source-list { font-size: 0.82rem; }
     .source-list li { color: var(--muted); }
     .source-list a { color: var(--blue); }
+    .note { background: rgba(79,195,201,.06); border: 1px solid rgba(79,195,201,.2); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; line-height: 1.6; }
+    .note strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .action-plan { background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25); border-left: 3px solid #fb923c; padding: 18px 22px; border-radius: 6px; margin: 32px 0 8px; }
+    .action-plan .ap-head { color: #fb923c; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 12px; }
+    .action-plan li { margin-bottom: 7px; font-size: .9rem; }
+    .decision-pending { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-left: 3px solid #f59e0b; padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; }
+    .decision-pending strong { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -188,5 +195,16 @@ except keyring.errors.PasswordDeleteError:
       <li><a href="https://developer.apple.com/documentation/security/keychain_services">Apple Developer: Keychain Services</a></li>
     </ul>
   </div>
+
+<div class="action-plan">
+  <span class="ap-head">Action Plan — python-keyring</span>
+  <ul>
+    <li><strong>Service namespace:</strong> <code>"com.squirrelthug.lilith"</code> for all credential entries.</li>
+    <li><strong>Linux:</strong> SecretService (GNOME Keyring) required. App detects backend at startup and refuses to launch if only <code>PlaintextKeyring</code> is available — no silent fallback to insecure storage.</li>
+    <li><strong>Key inventory:</strong> Active credential key names stored in the encrypted UCL database to enable a clean "reset all credentials" operation.</li>
+    <li><strong>Stored secrets:</strong> Database master key, LLM API key(s), Google OAuth refresh token.</li>
+    <li><strong>License:</strong> MIT — clear for commercial distribution.</li>
+  </ul>
+</div>
 </body>
 </html>

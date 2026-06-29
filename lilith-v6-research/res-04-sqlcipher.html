@@ -33,6 +33,13 @@
     .source-list { font-size: 0.82rem; }
     .source-list li { color: var(--muted); }
     .source-list a { color: var(--blue); }
+    .note { background: rgba(79,195,201,.06); border: 1px solid rgba(79,195,201,.2); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; line-height: 1.6; }
+    .note strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .action-plan { background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25); border-left: 3px solid #fb923c; padding: 18px 22px; border-radius: 6px; margin: 32px 0 8px; }
+    .action-plan .ap-head { color: #fb923c; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 12px; }
+    .action-plan li { margin-bottom: 7px; font-size: .9rem; }
+    .decision-pending { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-left: 3px solid #f59e0b; padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; }
+    .decision-pending strong { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -82,6 +89,11 @@
       </tr>
     </tbody>
   </table>
+
+<div class="note">
+  <strong>Design note — when wheels fail and what the backup is</strong>
+  Pre-built wheels fail in three scenarios: (1) a new Python version ships before the wheel maintainer publishes for it (typically 2–4 weeks lag), (2) the user's CPU architecture is not covered (rare — only affects exotic platforms), (3) PyPI is temporarily unreachable during CI. For all three, the fallback is source compilation: <code>libsqlcipher-dev</code> + GCC on Linux, <code>brew install sqlcipher openssl</code> + Xcode CLI tools on macOS, Visual Studio C++ build tools + vcpkg on Windows. The design document should specify that CI tries wheel install first, then falls back to documented compilation steps on failure. This covers all realistic scenarios without blocking delivery.
+</div>
 
   <h2>Q3. GitHub Actions build steps for each platform</h2>
   <p>To avoid compilation issues, we should install the binary wheels. Below is a GHA configuration snippet showing setup and fallback compilation paths:</p>
@@ -158,6 +170,11 @@ except sqlcipher3.DatabaseError as e:
     <li><strong>Text Passphrase vs. Raw Hex Key:</strong> Using <code>PRAGMA key</code> with a text passphrase forces KDF derivation (256,000 PBKDF2 iterations), adding a <strong>50–100ms CPU latency block</strong> during connection. Using a raw 32-byte hex key bypasses KDF, making connection establishment instantaneous (&lt;1ms).</li>
   </ul>
 
+<div class="note">
+  <strong>Decision — raw hex key confirmed; performance acceptable for conversational use</strong>
+  The hot path (conversational queries) only touches single-row primary-key lookups — overhead is under 5%, well within any latency budget. Background writes (L1/L2 enhancement, sync) carry the ~20–30% write overhead but run asynchronously and never block the response pipeline. The 50–100ms connection-open penalty from text-passphrase KDF is eliminated by using the raw 32-byte hex key via <code>PRAGMA key = "x'...'"</code> (derived by Argon2id — see RES-13). WAL mode confirmed. Decision is locked.
+</div>
+
   <h2>Q6. Encrypted backup with VACUUM INTO</h2>
   <ul>
     <li><strong>VACUUM INTO:</strong> Yes, <code>VACUUM INTO 'path/to/backup.db'</code> works in SQLCipher. The backup file is encrypted using the *same* key as the active connection.</li>
@@ -207,5 +224,16 @@ conn.execute("PRAGMA busy_timeout = 5000;")</pre>
       <li><a href="https://github.com/coleifer/sqlcipher3">sqlcipher3 Github Repository</a></li>
     </ul>
   </div>
+
+<div class="action-plan">
+  <span class="ap-head">Action Plan — SQLCipher</span>
+  <ul>
+    <li><strong>Package:</strong> <code>sqlcipher3-wheels</code> in all environments. CI falls back to documented source compilation if wheel install fails.</li>
+    <li><strong>Key handling:</strong> Argon2id-derived 32-byte keys (see RES-13) opened with <code>PRAGMA key = "x'hexkey'"</code> — bypasses SQLCipher internal KDF entirely.</li>
+    <li><strong>WAL mode:</strong> Enabled from first migration on all six databases. <code>busy_timeout = 5000</code>.</li>
+    <li><strong>Threading:</strong> One connection per thread/background job. No shared connections.</li>
+    <li><strong>Backup:</strong> <code>VACUUM INTO</code> for same-key backups; <code>sqlcipher_export()</code> via ATTACH for different-key backups.</li>
+  </ul>
+</div>
 </body>
 </html>

@@ -2,6 +2,14 @@
 <html lang="en"><head><meta charset="UTF-8"><title>RES-15 — Full Dependency License Audit</title><style>
 :root{--bg:#0a0a0f;--surface:#111118;--border:#1e1e2e;--text:#e2e8f0;--muted:#6b7280;--accent:#4fc3c9;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--blue:#60a5fa;--purple:#a78bfa}
 *{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;padding:48px 40px;max-width:900px;margin:0 auto}h1{font-size:1.9rem;color:var(--accent);margin-bottom:4px}.meta{color:var(--muted);font-size:.85rem;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:16px}h2{font-size:1.05rem;color:var(--accent);margin:28px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px}p,ul{margin-bottom:12px}li{margin-bottom:5px}code{background:var(--surface);border:1px solid var(--border);padding:1px 6px;border-radius:3px}table{width:100%;border-collapse:collapse;margin:12px 0}th{background:var(--surface);color:var(--accent);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:8px 9px;text-align:left}td{padding:8px 9px;border-bottom:1px solid var(--border);vertical-align:top;font-size:.86rem}.ok{background:rgba(16,185,129,.14);color:var(--green);font-weight:700}.warncell{background:rgba(245,158,11,.14);color:var(--amber);font-weight:700}.bad{background:rgba(239,68,68,.14);color:var(--red);font-weight:700}.verdict{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--green);padding:16px 20px;border-radius:6px;margin:24px 0}.verdict.warn{border-left-color:var(--amber)}.verdict.block{border-left-color:var(--red)}a{color:var(--blue)}.source-list{font-size:.82rem;color:var(--muted)}
+</style><style>
+.note{background:rgba(79,195,201,.06);border:1px solid rgba(79,195,201,.2);border-left:3px solid var(--accent);padding:14px 18px;border-radius:6px;margin:16px 0;font-size:.88rem;line-height:1.6}
+.note strong{color:var(--accent);display:block;margin-bottom:4px}
+.action-plan{background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.25);border-left:3px solid #fb923c;padding:18px 22px;border-radius:6px;margin:32px 0 8px}
+.action-plan .ap-head{color:#fb923c;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:12px}
+.action-plan li{margin-bottom:7px;font-size:.9rem}
+.decision-pending{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.25);border-left:3px solid #f59e0b;padding:14px 18px;border-radius:6px;margin:16px 0;font-size:.88rem}
+.decision-pending strong{color:#f59e0b}
 </style></head><body>
 <h1>RES-15 — Full Dependency License Audit</h1>
 <div class="meta">Researched: June 28, 2026 · versions checked against PyPI/project docs as of this date</div>
@@ -66,4 +74,9 @@
 <li><a href="https://pypi.org/project/sounddevice/">sounddevice PyPI</a> · <a href="https://www.portaudio.com/license.html">PortAudio license</a></li>
 <li><a href="https://pypi.org/project/anthropic/">anthropic PyPI</a> · <a href="https://pypi.org/project/openai/">openai PyPI</a> · <a href="https://pypi.org/project/google-auth-oauthlib/">google-auth-oauthlib PyPI</a> · <a href="https://pypi.org/project/google-api-python-client/">google-api-python-client PyPI</a></li>
 <li><a href="https://apscheduler.readthedocs.io/en/3.x/">APScheduler docs</a> · <a href="https://www.sqlite.org/copyright.html">SQLite copyright</a></li>
-</ul></body></html>
+</ul>
+<div class="decision-pending">
+<strong>Status — audit complete, overall verdict pending Qt Quick 3D decision</strong>
+This audit is complete and accurate. The overall BLOCKED verdict reflects the Qt Quick 3D GPLv3 issue (see RES-01), not any problem with the rest of the stack. All other dependencies are clear for commercial closed-source distribution: MIT, Apache 2.0, BSD-3-Clause, and PySide6/LGPLv3 with <code>--onedir</code> packaging compliance. Once the Qt Quick 3D question is resolved — commercial license, MIT 3D alternative, or 2D approach — this audit will be updated to reflect the final dependency list and the overall verdict will move to CLEAR.
+</div>
+</body></html>

@@ -33,6 +33,13 @@
     .source-list { font-size: 0.82rem; }
     .source-list li { color: var(--muted); }
     .source-list a { color: var(--blue); }
+    .note { background: rgba(79,195,201,.06); border: 1px solid rgba(79,195,201,.2); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; line-height: 1.6; }
+    .note strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .action-plan { background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25); border-left: 3px solid #fb923c; padding: 18px 22px; border-radius: 6px; margin: 32px 0 8px; }
+    .action-plan .ap-head { color: #fb923c; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 12px; }
+    .action-plan li { margin-bottom: 7px; font-size: .9rem; }
+    .decision-pending { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-left: 3px solid #f59e0b; padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; }
+    .decision-pending strong { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -81,6 +88,11 @@
     </tbody>
   </table>
 
+<div class="note">
+  <strong>Confirmed — PyInstaller works on all three platforms</strong>
+  PyInstaller <code>--onedir</code> is confirmed viable on Linux, macOS, and Windows. All three C extensions Lilith v6 requires (sqlcipher3-wheels, ctranslate2, sounddevice/PortAudio) have pre-built platform wheels — no source compilation required on any platform. Cross-platform packaging is not a blocker.
+</div>
+
   <h2>Q2. How do you package QML files and Qt Quick 3D assets?</h2>
   <p>To distribute PySide6 applications that use QML and 3D assets, there are two primary patterns:</p>
   <ul>
@@ -127,6 +139,11 @@
   </table>
   <p><strong>NVIDIA CUDA DLLs on Windows/Linux:</strong> Bundling CUDA DLLs (e.g., <code>cublas64_12.dll</code>, <code>cudnn_ops_infer64_8.dll</code>) adds ~1.5 GB to the bundle. To keep size reasonable, the client app can be built CPU-only by default, or download CUDA DLLs dynamically on first launch if a GPU is detected.</p>
 
+<div class="note">
+  <strong>Decision — CUDA libraries download dynamically on first launch, not bundled</strong>
+  CUDA DLLs are excluded from the base installer. On first launch, Lilith detects whether a compatible NVIDIA GPU is present. If found, a progress bar shows "Setting up GPU acceleration" and downloads <code>nvidia-cublas-cu12</code> and <code>nvidia-cudnn-cu12</code> on demand. The base installer stays at ~250–350 MB compressed instead of 1.5+ GB. The onboarding flow already needs a progress bar for model downloads — CUDA download integrates into the same initialization sequence.
+</div>
+
   <h2>Q4. macOS code signing and Apple notarization</h2>
   <p>To avoid macOS gatekeeper blocks, we must implement Apple Notarization in our GitHub Actions pipeline:</p>
   <ol>
@@ -153,6 +170,11 @@
     </li>
   </ol>
 
+<div class="note">
+  <strong>Confirmed — Apple Developer ID not required until distribution</strong>
+  During development, the app runs on developer hardware unsigned (Gatekeeper bypassed for dev builds). The Apple Developer ID Application certificate ($99/yr) is only needed when distributing to users. Plan: add macOS signing and notarization steps to the CI pipeline now with a placeholder Team ID — replace with the real certificate at distribution time. The pipeline is built and tested before the certificate is purchased, and fails clearly with an explicit error when the placeholder is in place.
+</div>
+
   <h2>Q5. Windows code signing</h2>
   <ul>
     <li><strong>EV vs Standard OV Certificates:</strong> EV (Extended Validation) certificates require strict verification and cloud HSM storage. They provide instant reputation bypassing Windows Defender SmartScreen. Standard OV certificates are cheaper but require building reputation over time, meaning users will see SmartScreen warnings initially.</li>
@@ -160,12 +182,22 @@
     <li><strong>Indie options:</strong> There are no free code-signing certificates for commercial closed-source apps. SSL.com and Certum offer standard code signing certificates starting around $200–$300/year.</li>
   </ul>
 
+<div class="note">
+  <strong>Decision — Standard OV certificate, not EV</strong>
+  Standard OV (Organization Validation) certificate at ~$200–300/yr is the correct choice for solo indie development. EV (Extended Validation) requires cloud HSM storage and ongoing operational overhead — not justified at this stage. The trade-off: users see a Windows Defender SmartScreen warning initially until the certificate builds reputation through downloads. This is standard for new indie software and does not block installation — users can proceed past the warning. SmartScreen warnings diminish automatically as downloads accumulate.
+</div>
+
   <h2>Q6. Linux AppImage generation</h2>
   <ul>
     <li><strong>Tooling:</strong> Use <code>linuxdeploy</code> with the <code>linuxdeploy-plugin-qt</code> and <code>linuxdeploy-plugin-python</code>. This combination compiles the environment and correctly collects the PySide6 runtime dependencies.</li>
     <li><strong>GLIBC & OpenSSL Compatibility:</strong> AppImages are backwards compatible with older GLIBC versions, but not forwards. Therefore, we <strong>must build the AppImage on the oldest active Ubuntu LTS runner (Ubuntu 20.04 or 22.04)</strong> in GitHub Actions. If built on Ubuntu 24.04, the AppImage will crash when run on older distributions.</li>
     <li><strong>Flatpak Alternative:</strong> Flatpak is a robust alternative. The official KDE runtime includes Qt6 and PySide6, providing a sandboxed environment that resolves GLIBC/OpenSSL distribution mismatches.</li>
   </ul>
+
+<div class="note">
+  <strong>Decision made — Ubuntu 20.04/22.04 runner, AppImage</strong>
+  Standard approach, no open questions. Build on Ubuntu 20.04 or 22.04 LTS GitHub Actions runner using <code>linuxdeploy</code> + <code>linuxdeploy-plugin-qt</code>. AppImage output, GLIBC backwards compatibility ensured by building on the older runner, Qt plugins collected automatically.
+</div>
 
   <h2>Q7. Approximate final bundle size</h2>
   <p>A packaged PySide6 client application is inherently heavy due to Qt's framework size and native extensions:</p>
@@ -204,5 +236,17 @@
       <li><a href="https://github.com/linuxdeploy/linuxdeploy">linuxdeploy Github Project</a></li>
     </ul>
   </div>
+
+<div class="action-plan">
+  <span class="ap-head">Action Plan — Packaging</span>
+  <ul>
+    <li><strong>Tool:</strong> PyInstaller <code>--onedir</code> on all three platforms.</li>
+    <li><strong>Linux:</strong> AppImage via <code>linuxdeploy</code> + <code>linuxdeploy-plugin-qt</code> on Ubuntu 20.04/22.04 GitHub Actions runner.</li>
+    <li><strong>macOS:</strong> Code signing + notarization CI pipeline built now with placeholder Team ID; replaced with real Developer ID Application certificate ($99/yr) at distribution time.</li>
+    <li><strong>Windows:</strong> Standard OV code signing certificate (~$200–300/yr). SmartScreen reputation builds through downloads over time.</li>
+    <li><strong>CUDA:</strong> Not bundled in installer. Detected and downloaded on first launch, shown behind onboarding progress bar.</li>
+    <li><strong>SQLCipher:</strong> <code>sqlcipher3-wheels</code> on all platforms. Compilation fallback steps documented in CI for edge cases.</li>
+  </ul>
+</div>
 </body>
 </html>

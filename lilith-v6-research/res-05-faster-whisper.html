@@ -33,6 +33,13 @@
     .source-list { font-size: 0.82rem; }
     .source-list li { color: var(--muted); }
     .source-list a { color: var(--blue); }
+    .note { background: rgba(79,195,201,.06); border: 1px solid rgba(79,195,201,.2); border-left: 3px solid var(--accent); padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; line-height: 1.6; }
+    .note strong { color: var(--accent); display: block; margin-bottom: 4px; }
+    .action-plan { background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25); border-left: 3px solid #fb923c; padding: 18px 22px; border-radius: 6px; margin: 32px 0 8px; }
+    .action-plan .ap-head { color: #fb923c; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; display: block; margin-bottom: 12px; }
+    .action-plan li { margin-bottom: 7px; font-size: .9rem; }
+    .decision-pending { background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.25); border-left: 3px solid #f59e0b; padding: 14px 18px; border-radius: 6px; margin: 16px 0; font-size: .88rem; }
+    .decision-pending strong { color: #f59e0b; }
   </style>
 </head>
 <body>
@@ -211,5 +218,16 @@ if sys.platform == 'win32':
       <li><a href="https://huggingface.co/Systran">Hugging Face: Pre-converted CTranslate2 Whisper Models</a></li>
     </ul>
   </div>
+
+<div class="action-plan">
+  <span class="ap-head">Action Plan — faster-whisper STT</span>
+  <ul>
+    <li><strong>Default model:</strong> <code>small</code> for GPU and Apple Silicon M1; <code>base</code> for CPU-only (Tier 0).</li>
+    <li><strong>Model download:</strong> During onboarding initialization sequence (progress bar) — not at import time.</li>
+    <li><strong>Windows CUDA:</strong> <code>nvidia-cublas-cu12</code> and <code>nvidia-cudnn-cu12</code> installed via pip; paths registered with <code>os.add_dll_directory()</code> at startup.</li>
+    <li><strong>Pipeline:</strong> sounddevice → VAD (Silero) → faster-whisper — fully on background threads, never blocking the UI.</li>
+    <li><strong>License:</strong> MIT — clear for commercial distribution.</li>
+  </ul>
+</div>
 </body>
 </html>
