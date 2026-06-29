@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Data, Onboarding, Telemetry & Standards</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.75; max-width: 980px; margin: 0 auto; padding: 60px 40px; }
+  h1 { font-size: 2.4rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 8px; }
+  .subtitle { font-size: 1.05rem; color: var(--muted); margin-bottom: 48px; font-style: italic; }
+  h2 { font-size: 1.45rem; font-weight: 600; color: var(--amber); margin: 52px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 28px 0 10px; }
+  h4 { font-size: 0.82rem; font-weight: 700; color: var(--purple); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+  p { margin-bottom: 14px; }
+  .callout { background: var(--surface); border-left: 3px solid var(--accent); padding: 14px 18px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+  .callout.purple { border-left-color: var(--purple); }
+  .callout-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red .callout-label { color: var(--red); }
+  .callout.purple .callout-label { color: var(--purple); }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 22px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.65; overflow-x: auto; color: #c9d1d9; margin: 14px 0; white-space: pre; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.88rem; }
+  th { text-align: left; padding: 10px 13px; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .bg { background: rgba(16,185,129,0.15); color: var(--green); }
+  .br { background: rgba(239,68,68,0.15); color: var(--red); }
+  .ba { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .bc { background: rgba(79,195,201,0.15); color: var(--accent); }
+  .bp { background: rgba(167,139,250,0.15); color: var(--purple); }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 44px 0; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px; margin-bottom: 44px; }
+  .toc-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { padding-left: 18px; margin: 0; }
+  .toc li { margin-bottom: 7px; font-size: 0.9rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .standard-box { background: var(--surface); border: 2px solid var(--amber); border-radius: 8px; padding: 22px 24px; margin: 24px 0; }
+  .standard-header { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--amber); margin-bottom: 12px; }
+  .stage { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; margin: 14px 0; }
+  .stage-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+  .stage-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .chat-mockup { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin: 16px 0; font-size: 0.84rem; }
+  .chat-source { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 4px; }
+  .chat-bubble { padding: 8px 12px; border-radius: 6px; margin: 8px 0; max-width: 80%; }
+  .chat-user { background: rgba(79,195,201,0.12); border: 1px solid rgba(79,195,201,0.2); color: var(--text); margin-left: auto; }
+  .chat-lilith { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+  .chat-separator { border-top: 1px dashed var(--border); margin: 12px 0; display: flex; align-items: center; gap: 10px; }
+  .chat-sep-label { font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+  .chat-sep-line { flex: 1; }
+</style>
+</head>
+<body>
+
+<h1>Data, Onboarding, Telemetry &amp; Standards</h1>
+<p class="subtitle">Google SSO onboarding · data sovereignty path · telemetry as first-class principle · enhancement layers · chat screen · source/endpoint management · distribution · documentation · June 2026</p>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#onboarding">Google SSO Onboarding — The Fastest Path to User Value</a></li>
+    <li><a href="#sovereignty">The Data Sovereignty Path</a></li>
+    <li><a href="#chat-screen">The Chat Screen in the Vertical Slice</a></li>
+    <li><a href="#sources">Source & Endpoint Management</a></li>
+    <li><a href="#telemetry">Telemetry as a First-Class Design Principle</a></li>
+    <li><a href="#enhancement">Enhancement Layers — L1/L2 Pattern</a></li>
+    <li><a href="#sprint-standards">Sprint Standards: Telemetry & Security as Done-Criteria</a></li>
+    <li><a href="#os-specific">OS-Specific Platform Tools (iMessage Pattern)</a></li>
+    <li><a href="#piracy">Distribution, Licensing & Piracy</a></li>
+    <li><a href="#documentation">Documentation as Part of the Plan</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="onboarding">1. Google SSO Onboarding — The Fastest Path to User Value</h2>
+
+<p>The best onboarding flow for a personal intelligence app isn't a form. It's a handshake with data the user already has. Google is the right first integration because almost everyone has a Google account and their most important data is already there: contacts, calendar, email.</p>
+
+<pre>
+  ONBOARDING FLOW (v6 v1)
+
+  User installs Lilith
+       │
+       ▼
+  "Sign in with Google" button
+       │
+       ▼
+  OAuth 2.0 flow (browser opens, user consents)
+  Requested scopes:
+  ├── contacts.readonly      → People screen
+  ├── calendar.readonly      → Calendar screen
+  └── gmail.readonly         → Optional (later — richer context)
+       │
+       ▼
+  Tokens stored in OS keychain (libsecret / Keychain / DPAPI)
+       │
+       ▼
+  Initial sync:
+  ├── Contacts → people DB
+  ├── Calendar events (next 30 days + past 7 days) → calendar DB
+  └── "Lilith is getting to know you..." (orb processing animation)
+       │
+       ▼
+  First conversation starts with Lilith
+  already knowing who you are (by name),
+  your next appointment, and the people in your life
+</pre>
+
+<p>The power of this: within 60 seconds of installation, Lilith can say "Good morning [name]. You've got [appointment] at [time] with [person]." That's the moment the user feels it. Not a tutorial. Not a form. An immediate demonstration of value.</p>
+
+<h3>What explicit permission looks like</h3>
+
+<p>The consent screen should be transparent and specific — not a wall of legal text. Something like:</p>
+
+<ul>
+  <li><strong>Contacts:</strong> "I'll read your Google contacts so I know who matters to you. This stays on your device."</li>
+  <li><strong>Calendar:</strong> "I'll read your calendar so I can tell you what's coming and help you prepare."</li>
+  <li><strong>Email (optional, later):</strong> "I'll read email subject lines and senders to give you briefings. I won't store the bodies."</li>
+</ul>
+
+<div class="callout green">
+  <div class="callout-label">The privacy-first framing</div>
+  "This stays on your device" is true if the sync writes to SQLCipher local DB and the tokens stay in the OS keychain. The cloud never sees your contacts. The LLM call that uses contact names goes out to the cloud, but the raw data doesn't. This is meaningfully different from most apps, and worth saying clearly in the onboarding.
+</div>
+
+<h3>What comes later (not v6 v1)</h3>
+<ul>
+  <li>Apple iCloud contacts/calendar (macOS version, v6.1)</li>
+  <li>Microsoft (Outlook / Exchange) — the corporate user path</li>
+  <li>Apple/Google Photos — "show me a photo from my trip to Denver"</li>
+  <li>Self-hosted migration: move from Google-hosted to Lilith-hosted Nextcloud, CardDAV, CalDAV</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="sovereignty">2. The Data Sovereignty Path</h2>
+
+<p>Most users will start with their data hosted by Google, Apple, or Microsoft. That's fine. The goal isn't to demand they self-host on day one — it's to give them a clear path from "Google hosts everything" to "I own everything," with Lilith managing the migration at whatever pace the user chooses.</p>
+
+<div class="stage">
+  <div class="stage-label">Stage 1 — Default start</div>
+  <div class="stage-title">Cloud-sourced, local-stored</div>
+  <p style="font-size: 0.9rem; margin-bottom: 0;">Data lives at Google/Apple/Microsoft. Lilith syncs a local copy (encrypted SQLCipher) and reads from there. You're still cloud-dependent for the source of truth, but Lilith adds a local encrypted layer. You can use Lilith offline; it just won't have new data from cloud sources until it reconnects.</p>
+</div>
+
+<div class="stage">
+  <div class="stage-label">Stage 2 — Hybrid control</div>
+  <div class="stage-title">Lilith-as-router</div>
+  <p style="font-size: 0.9rem; margin-bottom: 0;">Lilith manages the pipeline. User can see where each data category lives and choose routing: "keep contacts at Google, migrate calendar to self-hosted CalDAV." The local encrypted copy is always authoritative for Lilith's reads — the cloud is now a sync source, not the source of truth.</p>
+</div>
+
+<div class="stage">
+  <div class="stage-label">Stage 3 — Full sovereignty (opt-in)</div>
+  <div class="stage-title">Local-first, self-hosted</div>
+  <p style="font-size: 0.9rem; margin-bottom: 0;">User runs their own Nextcloud/Syncthing/Vaultwarden (or Lilith hosts its own sync server). Google is no longer in the loop. All data on devices you control. Lilith still handles sync across your own devices (desktop → phone → tablet) via E2E encrypted sync. This is the Obsidian model: you own the files, Lilith owns the experience layer.</p>
+</div>
+
+<p>Lilith doesn't force migration. She makes it easy when the user is ready. The UI for this is a "Data" screen that shows every data category, where it lives, and a button to migrate it. The backend supports all three stages simultaneously — different categories can be at different stages.</p>
+
+<!-- ============================================================ -->
+<h2 id="chat-screen">3. The Chat Screen in the Vertical Slice</h2>
+
+<p>The chat screen is the universal conversation view. Every interaction with Lilith — whether it started via voice, typed in the desktop app, or came from a voice unit in the kitchen — flows through the same conversation history. The chat screen shows all of it, organized by source.</p>
+
+<h3>What the chat screen needs to show</h3>
+
+<ul>
+  <li>A standard chat UI (messages, timestamps, read receipts) — not revolutionary, just clean</li>
+  <li>Visual tagging of message source: which device or endpoint originated this message</li>
+  <li>Cross-device continuity: a conversation that started on the kitchen speaker can be continued in the desktop chat window. Context carries over.</li>
+  <li>Voice vs. text visual distinction: voice messages might show a waveform icon or audio-first styling</li>
+  <li>Artifact mode messages look different from conversational replies: longer, formatted, attached results</li>
+</ul>
+
+<div class="chat-mockup">
+  <div class="chat-source">Chat — June 27, 2026</div>
+
+  <div style="display: flex; align-items: center; gap: 6px; margin: 6px 0;">
+    <span style="font-size: 0.65rem; color: var(--muted); background: rgba(107,114,128,0.15); padding: 2px 7px; border-radius: 3px;">🔊 Kitchen Speaker · 8:42 AM</span>
+  </div>
+  <div class="chat-bubble chat-user" style="margin-left: 0;">What's on today?</div>
+  <div class="chat-bubble chat-lilith">You've got two things: a dentist appointment at 2 PM, and Sarah's birthday — she turns 32. You mentioned wanting to find a restaurant last week; want me to look into options near the dentist while you're out?</div>
+
+  <div class="chat-separator">
+    <div class="chat-sep-line" style="border-top: 1px dashed var(--border);"></div>
+    <div class="chat-sep-label">Continued from Kitchen Speaker · Desktop · 11:17 AM</div>
+    <div class="chat-sep-line" style="border-top: 1px dashed var(--border);"></div>
+  </div>
+
+  <div class="chat-bubble chat-user" style="margin-left: 0;">Yeah, find somewhere good for 6 people, Italian, near downtown</div>
+  <div class="chat-bubble chat-lilith">
+    <div style="font-size: 0.8rem; color: var(--muted); margin-bottom: 6px;">📋 Artifact — Restaurant search</div>
+    Found three options that match. Osteria Marco seats 6 comfortably and has a private dining room option. Here's the comparison...
+    <div style="font-size: 0.78rem; color: var(--accent); margin-top: 8px;">→ View full results</div>
+  </div>
+</div>
+
+<h3>Cross-device conversation continuity</h3>
+
+<p>When a user picks up the conversation on a different device, Lilith needs to know two things: what was said before, and which device is now active. The context block for a resumed conversation should include:</p>
+
+<ul>
+  <li>Last N turns of conversation (from the persistent conversation log)</li>
+  <li>Any artifact results from the previous segment that were referenced but not acted on</li>
+  <li>The current device's capabilities (voice only? full screen? touchscreen?)</li>
+</ul>
+
+<p>The conversation doesn't restart. Lilith doesn't say "how can I help you today?" She says "picking up where we left off" if the gap is short, or "it's been a while, here's what we had going" if it's been hours.</p>
+
+<!-- ============================================================ -->
+<h2 id="sources">4. Source &amp; Endpoint Management</h2>
+
+<p>Every message Lilith receives has an origin: a device, a mode (voice/text), and a session. Tracking this from the beginning prevents a mess later — when Lilith has 4 devices talking to her, you want to know which conversation came from where and be able to route responses back to the right endpoint.</p>
+
+<pre>
+  SOURCES / ENDPOINTS
+
+  Desktop app
+  ├── Voice input (microphone → STT → text)
+  └── Chat window (typed text)
+
+  Phone app (future — v6.x)
+  ├── Voice input
+  └── Chat window
+
+  Kitchen speaker unit (appliance)
+  └── Voice only (no screen)
+
+  Browser / web thin client (future)
+  └── Chat window only
+
+  Each source has:
+  ├── endpoint_id     (unique device identifier)
+  ├── endpoint_type   (desktop, phone, speaker, browser)
+  ├── capabilities    (voice, screen, touch, display_size)
+  └── session_id      (current conversation session)
+</pre>
+
+<p>The endpoint model matters for response formatting. A response going to the kitchen speaker has no screen — it must be pure audio, no markdown, no "here's a table." A response going to the desktop can be a full artifact with formatted results. Lilith needs to know the destination before formatting her response.</p>
+
+<pre>
+# What the routing layer needs to know before generating a response
+response_context = {
+    "endpoint": "kitchen_speaker",
+    "capabilities": ["voice_only"],
+    "preferred_response_type": "conversational",
+    "max_tokens": 150,         # Short for voice-only endpoints
+    "markdown_supported": False
+}
+
+response_context = {
+    "endpoint": "desktop_chat",
+    "capabilities": ["screen", "voice", "touch"],
+    "preferred_response_type": "artifact",  # Can show structured results
+    "max_tokens": 2000,
+    "markdown_supported": True
+}
+</pre>
+
+<!-- ============================================================ -->
+<h2 id="telemetry">5. Telemetry as a First-Class Design Principle</h2>
+
+<p>This is not a "nice to have" observability feature. Telemetry is Lilith's nervous system. Without it, she's blind to her own behavior. With it, she can debug herself, tune herself, and eventually improve herself. The UCL (Universal Communication Log) database is where every event goes. It's the only way to answer: what did Lilith actually do, when, why, and did it work?</p>
+
+<h3>What metacognitive telemetry means</h3>
+
+<p>Lilith queries her own telemetry database. She doesn't need a human to look at a dashboard and tell her "you've been slow lately." She can look herself:</p>
+
+<pre>
+  Lilith receives: "You seem slower today"
+         │
+         ▼
+  Lilith queries UCL DB:
+  SELECT avg(response_latency_ms), event_type, endpoint
+  FROM ucl_events
+  WHERE timestamp > now() - interval '24 hours'
+  GROUP BY event_type, endpoint
+  ORDER BY avg_latency DESC
+         │
+         ▼
+  "My average response time in the last 24 hours was 4.2 seconds,
+   up from 1.8 seconds yesterday. The slowdown is concentrated in
+   calendar tool calls — they're averaging 6.1 seconds each.
+   The calendar sync ran at 11:15 PM last night and pulled
+   847 events. That's probably the culprit."
+</pre>
+
+<p>This is not science fiction. It's a read query against a local SQLite database. The LLM has access to the query tool; the database has the data. The only requirement is that the data is actually there — which means every event must be logged when it happens, without exception.</p>
+
+<h3>What the UCL stores</h3>
+
+<pre>
+  ucl_events table:
+
+  id              INTEGER PRIMARY KEY
+  timestamp       DATETIME (UTC, microsecond precision)
+  event_type      TEXT (dot-namespaced: "calendar.sync", "tool.call", "llm.response")
+  endpoint_id     TEXT (which device/session)
+  session_id      TEXT (conversation session)
+  payload         JSON (event-specific data)
+  duration_ms     INTEGER (for latency tracking)
+  success         BOOLEAN
+  error_msg       TEXT (null if success)
+</pre>
+
+<h3>Event taxonomy — the dot-namespaced system</h3>
+
+<table>
+  <thead>
+    <tr><th>Namespace</th><th>Events</th><th>Why it matters</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>llm.*</code></td>
+      <td>request, response, token_count, latency, model_used, cache_hit</td>
+      <td>Cost tracking, latency profiling, cache performance</td>
+    </tr>
+    <tr>
+      <td><code>tool.*</code></td>
+      <td>call, result, latency, error, tool_name</td>
+      <td>Which tools get used, which fail, which are slow</td>
+    </tr>
+    <tr>
+      <td><code>voice.*</code></td>
+      <td>stt.started, stt.complete, stt.latency, tts.started, tts.complete, amplitude_avg</td>
+      <td>Voice pipeline quality, latency by model</td>
+    </tr>
+    <tr>
+      <td><code>router.*</code></td>
+      <td>classify.result, mode_selected (conversational/artifact), confidence</td>
+      <td>How often the classifier is right; what gets routed where</td>
+    </tr>
+    <tr>
+      <td><code>context.*</code></td>
+      <td>blocks_selected, tokens_used, blocks_skipped, intent_detected</td>
+      <td>Context window efficiency; which blocks get used</td>
+    </tr>
+    <tr>
+      <td><code>sync.*</code></td>
+      <td>calendar.started, calendar.complete, contacts.started, contacts.complete, records_pulled</td>
+      <td>Sync health; how fresh the data is</td>
+    </tr>
+    <tr>
+      <td><code>user.*</code></td>
+      <td>message_sent, conversation_started, conversation_ended, session_length</td>
+      <td>Usage patterns; which features get used</td>
+    </tr>
+    <tr>
+      <td><code>memory.*</code></td>
+      <td>write, read, evict, recall_miss</td>
+      <td>Memory system performance; recall quality</td>
+    </tr>
+    <tr>
+      <td><code>personality.*</code></td>
+      <td>truth_detected, truth_written, truth_applied, model_call, model_latency</td>
+      <td>How the personality system is working; truth capture rate</td>
+    </tr>
+    <tr>
+      <td><code>error.*</code></td>
+      <td>type, source, recoverable, user_impact</td>
+      <td>Error patterns; which failures affect users</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="enhancement">6. Enhancement Layers — L1/L2 Pattern</h2>
+
+<p>Raw telemetry data is granular event logs. Enhancement layers transform raw events into purpose-built views that specific consumers can query without having to do complex aggregation themselves.</p>
+
+<pre>
+  DATA PIPELINE
+
+  Raw event (logged at mutation point)
+  ├── ucl_events.calendar.sync  {records: 847, duration_ms: 12000}
+  ├── ucl_events.tool.call      {tool: "get_calendar", latency_ms: 6100}
+  └── ucl_events.llm.response   {tokens: 1200, latency_ms: 2100}
+         │
+         ▼
+  L1 Enhancement (run periodically or triggered)
+  ├── calendar_sync_stats       {avg_records_per_sync, avg_duration, last_sync_age}
+  ├── tool_performance          {p50_latency, p95_latency, error_rate per tool}
+  └── llm_usage_daily           {total_tokens, total_cost_usd, avg_latency}
+         │
+         ▼
+  L2 Enhancement (built on L1 — narrative/insight layer)
+  ├── "Calendar sync is healthy" / "Calendar sync has degraded"
+  ├── "get_calendar is your slowest tool (p95: 8.2s)"
+  └── "LLM cost this week: $0.47 — up 23% from last week (more artifact calls)"
+         │
+         ▼
+  LLM reads L2 data to answer questions about system state
+  (never reads raw ucl_events directly — too much noise)
+</pre>
+
+<h3>Why this matters for the LLM</h3>
+
+<p>If Lilith reads raw UCL events to answer "am I performing well?", she'd be reading thousands of rows and doing complex math in her context window. That's slow, expensive, and unreliable. Instead, L1 runs the aggregation as a background job and writes summary stats. L2 runs interpretations on those stats. The LLM reads L2 and gets a clean, pre-computed answer.</p>
+
+<p>The same pattern applies to all data domains: contacts, finance, memory. The LLM never reads raw data tables. It reads enhanced views that have been purpose-built for LLM consumption: appropriately compressed, pre-summarized, contextually relevant.</p>
+
+<!-- ============================================================ -->
+<h2 id="sprint-standards">7. Sprint Standards: Telemetry &amp; Security as Done-Criteria</h2>
+
+<p>A task that ships functionality without telemetry is half-done. This must be a hard requirement in every sprint, not a nice-to-have polish item.</p>
+
+<div class="standard-box">
+  <div class="standard-header">Standard: Every sprint task done-criteria must include</div>
+
+  <p style="font-size: 0.9rem;"><strong>For any task that writes or mutates state:</strong></p>
+  <ul style="font-size: 0.9rem; margin-bottom: 14px;">
+    <li>A <code>log_event()</code> call at the point of mutation — not in a wrapper, at the actual write</li>
+    <li>The event type uses the dot-namespaced taxonomy (new types added to <code>EventType</code> enum if needed)</li>
+    <li>Payload includes enough data to reconstruct what happened without reading the actual record</li>
+    <li>Duration / latency tracked if the operation is non-trivial (&gt;50ms)</li>
+    <li>Error path also logs — a failed write is still an event</li>
+  </ul>
+
+  <p style="font-size: 0.9rem;"><strong>For any task that exposes data to the LLM:</strong></p>
+  <ul style="font-size: 0.9rem; margin-bottom: 14px;">
+    <li>The data goes through an enhancement layer (L1 at minimum), not direct raw table reads</li>
+    <li>The enhancement layer is documented: what does it compute? For which consumer?</li>
+    <li>Staleness gate: if the data is older than a defined threshold, the context block says so</li>
+  </ul>
+
+  <p style="font-size: 0.9rem;"><strong>For any task that adds a new user-facing security boundary:</strong></p>
+  <ul style="font-size: 0.9rem; margin-bottom: 0;">
+    <li>Credentials go to OS keychain — never to flat files or config JSON</li>
+    <li>User data that's sensitive goes to SQLCipher — never to plaintext SQLite</li>
+    <li>Any network call that sends user data documents what leaves the device and why</li>
+  </ul>
+</div>
+
+<h3>The review checklist addition</h3>
+
+<p>When reviewing any PR (yours or a delegated agent's), the security and telemetry check is not optional:</p>
+
+<ol>
+  <li>Does this PR have a write/mutation path? → Check for <code>log_event()</code> call on that path.</li>
+  <li>Does the write path go through an already-untelemetered route? → Flag it. The gap is inherited.</li>
+  <li>Does any new data flow to the LLM? → Confirm it goes through an enhancement layer.</li>
+  <li>Does this introduce any new credential, token, or sensitive data storage? → Must be in OS keychain or SQLCipher.</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="os-specific">8. OS-Specific Platform Tools (iMessage Pattern)</h2>
+
+<p>The principle: when Lilith is installed on a specific OS, she gets access to OS-specific capabilities that are only available there. These are plugins that activate based on detected OS, not core features.</p>
+
+<table>
+  <thead>
+    <tr><th>OS</th><th>Platform capability</th><th>What Lilith can do with it</th><th>Status for v6 v1</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>macOS</td>
+      <td>iMessage (via AppleScript or private API)</td>
+      <td>Read messages, send messages, search contacts/messages</td>
+      <td><span class="badge ba">v6.1+ (macOS-specific build)</span></td>
+    </tr>
+    <tr>
+      <td>macOS</td>
+      <td>Notification Center</td>
+      <td>Native system notifications, rich notification previews</td>
+      <td><span class="badge bg">v6 v1 — all OSes have this equivalent</span></td>
+    </tr>
+    <tr>
+      <td>Windows</td>
+      <td>Windows 11 Widgets / Live Tiles</td>
+      <td>Brief summary on desktop, incoming call notification</td>
+      <td><span class="badge ba">v6.1+ (Windows-specific)</span></td>
+    </tr>
+    <tr>
+      <td>Windows</td>
+      <td>Cortana integration / Windows Search</td>
+      <td>Surface Lilith results in Windows Search</td>
+      <td><span class="badge br">Not planned — too invasive</span></td>
+    </tr>
+    <tr>
+      <td>Linux</td>
+      <td>D-Bus / systemd</td>
+      <td>System-level notifications, startup service, file watch</td>
+      <td><span class="badge bg">v6 v1 — Linux primary platform</span></td>
+    </tr>
+    <tr>
+      <td>All</td>
+      <td>OS keychain</td>
+      <td>Credential storage (libsecret / Keychain / DPAPI)</td>
+      <td><span class="badge bg">v6 v1 — core requirement</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>How the plugin architecture works</h3>
+
+<pre>
+  STARTUP (all platforms)
+
+  detect_os() → "darwin" | "windows" | "linux"
+       │
+       ▼
+  load_platform_plugins(os)
+  ├── "linux" → load SystemdPlugin, DBusPlugin
+  ├── "darwin" → load KeychainPlugin + check iMessage access
+  └── "windows" → load DPAPIPlugin, WindowsNotificationPlugin
+       │
+       ▼
+  Available tools list updated based on loaded plugins
+  LLM system prompt includes: which platform tools are available
+</pre>
+
+<p>This means the v6 v1 codebase handles all three platforms in a single repo. OS-specific tools are just conditionally loaded plugins — they're not separate builds. The installer for macOS includes the iMessage plugin code even if it's disabled by default; a toggle enables it if the user grants access.</p>
+
+<!-- ============================================================ -->
+<h2 id="piracy">9. Distribution, Licensing &amp; Piracy</h2>
+
+<p>The Obsidian model is the right reference here. Obsidian is local-first, free for personal use, paid for commercial use. Their Sync service is the revenue driver — not the app itself. Pirates can pirate the app; they can't pirate the sync service. Obsidian made $7M ARR with 1M users using this model.</p>
+
+<h3>Why piracy isn't an existential threat for Lilith</h3>
+
+<ul>
+  <li><strong>The premium value is cloud-connected features.</strong> BYOK gives users their own API keys. Sync keeps devices in sync. These are services, not file copies. A pirated copy can't get sync without a valid license.</li>
+  <li><strong>Your target user is not a pirate.</strong> Someone who wants a personal AI assistant for their health, finances, and relationships is not the demographic looking for a cracked .exe on a forum. They want something that works, is maintained, and is trustworthy.</li>
+  <li><strong>Piracy is free marketing at this scale.</strong> 100 pirated copies of Lilith means 100 people know it exists. At this stage of the product, distribution is the hard problem, not revenue leakage.</li>
+  <li><strong>License keys for gated features.</strong> A simple license key for "Sync" feature, validated against a Lilith API endpoint. The core app works without it. Sync doesn't. No DRM needed on the app itself.</li>
+</ul>
+
+<div class="callout">
+  <div class="callout-label">The practical licensing model</div>
+  <ul style="margin-bottom: 0; padding-left: 18px; font-size: 0.9rem;">
+    <li><strong>Personal use:</strong> Free. App works fully for a single device. No cloud sync. BYOK for API access.</li>
+    <li><strong>Personal + Sync:</strong> $8–12/month. Cross-device sync (E2E encrypted, Lilith-hosted). License key enables the sync feature.</li>
+    <li><strong>Self-hosted:</strong> One-time purchase or free (open source sync server). Power user path.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="documentation">10. Documentation as Part of the Plan</h2>
+
+<p>Documentation isn't a post-launch cleanup task. A project this complex, built across multiple sessions with AI agents, needs documentation to stay coherent. The question is which documentation belongs in the plan and which can wait.</p>
+
+<h3>Documentation that's part of the plan (not optional)</h3>
+
+<table>
+  <thead>
+    <tr><th>Document type</th><th>When to write it</th><th>Who uses it</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sprint docs (existing format)</td>
+      <td>Before implementation starts — design tasks then implementation tasks</td>
+      <td>Agents doing the implementation; orchestrator reviewing it</td>
+    </tr>
+    <tr>
+      <td>CLAUDE.md updates</td>
+      <td>Whenever a workflow rule changes — not retroactively</td>
+      <td>Every agent that starts a session in this repo</td>
+    </tr>
+    <tr>
+      <td>docs/history/ session narratives</td>
+      <td>After significant sprint completion (every few tasks, not every task)</td>
+      <td>You — reading back through what was built and why</td>
+    </tr>
+    <tr>
+      <td>Idea register (IDEA_REGISTER.md)</td>
+      <td>When a good idea comes up that can't be done now — capture it before it evaporates</td>
+      <td>You — at sprint planning time</td>
+    </tr>
+    <tr>
+      <td>Architecture diagrams (like v6-systems.html)</td>
+      <td>When the system is complex enough that verbal description fails</td>
+      <td>You and Steven — visual thinkers need visual maps</td>
+    </tr>
+    <tr>
+      <td>API docs / tool schemas</td>
+      <td>When a tool or interface is stable (not before)</td>
+      <td>Agents implementing callers; future contributors</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Documentation that can wait</h3>
+
+<ul>
+  <li>User-facing docs (README, getting started, FAQ) — write after vertical slice exists and works</li>
+  <li>Contribution guide — write if and when there are contributors</li>
+  <li>API reference for external developers — write if and when the API is public</li>
+  <li>Changelog / release notes — write at each release point, not continuously</li>
+</ul>
+
+<div class="callout amber">
+  <div class="callout-label">The system map as living document</div>
+  The visual architecture document (v6-systems.html, on the Desktop) should be updated when major new systems are added. It's not one-time documentation — it's the map of the territory. When the territory changes, update the map. A map from 6 months ago showing systems that no longer exist is worse than no map. Make it part of the sprint review: "did anything architecturally change? Update the systems diagram."
+</div>
+
+<hr>
+<p style="color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 32px;">
+  LILITH V6 — DATA, TELEMETRY & STANDARDS · June 2026<br>
+  See also: <code>lilith-v6-systems.html</code> · <code>lilith-orchestration-pipeline.html</code> · <code>lilith-v6-vertical-slice.html</code>
+</p>
+</body>
+</html>

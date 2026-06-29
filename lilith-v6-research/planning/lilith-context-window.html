@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lilith: Context Window Architecture</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-panel: #111118;
+    --bg-card: #16161f;
+    --border: #1e1e2e;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-mid: #94a3b8;
+    --mono: 'IBM Plex Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 0 0 80px 0;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(180deg, #0d0d1a 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 40px;
+    text-align: center;
+  }
+  header .label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  header p {
+    color: var(--text-mid);
+    max-width: 640px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+  }
+
+  /* ── Layout ── */
+  .toc {
+    max-width: 900px;
+    margin: 40px auto 0;
+    padding: 0 40px;
+  }
+  .toc-inner {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+  .toc-inner h3 {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    margin-bottom: 14px;
+  }
+  .toc-inner ol { padding-left: 20px; }
+  .toc-inner li { margin: 6px 0; }
+  .toc-inner a { color: var(--accent); text-decoration: none; font-size: 0.95rem; }
+  .toc-inner a:hover { text-decoration: underline; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 40px 40px 0; }
+
+  section { margin-bottom: 64px; }
+  section h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    padding-top: 8px;
+    border-top: 2px solid var(--accent);
+    display: inline-block;
+    padding-top: 10px;
+  }
+  section .section-sub {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: var(--mono);
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+  }
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 32px 0 12px;
+  }
+  p { color: var(--text-mid); margin-bottom: 16px; }
+  strong { color: var(--text); }
+
+  /* ── Callouts ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 0.95rem;
+  }
+  .callout.info { background: rgba(79,195,201,0.07); border-color: var(--accent); }
+  .callout.warn { background: rgba(245,158,11,0.07); border-color: var(--amber); color: #fcd34d; }
+  .callout.good { background: rgba(16,185,129,0.07); border-color: var(--green); color: #6ee7b7; }
+  .callout.bad  { background: rgba(239,68,68,0.07);  border-color: var(--red);   color: #fca5a5; }
+  .callout .label { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+
+  /* ── Diagram boxes ── */
+  .diagram {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .diagram pre {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre;
+  }
+  .diagram .c-accent { color: var(--accent); }
+  .diagram .c-amber  { color: var(--amber); }
+  .diagram .c-green  { color: var(--green); }
+  .diagram .c-purple { color: var(--purple); }
+  .diagram .c-red    { color: var(--red); }
+  .diagram .c-dim    { color: var(--text-dim); }
+  .diagram .c-white  { color: #fff; font-weight: 600; }
+
+  /* ── Token bar ── */
+  .token-bar { margin: 20px 0; }
+  .token-bar-label {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .bar-track {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    height: 28px;
+    display: flex;
+    overflow: hidden;
+  }
+  .bar-seg {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 0 4px;
+    transition: width 0.3s;
+  }
+  .seg-system  { background: rgba(167,139,250,0.4); color: #c4b5fd; }
+  .seg-history { background: rgba(79,195,201,0.3);  color: #67e8f9; }
+  .seg-context { background: rgba(245,158,11,0.3);  color: #fcd34d; }
+  .seg-unused  { background: rgba(30,30,46,0.8);    color: var(--text-dim); }
+
+  /* ── Metric cards ── */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .metric-card .val {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: var(--mono);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .metric-card .desc { font-size: 0.78rem; color: var(--text-dim); }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+  th {
+    background: var(--bg-panel);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── Code ── */
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: rgba(79,195,201,0.1);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  pre.code-block {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text);
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  /* ── Phase timeline ── */
+  .timeline { position: relative; padding-left: 28px; margin: 24px 0; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-item.done::before { background: var(--green); }
+  .tl-item.now::before  { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .tl-item.next::before { background: var(--text-dim); }
+  .tl-item .tl-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .tl-item h4 { font-size: 1rem; color: var(--text); margin: 2px 0 6px; }
+  .tl-item p  { font-size: 0.88rem; margin: 0; }
+
+  /* ── Comparison grid ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .compare-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .compare-card h4 { font-size: 0.95rem; margin-bottom: 12px; }
+  .compare-card ul { padding-left: 18px; }
+  .compare-card li { font-size: 0.88rem; color: var(--text-mid); margin: 6px 0; }
+
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin-top: 80px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Lilith Architecture · Internal Reference</div>
+  <h1>The Context Window Problem</h1>
+  <p>How local and cloud inference handle memory, what Lilith has today, what it was designed to be, and the concrete path forward.</p>
+</header>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#s1">How Local Models Actually Process a Prompt</a></li>
+      <li><a href="#s2">How Claude (Cloud) Handles It — Prompt Caching</a></li>
+      <li><a href="#s3">What Lilith Has Right Now</a></li>
+      <li><a href="#s4">The Core Problem: Static Context, Dynamic Needs</a></li>
+      <li><a href="#s5">Best-Practice Context Architectures</a></li>
+      <li><a href="#s6">Infinite Conversations — Compression & Compaction</a></li>
+      <li><a href="#s7">What Claude Code Does (Anthropic's Published Approach)</a></li>
+      <li><a href="#s8">The Target Architecture for Lilith</a></li>
+      <li><a href="#s9">What to Build First</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2>How Local Models Actually Process a Prompt</h2>
+  <div class="section-sub">mistral-nemo:12b · Ollama · RTX 3060 12GB</div>
+
+  <p>When you send a message to Lilith and she routes it to the local model, here is what physically happens on your GPU — in full, not abstracted:</p>
+
+  <h3>The KV Cache: Your Biggest Cost</h3>
+  <p>Every transformer model works by computing <strong>attention</strong> — how much each token should "look at" every other token. The intermediate results of this computation (called <strong>Key</strong> and <strong>Value</strong> matrices, or the <strong>KV cache</strong>) are stored in VRAM so they don't have to be recomputed for tokens already processed.</p>
+
+  <div class="diagram">
+    <pre>
+  PROMPT ARRIVES
+        │
+        ▼
+┌───────────────────────────────────────────────────┐
+│  PREFILL PHASE  (slow — proportional to length)  │
+│                                                   │
+│  For every token in your prompt:                  │
+│  ┌────────┐    ┌────────┐    ┌────────┐           │
+│  │token 1 │───▶│token 2 │───▶│ ... N  │           │
+│  └────────┘    └────────┘    └────────┘           │
+│       │              │             │              │
+│       ▼              ▼             ▼              │
+│  [K₁,V₁]       [K₂,V₂]      [Kₙ,Vₙ]  ← KV cache│
+│                                                   │
+│  All N tokens run through all 40 layers in one   │
+│  pass. Bigger prompt = more VRAM, more time.      │
+└───────────────────────────────────────────────────┘
+        │
+        ▼
+┌───────────────────────────────────────────────────┐
+│  DECODE PHASE  (one token at a time)              │
+│                                                   │
+│  NEW token ◀── attends to all KV cache           │
+│  NEW token ◀── attends to all KV cache           │
+│  ...                                              │
+│                                                   │
+│  Each output token = one GPU pass. Fast per-     │
+│  token, but must read the ENTIRE KV cache.       │
+└───────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <h3>Why 32K Context Made Lilith Take 47 Seconds</h3>
+  <p>When you bumped <code>OLLAMA_NUM_CTX</code> from 8192 → 32768, Ollama <strong>pre-allocates the full KV cache at startup</strong> for that window size. Even if your prompt is only 5K tokens, it reserved memory for 32K. This is why the first real 22K-token request took 47 seconds — the prefill phase had to process 22,000 tokens across all 40 layers of a 12B parameter model on a single GPU.</p>
+
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="val" style="color:var(--red)">47s</div>
+      <div class="desc">Latency at 32K ctx<br/>22K token prompt</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:var(--amber)">~9s</div>
+      <div class="desc">Typical latency before<br/>(8K ctx, truncated)</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:var(--green)">~2.5s</div>
+      <div class="desc">Claude cloud latency<br/>same prompt</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:var(--accent)">~7GB</div>
+      <div class="desc">Mistral NeMo weight<br/>size (Q4_K_M)</div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <div class="label">Key Insight</div>
+    The local model has <strong>no persistent memory between requests</strong>. Every time you send a message, the entire conversation history + all context blocks are re-prefilled from scratch. There is no "warm" state. The KV cache is built fresh every turn and discarded after the response.
+  </div>
+
+  <h3>What This Means for Lilith's Local-First Vision</h3>
+  <p>The local model is fast at short conversations about simple things. It degrades quickly as context grows because the prefill cost is linear: double the tokens, roughly double the time. The enriched, dense context blocks Lilith was built around are actually <em>enemies</em> of local inference speed — they're great for quality, terrible for latency.</p>
+
+  <p>The only way to make local inference fast again is to make the prompt <strong>dramatically smaller</strong> — not by removing information from the system, but by only injecting the information relevant to this specific query. That's exactly what the context window manager was always supposed to do.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2>How Claude (Cloud) Handles It — Prompt Caching</h2>
+  <div class="section-sub">Anthropic API · claude-opus-4-6 · Already wired in Lilith</div>
+
+  <p>Cloud models face a different version of the same problem: you're paying per-token, every turn. Sending the same 3,000-token system prompt with every message means you're billed for those 3,000 tokens repeatedly, even when nothing changed.</p>
+
+  <h3>Anthropic Prompt Caching — How It Works</h3>
+  <p>Anthropic's caching system lets you mark parts of the prompt as <strong>cacheable</strong> by attaching a <code>cache_control: {type: "ephemeral"}</code> flag. When the same cached block is seen again (within a 5-minute TTL), Anthropic serves it from their cache instead of re-processing it — and charges you at a <strong>90% discount</strong> (cache read tokens cost 0.1× normal input price).</p>
+
+  <div class="diagram">
+    <pre>
+  TURN 1  ─────────────────────────────────────────────
+  ┌─────────────────────────────────────────────────┐
+  │ SYSTEM PROMPT (stable)        cache_control: ✓  │  ← Anthropic caches this
+  │  • EDICTS.md                                    │
+  │  • VOICE.md                                     │    Full price this turn
+  │  • TOOLS.md  (2,500 tokens)                     │
+  │  • LILITH.md                                    │
+  ├─────────────────────────────────────────────────┤
+  │ VOLATILE BLOCK                (no cache flag)   │  ← Always re-sent
+  │  • Current date & time                          │
+  │  • Calendar, facts, finance blocks              │
+  │  • Recall context                               │
+  └─────────────────────────────────────────────────┘
+
+  TURN 2  ─────────────────────────────────────────────
+  ┌─────────────────────────────────────────────────┐
+  │ SYSTEM PROMPT (stable)        cache_control: ✓  │  ← CACHE HIT — 90% cheaper
+  ├─────────────────────────────────────────────────┤
+  │ VOLATILE BLOCK                                  │  ← Full price
+  │  • New datetime, updated context                │
+  └─────────────────────────────────────────────────┘
+    </pre>
+  </div>
+
+  <div class="callout good">
+    <div class="label">Already Wired</div>
+    Lilith's cloud router (<code>modules/router/cloud.py</code> line 188–200) <strong>already implements this correctly</strong>. The <code>PersonalityEngine</code> inserts a <code>CACHE_BREAK</code> marker between the stable and volatile sections. The router splits on that marker and attaches <code>cache_control</code> to the stable block only. This is working right now.
+  </div>
+
+  <h3>Cache TTL and the 5-Minute Problem</h3>
+  <p>Anthropic's cache TTL is <strong>5 minutes</strong>. If more than 5 minutes pass between turns, the cache expires and you pay full price again on the next turn. For a conversation that's actively happening (back-and-forth every minute), caching saves significantly. For Lilith running as an always-on assistant with gaps between interactions, cache hits will be inconsistent.</p>
+
+  <h3>What About Context Window Limits for Claude?</h3>
+  <p>Claude Opus 4 supports a 200K token context window. This is why routing to cloud solves the immediate problem — you're not hitting a hard wall. But you're paying for every token you send, so the economic argument for trimming context is just as strong as the performance argument for local.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2>What Lilith Has Right Now</h2>
+  <div class="section-sub">As of 2026-06-26 · Observed from codebase + telemetry</div>
+
+  <h3>The Context Pipeline (Every Single Turn)</h3>
+  <p>Right now, every message you send to Lilith assembles the same set of blocks regardless of what you asked. The "context budget" gate exists but only drops blocks when the combined total exceeds the ceiling — in practice, all 6 blocks are always included.</p>
+
+  <div class="token-bar">
+    <div class="token-bar-label">
+      <span>What gets sent to the model (typical turn, ~12K tokens estimated)</span>
+      <span style="color:var(--text-dim)">32K ctx window</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-seg seg-system" style="width:20%">System (~2.5K)</div>
+      <div class="bar-seg seg-context" style="width:17%">Context blocks (~2.2K)</div>
+      <div class="bar-seg seg-history" style="width:32%">52 msg history (~7.5K)</div>
+      <div class="bar-seg seg-unused" style="width:31%">Unused capacity</div>
+    </div>
+  </div>
+
+  <h3>The 6 Context Blocks (Always Injected)</h3>
+  <table>
+    <thead>
+      <tr><th>Block</th><th>Source</th><th>TTL</th><th>Est. Tokens</th><th>Always relevant?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>calendar</code></td><td>iCloud CalDAV → <code>calendar.db</code></td><td>1 hour</td><td>~300</td><td style="color:var(--amber)">Only for scheduling questions</td></tr>
+      <tr><td><code>dossier</code></td><td><code>~/.lilith/dossier.db</code></td><td>On change</td><td>~200</td><td style="color:var(--green)">Fairly general</td></tr>
+      <tr><td><code>facts</code></td><td>Weather, news (wttr.in / Tavily)</td><td>3–6 hours</td><td>~400</td><td style="color:var(--amber)">Only for current-events questions</td></tr>
+      <tr><td><code>finance</code></td><td><code>~/.lilith/finance/transactions.db</code></td><td>On sync</td><td>~150</td><td style="color:var(--red)">Rarely relevant</td></tr>
+      <tr><td><code>people</code></td><td>Contacts store</td><td>On sync</td><td>~200</td><td style="color:var(--amber)">Only for people questions</td></tr>
+      <tr><td><code>recall</code></td><td>Vector search → <code>recall.db</code></td><td>Per query</td><td>~580</td><td style="color:var(--green)">Query-aware (best of the 6)</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Recall</strong> is the one block that's already doing what the full context window manager should do: it searches the vector store for semantically relevant past context and injects only those matches. The other 5 blocks are static dumps regardless of what you asked.</p>
+
+  <h3>Memory Tiers</h3>
+  <div class="diagram">
+    <pre>
+  <span class="c-accent">HOT</span>  (<code>memory.db</code>)  ──── Last 50 messages · SQLite · Loaded every turn
+       └── Full text of recent conversation history
+       └── Expensive: 50 msgs ≈ 7,500+ tokens of raw history
+
+  <span class="c-amber">WARM</span> (<code>MEMORY.md</code>) ──── Topic index · Markdown · Injected into system prompt
+       └── Summary headings about you, your goals, your context
+       └── Right size, but manually maintained
+
+  <span class="c-purple">COLD</span> (JSONL archive) ── Full session logs · Gzipped · Never injected
+       └── Archival only; not retrievable at query time
+
+  <span class="c-green">RECALL</span> (<code>recall.db</code>) ─ Vector embeddings · Hybrid kNN + recency decay
+       └── Best existing mechanism for dynamic retrieval
+       └── Currently: 15 candidates → 5 hits per turn
+    </pre>
+  </div>
+
+  <div class="callout info">
+    <div class="label">The Irony</div>
+    The recall system <em>is</em> a context window manager — it retrieves only what's relevant. But it sits alongside 5 other blocks that are always injected wholesale. The architecture has the right piece; it just needs to be the <strong>primary</strong> retrieval mechanism rather than an addendum to static dumps.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2>The Core Problem: Static Context, Dynamic Needs</h2>
+  <div class="section-sub">Why the current architecture can't scale</div>
+
+  <p>The gap between what Lilith has and what you described is a single idea: <strong>the context assembled for every message should be shaped by what the message is asking for.</strong></p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4 style="color:var(--red)">What Happens Now</h4>
+      <ul>
+        <li>"What's the weather?" → sends calendar + finance + people</li>
+        <li>"Remind me about my goals" → sends weather + finance data</li>
+        <li>"Help me debug this code" → sends Zoe's birthday + grocery spending</li>
+        <li>All 6 blocks injected regardless</li>
+        <li>50-turn history loaded unconditionally</li>
+        <li>Local model gets 22K tokens → 47s response</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4 style="color:var(--green)">What It Should Be</h4>
+      <ul>
+        <li>"What's the weather?" → sends <em>only</em> facts block</li>
+        <li>"Remind me about my goals" → sends goals + recent relevant turns</li>
+        <li>"Help me debug this code" → sends last 5 coding turns + recall hits</li>
+        <li>Query classifier routes to relevant blocks only</li>
+        <li>History compressed, only relevant turns included</li>
+        <li>Local model gets 3K tokens → &lt;5s response</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>The enriched data pipeline (L1/L2 enhancement, TTL-based caching, the finance store, the calendar sync, the vector recall) — all of that is the <strong>data warehouse</strong>. What's missing is the <strong>query planner</strong> that sits in front of it and decides what to pull out for each specific question.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s5">
+  <h2>Best-Practice Context Architectures</h2>
+  <div class="section-sub">What research and production systems actually do</div>
+
+  <h3>1. RAG — Retrieval-Augmented Generation</h3>
+  <p>The foundational pattern. Instead of injecting all known facts, you embed the user's query, search a vector store for semantically similar content, and inject only the top-K results. Lilith's <code>recall.db</code> already does this for <em>conversation history</em> — the missing piece is applying the same pattern to the fact blocks.</p>
+
+  <div class="diagram">
+    <pre>
+  User query: "what's my car payment this month?"
+       │
+       ▼
+  <span class="c-accent">EMBED query</span> → [0.23, -0.11, 0.87, ...]
+       │
+       ▼
+  <span class="c-amber">SEARCH</span> each knowledge store:
+  ┌────────────────┬─────────────┬──────────────┐
+  │ finance.db     │ dossier.db  │ recall.db    │
+  │ score: 0.91 ✓  │ score: 0.21 │ score: 0.44  │
+  └────────────────┴─────────────┴──────────────┘
+       │
+       ▼
+  <span class="c-green">INJECT</span> only finance block + top 2 recall hits
+  Total: ~400 tokens instead of 1,830
+    </pre>
+  </div>
+
+  <h3>2. Query Classification (Intent Routing)</h3>
+  <p>Before any retrieval, run the user's message through a lightweight classifier to determine <em>intent category</em>. Each category maps to a set of relevant context blocks. This is much cheaper than embedding-based retrieval and works for obvious intent signals.</p>
+
+  <table>
+    <thead>
+      <tr><th>Intent Category</th><th>Blocks to Include</th><th>Blocks to Skip</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Weather / current events</td><td>facts</td><td>finance, people, calendar</td></tr>
+      <tr><td>Scheduling / calendar</td><td>calendar, dossier</td><td>finance, facts</td></tr>
+      <tr><td>Finance / spending</td><td>finance, dossier</td><td>facts, people, calendar</td></tr>
+      <tr><td>People / contacts</td><td>people, recall</td><td>finance, facts</td></tr>
+      <tr><td>General conversation</td><td>recall, dossier</td><td>finance, facts</td></tr>
+      <tr><td>Code / technical</td><td>recall (code-filtered)</td><td>all others</td></tr>
+    </tbody>
+  </table>
+
+  <p>Lilith's codebase already has keyword-based intent routing for triggering tools (<code>main.py</code> lines 155–178). Extending that same list to also govern <em>which context blocks to include</em> is a small addition with large impact.</p>
+
+  <h3>3. Hierarchical Memory (MemGPT / Letta Architecture)</h3>
+  <p>The most sophisticated approach — treating memory as a first-class system with explicit tiers and model-driven read/write operations. Popularized by the <a href="#" style="color:var(--accent)">MemGPT paper</a> (Packer et al., 2023). The model itself decides when to move memories between tiers.</p>
+
+  <div class="diagram">
+    <pre>
+  ┌──────────────────────────────────────────────────────┐
+  │  CONTEXT WINDOW  (what the model sees right now)    │
+  │  ┌──────────────┐  ┌──────────────────────────────┐ │
+  │  │  CORE MEMORY │  │  WORKING CONTEXT             │ │
+  │  │  • Identity  │  │  • Recent conversation       │ │
+  │  │  • User facts│  │  • Injected recall hits      │ │
+  │  │  • Goals     │  │  • Active task state         │ │
+  │  └──────────────┘  └──────────────────────────────┘ │
+  └──────────────────────────────────────────────────────┘
+          │ read/write                    │ read
+          ▼                               ▼
+  ┌──────────────────┐        ┌───────────────────────┐
+  │  ARCHIVAL MEMORY │        │  RECALL MEMORY        │
+  │  Long-term facts │        │  Vector search index  │
+  │  Old conv logs   │        │  (recall.db today)    │
+  └──────────────────┘        └───────────────────────┘
+    </pre>
+  </div>
+
+  <p>Lilith has the tiers (hot/warm/cold/recall). What MemGPT adds is an <em>agent loop</em> where the model explicitly calls <code>memory_search()</code> and <code>memory_insert()</code> tools as part of generating a response. The model manages its own memory rather than having it pre-assembled by the orchestrator.</p>
+
+  <h3>4. Sliding Window + Summarization</h3>
+  <p>The simplest practical approach for conversation history. Keep the last N full turns verbatim. Summarize everything older into a compact "session summary" that replaces the raw messages. The summary gets compressed again as the conversation continues.</p>
+
+  <div class="diagram">
+    <pre>
+  Turn 1 ──── turn 50  (compressed → SUMMARY A, ~200 tokens)
+                │
+  Turn 51 ─── turn 100 (compressed → SUMMARY B, ~200 tokens)
+                │
+  Turn 101 ── turn 110 (kept verbatim, ~1,500 tokens)
+
+  Total history in context: ~2,000 tokens
+  vs. current 50-turn raw: ~7,500 tokens
+    </pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s6">
+  <h2>Infinite Conversations — Compression & Compaction</h2>
+  <div class="section-sub">How to never lose what matters without paying for what doesn't</div>
+
+  <p>You described wanting Lilith to have no "end" to a conversation — she should never forget what you said and the conversation should be able to run indefinitely without degrading. Here's exactly how that's designed to work.</p>
+
+  <h3>The Core Misunderstanding to Correct</h3>
+  <p>Infinite conversation does <strong>not</strong> mean an infinite context window. It means an infinite <em>external memory store</em> paired with smart retrieval, so the context window stays bounded but nothing is truly lost. Think of it like RAM vs disk: the model's context window is RAM (fast, bounded), recall.db is disk (unlimited, indexed).</p>
+
+  <div class="diagram">
+    <pre>
+  ────────────────────────────────────────────────────────
+
+  NAIVE APPROACH (what people assume):
+
+  Conv starts: [msg1, msg2, msg3, ... msg500]
+                ←────── context window ──────→ FULL → FAIL
+
+  ────────────────────────────────────────────────────────
+
+  CORRECT APPROACH:
+
+  Conv starts: [msg1 ... msg50] → ARCHIVE → embed → recall.db
+                                           ↓
+  Next turn:   [SUMMARY of 1-50] + [msg51 ... msg100] → ARCHIVE
+                                           ↓
+  Right now:   [SUMMARY of 1-100] + [last 10 turns] + [recalled hits]
+               ↑                                      ↑
+               ~400 tokens                        ~580 tokens
+               total history: CONSTANT, ~1,000 tokens regardless of
+               how long the conversation has been running
+  ────────────────────────────────────────────────────────
+    </pre>
+  </div>
+
+  <h3>Compression Quality Is Everything</h3>
+  <p>The compression step is where naive implementations fail. If you summarize poorly, you lose context and Lilith seems to "forget." The right approach uses <strong>lossy compression for specifics, lossless for facts</strong>:</p>
+
+  <table>
+    <thead><tr><th>Type</th><th>Compress to</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Chit-chat / small talk</td><td>Discard</td><td>"How's your day?" → dropped</td></tr>
+      <tr><td>Task discussion</td><td>One sentence summary</td><td>"Discussed sprint plan for finance module"</td></tr>
+      <tr><td>Decisions made</td><td>Fact stored in dossier</td><td>"Steven prefers GIF over MP4 for demos"</td></tr>
+      <tr><td>Corrections given</td><td>Feedback memory entry</td><td>"Don't use NodeJS.Timeout — use ReturnType&lt;typeof setTimeout&gt;"</td></tr>
+      <tr><td>Technical details</td><td>Embed in recall.db</td><td>Full searchable text, retrieved when relevant</td></tr>
+    </tbody>
+  </table>
+
+  <h3>For Local vs Cloud: Same Logic, Different Ceiling</h3>
+  <p>The compaction pipeline works identically for both. The local model just has a lower "keep verbatim" budget (maybe 5 recent turns instead of 20) and a smaller overall context ceiling. The same compression artifacts go into recall.db either way, so nothing is truly lost — it just becomes retrieval-dependent rather than always-present.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s7">
+  <h2>What Claude Code Does (Anthropic's Published Approach)</h2>
+  <div class="section-sub">The trillion-dollar company's answer to the same problem</div>
+
+  <p>You mentioned Claude releasing something — you're thinking of <strong>Claude Code</strong> and its <code>/compact</code> command. This is Anthropic's production solution to exactly the conversation-length problem, and it's worth dissecting because it's what you should build.</p>
+
+  <h3>Claude Code's Compaction Strategy</h3>
+  <p>When the context approaches the limit, Claude Code runs a structured summarization pass. The key insight: it doesn't just truncate or summarize everything equally. It preserves different things with different fidelity:</p>
+
+  <div class="diagram">
+    <pre>
+  <span class="c-white">WHAT CLAUDE CODE PRESERVES (verbatim):</span>
+  ├── All files currently open in editor
+  ├── The most recent user message and response
+  ├── Any pending tool results
+  └── Explicitly pinned context (CLAUDE.md)
+
+  <span class="c-white">WHAT IT COMPRESSES (to summary):</span>
+  ├── Previous conversation turns (collapsed to narrative)
+  ├── Earlier tool call results (just the outcome, not the output)
+  └── Superseded file contents (only latest version kept)
+
+  <span class="c-white">WHAT IT DISCARDS:</span>
+  ├── Redundant exchanges
+  ├── Error messages that were resolved
+  └── Intermediate reasoning that led nowhere
+    </pre>
+  </div>
+
+  <p>The structural principle is: <strong>keep current state, compress history, discard resolved noise.</strong> Current state is always verbatim because the model needs it to act correctly right now. History is summarized because you might need to reference it. Resolved noise has no future value.</p>
+
+  <h3>CLAUDE.md as Persistent Context</h3>
+  <p>Anthropic's other approach is the <code>CLAUDE.md</code> file — a human-curated, always-loaded document that survives compaction. It's essentially the same concept as Lilith's <code>EDICTS.md</code> and <code>MEMORY.md</code> combined: stable facts about how to operate that don't need to be inferred from conversation history because they're explicitly authored.</p>
+
+  <div class="callout info">
+    <div class="label">Lilith already has this</div>
+    Your vault's <code>identity.md</code>, <code>EDICTS.md</code>, <code>VOICE.md</code>, and <code>MEMORY.md</code> are exactly this pattern. They're the stable, always-loaded, human-curated context that survives any compression. The compaction strategy just needs to know <em>not</em> to touch these.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s8">
+  <h2>The Target Architecture for Lilith</h2>
+  <div class="section-sub">Concrete design, not handwaving</div>
+
+  <p>Putting all of this together, here is what the completed context window manager looks like. You have most of the pieces — this is the assembly diagram.</p>
+
+  <div class="diagram">
+    <pre>
+  USER SENDS MESSAGE
+         │
+         ▼
+  ┌─────────────────────────────────────────────────────┐
+  │  <span class="c-accent">QUERY CLASSIFIER</span>  (lightweight, &lt;50ms)             │
+  │                                                     │
+  │  "weather in paris?" → intent: WEATHER              │
+  │  "any birthdays?"    → intent: CALENDAR             │
+  │  "debug this code"   → intent: CODING               │
+  │                                                     │
+  │  Output: intent_tags[] + block_whitelist[]          │
+  └───────────────────┬─────────────────────────────────┘
+                      │
+         ┌────────────┴────────────┐
+         ▼                         ▼
+  ┌─────────────────┐      ┌───────────────────────────┐
+  │  <span class="c-amber">BLOCK SELECTOR</span>  │      │  <span class="c-green">RECALL RETRIEVER</span>         │
+  │                 │      │                           │
+  │  Only fetch     │      │  Embed query, search      │
+  │  blocks in      │      │  recall.db, return        │
+  │  whitelist      │      │  top-5 relevant turns     │
+  └────────┬────────┘      └─────────────┬─────────────┘
+           │                             │
+           └──────────────┬──────────────┘
+                          ▼
+  ┌─────────────────────────────────────────────────────┐
+  │  <span class="c-purple">HISTORY MANAGER</span>                                    │
+  │                                                     │
+  │  last_N_verbatim (N=5 local, N=15 cloud)            │
+  │    + session_summary (compressed older turns)       │
+  │                                                     │
+  │  Total history budget: 1,500 tokens (not 7,500)    │
+  └───────────────────┬─────────────────────────────────┘
+                      │
+                      ▼
+  ┌─────────────────────────────────────────────────────┐
+  │  <span class="c-white">ASSEMBLED CONTEXT</span>                                  │
+  │                                                     │
+  │  [stable system: EDICTS+VOICE+TOOLS+identity]  ◀ cached
+  │  [selected blocks only]                            │
+  │  [top recall hits]                                 │
+  │  [session summary]                                 │
+  │  [last N turns verbatim]                           │
+  │  [current message]                                 │
+  │                                                     │
+  │  Target: &lt;4,000 tokens for local                   │
+  │           &lt;8,000 tokens for cloud                  │
+  └─────────────────────────────────────────────────────┘
+                      │
+                      ▼
+  ┌───────────────────────────────┐
+  │  <span class="c-accent">ROUTER</span>                        │
+  │  local if &lt;4K tokens          │
+  │  cloud  if &gt;4K or tool-heavy  │
+  └───────────────────────────────┘
+
+  POST-RESPONSE:
+  ┌─────────────────────────────────────────────────────┐
+  │  <span class="c-amber">BACKGROUND JOBS</span>                                    │
+  │  • Extract decisions/facts → dossier               │
+  │  • Embed turn → recall.db                          │
+  │  • Compress if history &gt; N turns                   │
+  └─────────────────────────────────────────────────────┘
+    </pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s9">
+  <h2>What to Build First</h2>
+  <div class="section-sub">Ordered by impact-to-effort ratio</div>
+
+  <div class="timeline">
+
+    <div class="tl-item done">
+      <div class="tl-label">Already Done</div>
+      <h4>Recall retrieval, context budget gate, Anthropic prompt caching</h4>
+      <p>These are live. The recall system is your best context management tool. The Anthropic cache split is already wired correctly in cloud.py.</p>
+    </div>
+
+    <div class="tl-item now">
+      <div class="tl-label">Highest Impact — Do First</div>
+      <h4>Query-intent block selection</h4>
+      <p>Extend the existing keyword intent list in <code>main.py</code> to also produce a <code>block_whitelist</code>. Weather questions skip finance and people. Coding questions skip everything except recall. This alone likely cuts local context from 22K → 5K tokens, making the local model useful again. One file, additive change.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">Next</div>
+      <h4>History compression (sliding window + summary)</h4>
+      <p>After a conversation exceeds 20 turns, run a background summarization pass over the oldest 15 turns. Store the summary as a special "session_summary" message type. Load it instead of the raw turns. History budget drops from 7,500 → 2,000 tokens permanently.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">After That</div>
+      <h4>Post-response fact extraction</h4>
+      <p>After every response, run a lightweight pass to extract any decisions, preferences, corrections, or new facts mentioned in the conversation. Write confirmed facts to dossier automatically. This feeds the long-term memory system without requiring you to explicitly say "remember this."</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">Later</div>
+      <h4>Full MemGPT-style agent memory tools</h4>
+      <p>Give the model <code>memory_search(query)</code> and <code>memory_save(key, value)</code> tools it can call during inference. Let the model manage its own retrieval rather than the orchestrator pre-assembling everything. This is the full vision — but the earlier steps need to be solid first.</p>
+    </div>
+
+  </div>
+
+  <div class="callout good">
+    <div class="label">Bottom Line</div>
+    The context window manager you built four years ago and have been carrying forward is architecturally correct. The recall system, the L1/L2 enrichment pipeline, the TTL caching, the memory tiers — all right. What's missing is the <strong>selector layer</strong> between your data warehouse and the assembled prompt. Everything upstream of that is already built and working. The gap is smaller than it feels.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Generated 2026-06-26 · Based on live Lilith codebase at /home/ratatoskyr/projects/lilith · Internal use
+</footer>
+
+</body>
+</html>

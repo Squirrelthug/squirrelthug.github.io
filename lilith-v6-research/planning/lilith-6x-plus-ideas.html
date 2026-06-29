@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith 6.x+ — Ideas Parking Lot</title>
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #111118; --surface2: #16161f; --border: #1e1e2e;
+    --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9; --amber: #f59e0b;
+    --green: #10b981; --red: #ef4444; --purple: #a78bfa; --blue: #60a5fa; --orange: #fb923c;
+    --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.7; max-width: 1060px; margin: 0 auto; padding: 56px 40px; }
+  h1 { font-size: 2.2rem; font-weight: 700; color: var(--purple); margin-bottom: 6px; }
+  .doc-subtitle { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+  .mandate { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--purple); border-radius: 0 6px 6px 0; padding: 16px 20px; margin-bottom: 32px; font-size: 0.87rem; }
+  .mandate strong { color: var(--purple); }
+
+  .category { margin: 36px 0 12px; display: flex; align-items: center; gap: 10px; }
+  .cat-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 5px 12px; border-radius: 4px; }
+  .c-security { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+  .c-hardware { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  .c-multi { background: rgba(79,195,201,0.1); color: var(--accent); border: 1px solid rgba(79,195,201,0.25); }
+  .c-voice { background: rgba(16,185,129,0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+  .c-ui { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+  .c-mobile { background: rgba(244,114,182,0.1); color: var(--pink); border: 1px solid rgba(244,114,182,0.25); }
+  .c-data { background: rgba(251,146,60,0.1); color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+  .c-social { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+
+  .idea { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 8px; }
+  .idea-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .idea-id { font-size: 0.68rem; font-weight: 700; color: var(--muted); width: 44px; flex-shrink: 0; }
+  .idea-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .idea-body { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; }
+  .idea-body strong { color: var(--text); }
+  .idea-why { font-size: 0.80rem; color: var(--accent); }
+  .idea-arch { font-size: 0.78rem; color: var(--amber); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; font-style: italic; }
+
+  .version-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; background: rgba(107,114,128,0.15); border: 1px solid rgba(107,114,128,0.3); color: var(--muted); margin-left: 6px; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  .rule-box { background: var(--surface); border: 1px solid rgba(167,139,250,0.3); border-radius: 8px; padding: 18px 22px; margin-top: 36px; }
+  .rule-box h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--purple); margin-bottom: 10px; }
+  .rule-box p { font-size: 0.87rem; color: var(--muted); }
+  .rule-box p strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<h1>Lilith 6.x+ — Ideas Parking Lot</h1>
+<p class="doc-subtitle">Ideas that are out of scope for v6 v1 but must not be forgotten. Captured here so they don't pollute the vertical slice.</p>
+
+<div class="mandate">
+  <strong>Purpose:</strong> When a good idea comes up during v6 v1 development that belongs in a future version, it goes here.
+  The rule is simple: if building it now would extend the v6 v1 timeline, or if it requires infrastructure not in the vertical slice,
+  it lives in this document. This is not a backlog. These ideas don't have priority or estimates — just enough description
+  to rebuild context when we return to them. Some may never ship. All are worth remembering.
+  <br><br>
+  <strong>Important:</strong> Even though these ideas are deferred, the v6 v1 architecture must not foreclose them.
+  Where the architecture needs to leave a door open for a 6.x+ idea, that accommodation is noted.
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-security">Security & Privacy</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-01</div><div class="idea-title">Privacy obfuscation layer for cloud routing <span class="version-badge">6.2+</span></div></div>
+  <div class="idea-body">When the routing pipeline selects a cloud LLM, an additional enhancement pass is applied to the context that obfuscates PII: real names replaced with aliases, addresses removed or generalized, account numbers omitted. This layer sits between L2 output and the CWM assembly for cloud-bound calls. It is a <strong>separate, parallel enhancement path</strong> — not a modification of the existing L1/L2 outputs.</div>
+  <div class="idea-why">User value: Talk to any cloud AI about your real life without your real data leaving your device in identifiable form.</div>
+  <div class="idea-arch">Architecture note: The L2 → CWM pipeline must preserve the distinction between cloud-routed and local-routed calls so this layer can be inserted without reworking the CWM. Design the routing decision to be available at context assembly time.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-02</div><div class="idea-title">End-to-end encrypted inter-Lilith communication <span class="version-badge">6.3+</span></div></div>
+  <div class="idea-body">When two Lilith instances communicate on a local network (home server, secondary machine), all traffic is end-to-end encrypted. This is a prerequisite for the distributed GPU pool (6X-04) and multi-device sync (6X-03).</div>
+  <div class="idea-arch">Architecture note: The v6 v1 communication layer (backend event bus) should use a protocol that can be secured without a redesign — TLS or noise protocol.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-hardware">Hardware & Compute</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-03</div><div class="idea-title">Hardware tier visualization UI — draggable resource allocation <span class="version-badge">6.2</span></div></div>
+  <div class="idea-body">A visual interface (like Apple's storage breakdown bar) that shows total GPU and CPU capacity and lets the user drag-assign pipeline components between GPU and CPU. Each component (STT, TTS, conversational LLM, artifact LLM) appears as a colored block. Dragging from GPU to CPU shows the component shift to a CPU-only color with a label change. <strong>Makes hardware configuration intuitive for non-technical users.</strong></div>
+  <div class="idea-why">Most users have never heard of GPU VRAM. This visualization teaches them what their hardware is doing and gives them meaningful control without needing to understand it.</div>
+  <div class="idea-arch">Architecture note: The capability tier profile must store individual per-component assignments, not just a single tier number, so this UI has data to read and write. Design the capability profile schema to support per-component routing even if v6 v1 doesn't expose the UI for it.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-04</div><div class="idea-title">Distributed home GPU pool — background task offloading <span class="version-badge">6.4+</span></div></div>
+  <div class="idea-body">If you have multiple computers at home, Lilith instances on each can collaborate. The primary instance routes background and artifact tasks to secondary instances with available GPU capacity during their downtime. Enhancement layer processing, memory compression, long-form artifact generation — all can run on a secondary machine and return results to the primary.</div>
+  <div class="idea-why">A home with three computers suddenly has the background processing power of a small server. No cloud billing. All local.</div>
+  <div class="idea-arch">Architecture note: The artifact dispatcher and enhancement job scheduler in v6 v1 should be written so that the job executor can be a remote process, not just a local thread. Abstract the executor interface.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-05</div><div class="idea-title">Hardware change detection and tier re-assignment prompt <span class="version-badge">6.2</span></div></div>
+  <div class="idea-body">If Lilith detects on startup that GPU configuration has changed since the last run (new GPU installed, old GPU removed), she notifies the user and offers to walk through hardware tier re-assignment. This includes suggesting new local models to download based on the new capability level.</div>
+  <div class="idea-arch">Architecture note: The capability tier profile written at startup should be persisted (not just session state) so it can be compared against the freshly detected hardware on next boot. Current design: session state only. This needs a one-field config write to support future comparison.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-multi">Multi-Device & Sync</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-06</div><div class="idea-title">Multi-device identity — two Liliths recognize each other <span class="version-badge">6.2+</span></div></div>
+  <div class="idea-body">Running Lilith on both a MacBook and a Linux desktop. The two instances recognize each other on the same network, sync shared memory and conversation context, and coordinate so that a session started on one device can be continued on the other. Each device maintains its own hardware tier and routing decisions.</div>
+  <div class="idea-arch">Architecture note: The session and conversation schema in v6 v1 must include a device_id and allow multiple devices to share a session_id. Don't assume sessions are single-device.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-voice">Voice Pipeline — Advanced</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-07</div><div class="idea-title">Graceful interruption handling <span class="version-badge">6.2</span></div></div>
+  <div class="idea-body">When the user speaks while Lilith is speaking, Lilith pauses, VAD processes the new input, classifies it as an interruption vs. a backchannel ("yeah, exactly"), and responds appropriately. For real interruptions: stop, address what was said, optionally return to the original thought. For backchannels: no signal reply — continue speaking. This requires a secondary processing thread and a new signal type in the conversation pipeline.</div>
+  <div class="idea-arch">Architecture note: The conversation turn model in v6 v1 should not assume a strict alternating user→Lilith→user pattern. The schema should support concurrent or interrupted turns.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-08</div><div class="idea-title">No-signal reply — choosing silence as a response <span class="version-badge">6.2</span></div></div>
+  <div class="idea-body">The router gains a third output option: no response. When the user makes a backchannel comment ("yeah, I do that too"), Lilith continues whatever she was doing without acknowledging it verbally. Currently, all LLMs are trained to always produce output — this requires explicit routing logic and a "null response" result type that the TTS and orb systems recognize as "do nothing."</div>
+  <div class="idea-arch">Architecture note: The TTS caller must handle a null/empty response gracefully. Design the handoff between router and TTS to allow a deliberate empty payload with reason code.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-ui">UI / Orb — Advanced</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-09</div><div class="idea-title">Voxel world / interactive background environment <span class="version-badge">7.0+</span></div></div>
+  <div class="idea-body">A 3D environment in the application background that represents Lilith's internal state. Cron jobs, enhancement layers, and tool activity are visualized as objects the orb can interact with during idle time. As Lilith runs a background task, the orb floats toward the corresponding visual element. Far off, but the UCL data to power it will exist from v6 v1.</div>
+  <div class="idea-arch">Architecture note: The element semantic ID system and UCL event taxonomy being built in v6 v1 are the infrastructure this feature needs. No special accommodation required — just don't break those systems.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-10</div><div class="idea-title">Restart awareness with contextual response <span class="version-badge">6.1</span></div></div>
+  <div class="idea-body">When Lilith restarts after an unexpected shutdown, crash, or long idle period, she notices the time gap and responds to it. She knows: was it a clean shutdown (window closed), a crash, or a power loss. She knows how much time passed. She knows she was mid-utterance if she was. She addresses this before continuing — "Looks like I went down for a couple hours. Everything's back up. Where were we?" UCL telemetry already captures shutdown events, but the startup pipeline needs to query this and pass it to the greeting logic.</div>
+  <div class="idea-arch">Architecture note: Log startup and shutdown events to UCL including shutdown_type (clean/crash/power) and the last in-progress turn if any. Startup sequence should check these before generating the first response.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-mobile">Mobile</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-11</div><div class="idea-title">iOS / Android application <span class="version-badge">7.0+</span></div></div>
+  <div class="idea-body">A mobile companion app. The desktop instance is primary — the mobile app is a thin client that connects to the user's Lilith instance over a secure local/VPN connection. Chat, voice (forwarded to desktop for processing), and notification relay. Not a standalone Lilith — a window into the one running at home.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-12</div><div class="idea-title">Home screen widgets — Lilith calendar and digest <span class="version-badge">7.0+</span></div></div>
+  <div class="idea-body">Mobile home screen widgets showing the Lilith-managed calendar, a morning digest of the day, and current active tasks. Read from the Lilith instance's shared state, not from cloud storage.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-13</div><div class="idea-title">Haptic feedback integration <span class="version-badge">7.0+</span></div></div>
+  <div class="idea-body">On mobile and on devices that support haptics (some laptops, smart watches): Lilith's confirmations, alerts, and button-press feedback are expressed as haptic patterns in addition to audio. The element semantic ID system in v6 v1 is the prerequisite — haptic events reference the same element schema.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-data">Data &amp; Integration</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-14</div><div class="idea-title">Lilith-managed calendar as subscribable ICS / RSS <span class="version-badge">6.2</span></div></div>
+  <div class="idea-body">Lilith's private managed calendar (the one she controls, separate from the user's Google Calendar) can be subscribed to via ICS URL on a local server. The user adds it to their native calendar app. Changes Lilith makes to her calendar appear automatically in the user's Google Calendar, iOS Calendar, etc. — without Lilith having write access to those calendars.</div>
+  <div class="idea-arch">Architecture note: The Lilith calendar schema in v6 v1 should be ICS-export-ready. Don't use a format that would require a lossy conversion later.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-15</div><div class="idea-title">Bulk data import — Obsidian vaults, file directories <span class="version-badge">6.2+</span></div></div>
+  <div class="idea-body">A user who has been managing their life in Obsidian, Notion exports, or any structured local data can dump the entire directory at Lilith. An ingestion pipeline processes the files deterministically, extracts structured information (people, events, notes, tasks), and routes everything to the correct database. Enhancement layers then process it. This is the "firehose" onboarding path for power users.</div>
+  <div class="idea-arch">Architecture note: The memory and contacts schema should be generic enough to accept arbitrary text-extracted entities, not just Google-sourced records. Don't hardcode the sync source as the only write path.</div>
+</div>
+
+<!-- ============================================================ -->
+<div class="category"><div class="cat-label c-social">Calendar &amp; Contacts — Advanced</div></div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-16</div><div class="idea-title">iMessage integration (macOS only) <span class="version-badge">6.2</span></div></div>
+  <div class="idea-body">On macOS, Lilith gains read access to iMessage conversation history via the Messages SQLite database (~/.messages/chat.db). She can reference message history with contacts in her dossier. This is macOS-only, tied to the platform plugin system, and read-only. Writing iMessages is intentionally out of scope for many versions.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-17</div><div class="idea-title">Cross-device conversation join — "I can see you're in the kitchen" <span class="version-badge">6.2+</span></div></div>
+  <div class="idea-body">When the user opens the desktop app while another Lilith endpoint (kitchen speaker, mobile) is mid-conversation, the chat screen shows the active conversation with an option to join. Typing a message from the desktop TTS-reads it into the active session. Requires multi-device session model (6X-06) as a prerequisite.</div>
+</div>
+
+<div class="idea">
+  <div class="idea-header"><div class="idea-id">6X-18</div><div class="idea-title">OS notification integration — Lilith as notification hub <span class="version-badge">6.2+</span></div></div>
+  <div class="idea-body">Lilith intercepts or bridges OS-level notifications (email, calendar alerts, messaging apps) and decides how to surface them — deliver immediately, queue for summary, or filter based on context ("you're in a meeting, I'll hold this"). Requires OS-specific notification API integration per platform.</div>
+</div>
+
+<hr>
+
+<div class="rule-box">
+  <h3>How to use this document</h3>
+  <p>
+    When a good idea comes up during v6 v1 development: <strong>add it here immediately, then leave it here.</strong>
+    Do not implement it during the v6 v1 sprint. Do not file a sprint task for it. Just add it to this document
+    with enough context to rebuild the idea later, and note if the v6 v1 architecture needs to "leave a door open" for it.
+    Those architecture notes go into the corresponding section of the design document as a future-proofing consideration.
+    <br><br>
+    Review this document when beginning v6.2 sprint planning to prioritize what gets built next.
+  </p>
+</div>
+
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center; margin-top: 32px;">
+  LILITH 6.X+ IDEAS · 18 ideas captured · June 2026
+</p>
+</body>
+</html>

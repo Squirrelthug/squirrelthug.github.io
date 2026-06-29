@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lilith: Two-Mode Architecture</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-panel: #111118;
+    --bg-card: #16161f;
+    --border: #1e1e2e;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-mid: #94a3b8;
+    --mono: 'IBM Plex Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 0 0 80px 0;
+  }
+
+  header {
+    background: linear-gradient(180deg, #0d0d1a 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 40px;
+    text-align: center;
+  }
+  header .label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  header p {
+    color: var(--text-mid);
+    max-width: 660px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+  }
+
+  .toc { max-width: 900px; margin: 40px auto 0; padding: 0 40px; }
+  .toc-inner {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+  .toc-inner h3 {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    margin-bottom: 14px;
+  }
+  .toc-inner ol { padding-left: 20px; }
+  .toc-inner li { margin: 6px 0; }
+  .toc-inner a { color: var(--accent); text-decoration: none; font-size: 0.95rem; }
+  .toc-inner a:hover { text-decoration: underline; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 40px 40px 0; }
+  section { margin-bottom: 64px; }
+
+  section h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #fff;
+    border-top: 2px solid var(--accent);
+    display: inline-block;
+    padding-top: 10px;
+    margin-bottom: 6px;
+  }
+  section h2.amber-top { border-top-color: var(--amber); }
+  section h2.green-top { border-top-color: var(--green); }
+  section h2.purple-top { border-top-color: var(--purple); }
+
+  section .section-sub {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-family: var(--mono);
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+  }
+  h3 { font-size: 1.15rem; font-weight: 600; color: var(--accent); margin: 32px 0 12px; }
+  p { color: var(--text-mid); margin-bottom: 16px; }
+  strong { color: var(--text); }
+
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 0.95rem;
+  }
+  .callout.info  { background: rgba(79,195,201,0.07);  border-color: var(--accent); }
+  .callout.warn  { background: rgba(245,158,11,0.07);  border-color: var(--amber); color: #fcd34d; }
+  .callout.good  { background: rgba(16,185,129,0.07);  border-color: var(--green); color: #6ee7b7; }
+  .callout.idea  { background: rgba(167,139,250,0.07); border-color: var(--purple); color: #c4b5fd; }
+  .callout .label { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+
+  .diagram {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .diagram pre {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre;
+  }
+  .c-accent  { color: var(--accent); }
+  .c-amber   { color: var(--amber); }
+  .c-green   { color: var(--green); }
+  .c-purple  { color: var(--purple); }
+  .c-red     { color: var(--red); }
+  .c-dim     { color: var(--text-dim); }
+  .c-white   { color: #fff; font-weight: 600; }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .metric-card .val {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: var(--mono);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .metric-card .desc { font-size: 0.78rem; color: var(--text-dim); }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+  th {
+    background: var(--bg-panel);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: rgba(79,195,201,0.1);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .compare-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .compare-card h4 { font-size: 0.95rem; margin-bottom: 12px; }
+  .compare-card ul { padding-left: 18px; }
+  .compare-card li { font-size: 0.88rem; color: var(--text-mid); margin: 6px 0; }
+  .compare-card .mode-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .narrative-block {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 14px 0;
+    position: relative;
+  }
+  .narrative-block .tag {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .narrative-block .speech {
+    font-size: 1rem;
+    color: var(--amber);
+    font-style: italic;
+    line-height: 1.6;
+  }
+  .narrative-block .trigger {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    margin-top: 8px;
+  }
+
+  .timeline { position: relative; padding-left: 28px; margin: 24px 0; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -24px; top: 6px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-item.now::before  { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .tl-item.next::before { background: var(--text-dim); }
+  .tl-item.done::before { background: var(--green); }
+  .tl-item .tl-label { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+  .tl-item h4 { font-size: 1rem; color: var(--text); margin: 2px 0 6px; }
+  .tl-item p  { font-size: 0.88rem; margin: 0; }
+
+  .big-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 28px 0;
+  }
+  .split-panel {
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid;
+  }
+  .split-panel.conv  { background: rgba(79,195,201,0.04); border-color: rgba(79,195,201,0.3); }
+  .split-panel.artif { background: rgba(245,158,11,0.04);  border-color: rgba(245,158,11,0.3); }
+  .split-panel .panel-title {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .split-panel.conv  .panel-title { color: var(--accent); }
+  .split-panel.artif .panel-title { color: var(--amber); }
+  .split-panel ul { padding-left: 18px; }
+  .split-panel li { font-size: 0.88rem; color: var(--text-mid); margin: 8px 0; }
+
+  footer {
+    text-align: center;
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    margin-top: 80px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Lilith Architecture · Design Session 2026-06-26</div>
+  <h1>The Two-Mode Architecture</h1>
+  <p>Conversational latency is the only latency that matters. Everything else is a background process dressed in honest framing. Here's how to build around that truth.</p>
+</header>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#s1">The Core Realization</a></li>
+      <li><a href="#s2">The Math: Speaking Cadence → Token Budget</a></li>
+      <li><a href="#s3">Conversational Mode — Design</a></li>
+      <li><a href="#s4">Artifact Mode — Design</a></li>
+      <li><a href="#s5">The Narrative Layer: What Lilith Says While Things Process</a></li>
+      <li><a href="#s6">The Personality Model — Where It Actually Belongs</a></li>
+      <li><a href="#s7">The Context Window Manager, Revisited</a></li>
+      <li><a href="#s8">The Edge Cases</a></li>
+      <li><a href="#s9">What This Changes About Build Order</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2>The Core Realization</h2>
+  <div class="section-sub">The architecture you described was always the right one</div>
+
+  <p>Everything in the last article — the context window manager, the dynamic retrieval, the query classifier, the hybrid vector DB — those are all still real work that needs to happen. But they were being framed as solutions to the wrong problem. The problem was never "how do we fit more context into a small window." It was: <strong>how does Lilith always feel present and fast to talk to, even when the underlying system is slow?</strong></p>
+
+  <p>The answer isn't better hardware or smarter routing. It's a <strong>design paradigm</strong>: Lilith is a personality that exists in the conversational layer. Everything else — tool results, long documents, background research, cloud model outputs — is an artifact that arrives from a system. She receives artifacts. She delivers them. She is not them.</p>
+
+  <div class="callout idea">
+    <div class="label">The Paradigm Shift</div>
+    <strong>Before:</strong> Lilith generates a response. If it's slow, that's a latency problem.<br/>
+    <strong>After:</strong> Lilith speaks immediately — conversationally, always. When something takes time, it's a background task completing, not a slow response. The framing makes latency architecturally invisible.
+  </div>
+
+  <p>This isn't a workaround. It's actually how trust is built with any assistant — human or AI. A good assistant doesn't go silent for 47 seconds and then deliver a monologue. They say "let me pull that together" and keep the conversation moving while the work happens.</p>
+
+  <p>K-2SO from Rogue One. TARS from Interstellar. What made those characters work wasn't that they were fast — it was that they were <em>present</em>. Personality in the foreground, capability in the background. That's the original design of Lilith, and you arrived back at it by working through all the hardware friction.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2 class="amber-top">The Math: Speaking Cadence → Token Budget</h2>
+  <div class="section-sub">Kokoro af_bella · TTS_RATE=1.0 · ~135 WPM</div>
+
+  <p>Lilith's voice pipeline runs at approximately 135 words per minute at natural cadence. This gives us a hard, grounded number for what "conversational" actually means in tokens.</p>
+
+  <table>
+    <thead>
+      <tr><th>Duration</th><th>Words</th><th>Est. Tokens</th><th>Feels Like</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>3 seconds</td><td>7</td><td>~5</td><td style="color:var(--text-dim)">Too short — sounds clipped</td></tr>
+      <tr><td>8 seconds</td><td>18</td><td>~13</td><td style="color:var(--accent)">Quick reply ← good floor</td></tr>
+      <tr><td>15 seconds</td><td>34</td><td>~25</td><td style="color:var(--green)">Comfortable conversational</td></tr>
+      <tr><td>25 seconds</td><td>56</td><td>~42</td><td style="color:var(--green)">Rich conversational — still natural</td></tr>
+      <tr><td>35 seconds</td><td>79</td><td>~58</td><td style="color:var(--amber)">Long — starting to feel like a presentation</td></tr>
+      <tr><td>60 seconds</td><td>135</td><td>~100</td><td style="color:var(--red)">Monologue — break this into artifact</td></tr>
+    </tbody>
+  </table>
+
+  <p>The conversational ceiling sits at roughly <strong>50 output tokens / 25 seconds of audio</strong>. That's the number to wire into the system. Anything the model is predicted to generate beyond that threshold should route to artifact mode, not conversational.</p>
+
+  <div class="metric-grid">
+    <div class="metric-card">
+      <div class="val" style="color:var(--accent)">135</div>
+      <div class="desc">WPM · af_bella at 1.0x</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:var(--green)">~50</div>
+      <div class="desc">Output token ceiling<br/>for conversational mode</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:var(--amber)">~25s</div>
+      <div class="desc">Max speech duration<br/>before it becomes a lecture</div>
+    </div>
+    <div class="metric-card">
+      <div class="val" style="color:var(--purple)">~30</div>
+      <div class="desc">Input tokens needed<br/>to predict output length</div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="label">Note on prediction</div>
+    You don't need to generate the full response to know it'll be long. Query classification (the same intent layer from the context window article) can predict output size before any model sees the prompt. "What's the weather?" → short. "Explain everything about my finances" → artifact. This decision can be made in milliseconds.
+  </div>
+
+  <h3>The Bandwidth Truth</h3>
+  <p>Voice has fundamentally lower information bandwidth than text. You can scan a well-structured document in 30 seconds and absorb the key points. Hearing someone read that same document aloud takes 10 minutes. This isn't a failure — it's the nature of the medium. Voice is rich and human and trusted. It's just low bandwidth.</p>
+
+  <p>The implication: <strong>voice should never be used to deliver information that would be better scanned</strong>. Anything dense — a finance summary, a code diff, a list of calendar events — belongs in a visual artifact with Lilith speaking a short summary: "Your March spending is in the panel. Main thing: Costco was way up." That's two seconds of audio plus something you can actually read. This is better for the user AND better for the architecture.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2 class="green-top">Conversational Mode — Design</h2>
+  <div class="section-sub">The fast path · Always ≤ 50 output tokens · Always feels immediate</div>
+
+  <p>Conversational mode is the default. Every interaction starts here and only escalates if the query demands it. The entire design of this path is optimized for one metric: time-to-first-audio.</p>
+
+  <div class="diagram">
+    <pre>
+  <span class="c-green">CONVERSATIONAL MODE PIPELINE</span>
+  ────────────────────────────────────────────────────────────
+
+  User speaks
+       │
+       ▼
+  <span class="c-accent">Query Classifier</span>  (~5ms)
+  ├── Intent: simple / conversational / quick-lookup
+  ├── Predicted output: ≤ 50 tokens
+  └── Context needed: minimal
+       │
+       ▼
+  <span class="c-accent">Context Assembly</span>  (~10ms, runs in parallel with classifier)
+  ├── dossier         (always — ~200 tokens, who you are)
+  ├── last 3–5 turns  (~500 tokens max)
+  └── 1–2 recall hits (~200 tokens)
+  Total context: ~1,000 tokens (not 22,000)
+       │
+       ▼
+  <span class="c-accent">Local Model</span>  (Mistral NeMo or fast cloud)
+  ├── 1K token prefill  →  ~2s on RTX 3060
+  ├── Output budget: HARD CAP at 60 tokens
+  └── If model would exceed cap → truncate + append artifact flag
+       │
+       ▼
+  <span class="c-amber">Personality Layer</span>  (baked into system prompt — no extra model pass)
+  └── EDICTS + VOICE already embedded; no second inference needed
+       │
+       ▼
+  <span class="c-green">format_for_speech()</span>  → Kokoro TTS
+  └── Audio begins streaming
+
+  ────────────────────────────────────────────────────────────
+  Total latency target: <span class="c-green">≤ 3 seconds to first audio</span>
+    </pre>
+  </div>
+
+  <div class="split-panel conv" style="margin: 20px 0;">
+    <div class="panel-title">Conversational Mode — What It Handles</div>
+    <ul>
+      <li>"What's the weather right now?"</li>
+      <li>"Remind me what I was working on yesterday"</li>
+      <li>"When's my next appointment?"</li>
+      <li>"What time is it in Tokyo?"</li>
+      <li>"Set a timer for 20 minutes"</li>
+      <li>"What did we talk about last week with the finance stuff?"</li>
+      <li>Casual back-and-forth — any reply to a reply</li>
+      <li>Short acknowledgements, confirmations, small talk</li>
+    </ul>
+  </div>
+
+  <h3>The Hard Output Cap</h3>
+  <p>The most important enforcement mechanism in conversational mode is a <strong>hard cap on output tokens</strong>. The model is told in the system prompt that in conversational mode, responses must fit within the token budget. If a question genuinely requires more — it says so briefly and signals artifact mode.</p>
+
+  <p>This is not clipping the model's ability. It's training the right behavior: "I can give you the short version now, or pull together the full picture — which do you want?" That's how a skilled assistant actually operates.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2 class="amber-top">Artifact Mode — Design</h2>
+  <div class="section-sub">The background path · No latency pressure · Lilith speaks immediately anyway</div>
+
+  <p>Artifact mode is not slow mode. It's <em>parallel</em> mode. Lilith speaks within 2 seconds regardless of how long the background task takes — she has a narrative response ready before the work is even started.</p>
+
+  <div class="diagram">
+    <pre>
+  <span class="c-amber">ARTIFACT MODE PIPELINE</span>
+  ────────────────────────────────────────────────────────────
+
+  User speaks something that requires long processing
+       │
+       ▼
+  <span class="c-accent">Query Classifier</span>
+  ├── Intent: info-heavy / tool-chain / long-output predicted
+  └── Routes to: artifact mode
+       │
+       ├──────────────────────────────────────────────────────
+       │                                                      │
+       ▼  <span class="c-green">IMMEDIATE (≤ 2s)</span>                                   ▼  <span class="c-amber">BACKGROUND</span>
+  Lilith speaks filler narrative                     Task queued:
+  (from per-tool narrative library)                  ├── Full context assembled
+  "I'm pulling your spending together,               ├── Cloud model called
+   shouldn't take long."                             ├── Tool chain executes
+       │                                             ├── Result formatted
+       ▼                                             └── Artifact created
+  Continues conversation naturally                          │
+       │                                                    │
+       └──────────────────────────┬─────────────────────────┘
+                                  │
+                             Task completes
+                                  │
+                                  ▼
+                     <span class="c-amber">Artifact delivered to UI panel</span>
+                     + Lilith speaks short handoff:
+                     "That came back. Quick version: [2 sentences].
+                      Full breakdown's in the panel."
+
+  ────────────────────────────────────────────────────────────
+  Time-to-first-audio: <span class="c-green">≤ 2s</span>   Time-to-artifact: <span class="c-amber">as long as needed</span>
+    </pre>
+  </div>
+
+  <div class="split-panel artif" style="margin: 20px 0;">
+    <div class="panel-title">Artifact Mode — What It Handles</div>
+    <ul>
+      <li>Finance summaries, spending trends, monthly breakdowns</li>
+      <li>Calendar week/month views</li>
+      <li>Long document generation or analysis</li>
+      <li>Web research (Tavily multi-step queries)</li>
+      <li>Code generation or review</li>
+      <li>Large context questions ("summarize everything we've talked about")</li>
+      <li>Multi-tool chains (weather + traffic + calendar → morning briefing)</li>
+      <li>Anything Steven dumps as a wall of text (like a 20-minute rant)</li>
+    </ul>
+  </div>
+
+  <h3>Lilith's Relationship to Artifacts</h3>
+  <p>The key framing: artifacts don't originate <em>from</em> Lilith — they originate from <em>systems Lilith has access to</em>. She's the one who requested them, received them, and is delivering them. She is not the artifact. She is the assistant who pulled it from the system and is handing it to you.</p>
+
+  <p>This matters for how she speaks about them: <em>"The finance module came back with this"</em> not <em>"I calculated your spending."</em> The subtle difference builds the right mental model for the user: Lilith is present and responsive; the underlying systems are capable but have their own latency.</p>
+
+  <div class="callout good">
+    <div class="label">Why This Builds Trust</div>
+    A human assistant who says "let me look into that and come back to you" is more trustworthy than one who goes silent and returns 45 seconds later with an answer. The verbal acknowledgement + brief explanation + follow-through is the entire trust loop. Lilith just needs to execute that loop on every artifact task.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s5">
+  <h2>The Narrative Layer</h2>
+  <div class="section-sub">What Lilith says while the work is happening — per tool, per situation</div>
+
+  <p>Every tool and every artifact class needs a defined set of filler narratives — short spoken responses Lilith delivers immediately while the background task runs. These aren't filler in the pejorative sense. They're conversational acknowledgements that maintain presence and set expectations.</p>
+
+  <h3>The Structure of a Narrative</h3>
+  <p>Each narrative has three parts, delivered across the interaction:</p>
+  <ol style="color: var(--text-mid); padding-left: 24px; margin: 16px 0;">
+    <li style="margin-bottom: 10px;"><strong>Acknowledgement</strong> — confirms the request was understood, task is underway (spoken immediately)</li>
+    <li style="margin-bottom: 10px;"><strong>Bridge</strong> — optional, keeps conversation alive if processing is taking longer (spoken mid-wait)</li>
+    <li style="margin-bottom: 10px;"><strong>Handoff</strong> — delivers the artifact summary when the result arrives (spoken on completion)</li>
+  </ol>
+
+  <h3>Example Narratives by Tool</h3>
+
+  <div class="narrative-block">
+    <div class="tag">Finance Tool · Acknowledgement</div>
+    <div class="speech">"Pulling up your spending — give me just a second."</div>
+    <div class="trigger">trigger: finance query detected · task queued</div>
+  </div>
+
+  <div class="narrative-block">
+    <div class="tag">Finance Tool · Handoff</div>
+    <div class="speech">"Alright, that came back. Short version: you're up on groceries this month, everything else is tracking close to last month. The full breakdown is in the panel."</div>
+    <div class="trigger">trigger: finance artifact created · delivered to UI</div>
+  </div>
+
+  <div class="narrative-block">
+    <div class="tag">Calendar Tool · Acknowledgement</div>
+    <div class="speech">"Looking at your week now."</div>
+    <div class="trigger">trigger: calendar range query · task queued</div>
+  </div>
+
+  <div class="narrative-block">
+    <div class="tag">Web Research · Acknowledgement</div>
+    <div class="speech">"That's going to take me a minute to pull together — I'm searching on it."</div>
+    <div class="trigger">trigger: Tavily search queued · expected latency > 5s</div>
+  </div>
+
+  <div class="narrative-block">
+    <div class="tag">Large Document / Long Generation · Acknowledgement</div>
+    <div class="speech">"There's a lot there. I'm going to work through it in the background — might take a bit. What else is on your mind?"</div>
+    <div class="trigger">trigger: estimated output > 500 tokens · routed to background</div>
+  </div>
+
+  <div class="narrative-block">
+    <div class="tag">System Self-Query · Acknowledgement</div>
+    <div class="speech">"My system's generating a report on that — I'll have it for you in a moment."</div>
+    <div class="trigger">trigger: user asks about Lilith's own internals · telemetry query queued</div>
+  </div>
+
+  <h3>Bridge Responses (For Long Waits)</h3>
+  <p>If a task is predicted to take longer than ~8 seconds and Lilith has gone quiet, a bridge response fires automatically — something that continues the conversation or signals the wait is expected. She doesn't go silent. Silence is the UX failure to avoid above all others.</p>
+
+  <div class="narrative-block">
+    <div class="tag">Generic Bridge · fires at 8s if task incomplete</div>
+    <div class="speech">"Still working on that one — it's a bit to pull together."</div>
+    <div class="trigger">trigger: task_elapsed > 8s AND no response yet</div>
+  </div>
+
+  <h3>Where These Live in Code</h3>
+  <p>Each tool definition already has a YAML schema in <code>tools/definitions/</code>. The right place to add narratives is a new <code>narratives:</code> key in each tool YAML — three optional string fields: <code>acknowledge</code>, <code>bridge</code>, <code>handoff</code>. The router reads these at dispatch time and fires the appropriate one to the TTS queue immediately, before the tool even starts executing.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s6">
+  <h2 class="purple-top">The Personality Model — Where It Actually Belongs</h2>
+  <div class="section-sub">A small model for voice, not for reasoning</div>
+
+  <p>You described running a small model on the upgraded GPU whose job is to take generated text and run it through Lilith's personality layer before it hits TTS. This is architecturally correct — but its role is different in each mode.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="mode-label" style="color:var(--green)">Conversational Mode</div>
+      <h4 style="color:var(--green)">Personality in the Prompt, Not the Pipeline</h4>
+      <ul>
+        <li>EDICTS + VOICE already embedded in system prompt</li>
+        <li>A second model pass adds latency you can't afford here</li>
+        <li>Target is ≤ 3s total — no room for extra inference</li>
+        <li>Personality layer model: <strong>not used in this path</strong></li>
+        <li>Solution: make the main model's personality baked-in tight enough that no pass is needed</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <div class="mode-label" style="color:var(--amber)">Artifact Mode</div>
+      <h4 style="color:var(--amber)">Personality Model Earns Its Slot Here</h4>
+      <ul>
+        <li>Cloud model generates raw content (no personality constraint)</li>
+        <li>Raw content can be long, dense, structured — cloud doesn't care</li>
+        <li>Personality model takes: raw content + delivery context</li>
+        <li>Outputs: Lilith's spoken handoff (the 2-sentence summary)</li>
+        <li>Latency: runs while artifact is being formatted → parallel, free</li>
+        <li>Personality model: <strong>translates artifacts into Lilith's voice</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <p>The personality model's actual job description: <strong>given a dense output from a cloud model or tool, produce the short spoken handoff Lilith uses to deliver it</strong>. That's a narrow, fast task a 3B–7B model handles well. It doesn't need to reason. It needs to know Lilith's voice deeply and produce 1–3 sentences in it.</p>
+
+  <div class="diagram">
+    <pre>
+  ARTIFACT MODE WITH PERSONALITY MODEL
+  ────────────────────────────────────────────────────────
+
+  Cloud model produces:
+  "Your March spending totals $3,847. Groceries: $612 (up 23%
+   from February). Gas: $89. Dining: $340. Transfers excluded.
+   Year-over-year you're tracking 8% below March 2025..."
+       │
+       ▼
+  <span class="c-purple">Personality Model</span>  (3B–7B, local, fast)
+  Receives: raw artifact summary + VOICE.md context
+  Task: produce Lilith's spoken handoff in her voice
+       │
+       ▼
+  Output:
+  <span class="c-amber">"March came in at thirty-eight hundred. Groceries went up —
+  that's probably the Costco run. Full breakdown's in the panel."</span>
+       │
+       ▼
+  format_for_speech() → Kokoro → audio
+
+  ────────────────────────────────────────────────────────
+  The cloud model focused on accuracy.
+  The personality model focused on how Lilith would say it.
+  Neither job contaminates the other.
+    </pre>
+  </div>
+
+  <h3>The Collaborative Personality Document</h3>
+  <p>You mentioned the idea of having a document that defines how Lilith handles specific situations — written collaboratively with her, capturing the examples. Something like an extended personality layer beyond EDICTS and VOICE. This would be the primary context the personality model receives, distinct from EDICTS (what she must do) and VOICE (how she speaks). Call it something like <code>character.md</code> — the situational responses, the humor register, the way she handles being asked about herself, the way she handles long silences, the way she transitions between topics.</p>
+
+  <p>This is the document that makes her feel like K-2SO or TARS — not just capable, but <em>distinct</em>. You can edit it in conversation with her. You say "that response felt wrong — in that situation you'd say X instead." She edits her own character file. Over time it becomes the richest personality context in the system.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s7">
+  <h2>The Context Window Manager, Revisited</h2>
+  <div class="section-sub">Its job changed — it's now a servant of the conversational path</div>
+
+  <p>After this design session, the context window manager is no longer the architecture. It's a subsystem that serves the two-mode split. Its job description is now narrower and more achievable:</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="mode-label" style="color:var(--text-dim)">Old Job Description</div>
+      <h4>Handle all queries efficiently</h4>
+      <ul>
+        <li>Dynamic retrieval for every turn</li>
+        <li>Balance context quality vs. token count for all cases</li>
+        <li>Route local vs cloud based on complexity</li>
+        <li>Handle short queries and long ones in the same pipeline</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <div class="mode-label" style="color:var(--accent)">New Job Description</div>
+      <h4>Keep conversational mode skinny</h4>
+      <ul>
+        <li>Assemble ≤ 1,200 tokens for conversational path</li>
+        <li>Never inject finance/people/facts when not queried</li>
+        <li>Artifact mode gets full context — no budget pressure there</li>
+        <li>Route decision: conversational vs artifact (not local vs cloud)</li>
+      </ul>
+    </div>
+  </div>
+
+  <p>The cloud vs local decision is now downstream of the conversational vs artifact decision. Conversational mode usually goes local (fast, cheap). Artifact mode usually goes cloud (capable, no latency pressure). But either can go either way — a simple query on a slow GPU might route cloud; a complex artifact might run local overnight. The primary split is user experience, not model selection.</p>
+
+  <div class="callout info">
+    <div class="label">Anthropic prompt caching still matters</div>
+    For artifact mode cloud calls, the stable system prompt (EDICTS, VOICE, tools, identity) is already cached via the <code>CACHE_BREAK</code> split in <code>cloud.py</code>. Artifact mode hits cloud frequently. Cache hits here save real money. Keep the caching architecture exactly as-is — it's in the right place.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s8">
+  <h2>The Edge Cases</h2>
+  <div class="section-sub">Three situations that don't fit cleanly into either mode</div>
+
+  <h3>1. Steven dumps a 20-minute rant (like today)</h3>
+  <p>Large wall of text → artifact mode, immediately. Lilith doesn't try to process it inline. She says something like <em>"That's a lot — let me work through it properly. Keep going or give me a moment?"</em> The full text goes to a cloud model for summarization + synthesis in the background. The result comes back as a structured artifact she then delivers conversationally.</p>
+  <p>The key is she doesn't go silent. She acknowledges the magnitude of the input and signals the mode shift explicitly.</p>
+
+  <h3>2. A query that starts conversational but turns artifact mid-generation</h3>
+  <p>The model starts generating a response and realizes it's going long. Two options:</p>
+  <ul style="color: var(--text-mid); padding-left: 22px; margin: 12px 0;">
+    <li style="margin: 8px 0;">The hard output cap truncates it and appends: <em>"...there's more to this — I'll put the full version in the panel."</em></li>
+    <li style="margin: 8px 0;">Better long-term: query classification is accurate enough that this rarely happens. "Explain everything about X" is always artifact before the model is called.</li>
+  </ul>
+
+  <h3>3. User is in rapid-fire mode (coding session, quick back-and-forth)</h3>
+  <p>When queries are coming in faster than artifact tasks complete, the context window needs to know which tasks are pending and reference them naturally. <em>"Still working on that search from a minute ago — should have it soon."</em> This requires the context window to include a lightweight "pending tasks" block — a short list of what's processing in background. Small, always injected, keeps Lilith coherent across parallel work.</p>
+
+  <h3>4. The user directly asks Lilith about herself</h3>
+  <p>This is the introspection case from x.txt. Lilith's self-knowledge should come in layers:</p>
+  <ul style="color: var(--text-mid); padding-left: 22px; margin: 12px 0;">
+    <li style="margin: 8px 0;"><strong>General identity</strong> — always in context (who she is, what she does, in vague terms)</li>
+    <li style="margin: 8px 0;"><strong>System specifics</strong> — queried on demand (UCL telemetry, current model, uptime, recent activity)</li>
+    <li style="margin: 8px 0;"><strong>Deep internals</strong> — artifact mode (if she needs to generate a full system report, that's background)</li>
+  </ul>
+  <p>The response to "what are you running on?" should never take 47 seconds. The quick answer is always available. The detailed answer is an artifact.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s9">
+  <h2 class="green-top">What This Changes About Build Order</h2>
+  <div class="section-sub">Same work, different priority — the constraint came first</div>
+
+  <p>You said in x.txt: "I think we still need to do that, but with the constraint of locking ourselves into a new design." That's exactly right. The work from the context window article still needs doing. The priority order just changed.</p>
+
+  <div class="timeline">
+
+    <div class="tl-item now">
+      <div class="tl-label">Do First — Constraint</div>
+      <h4>Define the two-mode split in code</h4>
+      <p>Add <code>mode: "conversational" | "artifact"</code> to the query classification output. Wire the output token cap into conversational mode. This is the architectural anchor everything else plugs into. Without it, all the other work could be optimizing the wrong path.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">Next — Narrative Layer</div>
+      <h4>Add narratives to tool YAML definitions</h4>
+      <p>Three fields per tool: <code>acknowledge</code>, <code>bridge</code>, <code>handoff</code>. Router fires acknowledge immediately on artifact dispatch. Bridge fires at 8s if task still running. Handoff fires on completion. This is additive — no existing behavior changes.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">Next — Context</div>
+      <h4>Query-intent block selection for conversational path</h4>
+      <p>From the context window article: only inject blocks relevant to the query. Now easier to scope — conversational mode has a strict ≤ 1,200 token budget, so block selection isn't optional, it's enforced by the ceiling.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">After GPU Upgrade</div>
+      <h4>Personality model for artifact handoffs</h4>
+      <p>Small model (3B–7B) loaded alongside Kokoro. Takes raw artifact content + VOICE.md, produces Lilith's spoken handoff summary. Runs in parallel with artifact formatting — no added latency on the critical path.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">Later</div>
+      <h4>character.md — the collaborative personality document</h4>
+      <p>Situational responses, humor register, self-identity framing, how she handles long tasks, how she talks about the system. Written with her, iteratively. The thing that makes her feel distinct, not just functional.</p>
+    </div>
+
+    <div class="tl-item next">
+      <div class="tl-label">Later Still</div>
+      <h4>Conversation compression + history management</h4>
+      <p>Still needed — especially for the conversational path's token budget. But less urgent now that artifact mode takes the heavy workload out of the conversational context entirely.</p>
+    </div>
+
+  </div>
+
+  <div class="callout good">
+    <div class="label">The Summary</div>
+    The hardware problem was a design problem in disguise. The conversational path needs to be fast and it can be — not because the hardware got better, but because <strong>you stopped asking the conversational path to do things it was never supposed to do</strong>. Anything heavy is an artifact. Lilith speaks immediately. That's the design. It was always the design.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Generated 2026-06-26 · Design session — Lilith Two-Mode Architecture · Internal reference
+</footer>
+
+</body>
+</html>

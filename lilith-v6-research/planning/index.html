@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Planning Documents</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface-hover: #14141e;
+    --border: #1e1e2e;
+    --border-hover: #2a2a3e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --blue: #60a5fa;
+    --orange: #fb923c;
+    --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 48px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  header { margin-bottom: 40px; }
+  h1 { font-size: 2rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .subtitle { font-size: 0.9rem; color: var(--muted); }
+
+  /* Section groupings */
+  .group-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 5px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    margin: 36px 0 14px;
+  }
+  .g-ref { background: rgba(79,195,201,0.1); color: var(--accent); border: 1px solid rgba(79,195,201,0.2); }
+  .g-arch { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.2); }
+  .g-found { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
+  .g-future { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+
+  /* Card grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .grid-wide { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Card */
+  a.card {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+  a.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--card-accent, var(--border));
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  a.card:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+  }
+  a.card:hover::before { opacity: 1; }
+
+  .card-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 7px;
+    line-height: 1.35;
+  }
+  .card-summary {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .card-summary strong { color: #9ca3af; font-weight: 600; }
+  .card-arrow {
+    position: absolute;
+    bottom: 16px;
+    right: 18px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  a.card:hover .card-arrow { opacity: 1; transform: translateX(2px); }
+
+  /* Tag color variants */
+  .tag-checklist { background: rgba(79,195,201,0.12); color: var(--accent); }
+  .tag-standards { background: rgba(239,68,68,0.12); color: var(--red); }
+  .tag-future    { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .tag-arch      { background: rgba(96,165,250,0.12); color: var(--blue); }
+  .tag-systems   { background: rgba(167,139,250,0.12); color: var(--purple); }
+  .tag-voice     { background: rgba(16,185,129,0.12); color: var(--green); }
+  .tag-data      { background: rgba(45,212,191,0.12); color: #2dd4bf; }
+  .tag-story     { background: rgba(244,114,182,0.12); color: var(--pink); }
+  .tag-infra     { background: rgba(251,146,60,0.12); color: var(--orange); }
+
+  /* Card accent colors via CSS var */
+  .accent-teal   { --card-accent: var(--accent); }
+  .accent-red    { --card-accent: var(--red); }
+  .accent-amber  { --card-accent: var(--amber); }
+  .accent-blue   { --card-accent: var(--blue); }
+  .accent-purple { --card-accent: var(--purple); }
+  .accent-green  { --card-accent: var(--green); }
+  .accent-pink   { --card-accent: var(--pink); }
+  .accent-orange { --card-accent: var(--orange); }
+  .accent-teal2  { --card-accent: #2dd4bf; }
+
+  @media (max-width: 700px) {
+    .grid, .grid-wide { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Planning Documents</h1>
+  <p class="subtitle">All design research and reference documents for Lilith v6 · Click any card to open</p>
+</header>
+
+<!-- ============================================================ -->
+<div class="group-label g-ref">Active References — Use These During Design</div>
+<div class="grid-wide">
+
+  <a href="lilith-v6-design-checklist.html" class="card accent-teal">
+    <div class="card-tag tag-checklist">Checklist</div>
+    <div class="card-title">v6 Design Document Checklist</div>
+    <div class="card-summary">
+      <strong>28 sections</strong>, ~220 checklist items. For each section of the design document, the specific questions that must be answered before build begins. The quality gate for the design document. Use this while filling in <em>Lilithv6 Design Doc.html</em> — every item checked means the section is truly complete.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-v6-standards.html" class="card accent-red">
+    <div class="card-tag tag-standards">Standards</div>
+    <div class="card-title">Non-Negotiable Standards</div>
+    <div class="card-summary">
+      The inalienable rules every agent and every sprint task must follow. <strong>No blind spots in telemetry. pathlib.Path everywhere. SQLCipher for all DBs. OS keychain for all credentials. Voice at all tiers. No raw data in LLM context.</strong> Includes the sprint done-criteria checklist. Read at the start of every agent session.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+</div>
+
+<!-- ============================================================ -->
+<div class="group-label g-arch">Architecture — The Shape of v6</div>
+<div class="grid">
+
+  <a href="lilith-v6-vertical-slice.html" class="card accent-blue">
+    <div class="card-tag tag-arch">Vision</div>
+    <div class="card-title">v6 Vertical Slice</div>
+    <div class="card-summary">
+      The product vision and build strategy. <strong>Three core apps: Contacts, Finance, Conversation/Chat.</strong> BYOK model. Why the vertical slice is the ship target, not a milestone. Piracy/Obsidian licensing model. The "we only built it once we built v5" realization.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-v6-systems.html" class="card accent-purple">
+    <div class="card-tag tag-systems">Diagram</div>
+    <div class="card-title">v6 Systems Architecture</div>
+    <div class="card-summary">
+      Color-coded visual architecture across <strong>9 layers</strong>. Four data flow narratives: conversational query, artifact mode, sync pipeline, Lilith self-debugging via UCL. Scale breakdown: frontend ~10%, processing ~45%, data ~45%.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-two-mode-architecture.html" class="card accent-teal">
+    <div class="card-tag tag-arch">Architecture</div>
+    <div class="card-title">Two-Mode Architecture</div>
+    <div class="card-summary">
+      The core design anchor. <strong>Conversational mode</strong> (≤50 tokens, ≤3s to audio, ≤1,200 token context) vs <strong>Artifact mode</strong> (acknowledge → background → handoff). Why conversational latency is the only latency that matters. How the "buying time" framing makes everything else possible.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-context-window.html" class="card accent-blue">
+    <div class="card-tag tag-arch">CWM</div>
+    <div class="card-title">Context Window Architecture</div>
+    <div class="card-summary">
+      How local and cloud inference physically handle a prompt. The Context Window Manager design — <strong>intent-to-block mapping, dynamic retrieval, the query classifier.</strong> What Lilith had in v5, what it was designed to be, and the concrete path to the right architecture.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-conversational-design.html" class="card accent-green">
+    <div class="card-tag tag-voice">Conversational</div>
+    <div class="card-title">Conversational Design — The Hard Parts</div>
+    <div class="card-summary">
+      Critiques and hard questions from the two-mode architecture. <strong>Cloud in the conversational path, personality consistency across model providers, fallback chains, personal truths, the limits of buying time.</strong> How Lilith stays herself regardless of which model is handling the call.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-orchestration-pipeline.html" class="card accent-orange">
+    <div class="card-tag tag-infra">Orchestration</div>
+    <div class="card-title">Orchestration Pipeline</div>
+    <div class="card-summary">
+      The <strong>3-terminal workflow</strong> documented precisely. Path to Lilith-as-orchestrator. <strong>Windows build toolchain</strong> — 5 specific problems (C extensions, path separators, case sensitivity, process spawning, SQLCipher on Windows). Windows audio VM vs real hardware. CI runners. Hardware capability tiers.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-frontend-framework.html" class="card accent-purple">
+    <div class="card-tag tag-arch">Frontend</div>
+    <div class="card-title">Frontend Framework Decision</div>
+    <div class="card-summary">
+      Deep comparison of <strong>Tauri v2 vs Flutter vs Qt6</strong>. Scored bars for 3D orb quality, backend-to-UI events, touch/mouse parity, native feel, Python integration, build toolchain. <strong>Decision made: Qt6 / PySide6 + Qt Quick 3D.</strong> Reference document — the reasoning behind the choice.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-data-telemetry-standards.html" class="card accent-teal2">
+    <div class="card-tag tag-data">Data &amp; Telemetry</div>
+    <div class="card-title">Data, Telemetry &amp; Standards</div>
+    <div class="card-summary">
+      <strong>Google SSO onboarding flow</strong>, data sovereignty path (Stage 1→2→3), UCL event taxonomy (dot-namespaced), endpoint management and response formatting by device type, L1/L2 enhancement layers, sprint done-criteria, OS-specific platform tools table, piracy/Obsidian licensing model.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="lilith-crossplatform-and-repos.html" class="card accent-orange">
+    <div class="card-tag tag-infra">Cross-Platform</div>
+    <div class="card-title">Cross-Platform &amp; Repository Setup</div>
+    <div class="card-summary">
+      Linux-first development, CI for all three OSes. <strong>v5→v6 repo migration</strong> — how the history was preserved, v5 archived to private repo, v6 started clean. <code>lilith</code> and <code>lilithv5</code> command setup. GitHub Actions matrix. Why Linux primary doesn't mean Linux only.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+</div>
+
+<!-- ============================================================ -->
+<div class="group-label g-found">Foundation — The Thinking Behind v6</div>
+<div class="grid">
+
+  <a href="lilith-paradigm-shift.html" class="card accent-pink">
+    <div class="card-tag tag-story">Origin</div>
+    <div class="card-title">The Paradigm Shift</div>
+    <div class="card-summary">
+      "I was solving the wrong problem." A first-person account of four years building a personal AI assistant, the wall that wasn't a hardware problem, and the realization that <strong>the context window manager was the right idea from the very beginning</strong> — just never properly built. The intellectual foundation for why v6 is different.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+</div>
+
+<!-- ============================================================ -->
+<div class="group-label g-future">Future — Out of Scope for v6 v1</div>
+<div class="grid-wide">
+
+  <a href="lilith-6x-plus-ideas.html" class="card accent-amber">
+    <div class="card-tag tag-future">6.x+ Ideas</div>
+    <div class="card-title">Ideas Parking Lot — 6.x and Beyond</div>
+    <div class="card-summary">
+      <strong>18 ideas</strong> captured during v6 v1 design that are out of scope but must not be forgotten. Privacy obfuscation layer for cloud routing, draggable hardware tier UI, distributed home GPU pool, graceful voice interruption, no-signal reply, voxel world for the orb, mobile app, ICS calendar subscribe, Obsidian vault import, iMessage integration, and more. Each has an architecture note flagging what v6 v1 must not foreclose.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+  <a href="../index.html" class="card accent-teal">
+    <div class="card-tag tag-checklist">Research Reports</div>
+    <div class="card-title">Research Sprint — 15 Reports ↗</div>
+    <div class="card-summary">
+      The completed first agent sprint — <strong>15 targeted research reports</strong> on every technology in the chosen stack. Qt6 licensing, SQLCipher cross-platform, faster-whisper performance, Kokoro TTS streaming, python-keyring backends, Google OAuth flow, Silero VAD, key derivation, background jobs, FTS5 in SQLCipher, and a full dependency license audit. All complete. No blockers.
+    </div>
+    <div class="card-arrow">Open →</div>
+  </a>
+
+</div>
+
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center; margin-top: 48px;">
+  LILITH V6 · PLANNING DOCUMENTS · 13 docs · <a href="../index.html" style="color: var(--accent);">Research reports →</a>
+</p>
+
+</body>
+</html>

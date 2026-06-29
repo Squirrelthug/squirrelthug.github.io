@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Orchestration, Build Pipeline & Cross-Platform Reality</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.75; max-width: 980px; margin: 0 auto; padding: 60px 40px; }
+  h1 { font-size: 2.4rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 8px; }
+  .subtitle { font-size: 1.05rem; color: var(--muted); margin-bottom: 48px; font-style: italic; }
+  h2 { font-size: 1.45rem; font-weight: 600; color: var(--amber); margin: 52px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 28px 0 10px; }
+  h4 { font-size: 0.82rem; font-weight: 700; color: var(--purple); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+  p { margin-bottom: 14px; }
+  .callout { background: var(--surface); border-left: 3px solid var(--accent); padding: 14px 18px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+  .callout.purple { border-left-color: var(--purple); }
+  .callout-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red .callout-label { color: var(--red); }
+  .callout.purple .callout-label { color: var(--purple); }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 22px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.65; overflow-x: auto; color: #c9d1d9; margin: 14px 0; white-space: pre; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.88rem; }
+  th { text-align: left; padding: 10px 13px; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .bg { background: rgba(16,185,129,0.15); color: var(--green); }
+  .br { background: rgba(239,68,68,0.15); color: var(--red); }
+  .ba { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .bc { background: rgba(79,195,201,0.15); color: var(--accent); }
+  .bp { background: rgba(167,139,250,0.15); color: var(--purple); }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 44px 0; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px; margin-bottom: 44px; }
+  .toc-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { padding-left: 18px; margin: 0; }
+  .toc li { margin-bottom: 7px; font-size: 0.9rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .terminal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .terminal-pane { background: #0d0d0d; border: 1px solid #333; border-radius: 6px; padding: 14px; font-family: monospace; font-size: 0.78rem; }
+  .terminal-title { color: var(--muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 10px; }
+  .t-label { color: var(--accent); }
+  .t-label2 { color: var(--amber); }
+  .t-cmd { color: #98c379; }
+  .t-out { color: var(--muted); }
+  .t-prompt { color: #61afef; }
+  .phase { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; margin: 16px 0; }
+  .phase-num { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+  .phase-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .tier-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin: 12px 0; }
+  .tier-name { font-size: 1rem; font-weight: 700; color: var(--accent); }
+  .tier-hw { font-size: 0.82rem; color: var(--muted); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Orchestration, Build Pipeline &amp; Cross-Platform Reality</h1>
+<p class="subtitle">Current 3-terminal workflow documented → path to Lilith-as-orchestrator · CI/CD runners · Windows build toolchain · Audio hardware testing · June 2026</p>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#current-workflow">The Current Orchestration Workflow — Documented</a></li>
+    <li><a href="#lilith-as-orchestrator">The Path: Lilith Becomes the Orchestrator</a></li>
+    <li><a href="#windows-toolchain">Windows Build Toolchain — What "Deliberate Attention" Actually Means</a></li>
+    <li><a href="#windows-audio">Windows Audio Testing — VM vs Real Hardware</a></li>
+    <li><a href="#ci-runners">CI Runners Explained</a></li>
+    <li><a href="#hardware-tiers">Hardware Capability Detection & Routing Tiers</a></li>
+    <li><a href="#macbook">MacBook M1 Considerations</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="current-workflow">1. The Current Orchestration Workflow — Documented</h2>
+
+<p>This is how the development workflow operates right now. Documenting it explicitly so the path to Lilith automating it is clear.</p>
+
+<h3>The three-terminal setup</h3>
+
+<div class="terminal-grid">
+  <div class="terminal-pane">
+    <div class="terminal-title" style="color: var(--amber);">⬛ Left Terminal — Agent 1</div>
+    <div class="t-label2">claude / grok --no-confirm</div>
+    <br>
+    <div class="t-out">Working on task from agent1_prompt.txt</div>
+    <div class="t-out">Editing: modules/router/classifier.py</div>
+    <div class="t-out">Running tests...</div>
+    <br>
+    <div class="t-out">→ reads from: agents/agent1/</div>
+    <div class="t-out">→ writes to: designated files</div>
+    <div class="t-out">→ confirmations: OFF</div>
+  </div>
+  <div class="terminal-pane">
+    <div class="terminal-title" style="color: var(--green);">⬛ Center Terminal — Orchestrator (You)</div>
+    <div class="t-label">★ COMMAND CENTER</div>
+    <br>
+    <div class="t-cmd">cat agents/agent1/status.txt</div>
+    <div class="t-out">→ reads x.txt (voice input)</div>
+    <div class="t-out">→ writes agent prompt files</div>
+    <div class="t-out">→ runs git diff / build / tests</div>
+    <div class="t-out">→ merges completed work</div>
+    <br>
+    <div class="t-out">After agents done:</div>
+    <div class="t-cmd">git diff, check, merge, push</div>
+  </div>
+  <div class="terminal-pane">
+    <div class="terminal-title" style="color: var(--amber);">⬛ Right Terminal — Agent 2</div>
+    <div class="t-label2">claude / grok --no-confirm</div>
+    <br>
+    <div class="t-out">Working on task from agent2_prompt.txt</div>
+    <div class="t-out">Editing: modules/context/assembler.py</div>
+    <div class="t-out">Running tests...</div>
+    <br>
+    <div class="t-out">→ reads from: agents/agent2/</div>
+    <div class="t-out">→ writes to: designated files</div>
+    <div class="t-out">→ confirmations: OFF</div>
+  </div>
+</div>
+
+<h3>The voice input pipeline (x.txt)</h3>
+
+<pre>
+  CURRENT VOICE INPUT FLOW
+
+  You speak
+      │
+      ▼
+  Voice-to-text transcription (external tool or STT)
+      │
+      ▼
+  x.txt gets updated with transcript
+      │
+      ▼
+  Orchestrator (you, in center terminal) reads x.txt
+      │
+      ▼
+  Writes instructions to agent prompt files:
+  agents/agent1/agent1_prompt.txt
+  agents/agent2/agent2_prompt.txt
+      │
+      ▼
+  Agents read their prompt files, begin working autonomously
+      │
+      ▼
+  Orchestrator monitors output / diffs as agents complete
+      │
+      ▼
+  git diff → check correctness → merge → build → push
+</pre>
+
+<h3>The agent folder structure</h3>
+
+<pre>
+  agents/
+  ├── agent1/
+  │   ├── agent1_prompt.txt     ← orchestrator writes task here
+  │   ├── status.txt            ← agent writes current state
+  │   └── notes.txt             ← agent scratchpad
+  ├── agent2/
+  │   ├── agent2_prompt.txt
+  │   ├── status.txt
+  │   └── notes.txt
+  └── shared/
+      └── context.txt           ← shared facts both agents need
+</pre>
+
+<div class="callout amber">
+  <div class="callout-label">The friction points in the current workflow</div>
+  <ol style="padding-left: 18px; margin-top: 8px; margin-bottom: 0; font-size: 0.9rem;">
+    <li>You still have to manually transcribe speech → x.txt → prompt files (or do it yourself in text)</li>
+    <li>Monitoring three terminals simultaneously requires attention that could be automated</li>
+    <li>The post-agent review (diff/check/build) is manual — you can catch errors but it's time-consuming</li>
+    <li>Task assignment to agents is manual — you decide who gets what</li>
+    <li>There's no automated "did this break anything" check before the merge</li>
+  </ol>
+</div>
+
+<h3>The collapsed-code view for watching agents</h3>
+
+<p>You want to see agents working but not be flooded with code. The right monitor setup for the current workflow:</p>
+
+<ul>
+  <li>Left/right terminals show agent narrative output, not code diffs (pipe through a filter or use agent's status.txt)</li>
+  <li>Code diffs go to the center terminal on request only (<code>git diff</code> when you want to check)</li>
+  <li>Agents write a one-line status update every N minutes to their status.txt — center terminal <code>tail -f</code> both</li>
+</ul>
+
+<pre>
+# Center terminal: watch both agents without reading code
+tail -f agents/agent1/status.txt agents/agent2/status.txt
+
+# Output:
+==> agents/agent1/status.txt <==
+[14:32] Working on classifier.py — implementing intent detection loop
+==> agents/agent2/status.txt <==
+[14:33] Tests passing for assembler.py — moving to integration
+==> agents/agent1/status.txt <==
+[14:35] Classifier complete. Running unit tests.
+==> agents/agent2/status.txt <==
+[14:37] Done. Waiting for review.
+</pre>
+
+<!-- ============================================================ -->
+<h2 id="lilith-as-orchestrator">2. The Path: Lilith Becomes the Orchestrator</h2>
+
+<p>The long-term vision: you speak to Lilith. She understands the sprint, breaks the work down, assigns it to agents, monitors their progress, reviews the output, runs the build, and tells you what happened. The 3-terminal setup becomes a UI that Lilith manages. You watch from outside.</p>
+
+<pre>
+  CURRENT WORKFLOW                    TARGET WORKFLOW
+
+  You speak                           You speak
+      │                                   │
+      ▼                                   ▼
+  x.txt updated                       Lilith transcribes (STT)
+      │                                   │
+  You write prompts          ─────→   Lilith writes agent prompts
+      │                                   │
+  Agents work                         Agents work
+      │                                   │
+  You monitor terminals               Lilith monitors status.txt
+      │                                   │
+  You review diff                     Lilith reviews diff (LLM)
+      │                                   │
+  You run build/tests                 Lilith runs build/tests
+      │                                   │
+  You merge/push             ─────→   Lilith reports to you:
+                                      "Both agents done. Tests pass.
+                                       3 files changed. Ready to merge?"
+                                          │
+                                      You say "merge it"
+                                          │
+                                      Lilith merges and pushes
+</pre>
+
+<p>This is the pair programmer vision — the thing that makes Lilith the pair programmer you want. The orchestration logic already has a shape: read sprint doc → extract tasks → assign to agents → monitor → review → build → report. All of this can be a Lilith tool chain.</p>
+
+<h3>Lilith's orchestration tools (what gets built)</h3>
+
+<table>
+  <thead>
+    <tr><th>Tool</th><th>What it does</th><th>Inputs</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>assign_to_agent</code></td><td>Writes a task to an agent's prompt file</td><td>agent_id, task description, context files</td></tr>
+    <tr><td><code>check_agent_status</code></td><td>Reads agent's status.txt, returns current state</td><td>agent_id</td></tr>
+    <tr><td><code>review_agent_diff</code></td><td>Runs <code>git diff</code> on agent's files, returns summary via LLM</td><td>agent_id, files changed</td></tr>
+    <tr><td><code>run_build</code></td><td>Executes build/test command, returns pass/fail + errors</td><td>scope (unit / integration / all)</td></tr>
+    <tr><td><code>merge_agent_work</code></td><td>Moves agent's changes to main branch after review</td><td>agent_id, confirmation</td></tr>
+    <tr><td><code>spawn_agent</code></td><td>Opens a new agent terminal with a task (future — needs OS integration)</td><td>agent_type, task</td></tr>
+  </tbody>
+</table>
+
+<p>The first four tools can be built on the current system right now. <code>spawn_agent</code> requires OS-level process spawning (v6.2 territory). Until then, you launch agents manually and hand Lilith the monitoring and review job.</p>
+
+<div class="callout green">
+  <div class="callout-label">Why this is the right project to build Lilith's pair programmer capability</div>
+  You understand this workflow deeply because you built it. The tooling maps naturally to Lilith's existing architecture (tools → LLM → decision → next action). And it creates a feedback loop: Lilith helping you build Lilith creates telemetry on what a coding orchestrator actually needs. The tools you build for managing agents in this project become the template for managing any multi-step autonomous process.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="windows-toolchain">3. Windows Build Toolchain — What "Deliberate Attention" Actually Means</h2>
+
+<p>The previous document said the Windows build toolchain requires "deliberate attention." That's abstract. Here's the concrete reality.</p>
+
+<h3>What the toolchain problem actually is</h3>
+
+<p>On Linux, building a Python app is simple: Python is first-class, system libraries install via apt, C extensions compile cleanly with gcc. The entire stack is POSIX and assumes Linux is the default.</p>
+
+<p>On Windows, several things break this assumption:</p>
+
+<h4>Problem 1: C extension compilation</h4>
+
+<p>Several Python packages you likely use have C extensions (native code that compiles when you <code>pip install</code>). On Linux this uses gcc (already installed). On Windows it requires MSVC (Microsoft Visual C++ build tools). The CI runner must have these installed, and some packages behave differently between their Linux and Windows compiled versions.</p>
+
+<pre>
+# What works on Linux
+pip install cryptography   ← uses prebuilt wheel, no problem
+
+# What might fail on Windows CI without MSVC
+pip install some-audio-package  ← needs to compile C extension
+                                ← fails if build tools not installed
+
+# Fix in CI runner (GitHub Actions Windows)
+- uses: microsoft/setup-msbuild@v1
+- run: pip install --prefer-binary package-name
+     # --prefer-binary uses prebuilt wheel if available, avoids compilation
+</pre>
+
+<h4>Problem 2: Path separators</h4>
+
+<p>Every hardcoded path in your Python code using <code>/</code> or string concatenation is a potential Windows bug. The fix is already known: use <code>pathlib.Path</code> everywhere. But any path that was written as a string with slashes will silently break on Windows.</p>
+
+<pre>
+# Wrong (breaks on Windows)
+config_file = "~/.config/lilith/config.json"
+log_path = base_dir + "/logs/" + name + ".log"
+
+# Right
+from pathlib import Path
+config_file = Path.home() / ".config" / "lilith" / "config.json"
+log_path = Path(base_dir) / "logs" / f"{name}.log"
+</pre>
+
+<h4>Problem 3: File system case sensitivity</h4>
+
+<p>Linux file systems are case-sensitive. Windows is not. A file named <code>Config.py</code> and <code>config.py</code> are different on Linux, the same on Windows. Any import that relies on exact case matching can fail silently — or worse, import the wrong file. The CI runner will catch this if it's a real problem.</p>
+
+<h4>Problem 4: Process spawning</h4>
+
+<p>Python's <code>subprocess</code> and <code>os.fork()</code> behavior differs on Windows. Multiprocessing uses "spawn" by default on Windows (vs "fork" on Linux), meaning child processes don't inherit parent state. Any code that relies on forked state will need a different approach.</p>
+
+<h4>Problem 5: SQLCipher on Windows</h4>
+
+<p>SQLCipher requires a native C library. On Linux it's a system package. On Windows it must be bundled. The <code>sqlcipher3</code> Python package has prebuilt Windows wheels but they must be verified. This is a one-time setup cost, not ongoing friction.</p>
+
+<h3>The actual workflow for handling this</h3>
+
+<pre>
+  YOU WRITE CODE ON LINUX (normal dev workflow)
+             │
+             ▼
+  Push to GitHub
+             │
+             ▼
+  GitHub Actions: Linux CI runner (fast, verifies correctness)
+             │
+             ▼
+  GitHub Actions: Windows CI runner (parallel)
+             │
+             ├── If Windows CI passes → no Windows-specific issue
+             │
+             └── If Windows CI fails →
+                     Read CI log → identify which package/path failed
+                     Fix it → push → both CIs green → done
+</pre>
+
+<p>In practice, most Windows CI failures are one of the five problems above. They're fixed once and don't recur. The first pass of getting the app running on Windows CI probably takes 2–3 days of fixing. After that, it's green and stays green as long as you avoid re-introducing path string hacks or OS-specific assumptions.</p>
+
+<!-- ============================================================ -->
+<h2 id="windows-audio">4. Windows Audio Testing — VM vs Real Hardware</h2>
+
+<p>The question: can you test audio input/output on Windows in a virtual machine, or do you need actual Windows hardware?</p>
+
+<h3>What Windows audio actually is</h3>
+
+<p>Windows has three audio driver models, and which one you're talking to affects how Lilith's audio pipeline works:</p>
+
+<table>
+  <thead>
+    <tr><th>Driver model</th><th>What it is</th><th>Latency</th><th>Used for</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>WASAPI</strong><br>(Windows Audio Session API)</td><td>Microsoft's current standard. Two modes: shared (normal apps) and exclusive (low-latency apps)</td><td>Shared: ~10–30ms<br>Exclusive: ~1–5ms</td><td>Everything modern including Python <code>sounddevice</code></td></tr>
+    <tr><td><strong>WDM/KS</strong><br>(Kernel Streaming)</td><td>Older low-level driver access. Rarely needed by app developers.</td><td>~1–3ms</td><td>Pro audio DAWs, not Lilith</td></tr>
+    <tr><td><strong>MME / DirectSound</strong></td><td>Legacy Windows audio. Still present for compatibility. High latency.</td><td>~50–150ms</td><td>Old apps only</td></tr>
+  </tbody>
+</table>
+
+<p>For Lilith, WASAPI shared mode is the target. That's what PyAudio and sounddevice use by default on Windows.</p>
+
+<h3>What a VM can and cannot do</h3>
+
+<table>
+  <thead>
+    <tr><th></th><th>VMware / VirtualBox / Hyper-V</th><th>Real Windows Hardware</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Audio output (speakers)</strong></td><td><span class="badge bg">Works</span> — VM routes to host speakers via virtual audio device</td><td><span class="badge bg">Works</span></td></tr>
+    <tr><td><strong>Audio input (microphone)</strong></td><td><span class="badge ba">Partial</span> — can forward host mic, but with added latency and potential dropout. USB microphone passthrough is more reliable than integrated mic.</td><td><span class="badge bg">Works natively</span></td></tr>
+    <tr><td><strong>WASAPI shared mode</strong></td><td><span class="badge ba">Partial</span> — the VM presents a virtual audio device. It behaves like WASAPI shared but is actually a layer of abstraction. Functional for testing, not identical to real hardware.</td><td><span class="badge bg">Real WASAPI</span></td></tr>
+    <tr><td><strong>WASAPI exclusive mode</strong></td><td><span class="badge br">Does not work</span> — VM cannot grant exclusive hardware access</td><td><span class="badge bg">Works</span></td></tr>
+    <tr><td><strong>Bluetooth audio</strong></td><td><span class="badge br">Very limited</span> — BT passthrough in VMs is unreliable; BT drivers rarely work correctly</td><td><span class="badge bg">Works natively</span></td></tr>
+    <tr><td><strong>UI and app behavior</strong></td><td><span class="badge bg">Works</span> — no difference for UI testing</td><td><span class="badge bg">Works</span></td></tr>
+    <tr><td><strong>Installer testing</strong></td><td><span class="badge bg">Works</span> — clean VM is ideal for testing first-run installs</td><td><span class="badge bg">Works</span></td></tr>
+  </tbody>
+</table>
+
+<div class="callout amber">
+  <div class="callout-label">Bottom line on VM audio testing</div>
+  <p style="margin-bottom: 8px; font-size: 0.9rem;">A VM is <strong>good enough for initial development and most functional testing</strong>. You can verify that the Python audio pipeline connects to Windows audio, that STT input works, that TTS output plays. The things that won't be testable in a VM:</p>
+  <ul style="padding-left: 18px; font-size: 0.9rem; margin-bottom: 0;">
+    <li>Real latency (VM audio has added overhead)</li>
+    <li>Bluetooth audio devices</li>
+    <li>WASAPI exclusive mode (not needed for Lilith at this stage)</li>
+    <li>Microphone array or noise cancellation hardware behavior</li>
+  </ul>
+  <p style="margin-top: 8px; margin-bottom: 0; font-size: 0.9rem;">For pre-launch validation you want one real Windows machine (or access to one). For development, a VM will get you 90% of the way there.</p>
+</div>
+
+<h3>Practical recommendation for audio on Windows</h3>
+
+<pre>
+  DEVELOPMENT PHASE
+  Use VM (VMware/VirtualBox on Linux) for:
+  ├── UI development and testing
+  ├── Installer testing
+  ├── Python pipeline smoke testing
+  └── Initial audio I/O verification (using USB mic passthrough)
+
+  PRE-LAUNCH PHASE
+  Borrow or buy a cheap Windows laptop for:
+  ├── Real audio device behavior
+  ├── Microphone quality under real WASAPI
+  ├── Bluetooth audio pairing
+  ├── Full performance profiling
+  └── Real-user first-run experience
+
+  Budget: $200–400 used/refurbished Windows laptop is enough
+  for hardware-accurate testing. Not a development machine, just
+  a test device.
+</pre>
+
+<!-- ============================================================ -->
+<h2 id="ci-runners">5. CI Runners Explained</h2>
+
+<p>GitHub Actions gives you managed virtual machines — "runners" — that run your code. You tell GitHub what kind of machine you want and what to do on it. The key insight: you don't own these machines, you don't configure them, you don't maintain them. GitHub spins one up for each job, it runs, it shuts down.</p>
+
+<pre>
+  YOUR GITHUB REPO
+        │
+        │ push to main
+        ▼
+  GitHub Actions triggered
+        │
+        ├─────────────────────────────────┐
+        │                                 │
+        ▼                                 ▼
+  Ubuntu runner (Linux)           Windows runner
+  ubuntu-latest                   windows-latest
+        │                                 │
+  pip install requirements         pip install requirements
+  python -m pytest                 python -m pytest
+  build AppImage                   build Windows .exe
+        │                                 │
+  ✓ Tests pass / ✗ fail            ✓ Tests pass / ✗ fail
+        │                                 │
+        └──────────────────┬──────────────┘
+                           │
+                     All green → merge allowed
+                     Any red → PR blocked
+</pre>
+
+<p>The GitHub Actions config file (`.github/workflows/ci.yml`) controls all of this:</p>
+
+<pre>
+name: Build and Test
+on: [push, pull_request]
+
+jobs:
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -r requirements.txt
+      - run: timeout 180 python -m pytest tests/
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install --prefer-binary -r requirements.txt
+      - run: python -m pytest tests/
+
+  test-macos:
+    runs-on: macos-latest          # Apple Silicon runner available
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests/
+</pre>
+
+<p>Free tier: GitHub provides 2,000 minutes/month on free accounts, 3,000 on Pro. Linux runners use 1× multiplier, macOS uses 10× (more expensive), Windows uses 2×. For the current stage of development, you'll likely stay well within the free tier.</p>
+
+<div class="callout">
+  <div class="callout-label">What you don't need a Windows machine for</div>
+  Building the Windows <code>.exe</code> happens on the Windows CI runner. You never need to boot Windows yourself to produce a Windows binary. Your entire development workflow stays on Linux. The CI runner is your Windows machine.
+</div>
+
+<!-- ============================================================ -->
+<h2 id="hardware-tiers">6. Hardware Capability Detection &amp; Routing Tiers</h2>
+
+<p>The concept: Lilith boots on different hardware and detects what she can do locally before deciding what to send to the cloud. The hardware detection happens once at startup and produces a capability profile that routes all subsequent decisions.</p>
+
+<pre>
+  STARTUP SEQUENCE
+
+  Lilith starts
+       │
+       ▼
+  Hardware detection (< 1 second)
+  ├── GPU: detected via nvidia-smi / Metal / DirectX
+  │         → VRAM: how much?
+  ├── CPU: core count, architecture (x86 / ARM)
+  ├── RAM: available system memory
+  └── Audio: microphone present? Speaker present?
+       │
+       ▼
+  Capability profile written to session state
+       │
+       ▼
+  Route all decisions based on tier
+</pre>
+
+<h3>Capability tiers</h3>
+
+<div class="tier-card">
+  <div class="tier-name">Tier 0 — Cloud-Only (No Local Inference)</div>
+  <div class="tier-hw">MacBook Air M1 with no GPU · low-RAM devices · any machine without a dedicated GPU</div>
+  <ul style="font-size: 0.88rem; margin-bottom: 0;">
+    <li>STT: Whisper tiny (CPU — fast on any hardware) ✓</li>
+    <li>TTS: Kokoro or similar lightweight model (CPU) ✓</li>
+    <li>LLM: Cloud only (Claude API, OpenAI, etc.)</li>
+    <li>Personality model: Not available → falls back to baked-in system prompt</li>
+    <li>Local tools: All tools available (they're Python, not GPU-dependent)</li>
+    <li>Voice pipeline: Fully functional, cloud-routed inference</li>
+  </ul>
+</div>
+
+<div class="tier-card" style="border-color: var(--accent);">
+  <div class="tier-name" style="color: var(--amber);">Tier 1 — Hybrid (Local STT/TTS + Optional Local LLM)</div>
+  <div class="tier-hw">RTX 3060 (12GB VRAM) — current dev machine · or equivalent 8GB+ VRAM</div>
+  <ul style="font-size: 0.88rem; margin-bottom: 0;">
+    <li>STT: Whisper small or medium (GPU-accelerated) ✓ — noticeably faster than Tier 0</li>
+    <li>TTS: Higher quality model (GPU) ✓</li>
+    <li>LLM: Can run a 7B quantized model locally (e.g., Mistral-7B-Q4) if needed, but still defaults to cloud for quality</li>
+    <li>Personality model: Can run 3B–4B personality model when PERS-2 is implemented</li>
+    <li>Memory: Enough VRAM to run STT + personality simultaneously</li>
+  </ul>
+</div>
+
+<div class="tier-card" style="border-color: var(--purple);">
+  <div class="tier-name" style="color: var(--purple);">Tier 2 — Local-First (High-VRAM Workstation)</div>
+  <div class="tier-hw">RTX 4090 24GB · or 48GB+ VRAM · future hardware</div>
+  <ul style="font-size: 0.88rem; margin-bottom: 0;">
+    <li>STT: Whisper large-v3 (GPU) ✓ — near-perfect transcription</li>
+    <li>TTS: High-fidelity neural TTS (GPU) ✓</li>
+    <li>LLM: 13B–34B quantized model locally — approaches cloud quality for many tasks</li>
+    <li>Personality model: Full 7B dedicated personality model</li>
+    <li>Privacy: Conversation can be fully local, no cloud required</li>
+  </ul>
+</div>
+
+<h3>The detection code (simplified)</h3>
+
+<pre>
+# modules/startup/hardware_detect.py
+
+def detect_hardware_tier() -> HardwareTier:
+    vram_gb = _get_vram_gb()   # nvidia-smi, or Metal on macOS, or 0 if no GPU
+    ram_gb = psutil.virtual_memory().total / (1024**3)
+    cpu_cores = psutil.cpu_count(logical=False)
+
+    if vram_gb >= 20:
+        return HardwareTier.TIER_2_LOCAL_FIRST
+    elif vram_gb >= 8:
+        return HardwareTier.TIER_1_HYBRID
+    else:
+        return HardwareTier.TIER_0_CLOUD_ONLY
+
+def _get_vram_gb() -> float:
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=3
+        )
+        return float(result.stdout.strip()) / 1024
+    except Exception:
+        return 0.0  # No NVIDIA GPU, or nvidia-smi not available
+</pre>
+
+<h3>Capability routing in practice</h3>
+
+<p>The tier isn't just for the personality model — it changes behavior throughout the system:</p>
+
+<table>
+  <thead>
+    <tr><th>Decision point</th><th>Tier 0 (cloud-only)</th><th>Tier 1 (hybrid)</th><th>Tier 2 (local-first)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>STT model</td><td>Whisper tiny (CPU)</td><td>Whisper small (GPU)</td><td>Whisper large (GPU)</td></tr>
+    <tr><td>TTS model</td><td>Lightweight CPU model</td><td>Mid-quality GPU model</td><td>High-fidelity GPU model</td></tr>
+    <tr><td>LLM routing</td><td>100% cloud</td><td>Cloud for main inference; optional local for simple tasks</td><td>Local where possible, cloud for heavy reasoning</td></tr>
+    <tr><td>Personality pipeline</td><td>Baked into system prompt</td><td>3B local model (after PERS-2)</td><td>7B local model</td></tr>
+    <tr><td>Privacy mode availability</td><td>Not available (cloud required)</td><td>Partial (STT/TTS local, LLM cloud)</td><td>Full (entirely local possible)</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="macbook">7. MacBook M1 Considerations</h2>
+
+<p>The M1 MacBook is currently used as a Mac node/thin client (Sprint ND-1). Its capability profile matters for understanding the routing decisions.</p>
+
+<h3>M1 vs. the 3060 desktop</h3>
+
+<table>
+  <thead>
+    <tr><th>Capability</th><th>RTX 3060 (Linux desktop)</th><th>MacBook M1 (16GB unified)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>VRAM for inference</td><td>12GB GDDR6 discrete</td><td>~7–10GB usable from 16GB unified (shared with CPU)</td></tr>
+    <tr><td>STT (Whisper)</td><td>small/medium via CUDA</td><td>tiny/small via Metal (MPS) — respectable, slower than CUDA</td></tr>
+    <tr><td>TTS</td><td>GPU-accelerated</td><td>CPU/Metal — functional, slightly higher latency</td></tr>
+    <tr><td>Local LLM</td><td>7B Q4 comfortably</td><td>7B Q4 via Metal, possible but warm/throttled on extended use</td></tr>
+    <tr><td>Hardware tier classification</td><td>Tier 1 (Hybrid)</td><td>Tier 0–1 boundary (treat as Tier 0 for safety)</td></tr>
+    <tr><td>Best role for Lilith</td><td>Primary workstation — all features</td><td>Thin client (ND-1) — sends audio to Linux master for processing</td></tr>
+  </tbody>
+</table>
+
+<p>The M1 as a development machine: possible but adds friction. The PyTorch Metal backend (MPS) works but is less stable than CUDA, some packages don't have Metal-accelerated versions, and the cross-compilation story for producing Windows binaries gets complicated. The Linux dev → CI-for-all-platforms approach remains the right architecture regardless of whether you occasionally use the MacBook for coding.</p>
+
+<div class="callout">
+  <div class="callout-label">If you ever develop on the MacBook temporarily</div>
+  The Python backend will run fine. CUDA-specific calls fail — always guard with <code>torch.cuda.is_available()</code> and fall through to CPU/MPS. The CI pipeline still handles building for all three platforms regardless of which machine you write code on. The constraint is that you can't run the full local inference stack on M1, so development that depends on GPU-accelerated STT/TTS needs to test against the Linux machine (or accept that audio testing on M1 uses CPU-speed models).
+</div>
+
+<hr>
+<p style="color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 32px;">
+  LILITH V6 — ORCHESTRATION & BUILD PIPELINE · June 2026<br>
+  See also: <code>lilith-frontend-framework.html</code> · <code>lilith-v6-systems.html</code> · <code>lilith-crossplatform-and-repos.html</code>
+</p>
+</body>
+</html>

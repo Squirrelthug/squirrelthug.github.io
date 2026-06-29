@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Design Document Checklist</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --blue: #60a5fa;
+    --orange: #fb923c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.7; max-width: 1060px; margin: 0 auto; padding: 56px 40px; }
+  h1 { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .doc-subtitle { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+  .doc-purpose { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 16px 20px; border-radius: 0 6px 6px 0; font-size: 0.9rem; margin-bottom: 40px; color: var(--text); }
+  .doc-purpose strong { color: var(--accent); }
+
+  /* Layer headers */
+  .layer { margin: 48px 0 6px; padding: 8px 16px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block; }
+  .layer-found { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+  .layer-infra { background: rgba(107,114,128,0.12); color: var(--muted); border: 1px solid rgba(107,114,128,0.25); }
+  .layer-voice { background: rgba(16,185,129,0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+  .layer-intel { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+  .layer-data { background: rgba(45,212,191,0.1); color: #2dd4bf; border: 1px solid rgba(45,212,191,0.25); }
+  .layer-app { background: rgba(251,146,60,0.1); color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+  .layer-pers { background: rgba(244,114,182,0.1); color: var(--pink); border: 1px solid rgba(244,114,182,0.25); }
+  .layer-ui { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+
+  /* Section cards */
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; margin: 12px 0; }
+  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .section-num { font-size: 0.72rem; font-weight: 700; color: var(--muted); width: 28px; flex-shrink: 0; }
+  .section-title { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+  .section-scope { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; font-style: italic; }
+  .section-touches { font-size: 0.75rem; color: var(--muted); margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .section-touches span { color: var(--accent); }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 0.87rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 3px; flex-shrink: 0; margin-top: 3px; }
+  .check-text { flex: 1; }
+  .check-text strong { color: var(--accent); font-weight: 600; }
+  .check-text em { color: var(--amber); font-style: normal; font-size: 0.78rem; }
+
+  /* Decision callout */
+  .decision { display: inline-flex; align-items: center; gap: 5px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 0.04em; margin-left: 8px; }
+  .open { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--red); }
+  .standard { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--green); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 50px 0; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px; margin-bottom: 44px; columns: 2; column-gap: 32px; }
+  .toc-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; column-span: all; }
+  .toc a { color: var(--muted); text-decoration: none; font-size: 0.82rem; display: block; padding: 2px 0; transition: color 0.15s; }
+  .toc a:hover { color: var(--accent); }
+  .toc-layer { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--border); margin-top: 10px; margin-bottom: 3px; break-inside: avoid; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--muted); }
+  .leg-box { width: 10px; height: 10px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document Checklist</h1>
+<p class="doc-subtitle">Vertical slice scope · June 2026 · Use this to verify every section of the design document before build begins</p>
+
+<div class="doc-purpose">
+  <strong>Purpose:</strong> This is not the design document. It is the checklist that ensures the design document is complete. Every item in every section must be answered with a specific, code-free implementation decision before any agent touches a file. When this checklist is fully checked off, all architectural decisions have been made and the only remaining design work is UI/UX. Work through this section by section using research and prior design sessions. Merge the resulting section documents into one canonical design document and treat it as law.
+  <br><br>
+  <strong>Markers:</strong> <span class="decision open">Open</span> = decision not yet made · <span class="decision">Decision needed</span> = multiple valid options, must pick one · <span class="standard">Standard</span> = already decided, just needs documenting
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="leg-box" style="background:rgba(167,139,250,0.4)"></div> Foundation</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(107,114,128,0.4)"></div> Infrastructure</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(16,185,129,0.4)"></div> Voice Pipeline</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(96,165,250,0.4)"></div> Intelligence</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(45,212,191,0.4)"></div> Data Layer</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(251,146,60,0.4)"></div> Application Layer</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(244,114,182,0.4)"></div> Personality & Response</div>
+  <div class="legend-item"><div class="leg-box" style="background:rgba(245,158,11,0.4)"></div> Frontend</div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">Sections — 28 total</div>
+  <div class="toc-layer">Foundation</div>
+  <a href="#s1">1. Project Structure & Conventions</a>
+  <a href="#s2">2. Security & Credential Management</a>
+  <a href="#s3">3. Encryption at Rest — SQLCipher</a>
+  <a href="#s4">4. Cross-Platform Foundations</a>
+  <div class="toc-layer">Infrastructure</div>
+  <a href="#s5">5. Hardware Detection & Capability Tiers</a>
+  <a href="#s6">6. Process Lifecycle & Recovery</a>
+  <a href="#s7">7. CI/CD Pipeline</a>
+  <a href="#s8">8. Testing Standards</a>
+  <div class="toc-layer">Voice Pipeline</div>
+  <a href="#s9">9. Audio I/O & Platform Audio APIs</a>
+  <a href="#s10">10. Speech-to-Text (STT)</a>
+  <a href="#s11">11. Text-to-Speech (TTS)</a>
+  <div class="toc-layer">Intelligence Layer</div>
+  <a href="#s12">12. LLM Integration & Provider Abstraction</a>
+  <a href="#s13">13. Two-Mode Router</a>
+  <a href="#s14">14. Context Window Manager</a>
+  <a href="#s15">15. Tool System</a>
+  <div class="toc-layer">Data Layer</div>
+  <a href="#s16">16. UCL Telemetry</a>
+  <a href="#s17">17. Enhancement Layers (L1/L2)</a>
+  <a href="#s18">18. Memory System</a>
+  <a href="#s19">19. Data Sync Pipeline</a>
+  <div class="toc-layer">Application Layer</div>
+  <a href="#s20">20. Contacts / People App</a>
+  <a href="#s21">21. Finance App</a>
+  <a href="#s22">22. Conversation / Chat App</a>
+  <div class="toc-layer">Personality & Response</div>
+  <a href="#s23">23. Personality System & System Prompt</a>
+  <a href="#s24">24. Narrative Layer</a>
+  <a href="#s25">25. Onboarding Flow</a>
+  <div class="toc-layer">Frontend</div>
+  <a href="#s26">26. Frontend Framework & Application Shell</a>
+  <a href="#s27">27. The Orb</a>
+  <a href="#s28">28. Screen Architecture & Navigation</a>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-found">Foundation Layer</div>
+
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">Project Structure & Conventions</div>
+  </div>
+  <div class="section-scope">The ground rules every file in the project follows. Must be decided before the first file is written so agents don't drift.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Root directory layout:</strong> exact top-level directories named and their purpose stated. No guessing — every directory has a declared role. <span class="standard">Standard</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Path handling:</strong> pathlib.Path everywhere, no string concatenation for paths, no hardcoded separators. Rule applies to ALL file I/O, all subprocess calls, all DB paths. No exceptions. <span class="standard">Standard</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Python version:</strong> which exact version (3.11 / 3.12 / 3.13), why, and how it's enforced (.python-version file, pyproject.toml). <span class="decision">Decision needed</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Package management:</strong> pip + requirements.txt or uv or poetry — pick one, explain the choice, document how to add a dependency. <span class="decision">Decision needed</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Naming conventions:</strong> files (snake_case), classes (PascalCase), constants (UPPER_SNAKE), database tables (snake_case), event type names (dot.namespaced). All stated explicitly.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Module boundary rules:</strong> which modules may import from which. Circular imports are a recurring failure mode — define the dependency direction at project start.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Error handling philosophy:</strong> where errors are caught vs propagated, what constitutes a recoverable vs unrecoverable error, what gets logged vs what gets surfaced to the user.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Logging to stdout vs UCL:</strong> clear rule for which events go to the UCL database vs which go to stdout/stderr. UCL gets behavioral events; stdout gets startup/debug only.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Configuration management:</strong> how app config (not credentials) is stored and read. What format (TOML/JSON/YAML), where the file lives per OS, what the defaults are, how schema changes are handled.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Git workflow:</strong> branch naming convention, PR requirement for all merges, no direct commits to main, commit message format. Stated so agents follow it.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Sprint task done-criteria standard:</strong> the baseline that every task inherits — telemetry event on every write path, security review, test coverage. Written here, referenced by every sprint doc.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§7 CI/CD</span> · <span>§8 Testing</span> · <span>§16 UCL Telemetry</span></div>
+</div>
+
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">Security & Credential Management</div>
+  </div>
+  <div class="section-scope">How secrets are stored, accessed, and never exposed. Must be the first implementation concern — retrofitting security is how v5 accrued debt.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>OS keychain library:</strong> python-keyring as the abstraction — confirm it covers libsecret (Linux), Keychain (macOS), DPAPI (Windows) with the same API. Document the service name and key naming convention used throughout the app.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>What counts as a credential:</strong> explicit list — API keys, OAuth tokens, database passphrase, user password. Everything on this list goes to keychain. Everything not on this list is not a secret.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Credential access pattern:</strong> how the app retrieves a key at runtime — the exact call sequence, where it happens in startup, what the failure behavior is if keychain is unavailable.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>.env file policy:</strong> .env is for local development only, never committed, never read in production. What replaces it in production (keychain). How CI/CD accesses secrets it needs (GitHub Secrets, not .env).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>OAuth token lifecycle:</strong> how access tokens are acquired, stored (keychain), refreshed on expiry, and revoked when the user disconnects a service. Token never written to disk as plaintext.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>What never leaves the device:</strong> explicit list of data categories that are never sent anywhere unencrypted. Contacts, conversation content, finance data — state this explicitly so agents don't accidentally send it.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>LLM call data hygiene:</strong> what is and isn't sent in the context window to cloud LLMs. Raw PII handling — names, addresses, account numbers — and how they're handled before being included in a cloud-bound prompt.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Audit trail for credential access:</strong> does the app log when it reads from keychain? Should it? Decision stated either way.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§3 SQLCipher</span> · <span>§12 LLM Integration</span> · <span>§19 Data Sync</span> · <span>§25 Onboarding</span></div>
+</div>
+
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">Encryption at Rest — SQLCipher</div>
+  </div>
+  <div class="section-scope">Every database is encrypted from the first migration. Not added later. This section defines the exact technical approach so all six databases are consistent.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Python package choice:</strong> sqlcipher3 vs pysqlcipher3 vs apsw with SQLCipher — pick one, confirm it has pre-built wheels for all three target platforms, document the install command.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Key derivation:</strong> how the SQLCipher encryption key is derived. User passphrase → PBKDF2 or Argon2 → key. Which algorithm, which parameters, where the salt is stored. Decision stated with rationale.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Passphrase storage:</strong> the derived key or the raw passphrase stored in keychain — which one and why. What the user must provide on each app start vs what is auto-retrieved.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Database file locations per OS:</strong> exact paths using OS-appropriate conventions — XDG_DATA_HOME on Linux (~/.local/share/lilith/), ~/Library/Application Support/Lilith/ on macOS, %APPDATA%\Lilith\ on Windows. All stated explicitly.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Which databases exist:</strong> complete list — calendar_db, contacts_db, finance_db, memory_db, conversation_db, ucl_db. All SQLCipher, no plaintext SQLite anywhere.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Schema migration strategy:</strong> how schema changes are applied without data loss. Migration runner design — numbered migrations, applied on startup, idempotent. No ad-hoc ALTER TABLE in code.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Connection management:</strong> one connection per database or a pool — which, and how connections are opened, kept alive, and closed. Thread safety requirements.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Backup strategy:</strong> how the encrypted databases are backed up. VACUUM INTO for online backup. When it runs, where backups go, how many are kept.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>First-run key setup:</strong> what happens on first launch — passphrase prompt, key derivation, database creation. What happens if the user forgets their passphrase (data is unrecoverable — is this stated clearly in onboarding?).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§16 UCL Telemetry</span> · <span>§18 Memory</span> · <span>§20–22 App databases</span> · <span>§25 Onboarding</span></div>
+</div>
+
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">Cross-Platform Foundations</div>
+  </div>
+  <div class="section-scope">The rules that make the same codebase run on Linux, macOS, and Windows without platform-specific branches scattered through the code.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Platform detection:</strong> how and where the OS is detected — once at startup, stored in session state, accessed via a platform module. Never detected ad-hoc in feature code.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>OS-specific path roots:</strong> the canonical function that returns the right base path per OS for data, config, logs, and cache. Called by all modules — never hardcoded per-module.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Platform plugin system:</strong> how OS-specific capabilities (keychain backend, audio API, notification system) are loaded at startup based on detected OS. The interface each plugin must implement.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>C extension handling:</strong> list of packages with C extensions that need special handling on Windows (--prefer-binary in CI). Process for validating new dependencies cross-platform before adding them.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Process spawning:</strong> any code that uses subprocess, multiprocessing, or os.fork must note the Windows behavior difference (spawn vs fork). Decision on how multiprocessing is used (if at all).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>File system case sensitivity:</strong> policy for file and import naming — always lowercase filenames, always exact-case imports. Enforced by linter or CI check.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Line endings:</strong> .gitattributes policy. LF everywhere, Windows CI runner converts on checkout.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Packaging per platform:</strong> AppImage (Linux), .dmg or .pkg (macOS), NSIS installer or .msix (Windows). Which tools produce each. When in the CI pipeline they're built.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§7 CI/CD</span> · <span>§9 Audio I/O</span> · <span>§26 Frontend</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-infra">Infrastructure Layer</div>
+
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">Hardware Detection & Capability Tiers</div>
+  </div>
+  <div class="section-scope">Runs once at startup. Determines which local models can run, how routing decisions are made, and what features are available. The rest of the system reads from this result — never re-detects.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Detection method per platform:</strong> nvidia-smi for NVIDIA GPU VRAM (Linux/Windows), Metal device query for Apple Silicon, psutil for CPU and RAM. Exact library/command for each, timeout behavior if detection hangs.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tier definitions (complete):</strong> Tier 0 (no GPU / low VRAM), Tier 1 (8–20GB VRAM), Tier 2 (20GB+ VRAM) — exact thresholds stated. What changes at each tier for STT, TTS, LLM, personality model.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Capability profile schema:</strong> the exact data structure written to session state — which fields, which types. All downstream consumers read this structure.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Where tier is stored:</strong> session state only (not persisted to DB). What happens if detection fails — safe default (Tier 0 / cloud-only) stated explicitly.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>How tier affects routing:</strong> explicit mapping — Tier 0 routes STT/LLM/TTS to cloud, Tier 1 runs STT and TTS locally with cloud LLM, Tier 2 adds local LLM option. This mapping is the single source of truth.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>User visibility:</strong> does the user see their detected tier? Where? Can they override it manually? Decision stated.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry event:</strong> what gets logged at startup — detected GPU, VRAM, tier assigned, models selected as a result. Event name and payload fields.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§10 STT</span> · <span>§11 TTS</span> · <span>§12 LLM</span> · <span>§23 Personality Model</span></div>
+</div>
+
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">Process Lifecycle & Recovery</div>
+  </div>
+  <div class="section-scope">How Lilith starts, stays alive, restarts after a crash, and shuts down cleanly. The appliance behavior — it just works, silently.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Startup sequence order:</strong> the exact ordered steps — hardware detect → keychain open → database open → config load → platform plugins load → voice pipeline init → ready. No step may be skipped or reordered.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Process supervisor per platform:</strong> systemd unit file (Linux), launchd plist (macOS), Windows Service or Task Scheduler (Windows). Which approach for v6 v1, with the others noted as future.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Crash recovery:</strong> what constitutes a crash vs a clean exit. How the supervisor restarts the process. Backoff strategy for repeated crashes (don't loop-crash infinitely).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Graceful shutdown:</strong> what must be flushed or closed before exit — DB connections, audio streams, in-flight LLM calls. SIGTERM handler behavior.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Log file management:</strong> where logs are written, rotation policy (size or time based), how many old files kept. Log format (structured JSON vs plain text).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>State that survives restart:</strong> what is persisted to DB (durable) vs what is reconstructed fresh on each start (session state, capability tier, active conversation context).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Update mechanism:</strong> how a new version replaces the running one — AppImage swap on Linux, pkg replace on macOS. Whether updates are applied while running or require restart. Who initiates the update.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>First-run vs subsequent start:</strong> how the process knows it's running for the first time (flag in DB or config). Onboarding flow gated on this flag.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§3 SQLCipher</span> · <span>§4 Cross-Platform</span> · <span>§25 Onboarding</span></div>
+</div>
+
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title">CI/CD Pipeline</div>
+  </div>
+  <div class="section-scope">GitHub Actions configuration. What runs automatically on push and merge. The machine that ensures the codebase is always in a releasable state on all three platforms.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Trigger events:</strong> which GitHub events fire the pipeline — push to main, PR open, PR update. What runs on each event (not everything needs to run on every push).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Runner matrix:</strong> ubuntu-latest, windows-latest, macos-latest. Which jobs run on which runners. macOS runners cost 10× — what gets tested there vs inferred from Linux.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Python environment setup:</strong> exact setup-python action version, python-version pinned in CI config, pip cache strategy to keep runs fast.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Windows-specific install flags:</strong> --prefer-binary for packages with C extensions. List of packages known to need this. How to detect new ones that do.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Test execution:</strong> how pytest is invoked in CI, timeout wrapper (no stalling CI), which test markers run vs which are skipped (integration tests that need real hardware excluded from CI).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Build artifacts:</strong> which jobs produce a binary (AppImage, .dmg, .exe), where they're uploaded (GitHub Releases or Actions artifacts), version numbering scheme.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Secrets in CI:</strong> which secrets are needed (API keys for integration tests?), how they're stored (GitHub Secrets), how they're injected into the CI environment without appearing in logs.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Failure behavior:</strong> does a Windows CI failure block merge? Should it for v6 v1 (Linux primary)? Policy stated explicitly so there's no ambiguity when it happens.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§4 Cross-Platform</span> · <span>§8 Testing</span></div>
+</div>
+
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">08</div>
+    <div class="section-title">Testing Standards</div>
+  </div>
+  <div class="section-scope">What must be tested, how, and what is not worth testing. Prevents both the "no tests" failure and the "mocked everything" failure from v5.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>No DB mocking policy:</strong> integration tests hit real SQLCipher databases — in-memory or temp file, but real SQLCipher. No mocking the database layer. Mocked DB tests caught v5 bugs too late. <span class="standard">Standard</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Test database setup:</strong> how a clean test DB is created and torn down for each test or test session. Fixture design (pytest fixtures). Key derivation in tests (fixed test passphrase, not random).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>What requires a test:</strong> every new tool, every database write function, every enhancement layer job, every sync function. Unit tests for pure functions. Integration tests for anything touching a DB or external API.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>External API testing:</strong> LLM calls, OAuth flows, Google API calls — how these are tested without hitting real APIs in CI. VCR cassettes, response fixtures, or skip markers with real-API test run separately.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Voice pipeline testing:</strong> STT and TTS cannot run in headless CI without audio hardware. Policy: unit test the pipeline logic, mark audio I/O tests as hardware-only, exclude from CI.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Test file organization:</strong> where tests live relative to the code they test (tests/ mirroring modules/ structure or colocated). Import convention (absolute imports in tests).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Test timeout:</strong> per-test timeout (pytest-timeout), suite-level timeout (wrapping pytest call). Values stated — not left as defaults.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Coverage requirements:</strong> minimum coverage threshold enforced in CI? Which paths are excluded from coverage (third-party wrappers, platform-specific branches that can't run on CI runner)?</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§7 CI/CD</span> · <span>§16 UCL Telemetry</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-voice">Voice Pipeline</div>
+
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">09</div>
+    <div class="section-title">Audio I/O & Platform Audio APIs</div>
+  </div>
+  <div class="section-scope">The hardware interface layer for microphone input and speaker output. Platform-specific below this point; everything above treats audio as streams.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Python audio library:</strong> sounddevice vs PyAudio vs soundcard — pick one, confirm it supports WASAPI on Windows, ALSA/PulseAudio on Linux, CoreAudio on macOS. Document why.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Audio device selection:</strong> how the app selects input and output devices at startup. Default device vs user-configured. What happens when the configured device is disconnected.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Microphone capture format:</strong> sample rate, bit depth, mono vs stereo, chunk size for streaming. These values affect STT model performance — chosen to match Whisper's expected input.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>VAD (Voice Activity Detection):</strong> library choice (Silero VAD vs WebRTC VAD vs energy threshold). Threshold tuning. What constitutes end-of-utterance. How VAD output feeds into STT.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Audio buffer and latency management:</strong> target end-to-end audio latency budget by tier. How buffers are sized. What causes latency spikes and how they're mitigated.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Platform audio API per OS:</strong> WASAPI shared mode (Windows), CoreAudio (macOS), PulseAudio/PipeWire (Linux) — which is targeted for v6 v1, what the fallback is.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Amplitude signal:</strong> how microphone amplitude is exposed to the orb for real-time visual reaction. Which value (RMS, peak), at what sample rate, over what channel.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> what audio events are logged — device selected, dropout detected, latency spike, sample rate mismatch.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§4 Cross-Platform</span> · <span>§10 STT</span> · <span>§11 TTS</span> · <span>§27 Orb</span></div>
+</div>
+
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div class="section-title">Speech-to-Text (STT)</div>
+  </div>
+  <div class="section-scope">Converts microphone audio to text. Model choice and inference path are tier-dependent. Output feeds directly into the router.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Model selection per tier:</strong> exact model names — Tier 0: whisper tiny (CPU), Tier 1: whisper small or medium (CUDA), Tier 2: whisper large-v3 (CUDA). Language setting (auto-detect vs English-locked).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Inference library:</strong> openai-whisper vs faster-whisper vs whisper.cpp Python bindings — pick one for each tier or one library that handles all tiers. Confirm CUDA support for Tier 1/2.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Model loading:</strong> when the model is loaded (startup vs first use), where model weights are cached (OS-appropriate path), how loading time is handled UX-wise.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Streaming vs batch transcription:</strong> does STT run on a fixed audio chunk after VAD detects end-of-utterance, or is it a streaming transcription? Tradeoff stated, decision made.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Output format:</strong> what the STT module returns — plain text string, or text with timestamps/confidence. What downstream components expect.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Failure handling:</strong> what happens when transcription fails or returns empty string. Silent failure vs retry vs user notification.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> latency from audio capture end to text output, model used, character count output, confidence score if available.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§5 Hardware Tiers</span> · <span>§9 Audio I/O</span> · <span>§13 Router</span></div>
+</div>
+
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <div class="section-title">Text-to-Speech (TTS)</div>
+  </div>
+  <div class="section-scope">Converts LLM text output to audio. Must be fast enough to meet the conversational mode latency budget. Quality and speed are tier-dependent.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Model selection per tier:</strong> Tier 0: lightweight CPU model (Kokoro or piper-tts), Tier 1: mid-quality GPU model, Tier 2: high-fidelity GPU model. Exact model names or packages.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Streaming TTS:</strong> does TTS begin playing before the full text is generated (streaming), or does it wait for the complete response? Streaming is critical for conversational mode latency — decision and rationale.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Voice selection:</strong> which voice(s) are available, how voice is configured per user, whether voice can change based on context (e.g., Lilith's personality modes).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Amplitude output for orb sync:</strong> how TTS audio amplitude is extracted in real time and sent to the orb. This must be a low-latency signal, not post-processed.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Interruption handling:</strong> what happens when the user speaks while Lilith is speaking. Stop immediately vs finish current sentence vs ignore. Policy stated.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Endpoint-aware output:</strong> how TTS knows whether to play to local speakers vs send audio stream to a remote thin client (kitchen speaker). The output routing decision.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> latency from text input to first audio byte, model used, character count input.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§5 Hardware Tiers</span> · <span>§9 Audio I/O</span> · <span>§24 Narrative Layer</span> · <span>§27 Orb</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-intel">Intelligence Layer</div>
+
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <div class="section-title">LLM Integration & Provider Abstraction</div>
+  </div>
+  <div class="section-scope">The layer that talks to inference models. Must be provider-agnostic so cloud models can be swapped without touching the rest of the system. BYOK is a core requirement.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Provider abstraction interface:</strong> the exact methods every provider must implement — complete(messages, tools, stream) at minimum. No provider-specific code above this interface.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Supported providers for v6 v1:</strong> which providers ship in vertical slice — Anthropic Claude (primary), OpenAI (secondary), local via ollama or llama.cpp. Others noted as future.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>BYOK implementation:</strong> API keys retrieved from keychain at provider instantiation, never stored in code or config. Key validation on startup (light API call to confirm key works).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Default model per provider:</strong> which specific model string is used for each provider in v6 v1. How model choice is overridden by user config.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Prompt caching:</strong> Anthropic prompt caching — which parts of the context are marked as cacheable (system prompt, stable context blocks). Cache TTL awareness. Whether other providers have equivalent feature.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Streaming vs non-streaming:</strong> which call paths use streaming (conversational mode for low latency) and which use non-streaming (artifact mode where full response is needed before proceeding).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Error handling and retry:</strong> rate limit (429) backoff strategy, timeout values, model unavailable fallback chain. Maximum retry count before surfacing error to user.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Token counting:</strong> how tokens are counted before sending (to enforce context budget) and after receiving (for cost tracking). Which library (tiktoken, Anthropic's counter, provider-reported).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> every LLM call logged — provider, model, prompt tokens, completion tokens, latency, cache hit/miss, cost estimate in USD, success/error.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§5 Hardware Tiers</span> · <span>§13 Router</span> · <span>§14 CWM</span> · <span>§15 Tool System</span></div>
+</div>
+
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-num">13</div>
+    <div class="section-title">Two-Mode Router</div>
+  </div>
+  <div class="section-scope">Every input is classified as conversational or artifact before anything else happens. This classification gates the entire downstream pipeline. The most load-bearing architectural decision in v6.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Classifier implementation:</strong> how classification happens — small LLM call, keyword/pattern matching, embedding similarity, or a combination. Latency budget for the classification step itself.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Classification output schema:</strong> what the classifier returns — mode (conversational/artifact), intent labels (calendar.lookup, people.search, etc.), confidence score. This schema is the contract between routing and downstream systems.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Conversational mode constraints (hard limits):</strong> maximum output tokens (50), maximum time-to-first-audio-byte (3 seconds), maximum context tokens (1,200). These are ceilings, not targets. How they're enforced.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Artifact mode flow:</strong> immediate acknowledge → background task dispatch → bridge timer → handoff. What happens at each step, what triggers the handoff, what happens if the task exceeds the bridge timer.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Ambiguous query handling:</strong> when confidence is below a threshold, what happens — default to conversational (safer/faster) or ask for clarification. Threshold value stated.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Intent taxonomy:</strong> complete list of intent labels the classifier can output. This list is the contract — CWM uses it to select context blocks, tool system uses it to decide which tools to surface.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Multi-intent handling:</strong> a query with two intents (calendar AND people) — which mode wins, which context blocks load, how the response handles both.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> every classification logged — input text hash (not raw text), mode selected, intent labels, confidence, classifier latency.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§14 CWM</span> · <span>§15 Tool System</span> · <span>§24 Narrative Layer</span></div>
+</div>
+
+<div class="section" id="s14">
+  <div class="section-header">
+    <div class="section-num">14</div>
+    <div class="section-title">Context Window Manager</div>
+  </div>
+  <div class="section-scope">Assembles the context that goes into each LLM call. Wrong context = wrong answer. Unnecessary context = slow, expensive calls. This is the efficiency engine of the system.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Intent-to-block mapping (complete):</strong> for every intent label in §13's taxonomy, which context blocks are loaded. Must be a complete table — no unmapped intents. <span class="decision open">Open</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Block catalog:</strong> complete list of all context blocks — system prompt, personal truths, conversation history, calendar, contacts, finance, memory recall, telemetry stats, pending tasks. Each block's source, size budget, and staleness policy.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Token budget per block:</strong> how many tokens each block is allowed to consume. What happens when a block's data exceeds its budget (truncate, summarize, or paginate).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Block loading behavior:</strong> blocks not in the whitelist for the current intent are NOT fetched — not fetched and discarded, not fetched. The DB query never happens. This is critical for conversational mode latency.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Conversational mode context ceiling:</strong> 1,200 tokens total — how this is enforced across all blocks. Which blocks get priority when budget is exceeded.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Conversation history compression:</strong> when does history get summarized vs truncated, how many raw turns are kept before compression, what the summary format is.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Staleness gate integration:</strong> how blocks check freshness before injection. What "stale" means per block (calendar: 4 hours, contacts: 24 hours, etc.). What happens in the context when a block is stale (note injected, or block withheld).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Block assembly order:</strong> the order blocks appear in the context matters for LLM attention. Defined ordering stated — system prompt first, stable context, then dynamic blocks, then history last.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> which blocks were loaded, token count per block, total tokens assembled, blocks skipped due to intent filter, staleness flags triggered.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§13 Router</span> · <span>§17 Enhancement Layers</span> · <span>§18 Memory</span></div>
+</div>
+
+<div class="section" id="s15">
+  <div class="section-header">
+    <div class="section-num">15</div>
+    <div class="section-title">Tool System</div>
+  </div>
+  <div class="section-scope">How tools are registered, called, and their results returned to the LLM. The interface between the LLM and all data/action capabilities.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Tool registration:</strong> how tools are discovered and registered at startup. Auto-discovery from a directory vs explicit registration list. Which approach and why.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tool schema format:</strong> how each tool's input schema is defined (JSON Schema). Whether the schema is in code or in a separate YAML/JSON file. How it's validated.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tool result format:</strong> what every tool returns — success/error flag, payload, metadata (latency, source, freshness). The LLM always receives a structured result, never raw exception text.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tool call loop:</strong> how the multi-step tool call loop works — LLM requests tool, tool runs, result injected, LLM continues. Maximum tool calls per request. How to detect and break infinite tool loops.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tool authorization:</strong> which tools require explicit user confirmation before running (any tool that writes data, deletes data, or sends a message). Which run silently. Policy stated and enforced in the tool runner, not per-tool.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Blocking vs non-blocking tools:</strong> tools that return immediately vs tools that kick off a background job (the artifact mode tools). How the router knows which type a tool is.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tool availability by tier:</strong> which tools are unavailable at certain hardware tiers (personality model tool only at Tier 1+). How the LLM's tool list is filtered before each call.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Error handling:</strong> tool throws an exception — what gets returned to the LLM, what gets logged to UCL, whether the LLM is told to retry or to report failure to user.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> every tool call logged — tool name, input hash, latency, success/error, called in mode (conversational/artifact).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§12 LLM</span> · <span>§13 Router</span> · <span>§20–22 App tools</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-data">Data Layer</div>
+
+<div class="section" id="s16">
+  <div class="section-header">
+    <div class="section-num">16</div>
+    <div class="section-title">UCL Telemetry</div>
+  </div>
+  <div class="section-scope">The nervous system of the entire application. Every behavioral event goes here. Lilith reads this to understand herself. Must be designed once and followed without exception.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Schema (complete):</strong> ucl_events table with all columns — id, timestamp (UTC microseconds), event_type (dot-namespaced text), endpoint_id, session_id, payload (JSON), duration_ms, success (bool), error_msg. No other tables in ucl_db at v1.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Event taxonomy (complete):</strong> every dot-namespaced event type in the system listed. llm.request, llm.response, tool.call, tool.result, voice.stt.complete, voice.tts.start, router.classify, context.assemble, sync.calendar.complete, memory.write, user.message_sent, error.unhandled — full list, not examples.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Write path:</strong> the exact function called to log an event. Synchronous or asynchronous write. What happens if the write fails (telemetry must never crash the main path).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>No raw table LLM access:</strong> the LLM never queries ucl_events directly. It reads L2-enhanced views only. This is a hard architectural rule, not a preference. <span class="standard">Standard</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Retention policy:</strong> how long raw events are kept. After retention period, are they deleted or archived? Are L1/L2 summaries kept longer than raw events?</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Indexes:</strong> which columns are indexed for query performance — at minimum timestamp and event_type. Any compound indexes for common query patterns.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Payload schema per event type:</strong> for each event type in the taxonomy, the exact JSON fields in the payload. Not vague — specific field names, types, and what they mean.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Enforcement:</strong> how the "telemetry on every write path" rule is enforced during review. Checklist item in PR review. No automated enforcement planned for v1 — stated as a discipline requirement.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§17 Enhancement Layers</span> · <span>§12 LLM</span> · <span>§13 Router</span> · <span>§14 CWM</span> · <span>§15 Tools</span></div>
+</div>
+
+<div class="section" id="s17">
+  <div class="section-header">
+    <div class="section-num">17</div>
+    <div class="section-title">Enhancement Layers (L1/L2)</div>
+  </div>
+  <div class="section-scope">Raw data is never LLM-readable. Enhancement layers transform it into purpose-built views. Every data domain has at least L1. L2 produces the narrative the LLM actually reads.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>L1 definition:</strong> aggregation and normalization of raw data. Runs as a background job, not on-demand. Output is structured summary tables, not narrative text. Idempotent — safe to re-run.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>L2 definition:</strong> interprets L1 output into LLM-readable context blocks. May involve a small LLM call or a template engine. Output is text or structured text. Also runs as a background job.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Enhancement domains for v1:</strong> calendar, contacts, finance, UCL/telemetry, memory. Each domain listed with its L1 computation and L2 narrative output.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Job scheduling:</strong> when L1 and L2 jobs run — after sync completion, on a timer, or triggered by data change. Maximum staleness tolerance per domain before a job is forced.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Output storage:</strong> where L1 and L2 outputs are stored — in the same DB as raw data (separate tables) or in a separate enhanced_db. Decision stated with rationale.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Staleness tracking:</strong> how the CWM knows if an L2 block is fresh enough to use. Timestamp column on enhancement output, compared against the staleness threshold defined per domain in §14.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Failure isolation:</strong> if an L2 job fails, the L1 data is still valid. If L1 fails, raw data is still in the DB. Enhancement failures degrade context quality but never crash the main path.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> enhancement job start, complete, duration, records processed, success/failure.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§16 UCL</span> · <span>§14 CWM</span> · <span>§19 Sync</span> · <span>§20–22 App data</span></div>
+</div>
+
+<div class="section" id="s18">
+  <div class="section-header">
+    <div class="section-num">18</div>
+    <div class="section-title">Memory System</div>
+  </div>
+  <div class="section-scope">Persistent recall across sessions. Three tiers: warm store (recent, fast), cold store (archived, slower), personal truths (stable facts about the user, permanent).</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Warm store definition:</strong> what goes here — recent conversation summaries, recently mentioned entities, active tasks. Retention window (last N days or last N entries). Query method.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Cold store definition:</strong> what goes here — older summaries beyond warm window, significant events, archived conversations. How items move from warm to cold (age threshold, or triggered by compression).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Personal truths store:</strong> structure of a truth entry — content, confidence level, source (explicit/inferred), timestamp, last_confirmed. The schema is a design decision. <span class="decision open">Open — PERS-1 D1</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Truth write triggers:</strong> what causes a truth to be written — explicit user statement ("I am vegetarian"), repeated mention, or subtle pattern. Which of these are in scope for v1.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Recall tool behavior:</strong> how the memory_recall tool searches — keyword, semantic similarity, or both. What it returns — text snippets, structured entries, or both. How results are ranked.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Memory injection into context:</strong> does memory go into the CWM block system (yes), and under what intent labels does the memory block load?</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Session isolation:</strong> whether in-session conversation state is kept separate from persisted memory until session end. How a session is defined (time gap, explicit end, or device change).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> memory.write (with tier), memory.recall (with match count), memory.compress (when warm→cold migration runs).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§14 CWM</span> · <span>§23 Personality & System Prompt</span></div>
+</div>
+
+<div class="section" id="s19">
+  <div class="section-header">
+    <div class="section-num">19</div>
+    <div class="section-title">Data Sync Pipeline</div>
+  </div>
+  <div class="section-scope">How external data (Google Calendar, Google Contacts) gets into the local encrypted databases safely and efficiently. Sync failures must never corrupt local state.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Sync sources for v1:</strong> Google Calendar and Google Contacts only. No other sources in v6 v1. Others listed as future.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>OAuth flow:</strong> which OAuth library (google-auth-oauthlib), scopes requested (calendar.readonly, contacts.readonly), how the browser is opened for the consent screen, how the callback is handled locally.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Token storage and refresh:</strong> access token and refresh token stored in OS keychain. Refresh logic — check expiry before each sync, refresh if within threshold, update keychain with new token.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Incremental sync:</strong> how each sync avoids pulling everything every time — sync tokens for Google Calendar API, etags for Contacts. What triggers a full sync vs incremental.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Write safety:</strong> sync writes to DB in a transaction. If the sync fails mid-way, the transaction rolls back — no partial state. How this is implemented.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Conflict handling:</strong> what happens when a local record differs from the remote (edit on both sides). For v1: remote wins for calendar and contacts (read-only sources). Stated explicitly.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Sync schedule:</strong> how often each source is synced — interval (minutes), startup sync, and manually triggered sync. Whether sync runs when the device is on battery (mobile consideration).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Rate limit handling:</strong> Google API rate limits — how they're detected (429 response), backoff strategy, how the user is notified if sync is blocked.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> sync.start, sync.complete (with record count and duration), sync.error (with error type), sync.rate_limited.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§17 Enhancement Layers</span> · <span>§20 Contacts</span> · <span>§25 Onboarding</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-app">Application Layer — Core Apps</div>
+
+<div class="section" id="s20">
+  <div class="section-header">
+    <div class="section-num">20</div>
+    <div class="section-title">Contacts / People App</div>
+  </div>
+  <div class="section-scope">The first of three vertical slice apps. People data is central to most queries — who is this person, when did we last talk, what do I know about them.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Database schema (contacts_db):</strong> every table, every column, types, constraints, indexes. People, relationships, interaction_history, dossier_entries — exact schema.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Google Contacts field mapping:</strong> which Google Contacts fields are pulled and how they map to contacts_db columns. Fields not mapped are discarded — stated explicitly.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>L1 enhancement:</strong> what L1 computes for contacts — interaction frequency, last contact date, relationship strength score. How these are computed from raw contact and calendar data.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>L2 enhancement (dossier block):</strong> what the LLM-readable context block for a person looks like. What fields, what format, token budget per person entry.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>get_contacts tool:</strong> input parameters (name search, relationship filter, recency), output format, how it queries (L1 or L2 data, not raw), error cases.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Dossier concept:</strong> free-form notes per person that Lilith writes from conversation. Schema for dossier entries, who can write them (only Lilith via tool, not sync), how they surface in context.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Privacy handling:</strong> contacts data is sensitive — what's included in cloud LLM calls and what's withheld. Names included; home addresses potentially excluded from context block. Policy stated.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> contacts.sync.complete (record count), contacts.query (tool call), contacts.dossier.write.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§17 Enhancement Layers</span> · <span>§19 Sync</span> · <span>§21 Finance (shared contacts)</span></div>
+</div>
+
+<div class="section" id="s21">
+  <div class="section-header">
+    <div class="section-num">21</div>
+    <div class="section-title">Finance App</div>
+  </div>
+  <div class="section-scope">The most sensitive data in the system. Financial data must be treated with the strictest privacy controls. For v6 v1, manual entry only — no bank sync.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Database schema (finance_db):</strong> every table and column — transactions, accounts, categories, budgets. Types, constraints, indexes. Account numbers never stored in plaintext even within SQLCipher.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Data ingestion for v1:</strong> manual entry via tool call or UI. No bank sync, no Plaid, no CSV import in v6 v1. Stated clearly so no scope creep.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>L1 enhancement:</strong> what L1 computes — spending by category (last 30/90 days), income vs expense summary, budget utilization. How often it runs (after any transaction write).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>L2 enhancement:</strong> the narrative block the LLM reads. "You spent $X on Y last month, up Z% from the month before." Token budget, update frequency.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>get_finance tool:</strong> input parameters (date range, category, account), output format, what level of detail is returned by default vs on explicit request.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Cloud LLM privacy:</strong> specific fields that NEVER appear in a cloud-bound LLM context — account numbers, full transaction merchant names (hash or category instead?). Policy written as a rule, not a suggestion.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> finance.transaction.write, finance.query (tool call). No amounts or merchant names in telemetry payload — only category and relative size (small/medium/large).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§17 Enhancement Layers</span></div>
+</div>
+
+<div class="section" id="s22">
+  <div class="section-header">
+    <div class="section-num">22</div>
+    <div class="section-title">Conversation / Chat App</div>
+  </div>
+  <div class="section-scope">The persistent log of every interaction across every endpoint. The chat screen is its UI. Cross-device continuation is its killer feature.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Database schema (conversation_db):</strong> sessions table, messages table — every column. Message fields include: id, session_id, timestamp, role (user/assistant), content, endpoint_id, mode (conversational/artifact), source_type (voice/text).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Endpoint tagging:</strong> how every message is tagged with its origin endpoint at write time. The endpoint_id format and registry — where endpoint IDs are assigned and stored.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Session definition:</strong> what constitutes a conversation session — time gap threshold, device change, explicit new conversation. How sessions are created and closed.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Cross-device continuation:</strong> how a conversation started on the kitchen speaker is continued in the desktop chat window. Session ID is the link. How the desktop UI signals "continuing session X."</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Conversation history block for CWM:</strong> format and token budget of the history block injected into context. How many raw turns before compression. What compression produces.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Search and retrieval:</strong> how the user finds an old conversation. Full-text search (FTS5 in SQLite), date filter, endpoint filter. What the UI shows for search results.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Artifact messages:</strong> how artifact-mode responses are stored — the acknowledge, the task result, and the handoff as distinct message entries or as a single structured message. How the UI renders them differently.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> conversation.session.start, conversation.session.end (with duration and message count), conversation.message.write.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§13 Router</span> · <span>§14 CWM</span> · <span>§24 Narrative Layer</span> · <span>§28 Screen Architecture</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-pers">Personality & Response Layer</div>
+
+<div class="section" id="s23">
+  <div class="section-header">
+    <div class="section-num">23</div>
+    <div class="section-title">Personality System & System Prompt</div>
+  </div>
+  <div class="section-scope">Who Lilith is, in text. The system prompt is the most read piece of the entire system. Its structure determines how reliably Lilith behaves. Every word in it is a design decision.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>System prompt structure:</strong> the ordered sections of the system prompt — identity, behavioral rules, tone guidelines, personal truths (stable), current context (volatile). Order matters for LLM attention.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Stable vs volatile sections:</strong> which parts of the system prompt never change (identity, rules) vs which are injected fresh each call (personal truths summary, current context note). Cache-eligible sections marked for Anthropic prompt caching.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Personal truths injection:</strong> where in the system prompt truths appear, how many truths are injected at once, whether all truths are always included or selectively filtered by relevance to the current query. <span class="decision open">Open — PERS-1 D2</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Personality document format:</strong> the file that defines Lilith's character — what it contains, what format it's in, where it lives, how it's loaded into the system prompt. Not the content — the structure and format decision.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Two-mode tone differences:</strong> how conversational mode system prompt differs from artifact mode. Conversational: brief, warm, immediate. Artifact: acknowledging, managing expectations. Whether these are two prompts or one with mode-injected instructions.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>System prompt versioning:</strong> how prompt changes are tracked. Whether a prompt version is stored in the DB so telemetry can correlate behavior changes to prompt changes.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Personality model (PERS-2):</strong> hardware-gated, Tier 1+ only, design-only for v6 v1. Where in the pipeline it fits (artifact mode only, post-LLM style pass). Noted but not implemented.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§14 CWM</span> · <span>§18 Memory / Truths</span> · <span>§12 LLM</span></div>
+</div>
+
+<div class="section" id="s24">
+  <div class="section-header">
+    <div class="section-num">24</div>
+    <div class="section-title">Narrative Layer</div>
+  </div>
+  <div class="section-scope">The voice of the artifact mode pipeline. Every tool has acknowledge, bridge, handoff, and failure copy. This is what the user hears while Lilith works.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>YAML schema for tool narratives:</strong> exact fields — tool_name, acknowledge (spoken immediately), bridge (spoken at interval if task is slow), handoff (spoken on completion), failure (spoken on error). Format of the YAML file per tool.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Narrative file location and loading:</strong> where narrative YAML files live (tools/ directory alongside tool definition, or separate narratives/ directory), how the loader discovers them at startup.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Acknowledge timing:</strong> the acknowledge phrase is spoken before the tool call begins — how quickly after the user's input it fires, and how this is enforced technically.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Bridge timer:</strong> how long before a bridge phrase fires if the tool is still running. Fixed duration vs adaptive (based on tool's average historical duration from UCL). <span class="decision open">Open — CONV-2 D2</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Handoff summary source:</strong> does the handoff phrase come from the tool result directly (template fill), from a small LLM call summarizing the result, or from the narrative YAML? <span class="decision open">Open — CONV-2 D3</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Failure narrative:</strong> what Lilith says when a tool errors. Generic fallback vs tool-specific failure copy. Whether the error detail is shared with the user or abstracted.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Tools requiring narratives for v1:</strong> complete list of tools that need narrative YAML files in the vertical slice. Every artifact-mode tool must have one before it ships.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> narrative.acknowledge.fired, narrative.bridge.fired (with delay), narrative.handoff.fired (with task duration).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§13 Router</span> · <span>§15 Tool System</span> · <span>§11 TTS</span></div>
+</div>
+
+<div class="section" id="s25">
+  <div class="section-header">
+    <div class="section-num">25</div>
+    <div class="section-title">Onboarding Flow</div>
+  </div>
+  <div class="section-scope">The first-run experience. Everything in this section happens once. It must end with Lilith knowing who the user is and having initial data to work with — or it failed.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>First-run detection:</strong> how the app knows it's the first run — flag in a config file or a dedicated DB table. What sets the flag to "done" (completion of onboarding flow, not just first launch).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Passphrase setup:</strong> the step where the user sets their database passphrase. Requirements (minimum length, confirmation), how it's tested (decrypt/re-encrypt a test value), what happens if they skip it (is skipping allowed for v1?).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Google sign-in:</strong> Google SSO step — what is requested (contacts.readonly + calendar.readonly), how the consent screen is shown (system browser), what feedback the app gives while waiting for completion.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Initial sync during onboarding:</strong> what gets synced at first run, how long it takes, what the user sees while it runs. Progress indicator? Lilith speaks through it?</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Hardware detection disclosure:</strong> whether the user is shown their detected hardware tier and what features it enables. If not shown, when they can find it.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>First conversation after onboarding:</strong> what Lilith says when onboarding is complete and the first real conversation begins. Should demonstrate immediate value from the synced data.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Onboarding skip / defer:</strong> can any step be skipped and completed later? Which steps are blocking (passphrase) vs optional (Google sign-in, can be done from settings later)?</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UCL telemetry:</strong> onboarding.step.complete for each step, onboarding.complete (with total duration), onboarding.error (if any step fails).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§2 Security</span> · <span>§3 SQLCipher</span> · <span>§19 Sync</span> · <span>§26 Frontend</span></div>
+</div>
+
+<!-- ============================================================ -->
+<div class="layer layer-ui">Frontend Layer</div>
+
+<div class="section" id="s26">
+  <div class="section-header">
+    <div class="section-num">26</div>
+    <div class="section-title">Frontend Framework & Application Shell</div>
+  </div>
+  <div class="section-scope">The largest open design decision. Framework choice determines everything about the orb, the backend-to-UI event bus, the build toolchain, and the touch/mouse parity story. Must be decided before any UI code is written.</div>
+  <ul class="checklist">
+    <li><div class="check-box" style="background:rgba(16,185,129,0.3);border-color:#10b981;"></div><div class="check-text"><strong>Framework selection:</strong> <strong style="color:#10b981;">DECIDED — PySide6 6.11.1 (Qt6, LGPL v3).</strong> PyInstaller --onedir distribution. No commercial license required. Qt Quick 3D dropped (GPLv3); orb uses ModernGL 5.x (MIT) in QOpenGLWidget instead. See RES-01, RES-03, RES-15. <span class="standard">Standard</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Backend-to-frontend event bus:</strong> how Python backend sends navigation and UI commands to the frontend. The protocol — event names, payload format, how the frontend registers handlers. Must be defined before any screen is built.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Frontend-to-backend calls:</strong> how user actions in the UI trigger backend functions. Named commands, parameters, response format. Same interface regardless of framework choice.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Touch and mouse parity contract:</strong> every interactive element must respond to both tap and click. Right-click menus must have long-press equivalents. Hover tooltips must have tap-to-show equivalents. Design rule, not framework feature.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>UI command protocol for Lilith-controls-UI:</strong> how Lilith issues UI commands (navigate, highlight, resize, run_demo_step). The full set of commands she can issue, the payload format, and how the frontend maps them to actions.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Element addressability:</strong> every notable UI element has a semantic ID known to the backend. The naming convention for element IDs and how they're registered (or defined in a shared schema).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>App window behavior:</strong> initial size, minimum size, full-screen behavior, whether the app runs in the system tray when minimized. Per-platform behavior noted.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Build output:</strong> what the frontend build produces, how it's bundled with the Python backend, how the resulting package installs on each OS.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§4 Cross-Platform</span> · <span>§27 Orb</span> · <span>§28 Screen Architecture</span></div>
+</div>
+
+<div class="section" id="s27">
+  <div class="section-header">
+    <div class="section-num">27</div>
+    <div class="section-title">The Orb</div>
+  </div>
+  <div class="section-scope">Lilith's physical presence in the UI. 3D, animated, voice-reactive. This is the element that makes Lilith feel like an entity rather than a chat window. Its implementation is framework-dependent.</div>
+  <ul class="checklist">
+    <li><div class="check-box" style="background:rgba(16,185,129,0.3);border-color:#10b981;"></div><div class="check-text"><strong>3D implementation path:</strong> <strong style="color:#10b981;">DECIDED — ModernGL 5.x (MIT) embedded in PySide6 QOpenGLWidget.</strong> UV sphere mesh (numpy, 48×24 sectors), GLSL Fresnel glow shader, Kokoro RMS amplitude → u_amplitude uniform, spring-physics positional animation. Qt Quick 3D dropped (GPLv3 incompatible). Full implementation spec in RES-03. <span class="standard">Standard</span></div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Orb state machine:</strong> complete set of states — idle, listening, processing, speaking, error, background_task. Transition triggers (from audio events, from router, from TTS events). Visual behavior per state.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Voice-reactive animation:</strong> how microphone amplitude (from §9) drives orb pulse, scale, or particle density in real time. Maximum acceptable latency between audio and visual (target: &lt;50ms).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>TTS amplitude sync:</strong> how TTS audio amplitude (from §11) drives orb behavior while Lilith speaks. The signal path from TTS output to orb animation.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Orb positioning:</strong> where the orb lives in the layout — fixed corner, floating, or responsive to the active screen. Whether its position is controlled by Lilith (she can move herself) or fixed by layout.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Pointing / attention direction:</strong> how the orb "points" at a UI element when Lilith wants to direct attention to it. Whether this is an animation (glow toward element, particle trail) or a visual indicator (arrow/highlight).</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Idle behavior:</strong> the orb when Lilith is not speaking and no input is coming. Not a frozen image — subtle drift, occasional micro-animation, internal light shift. Described in implementation terms, not just aesthetics.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Performance budget:</strong> GPU/CPU budget for the orb at idle and during active animation. Must not spike system resources. Target frame rate (60fps or 30fps acceptable).</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§9 Audio I/O</span> · <span>§11 TTS</span> · <span>§26 Frontend Framework</span></div>
+</div>
+
+<div class="section" id="s28">
+  <div class="section-header">
+    <div class="section-num">28</div>
+    <div class="section-title">Screen Architecture & Navigation</div>
+  </div>
+  <div class="section-scope">The map of every screen in the vertical slice and how the user moves between them — both manually and when Lilith navigates for them.</div>
+  <ul class="checklist">
+    <li><div class="check-box"></div><div class="check-text"><strong>Screen inventory (complete for v1):</strong> every screen in the vertical slice listed by name — Chat, Calendar, Contacts, Finance, Assistant, Settings. No others in v6 v1. Stated as a constraint.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Navigation model:</strong> how the user moves between screens — sidebar/nav rail, tab bar, gesture-based, voice command. Choice must work for both mouse and touch. Decision stated with rationale.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Lilith-driven navigation:</strong> how the UI command navigate(screen_id) is handled — transition animation type and duration, what happens to ongoing content on the current screen.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Data loading per screen:</strong> how each screen gets its data — from a backend query on every load, from a persistent subscription, or from a cached frontend store. How loading states are shown.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Chat screen specifics:</strong> message list rendering (virtualized for long histories), source tags per message, visual distinction between conversational and artifact responses, continuation thread indicator for cross-device sessions.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Calendar screen specifics:</strong> default view (day/week/month), how events from contacts_db appear alongside calendar_db events, how Lilith can highlight a specific event.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Deep link / element addressing:</strong> how a UI command like highlight(element_id: "contact_sarah") maps to a specific rendered element. Whether the screen must be active for this to work, or if navigation happens first.</div></li>
+    <li><div class="check-box"></div><div class="check-text"><strong>Demo mode:</strong> the mechanism that allows Lilith to run a scripted sequence of UI commands from a markdown instruction file. How the sequence is parsed, timed, and executed. What can interrupt a demo in progress.</div></li>
+  </ul>
+  <div class="section-touches">Touches: <span>§22 Conversation App</span> · <span>§26 Frontend Framework</span> · <span>§27 Orb</span></div>
+</div>
+
+<hr>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px; margin-top: 40px; font-size: 0.88rem;">
+  <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px;">How to use this document</div>
+  <ol style="padding-left: 20px; line-height: 2;">
+    <li>Take one section at a time. Research what you don't know. Decide what you haven't decided.</li>
+    <li>Write the design document section: specific, no code, implementation instructions only. A new developer should be able to implement from it without asking questions.</li>
+    <li>Come back to this checklist. Check off each item in that section once the design doc covers it.</li>
+    <li>Any item marked <span class="decision open" style="font-size:0.7rem;">Open</span> is a blocker. Do not start implementation of that section until it's resolved.</li>
+    <li>When all 28 sections are fully checked: freeze the design document. No architecture decisions are made during build — they were all made here. Agents implement against the doc.</li>
+  </ol>
+  <div style="margin-top: 14px; color: var(--muted); font-size: 0.82rem;">28 sections · ~220 checklist items · June 2026</div>
+</div>
+
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center; margin-top: 32px;">
+  LILITH V6 — DESIGN DOCUMENT CHECKLIST · See <code>lilith-v6-systems.html</code> for the architecture visual
+</p>
+</body>
+</html>

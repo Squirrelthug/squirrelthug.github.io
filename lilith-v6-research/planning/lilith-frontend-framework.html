@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Frontend Framework: Tauri v2 vs Flutter vs Qt6</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; line-height: 1.75; max-width: 980px; margin: 0 auto; padding: 60px 40px; }
+  h1 { font-size: 2.4rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 8px; }
+  .subtitle { font-size: 1.05rem; color: var(--muted); margin-bottom: 48px; font-style: italic; }
+  h2 { font-size: 1.45rem; font-weight: 600; color: var(--amber); margin: 52px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 28px 0 10px; }
+  h4 { font-size: 0.82rem; font-weight: 700; color: var(--purple); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+  p { margin-bottom: 14px; }
+  .callout { background: var(--surface); border-left: 3px solid var(--accent); padding: 14px 18px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 0.93rem; }
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+  .callout.purple { border-left-color: var(--purple); }
+  .callout-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red .callout-label { color: var(--red); }
+  .callout.purple .callout-label { color: var(--purple); }
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px 22px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.65; overflow-x: auto; color: #c9d1d9; margin: 14px 0; white-space: pre; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.88rem; }
+  th { text-align: left; padding: 10px 13px; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .bg { background: rgba(16,185,129,0.15); color: var(--green); }
+  .br { background: rgba(239,68,68,0.15); color: var(--red); }
+  .ba { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .bc { background: rgba(79,195,201,0.15); color: var(--accent); }
+  .bp { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .bm { background: rgba(107,114,128,0.15); color: var(--muted); }
+  .verdict { background: var(--surface); border: 2px solid var(--green); border-radius: 8px; padding: 20px 24px; margin: 28px 0; }
+  .verdict-header { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--green); font-weight: 700; margin-bottom: 10px; }
+  .framework-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin: 20px 0; }
+  .framework-name { font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .framework-tagline { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin: 20px 0; }
+  .col-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .col-title { font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 44px 0; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px; margin-bottom: 44px; }
+  .toc-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { padding-left: 18px; margin: 0; }
+  .toc li { margin-bottom: 7px; font-size: 0.9rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .anchor { scroll-margin-top: 24px; }
+  .score-row { display: flex; align-items: center; gap: 12px; margin: 6px 0; font-size: 0.9rem; }
+  .score-label { width: 200px; flex-shrink: 0; color: var(--muted); font-size: 0.82rem; }
+  .score-bar-bg { flex: 1; background: var(--border); border-radius: 4px; height: 8px; }
+  .score-bar { height: 8px; border-radius: 4px; }
+  .score-val { width: 32px; text-align: right; font-size: 0.8rem; font-weight: 600; }
+</style>
+</head>
+<body>
+<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-left:4px solid #10b981;border-radius:6px;padding:14px 20px;margin-bottom:28px;font-size:0.88rem;"><strong style="color:#10b981;display:block;margin-bottom:6px;">DECISION MADE — 2026-06-28</strong>This document was written before the framework decision was made. <strong>Decision: PySide6 6.11.1 (Qt6, LGPL v3)</strong> is the frontend framework. <strong>ModernGL 5.x (MIT)</strong> is used for the orb via <code>QOpenGLWidget</code>. Qt Quick 3D (GPLv3) is dropped. No commercial Qt license required. Tauri and Flutter are no longer under consideration. This document is preserved for historical research context only — the decision it was researching is resolved. See RES-01, RES-03, RES-15 in the research directory.</div>
+
+<h1>Frontend Framework Decision</h1>
+<p class="subtitle">Tauri v2 vs Flutter vs Qt6 — what the orb, the demo, and the premium feel actually require · June 2026</p>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#requirements">The Non-Negotiable Requirements</a></li>
+    <li><a href="#why-qt6-was-underrated">Why Qt6 Was Underrated in the Previous Doc</a></li>
+    <li><a href="#tauri">Tauri v2 — Deep Look</a></li>
+    <li><a href="#flutter">Flutter Desktop — Deep Look</a></li>
+    <li><a href="#qt6">Qt6 / PySide6 — Deep Look</a></li>
+    <li><a href="#comparison">Side-by-Side Comparison</a></li>
+    <li><a href="#the-orb">The Orb — 3D Asset Requirements</a></li>
+    <li><a href="#demo-mode">Demo Mode and Lilith Controls the UI</a></li>
+    <li><a href="#touch">Touch + Mouse Parity</a></li>
+    <li><a href="#verdict">The Verdict</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="requirements">1. The Non-Negotiable Requirements</h2>
+
+<p>Before comparing frameworks, the requirements that were underspecified in the previous document and which change the ranking:</p>
+
+<ul>
+  <li><strong>The orb is a 3D animated asset.</strong> Not a 2D image stack. A real-time 3D object — potentially liquid, glowing, particle-based — that moves, reacts to voice input, and feels alive. This is a rendering requirement, not just a CSS animation.</li>
+  <li><strong>Lilith controls the UI.</strong> She navigates between screens, points at elements, changes pages, runs a demo mode. The backend must be able to issue UI commands. This requires a well-defined backend-to-frontend event bus.</li>
+  <li><strong>Touch and mouse/keyboard are interchangeable.</strong> No friction switching between them. Touch events and pointer events handled identically. This is a design requirement that the framework must support natively.</li>
+  <li><strong>The orb lives inside the application.</strong> It does not float over the OS desktop or other applications. This removes the OS-overlay difficulty entirely — the orb is a widget inside a full-screen window.</li>
+  <li><strong>Premium feel on all three desktop platforms.</strong> Not "it runs." Actually looks and feels like software worth paying for.</li>
+</ul>
+
+<div class="callout green">
+  <div class="callout-label">Clarification that changes the framework comparison</div>
+  The orb being inside the application (not an OS-level overlay) removes what was listed as a "medium difficulty" challenge in the previous doc. Inside a full-screen window, every framework handles an animated floating element trivially. The orb complexity shifts entirely to rendering quality — can it be 3D? Can it react in real time?
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="why-qt6-was-underrated">2. Why Qt6 Was Underrated</h2>
+
+<p>The previous doc labeled Qt6 as a "strong candidate" but placed it below Tauri and Flutter. The reasoning was incomplete. Here's the case for Qt6 that was missed:</p>
+
+<ul>
+  <li><strong>Qt Quick 3D</strong> is a production-grade 3D scene system built directly into Qt. It's what game engine UIs and premium embedded device interfaces use. The orb you're imagining — a real-time 3D animated sphere with shaders and particle effects — is exactly what Qt Quick 3D was designed for. This is not a workaround. It's the primary use case.</li>
+  <li><strong>Native on all platforms</strong> means Qt draws its own widgets using native platform rendering primitives. On macOS it looks like macOS. On Windows it looks like Windows. On Linux it looks like Linux. Flutter draws everything with its own rendering engine (consistent across platforms but not native). Tauri uses OS webviews (which can look native or not depending on web CSS).</li>
+  <li><strong>QML</strong> (Qt's UI language) is declarative, similar to CSS + a bit of JavaScript, and is genuinely pleasant to write for animated, reactive UIs. It's not C++. You write QML for the UI, Python for the logic, and they connect cleanly via PySide6.</li>
+  <li><strong>Licensing</strong> was the unstated concern that knocked Qt6 down. Qt6 under LGPL is free for open source and most commercial use if you dynamically link. PySide6 (the official Qt Python binding) is under LGPL. For a commercial desktop app, this is fine — you can distribute Lilith without paying Qt licensing fees as long as you use LGPL components.</li>
+</ul>
+
+<div class="callout amber">
+  <div class="callout-label">Why Qt6 was omitted from "top two"</div>
+  The implicit assumption was that web tech (React/Vue) would be easier to hire for if the project grows. That's true but irrelevant for a solo developer. For one person who needs premium 3D UI, a clean Python integration, and genuine cross-platform native feel, Qt6 is arguably the strongest choice. It was underweighted in the previous analysis.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="tauri">3. Tauri v2 — Deep Look</h2>
+
+<div class="framework-card">
+  <div class="framework-name">Tauri v2</div>
+  <div class="framework-tagline">Rust shell + OS webview + web frontend (React / Vue / Svelte)</div>
+
+  <h4>What it is</h4>
+  <p style="font-size: 0.9rem;">Your app's logic lives in Rust. Your UI is HTML/CSS/JavaScript running in the OS's native webview (WebKit2GTK on Linux, WebKit on macOS, WebView2/Edge on Windows). Tauri exposes a bridge so the web frontend can call Rust functions and Rust can emit events to the web frontend.</p>
+
+  <h4>The orb in Tauri</h4>
+  <p style="font-size: 0.9rem;">Three.js or React Three Fiber running in a WebGL canvas. This is actually the strongest 3D option of the three frameworks — the web 3D ecosystem (Three.js, Babylon.js, shader libraries, particle systems) is enormous, well-documented, and runs at full GPU speed via WebGL. Navi-like orbs have been built in Three.js extensively. Liquid metal, plasma spheres, glowing energy fields — all standard Three.js territory.</p>
+
+  <h4>Backend-to-frontend events (Lilith controls the UI)</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 10px;">Tauri's <code>emit</code> API sends events from Rust to the webview. The Python backend sends a WebSocket message to the Tauri Rust layer, which emits a frontend event: <code>navigate_to("finance")</code>, <code>highlight_element("balance_card")</code>, <code>run_demo_step(3)</code>. The frontend subscribes to these events and reacts. This is a clean, well-established pattern.</p>
+
+  <h4>Touch support</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 14px;">Web touch events are native. <code>pointer events</code> unify mouse and touch in modern web APIs. No extra work needed.</p>
+
+  <div class="score-row"><div class="score-label">3D orb quality</div><div class="score-bar-bg"><div class="score-bar" style="width: 95%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">9/10</div></div>
+  <div class="score-row"><div class="score-label">Backend-to-UI events</div><div class="score-bar-bg"><div class="score-bar" style="width: 90%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">9/10</div></div>
+  <div class="score-row"><div class="score-label">Touch/mouse parity</div><div class="score-bar-bg"><div class="score-bar" style="width: 90%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">9/10</div></div>
+  <div class="score-row"><div class="score-label">Native platform feel</div><div class="score-bar-bg"><div class="score-bar" style="width: 65%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">6/10</div></div>
+  <div class="score-row"><div class="score-label">Cross-platform consistency</div><div class="score-bar-bg"><div class="score-bar" style="width: 75%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">7/10</div></div>
+  <div class="score-row"><div class="score-label">Python integration</div><div class="score-bar-bg"><div class="score-bar" style="width: 70%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">7/10</div></div>
+  <div class="score-row"><div class="score-label">Build toolchain simplicity</div><div class="score-bar-bg"><div class="score-bar" style="width: 80%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">8/10</div></div>
+
+  <p style="margin-top: 16px; font-size: 0.88rem; color: var(--muted);">⚠️ Native feel note: The web layer can be made to feel very premium, but it takes deliberate effort. Left to defaults (browser fonts, button behaviors, scrollbars) a Tauri app looks like a web app, not a desktop app. Tailwind + custom components can fix this, but it's design work that Flutter and Qt6 don't require.</p>
+  <p style="font-size: 0.88rem; color: var(--muted);">⚠️ WebView2 note: On Windows, Tauri requires WebView2 (Edge runtime). Modern Windows machines have it. Older ones may not — your installer would need to bundle or prompt for it. Minor friction.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="flutter">4. Flutter Desktop — Deep Look</h2>
+
+<div class="framework-card">
+  <div class="framework-name">Flutter Desktop</div>
+  <div class="framework-tagline">Google's UI framework — renders everything with its own engine (Impeller/Skia)</div>
+
+  <h4>What it is</h4>
+  <p style="font-size: 0.9rem;">Flutter doesn't use OS widgets or OS webviews. It renders everything itself via a GPU-accelerated canvas (Impeller on newer targets, Skia on older). Every pixel is Flutter's. This makes it perfectly consistent across platforms but not "native" in the traditional sense — it doesn't look like macOS or Windows specifically, it looks like Flutter.</p>
+
+  <h4>The orb in Flutter</h4>
+  <p style="font-size: 0.9rem;">This is Flutter's weakest point for this use case. Flutter's 3D story is improving but immature. Options: (1) <strong>flutter_scene</strong> — Flutter's official 3D package, still early; (2) <strong>Rive</strong> — excellent 2D/vector animation, not true 3D; (3) <strong>Embedding a WebGL view</strong> — possible but defeats the point of Flutter; (4) <strong>Shader-based 2.5D effects</strong> — Flutter has fragment shader support that can produce impressive orb-like effects that aren't technically 3D but can look it. A plasma/liquid sphere effect in Flutter shaders is achievable and looks great.</p>
+
+  <h4>Backend-to-frontend events (Lilith controls the UI)</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 10px;">Flutter uses <code>MethodChannel</code> and <code>EventChannel</code> to communicate between Dart and native code. For the Python backend, you'd route events through a WebSocket or IPC channel that the Dart code listens to. Workable but more layers than Tauri's direct emit approach.</p>
+
+  <h4>Touch support</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 14px;">Flutter was designed mobile-first. Touch handling is its native language. Touch and pointer events are unified through Flutter's <code>GestureDetector</code>. The best touch story of the three frameworks.</p>
+
+  <div class="score-row"><div class="score-label">3D orb quality</div><div class="score-bar-bg"><div class="score-bar" style="width: 55%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">5/10</div></div>
+  <div class="score-row"><div class="score-label">Backend-to-UI events</div><div class="score-bar-bg"><div class="score-bar" style="width: 70%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">7/10</div></div>
+  <div class="score-row"><div class="score-label">Touch/mouse parity</div><div class="score-bar-bg"><div class="score-bar" style="width: 98%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">10/10</div></div>
+  <div class="score-row"><div class="score-label">Cross-platform consistency</div><div class="score-bar-bg"><div class="score-bar" style="width: 95%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">10/10</div></div>
+  <div class="score-row"><div class="score-label">Native platform feel</div><div class="score-bar-bg"><div class="score-bar" style="width: 60%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">6/10</div></div>
+  <div class="score-row"><div class="score-label">Python integration</div><div class="score-bar-bg"><div class="score-bar" style="width: 65%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">6/10</div></div>
+  <div class="score-row"><div class="score-label">Build toolchain simplicity</div><div class="score-bar-bg"><div class="score-bar" style="width: 75%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">7/10</div></div>
+
+  <p style="margin-top: 16px; font-size: 0.88rem; color: var(--muted);">⚠️ 3D note: If the 3D orb is a hard requirement (not a shader approximation), Flutter is the wrong choice. The 3D ecosystem for Flutter Desktop is not production-ready for complex real-time 3D objects as of mid-2026.</p>
+  <p style="font-size: 0.88rem; color: var(--muted);">⚠️ Dart note: New language. Not hard to learn, but it's a cost. No one in the Python AI ecosystem is writing Dart. Every library integration (audio, platform features) requires a Flutter plugin or a custom MethodChannel.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="qt6">5. Qt6 / PySide6 — Deep Look</h2>
+
+<div class="framework-card" style="border-color: var(--purple);">
+  <div class="framework-name" style="color: var(--purple);">Qt6 / PySide6</div>
+  <div class="framework-tagline">Industry-standard C++ UI framework with full Python bindings — the strongest 3D + native story</div>
+
+  <h4>What it is</h4>
+  <p style="font-size: 0.9rem;">Qt is the framework behind VLC, Autodesk tools, the KDE desktop, Google Earth, and the interfaces on luxury car dashboards. Qt6 with PySide6 gives you full Qt in Python. You write the UI in QML (declarative, like a more powerful CSS) and the logic in Python. Qt Quick 3D is a first-class 3D scene system built into Qt, not a plugin.</p>
+
+  <h4>The orb in Qt</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 10px;">Qt Quick 3D is exactly what you want. A real-time 3D scene with a sphere, custom shaders, particle systems, and lighting — all in QML, no C++ required for the scene definition. Performance is native GPU (Metal on macOS, Vulkan on Linux, D3D12 on Windows). An animated 3D orb with a glowing aura, particle field, and reactive pulse to voice input is a beginner-level Qt Quick 3D project. This is the strongest 3D story of the three frameworks.</p>
+
+  <pre>// What the orb looks like in Qt Quick 3D (QML)
+View3D {
+    PerspectiveCamera { position: Qt.vector3d(0, 0, 300) }
+
+    DirectionalLight { color: "#4fc3c9"; brightness: 2.0 }
+
+    Model {
+        source: "#Sphere"
+        scale: Qt.vector3d(1.5, 1.5, 1.5)
+        materials: PrincipledMaterial {
+            baseColor: "#0a2030"
+            metalness: 0.9
+            roughness: 0.1
+            emissiveColor: Qt.binding(() => orbColor)
+            emissiveFactor: 2.0
+        }
+        // Animate rotation, pulse scale with voice amplitude
+        NumberAnimation on eulerRotation.y { from: 0; to: 360; duration: 8000; loops: -1 }
+    }
+    ParticleSystem3D { /* Navi glow particles */ }
+}</pre>
+
+  <h4>Backend-to-frontend events (Lilith controls the UI)</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 10px;">This is Qt's strongest suit for Lilith's architecture. PySide6 lets Python and QML share objects directly via <code>QProperty</code> and signals. The Python backend emits a signal; QML reacts immediately. No HTTP, no WebSocket between frontend and backend — they're in the same process. <code>lilith.navigate.emit("finance")</code> in Python triggers a QML screen transition instantly.</p>
+
+  <h4>Touch support</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 14px;">Qt has had touchscreen support since Qt 4. QML's <code>MultiPointTouchArea</code> and <code>TapHandler</code> handle pointer events (mouse and touch) identically. Qt was used extensively in automotive touchscreens and embedded devices — touch is first-class.</p>
+
+  <h4>Licensing</h4>
+  <p style="font-size: 0.9rem; margin-bottom: 14px;">PySide6 is LGPL v3 (the official Qt Company Python binding). Free for commercial use when dynamically linked. You can ship Lilith commercially without paying Qt licensing fees. The components you need for this project are all in the free tier.</p>
+
+  <div class="score-row"><div class="score-label">3D orb quality</div><div class="score-bar-bg"><div class="score-bar" style="width: 98%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">10/10</div></div>
+  <div class="score-row"><div class="score-label">Backend-to-UI events</div><div class="score-bar-bg"><div class="score-bar" style="width: 98%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">10/10</div></div>
+  <div class="score-row"><div class="score-label">Touch/mouse parity</div><div class="score-bar-bg"><div class="score-bar" style="width: 90%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">9/10</div></div>
+  <div class="score-row"><div class="score-label">Native platform feel</div><div class="score-bar-bg"><div class="score-bar" style="width: 93%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">9/10</div></div>
+  <div class="score-row"><div class="score-label">Cross-platform consistency</div><div class="score-bar-bg"><div class="score-bar" style="width: 88%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">9/10</div></div>
+  <div class="score-row"><div class="score-label">Python integration</div><div class="score-bar-bg"><div class="score-bar" style="width: 98%; background: var(--green);"></div></div><div class="score-val" style="color:var(--green);">10/10</div></div>
+  <div class="score-row"><div class="score-label">Build toolchain simplicity</div><div class="score-bar-bg"><div class="score-bar" style="width: 70%; background: var(--amber);"></div></div><div class="score-val" style="color:var(--amber);">7/10</div></div>
+
+  <p style="margin-top: 16px; font-size: 0.88rem; color: var(--muted);">⚠️ Learning curve note: QML is a new language (though very approachable). The documentation is C++ first, Python second. You'll find great examples but sometimes have to translate them from C++ to Python. This is the main friction point for Qt6.</p>
+  <p style="font-size: 0.88rem; color: var(--muted);">⚠️ Bundle size: A PySide6 installation is ~150MB because it includes all Qt modules. You can reduce this significantly by only including the modules you use (Qt Quick, Qt Quick 3D, Qt Multimedia) — down to ~40–60MB in a packaged app. Still larger than Tauri's ~7MB but not Electron-level bloat.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="comparison">6. Side-by-Side Comparison</h2>
+
+<table>
+  <thead>
+    <tr><th>Requirement</th><th>Tauri v2</th><th>Flutter</th><th>Qt6 / PySide6</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>3D orb (real-time, reactive)</strong></td>
+      <td><span class="badge bg">Three.js/WebGL — excellent</span></td>
+      <td><span class="badge ba">Shader approx — limited</span></td>
+      <td><span class="badge bg">Qt Quick 3D — purpose-built</span></td>
+    </tr>
+    <tr>
+      <td><strong>Lilith controls the UI</strong></td>
+      <td><span class="badge bg">emit() API — clean</span></td>
+      <td><span class="badge ba">EventChannel — workable</span></td>
+      <td><span class="badge bg">Qt signals — native Python/QML</span></td>
+    </tr>
+    <tr>
+      <td><strong>Touch + mouse parity</strong></td>
+      <td><span class="badge bg">Web pointer events — native</span></td>
+      <td><span class="badge bg">Mobile-first — best story</span></td>
+      <td><span class="badge bg">Qt touch — production-proven</span></td>
+    </tr>
+    <tr>
+      <td><strong>Premium desktop feel</strong></td>
+      <td><span class="badge ba">Requires design work</span></td>
+      <td><span class="badge ba">Consistent but not native</span></td>
+      <td><span class="badge bg">Native widgets on each OS</span></td>
+    </tr>
+    <tr>
+      <td><strong>Python backend integration</strong></td>
+      <td><span class="badge ba">Rust bridge → WebSocket</span></td>
+      <td><span class="badge ba">MethodChannel → IPC</span></td>
+      <td><span class="badge bg">Same process — no bridge</span></td>
+    </tr>
+    <tr>
+      <td><strong>Voice amplitude → orb animation</strong></td>
+      <td><span class="badge bg">JS Web Audio API</span></td>
+      <td><span class="badge ba">Custom plugin needed</span></td>
+      <td><span class="badge bg">Qt Multimedia, direct Python binding</span></td>
+    </tr>
+    <tr>
+      <td><strong>Demo mode (scripted navigation)</strong></td>
+      <td><span class="badge bg">JS event handler</span></td>
+      <td><span class="badge ba">Navigator + controller</span></td>
+      <td><span class="badge bg">QML state machine</span></td>
+    </tr>
+    <tr>
+      <td><strong>App bundle size</strong></td>
+      <td><span class="badge bg">~7MB (smallest)</span></td>
+      <td><span class="badge ba">~20–40MB</span></td>
+      <td><span class="badge ba">~40–60MB (trimmed)</span></td>
+    </tr>
+    <tr>
+      <td><strong>macOS build from Linux</strong></td>
+      <td><span class="badge ba">Cross-compile (experimental) or CI</span></td>
+      <td><span class="badge br">Requires macOS machine or CI</span></td>
+      <td><span class="badge ba">CI runner or macOS machine</span></td>
+    </tr>
+    <tr>
+      <td><strong>QML / UI language learning curve</strong></td>
+      <td><span class="badge bg">React/Vue — widely known</span></td>
+      <td><span class="badge ba">Dart — new language</span></td>
+      <td><span class="badge ba">QML — new language but simple</span></td>
+    </tr>
+    <tr>
+      <td><strong>Orb inside full-screen app</strong></td>
+      <td><span class="badge bg">Trivial — positioned div</span></td>
+      <td><span class="badge bg">Trivial — Stack widget</span></td>
+      <td><span class="badge bg">Trivial — anchored Item</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="the-orb">7. The Orb — 3D Asset Requirements</h2>
+
+<p>The orb is the most visible differentiator in Lilith's UI. It needs to communicate: presence, intelligence, listening state, processing state, speaking state. The v5 version is a 2D art stack rotating in a circle. The v6 version should feel alive.</p>
+
+<pre>
+ORB STATES AND VISUAL BEHAVIOR
+
+  State           Visual behavior
+  ────────────    ──────────────────────────────────────────
+  Idle            Slow rotation, gentle pulse, ambient glow
+  Listening       Outer particle field activates, amplitude ring expands
+  Processing      Surface becomes turbulent, internal light pattern shifts
+  Speaking        Pulse synced to TTS audio amplitude, warm color shift
+  Error           Color drains to cool, brief sharp pulse
+  Artifact mode   Splits attention — core speaks while background dim glow spins
+</pre>
+
+<h3>What makes it feel like Navi vs. what makes it feel like a logo</h3>
+
+<p>The difference between a Navi-like orb and a generic animated logo is three things: <strong>reaction</strong> (it responds to what's happening in real time), <strong>personality</strong> (it has behavior that feels intentional, not random), and <strong>physicality</strong> (it has a sense of volume and material, not just a flat lit circle).</p>
+
+<ul>
+  <li><strong>Reaction:</strong> Audio amplitude from the TTS stream modulates the orb's pulse and scale in real time. When Lilith is speaking louder (emphasis), the orb reacts. When she stops, it settles.</li>
+  <li><strong>Personality:</strong> Idle behavior that's not perfectly looping — slight drift, occasional flicker, a pause and reset. Makes it feel like something's in there.</li>
+  <li><strong>Physicality:</strong> A specular highlight that tracks a virtual light source. Sub-surface scattering that makes it look like there's something glowing inside. Particles that orbit at different speeds.</li>
+</ul>
+
+<h3>Per-framework 3D orb implementation path</h3>
+
+<table>
+  <thead>
+    <tr><th>Framework</th><th>Approach</th><th>What you'd actually write</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tauri v2</td>
+      <td>Three.js in the webview, React Three Fiber for component model</td>
+      <td>A React component with a Three.js MeshPhysicalMaterial sphere, PointLight, particle system via three/addons. Audio amplitude fed from Tauri backend via emit event. ~200 lines of JSX.</td>
+    </tr>
+    <tr>
+      <td>Flutter</td>
+      <td>Custom fragment shader applied to a canvas shape</td>
+      <td>A Flutter shader that produces a plasma/glowing sphere effect. Not a real 3D object but visually convincing. ~100 lines of GLSL + Flutter widget wrapper. No particle system.</td>
+    </tr>
+    <tr>
+      <td>Qt6 / PySide6</td>
+      <td>Qt Quick 3D scene with PBR sphere + particle system + shaders</td>
+      <td>QML View3D with a PrincipledMaterial sphere, a ParticleSystem3D for the glow field, a custom shader effect for sub-surface scattering. Amplitude bound via QProperty from Python. ~150 lines of QML.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="demo-mode">8. Demo Mode and Lilith Controls the UI</h2>
+
+<p>The vision: a markdown file of instructions, Lilith reads it, understands the steps, issues UI commands, navigates the app, points at elements, runs a complete demo of her own capabilities. She's not just a voice in the app — she lives in the app.</p>
+
+<pre>
+DEMO MODE PIPELINE
+
+  markdown file
+  "Show contacts screen → say 'I've got your contacts' →
+   highlight 'Sarah' → navigate to finance → speak spending summary →
+   return to home"
+       │
+       ▼
+  Lilith parses instructions (LLM call, small context)
+       │
+       ▼
+  Generates sequence of UI commands:
+  { action: "navigate", screen: "contacts" }
+  { action: "speak", text: "I've got your contacts loaded up." }
+  { action: "highlight", element: "contact_sarah" }
+  { action: "navigate", screen: "finance" }
+  { action: "speak", text: "Here's your spending..." }
+       │
+       ▼
+  Backend emits commands → frontend executes
+  (each command is an event on the backend-to-UI bus)
+</pre>
+
+<h3>Implementing "Lilith highlights an element"</h3>
+
+<p>This requires a semantic naming system on the UI side. Every interactive or notable element has an ID that the backend knows about. When the backend emits <code>highlight("contact_sarah")</code>, the frontend maps that ID to a visual element and applies a highlight animation (glow, border flash, camera pan to it).</p>
+
+<p>This is actually a useful discipline beyond demo mode — it forces every UI element to be addressable by name, which makes automated testing and accessibility easier too.</p>
+
+<table>
+  <thead>
+    <tr><th>Framework</th><th>How backend sends UI command</th><th>How frontend reacts</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Tauri v2</td><td><code>app_handle.emit("ui_command", payload)</code> from Rust (or Python → Rust → emit)</td><td>JS event listener on <code>listen("ui_command", handler)</code></td></tr>
+    <tr><td>Flutter</td><td>WebSocket message → Dart EventChannel subscriber</td><td>Dart StreamController broadcasts to widget tree</td></tr>
+    <tr><td>Qt6</td><td>Python emits Qt signal: <code>self.ui_command.emit(cmd, payload)</code></td><td>QML connected slot executes the navigation/animation</td></tr>
+  </tbody>
+</table>
+
+<p>Qt6 is the cleanest here — no bridge, no serialization overhead, Python and QML are in the same process and signals fire synchronously. Tauri requires going Python → WebSocket → Rust → webview emit, which is two hops but still fast (~1ms).</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="touch">9. Touch + Mouse Parity</h2>
+
+<p>The requirement: a touchscreen desktop user and a mouse/keyboard user should have no friction switching between input methods at any point. The same button works with both. The same gesture works with a trackpad, a touchscreen, and a mouse.</p>
+
+<p>This is not a hard engineering problem with any of the three frameworks — they all support it. It's a design discipline problem. The things that break touch/mouse parity are:</p>
+
+<ul>
+  <li>Hover states that have no touch equivalent (tooltips that appear on hover but never on tap)</li>
+  <li>Right-click menus that have no long-press equivalent</li>
+  <li>Drag targets that require pixel-perfect mouse precision</li>
+  <li>Keyboard shortcuts with no visible touch alternative</li>
+</ul>
+
+<p>The discipline: design for touch first, add mouse convenience on top. If a control works by tap, it works by click. If a control requires hover or right-click, it also has a long-press or a tap-for-context-menu. If a target is too small for a finger, it's also too small for usability in general.</p>
+
+<div class="callout">
+  <div class="callout-label">The touchscreen desktop market</div>
+  Surface Pro (Windows), many Dell XPS and HP Spectre models, some Lenovo ThinkPads — all have touchscreens. This is not a niche use case on Windows. On macOS, no touchscreen (Apple has consistently not shipped one). On Linux, some developer workstations have it. Designing for touch parity is primarily a Windows differentiator, and it's worth doing right.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="verdict">10. The Verdict</h2>
+
+<div class="verdict">
+  <div class="verdict-header">Framework recommendation</div>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin-bottom: 10px;">For the 3D orb and Python integration: Qt6 / PySide6</h3>
+  <p style="font-size: 0.92rem; margin-bottom: 16px;">If the 3D orb as described — real-time, reactive to voice, physically present — is a design requirement and not a nice-to-have, Qt6 is the answer. Qt Quick 3D is purpose-built for exactly this. The Python integration (PySide6) means the backend and frontend share a process and share signals natively — no bridge, no serialization. The native platform feel on all three OSes is genuine, not approximated. The downside is learning QML, which is a real cost but not a steep one.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin-bottom: 10px;">If web tech skills are more important than 3D quality: Tauri v2</h3>
+  <p style="font-size: 0.92rem; margin-bottom: 16px;">If you're comfortable with React (or want to be) and the orb being Three.js/WebGL is acceptable (it's genuinely excellent), Tauri v2 is a strong choice. Smallest bundle, great cross-platform story, the three-hop Python → Rust → webview is fast enough. Premium feel requires design work that Qt6 provides by default, but it's achievable.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin-bottom: 10px;">Flutter: not recommended for this use case</h3>
+  <p style="font-size: 0.92rem; margin-bottom: 0;">Flutter's strengths (touch parity, cross-platform consistency) are shared by the other two. Its weakness (3D) is a hard requirement for this project. Dart is a new language with no advantage over QML or React for this use case. Flutter excels at the mobile app you might build later — not the desktop hub.</p>
+</div>
+
+<div class="callout amber">
+  <div class="callout-label">The design step before picking a framework</div>
+  Prototype the orb. Before committing to a framework, spend two days building the orb — the 3D sphere, the particle field, the voice-reactive pulse — in both Tauri (Three.js) and Qt6 (Qt Quick 3D). The one that looks right and feels right to build is the framework for v6. This is the kind of decision you shouldn't make from a comparison table.
+</div>
+
+<hr>
+<p style="color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 32px;">
+  LILITH V6 — FRONTEND FRAMEWORK DESIGN SESSION · June 2026<br>
+  See also: <code>lilith-v6-vertical-slice.html</code> · <code>lilith-crossplatform-and-repos.html</code>
+</p>
+</body>
+</html>

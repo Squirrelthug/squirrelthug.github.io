@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Non-Negotiable Standards</title>
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #111118; --surface2: #16161f; --border: #1e1e2e;
+    --text: #e2e8f0; --muted: #6b7280; --accent: #4fc3c9; --amber: #f59e0b;
+    --green: #10b981; --red: #ef4444; --purple: #a78bfa; --blue: #60a5fa; --orange: #fb923c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15px; line-height: 1.7; max-width: 1060px; margin: 0 auto; padding: 56px 40px; }
+  h1 { font-size: 2.2rem; font-weight: 700; color: var(--red); margin-bottom: 6px; }
+  .doc-subtitle { font-size: 0.95rem; color: var(--muted); margin-bottom: 10px; font-style: italic; }
+  .mandate { background: var(--surface); border: 1px solid rgba(239,68,68,0.3); border-left: 3px solid var(--red); border-radius: 0 6px 6px 0; padding: 16px 20px; margin-bottom: 32px; font-size: 0.87rem; color: var(--text); }
+  .mandate strong { color: var(--red); }
+
+  /* Standard group */
+  .group { margin-bottom: 36px; }
+  .group-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 7px 14px; border-radius: 4px; display: inline-block; margin-bottom: 12px; }
+  .g-infra { background: rgba(107,114,128,0.12); color: var(--muted); border: 1px solid rgba(107,114,128,0.25); }
+  .g-telem { background: rgba(79,195,201,0.1); color: var(--accent); border: 1px solid rgba(79,195,201,0.25); }
+  .g-sec { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+  .g-voice { background: rgba(16,185,129,0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+  .g-data { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  .g-doc { background: rgba(167,139,250,0.1); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+  .g-license { background: rgba(251,146,60,0.1); color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+  .g-sprint { background: rgba(96,165,250,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.25); }
+
+  /* Standard items */
+  .std { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 8px; }
+  .std-title { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .std-rule { font-size: 0.87rem; color: var(--text); margin-bottom: 8px; }
+  .std-rule strong { color: var(--accent); }
+  .std-why { font-size: 0.80rem; color: var(--muted); font-style: italic; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 8px; }
+  .std-exception { font-size: 0.80rem; color: var(--red); margin-top: 6px; }
+  .std-exception strong { color: var(--red); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  .sprint-checklist { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; }
+  .sprint-checklist h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--blue); margin-bottom: 14px; }
+  .sprint-checklist ul { list-style: none; padding: 0; }
+  .sprint-checklist li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.87rem; }
+  .sprint-checklist li:last-child { border-bottom: none; }
+  .check-box { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 3px; flex-shrink: 0; margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<h1>Lilith v6 — Non-Negotiable Standards</h1>
+<p class="doc-subtitle">These rules apply to every line of code, every sprint task, every agent session. No exceptions.</p>
+
+<div class="mandate">
+  <strong>This document is law.</strong> Every sprint task starts by reading this. Every pull request is reviewed against this.
+  Standards here are not suggestions — they are the floor below which code does not ship.
+  If a standard creates friction with a specific implementation, the implementation changes, not the standard.
+  If a standard needs to change, it is a design decision requiring a documented design session.
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-infra">Infrastructure Standards</div>
+
+  <div class="std">
+    <div class="std-title">Path handling — pathlib.Path everywhere</div>
+    <div class="std-rule"><strong>Rule:</strong> All file paths use pathlib.Path. No string concatenation for paths. No os.path.join. No hardcoded directory separators (/, \). Every path is constructed from a base Path object and appended with /.</div>
+    <div class="std-why">Why: String paths fail silently across platforms. pathlib is type-safe, cross-platform, and readable. Enforcing this from the start prevents an entire class of Windows bugs.</div>
+    <div class="std-exception"><strong>No exceptions.</strong> Even one-liner scripts in the project use pathlib.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">OS-appropriate data paths</div>
+    <div class="std-rule"><strong>Rule:</strong> Data, config, and log paths use OS-appropriate conventions: <code>~/.local/share/lilith/</code> on Linux, <code>~/Library/Application Support/Lilith/</code> on macOS, <code>%APPDATA%\Lilith\</code> on Windows. A single platform module returns the correct base path — no hardcoded paths anywhere else.</div>
+    <div class="std-why">Why: Hardcoding Linux paths breaks every macOS and Windows user. Centralizing the logic means one fix works everywhere.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Module dependency direction</div>
+    <div class="std-rule"><strong>Rule:</strong> Dependencies flow downward only. UI imports from logic layer. Logic imports from data layer. Data layer imports from platform module. Nothing in the data layer imports from the logic or UI layer. Circular imports are bugs, not workarounds.</div>
+    <div class="std-why">Why: Circular imports create initialization order problems and make testing impossible without mocking the entire stack.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-telem">Telemetry Standards</div>
+
+  <div class="std">
+    <div class="std-title">No blind spots</div>
+    <div class="std-rule"><strong>Rule:</strong> Every system event that has behavioral significance is logged to the UCL database. If Lilith cannot answer a question about her own behavior by querying the UCL, that is a bug. There is no such thing as "too much telemetry" — there is only telemetry that hasn't been enhanced yet.</div>
+    <div class="std-why">Why: Lilith's metacognitive capability depends entirely on the completeness of the UCL. A blind spot is a place where she cannot self-debug.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">log_event() on every write path</div>
+    <div class="std-rule"><strong>Rule:</strong> Every function that writes to a database, calls an external API, modifies application state, or produces an artifact must call log_event() at the end of its success path. This is a checklist item on every PR.</div>
+    <div class="std-why">Why: Writing without logging means the action exists but Lilith cannot perceive it. She needs to perceive everything she does.</div>
+    <div class="std-exception"><strong>No exceptions.</strong> Including read operations that modify state (cache writes, sync token updates).</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">All UI elements have semantic IDs</div>
+    <div class="std-rule"><strong>Rule:</strong> Every interactive UI element — buttons, input fields, list items, navigation tabs, settings controls — has a stable semantic ID registered in a shared schema. The ID is present at render time, exposed to the backend event bus, and used in telemetry. IDs are human-readable and stable across app updates.</div>
+    <div class="std-why">Why: Telemetry that says "user tapped element_0x3f" is useless. Telemetry that says "user tapped settings.voice.stt_model" is actionable. The same IDs enable Lilith's UI control (highlight, navigate, demo mode).</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Hot-path deterministic enhancement only</div>
+    <div class="std-rule"><strong>Rule:</strong> Data written to the UCL in the hot path (during a live interaction) may not be enhanced by an LLM call in the same path. Hot-path enhancement must be deterministic — template-based, rule-based, or computed from fixed formulas. LLM-based enhancement runs in background jobs only.</div>
+    <div class="std-why">Why: An LLM call in the hot path adds 500–3000ms latency. The conversational mode latency budget is 3 seconds total. Using any of that budget for telemetry enhancement breaks the experience.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Telemetry never crashes the main path</div>
+    <div class="std-rule"><strong>Rule:</strong> log_event() catches its own exceptions. A telemetry write failure is logged to stderr and counted, but never propagates to the calling code. The application continues running even if the UCL database is temporarily unavailable.</div>
+    <div class="std-why">Why: Telemetry is observability infrastructure. Crashing the application because of a telemetry failure is worse than missing an event.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-sec">Security Standards</div>
+
+  <div class="std">
+    <div class="std-title">SQLCipher for all databases from first migration</div>
+    <div class="std-rule"><strong>Rule:</strong> All databases use SQLCipher with AES-256 encryption. No plaintext SQLite anywhere in the application. This applies from the first migration — retrofitting encryption is not acceptable. The six databases are: ucl_db, calendar_db, contacts_db, finance_db, memory_db, conversation_db.</div>
+    <div class="std-why">Why: Encrypting databases after they've been created with user data requires a complete re-migration and user disruption. Starting encrypted costs nothing and protects everything.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">OS keychain for all credentials</div>
+    <div class="std-rule"><strong>Rule:</strong> API keys, OAuth tokens (access and refresh), the database passphrase, and any other secret are stored in the OS keychain via python-keyring. They are never written to .env files, config files, code, or the application databases. .env is for local development scaffolding only and is never committed.</div>
+    <div class="std-why">Why: Config files and code get committed. Databases get backed up to other places. The OS keychain is the only storage that is both persistent and OS-protected.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">External APIs are read-only in v6 v1</div>
+    <div class="std-rule"><strong>Rule:</strong> Lilith may read from Google Calendar and Google Contacts. She may not write to them in any circumstance in v6 v1. Lilith manages her own separate calendar and contact roster. Writes to user's external accounts require an explicit, separate design decision in a future version.</div>
+    <div class="std-why">Why: Write access to a user's calendar or contacts, if buggy, causes irreversible data loss. The read-only constraint eliminates this entire risk category while still enabling the core use case.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">No PII in LLM cloud context without awareness</div>
+    <div class="std-rule"><strong>Rule:</strong> Before any data reaches a cloud LLM, the type of data being sent is known and considered. Contact home addresses, account numbers, and other high-sensitivity fields must not appear in cloud-bound context blocks unless explicitly required and noted in the design. The privacy obfuscation layer (future) will eventually handle this automatically.</div>
+    <div class="std-why">Why: Cloud LLMs ingest and potentially use training data. Data sent to the cloud cannot be recalled. This is a one-way door that should be managed intentionally.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">No raw data in LLM context window</div>
+    <div class="std-rule"><strong>Rule:</strong> The LLM never reads raw database rows. All data presented to the LLM passes through L1 or L2 enhancement. This is not a preference — it is an architectural invariant enforced by routing all context assembly through the Context Window Manager, which only reads from enhancement outputs.</div>
+    <div class="std-why">Why: Raw rows are poorly formatted for LLM consumption, often contain irrelevant columns, and can expose more data than needed. Enhancement layers are the single place where "what the LLM sees" is controlled.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-voice">Voice Standards</div>
+
+  <div class="std">
+    <div class="std-title">STT and TTS are non-negotiable minimums</div>
+    <div class="std-rule"><strong>Rule:</strong> Whisper (STT) and Kokoro (TTS) run on every supported machine, including Tier 0 (cloud-only inference). There is no "text-only mode." There is no user option to disable voice to free up resources for local inference. Lilith is a voice-first application. Period.</div>
+    <div class="std-why">Why: The differentiation of Lilith vs existing AI chat applications is the conversational, present experience. Removing voice removes that. Any machine that cannot run STT and TTS does not meet the minimum system requirements and will not support Lilith.</div>
+    <div class="std-exception"><strong>No exceptions.</strong> If a user wants to type at a keyboard and read text, they should use Claude.ai, ChatGPT, or Grok. Those products already exist.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Tier determines inference routing, not voice presence</div>
+    <div class="std-rule"><strong>Rule:</strong> Hardware tiers control whether local inference is available for the conversational and artifact paths. They do not control whether voice is present. Tier 0 = cloud inference only, but STT and TTS run locally. Tier 1 = local inference for conversational path added. Tier 2 = local inference for both paths.</div>
+    <div class="std-why">Why: Conflating voice capability with inference tier would mean lower-hardware users get a degraded product. Whisper tiny runs on any machine that meets minimum specs.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-data">Data &amp; Enhancement Standards</div>
+
+  <div class="std">
+    <div class="std-title">Enhancement jobs never block the main path</div>
+    <div class="std-rule"><strong>Rule:</strong> L1 and L2 enhancement jobs run as background tasks with lower priority than all interactive path code. If there is resource contention, enhancement is preempted. An enhancement job failure degrades context quality but never causes a user-facing error.</div>
+    <div class="std-why">Why: Enhancement latency is measured in seconds to minutes. Conversational mode latency budget is 3 seconds total. These cannot share a thread.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Staleness is acknowledged, not silently served</div>
+    <div class="std-rule"><strong>Rule:</strong> Every context block has a defined staleness threshold. The Context Window Manager checks freshness before injecting a block. Stale blocks are either flagged with a staleness note in the context or withheld entirely — never served silently as if current.</div>
+    <div class="std-why">Why: Stale data presented as current causes Lilith to give confidently wrong answers. It erodes trust faster than simply saying "I don't have fresh data on that."</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Artifact lifecycle is tracked end-to-end</div>
+    <div class="std-rule"><strong>Rule:</strong> Every artifact has a tracked lifecycle: created → stored (temp buffer with TTL) → handoff announced → user confirmed (telemetry: file opened/tapped) → saved or expired. A verbal handoff from Lilith does not count as confirmation. Telemetry must show the user accessed the artifact.</div>
+    <div class="std-why">Why: Lilith saying "I put that in your folder" while the user had walked away is not a successful delivery. Delivery confirmation must come from user action, not agent action.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-doc">Documentation Standards</div>
+
+  <div class="std">
+    <div class="std-title">Every feature has a wiki page</div>
+    <div class="std-rule"><strong>Rule:</strong> Every new feature, module, or significant function gets a wiki page in the locally-hosted HTML documentation. The wiki page must exist before the feature is marked complete. It contains: purpose, logic summary, inputs/outputs, which systems it touches, known constraints, and developer notes. No code pasted — just links to the source location.</div>
+    <div class="std-why">Why: Documentation written after the fact is documentation that doesn't get written. Building it into the done-criteria means it always exists.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Mermaid diagrams for all data flows</div>
+    <div class="std-rule"><strong>Rule:</strong> Any process that passes data through more than two components gets a Mermaid flowchart in its wiki page. Node labels in the diagram link to their respective wiki pages.</div>
+    <div class="std-why">Why: Prose descriptions of multi-component flows are almost always misunderstood. Diagrams are the single fastest way for a new agent or developer to understand the system.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">docs/history entry on direction changes</div>
+    <div class="std-rule"><strong>Rule:</strong> Any time a chosen approach is abandoned, a technical direction is reversed, or a design decision is changed mid-sprint, a docs/history entry is written explaining what was tried, why it failed, and what was chosen instead. This is a sprint done-criteria item, not an optional debrief.</div>
+    <div class="std-why">Why: The v5 build spent significant time debugging problems that stemmed from abandoned approaches whose failure modes were never documented. The history directory exists to prevent re-entering dead ends.</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<div class="group">
+  <div class="group-title g-license">Licensing Standards</div>
+
+  <div class="std">
+    <div class="std-title">Every dependency permits commercial SaaS distribution</div>
+    <div class="std-rule"><strong>Rule:</strong> Before any package is added to requirements.txt, its license is checked against the license audit (RES-15). The license must explicitly permit: (a) use in a closed-source desktop application, (b) distribution to end users, and (c) the developer selling a subscription service built around the application. Copyleft licenses (GPL, AGPL) require explicit evaluation before use.</div>
+    <div class="std-why">Why: Discovering a license incompatibility after integration means a rewrite. Checking first costs 5 minutes per dependency.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">PySide6 LGPL compliance — confirmed, no commercial license required</div>
+    <div class="std-rule"><strong>Rule:</strong> PySide6 6.11.1 is distributed under LGPL v3. Lilith distributes via PyInstaller <code>--onedir</code> (never <code>--onefile</code>), includes GPL/LGPL license texts in the <code>licenses/</code> folder, and shows a Qt attribution notice with clickable Qt source link in the About dialog. Qt Quick 3D (GPLv3-only) is NOT used — the orb is implemented with ModernGL 5.x (MIT) embedded in a <code>QOpenGLWidget</code>. No commercial Qt license is needed. This was the pre-condition for the frontend build starting — it is now resolved. See RES-01 and RES-03.</div>
+    <div class="std-why">Why: Confirmed via research sprint (RES-01, RES-03, RES-15). LGPL v3 is fully compatible with closed-source commercial distribution given --onedir packaging. ModernGL (MIT) eliminates the only remaining GPLv3 exposure (Qt Quick 3D).</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<hr>
+
+<div class="sprint-checklist">
+  <h3>Sprint task done-criteria — applies to every task, every sprint</h3>
+  <p style="font-size: 0.84rem; color: var(--muted); margin-bottom: 16px;">A task is not complete until all of these are true.</p>
+  <ul>
+    <li><div class="check-box"></div>Every new write path has a log_event() call at its success exit</li>
+    <li><div class="check-box"></div>No credentials in any file (code, config, .env) — all in keychain</li>
+    <li><div class="check-box"></div>All new databases use SQLCipher — no plaintext SQLite created</li>
+    <li><div class="check-box"></div>All paths use pathlib.Path — no string concatenation</li>
+    <li><div class="check-box"></div>Tests written and passing for all new functions that touch a DB or external API</li>
+    <li><div class="check-box"></div>Wiki page created for the feature/module implemented</li>
+    <li><div class="check-box"></div>CLAUDE.md updated if any architecture decision was made or changed</li>
+    <li><div class="check-box"></div>docs/history entry written if a direction was changed or abandoned</li>
+    <li><div class="check-box"></div>All new UI elements have semantic IDs registered in the element schema</li>
+    <li><div class="check-box"></div>Enhancement jobs that touch the new feature are tested for non-blocking behavior</li>
+    <li><div class="check-box"></div>Any new dependency has been license-checked against RES-15 criteria</li>
+  </ul>
+</div>
+
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center; margin-top: 32px;">
+  LILITH V6 NON-NEGOTIABLE STANDARDS · Read at the start of every agent session
+</p>
+</body>
+</html>

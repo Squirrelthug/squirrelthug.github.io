@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — System Architecture Visual</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+    --blue: #60a5fa;
+    --orange: #fb923c;
+    --teal: #2dd4bf;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; line-height: 1.6; padding: 40px; }
+  h1 { font-size: 2rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 32px; font-style: italic; }
+  h2 { font-size: 1.2rem; font-weight: 600; color: var(--amber); margin: 44px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+  /* === LEGEND === */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; color: var(--muted); }
+  .legend-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .legend-rect { width: 14px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  /* === LAYER SYSTEM === */
+  .architecture { display: flex; flex-direction: column; gap: 0; max-width: 1200px; }
+  .layer { margin-bottom: 3px; }
+  .layer-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 4px 0 6px 4px; }
+  .layer-content { display: flex; gap: 6px; align-items: stretch; }
+
+  /* === NODE TYPES === */
+  /* UI — pink */
+  .node-ui { background: rgba(244,114,182,0.1); border: 1px solid rgba(244,114,182,0.4); border-radius: 8px; }
+  /* Processing/Logic — cyan */
+  .node-proc { background: rgba(79,195,201,0.08); border: 1px solid rgba(79,195,201,0.35); border-radius: 6px; }
+  /* Database/Storage — purple */
+  .node-db { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.4); border-radius: 50px; }
+  /* Infrastructure/System — muted */
+  .node-infra { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.3); border-radius: 4px; }
+  /* External/Cloud — amber */
+  .node-cloud { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35); border-radius: 6px; border-style: dashed; }
+  /* Voice/Audio — green */
+  .node-voice { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.35); border-radius: 6px; }
+  /* LLM/AI — blue */
+  .node-ai { background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.4); border-radius: 8px; }
+  /* Tool — orange */
+  .node-tool { background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.35); border-radius: 6px; }
+  /* Enhancement layer — teal */
+  .node-enhance { background: rgba(45,212,191,0.07); border: 1px solid rgba(45,212,191,0.3); border-radius: 6px; }
+
+  .node { padding: 8px 12px; min-height: 52px; display: flex; flex-direction: column; justify-content: center; }
+  .node-title { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 3px; white-space: nowrap; }
+  .node-sub { font-size: 0.65rem; color: var(--muted); line-height: 1.4; }
+  .node-tag { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 1px 5px; border-radius: 3px; margin-top: 4px; }
+  .tag-ui { background: rgba(244,114,182,0.2); color: var(--pink); }
+  .tag-proc { background: rgba(79,195,201,0.2); color: var(--accent); }
+  .tag-db { background: rgba(167,139,250,0.2); color: var(--purple); }
+  .tag-cloud { background: rgba(245,158,11,0.2); color: var(--amber); }
+  .tag-voice { background: rgba(16,185,129,0.2); color: var(--green); }
+  .tag-ai { background: rgba(96,165,250,0.2); color: var(--blue); }
+  .tag-tool { background: rgba(251,146,60,0.2); color: var(--orange); }
+  .tag-infra { background: rgba(107,114,128,0.2); color: var(--muted); }
+
+  /* flex sizing helpers */
+  .w1 { flex: 1; min-width: 100px; }
+  .w2 { flex: 2; min-width: 160px; }
+  .w3 { flex: 3; min-width: 220px; }
+  .w4 { flex: 4; min-width: 280px; }
+  .w5 { flex: 5; }
+  .w6 { flex: 6; }
+
+  /* Arrow connector */
+  .arrow { display: flex; justify-content: center; align-items: center; color: var(--border); font-size: 1.1rem; padding: 2px 0; letter-spacing: -1px; }
+  .arrow-row { display: flex; gap: 6px; }
+
+  /* === FLOW DETAIL PANELS === */
+  .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 28px; }
+  .flow-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .flow-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 12px; }
+  pre { background: #0d0d12; border: 1px solid var(--border); border-radius: 5px; padding: 14px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.72rem; line-height: 1.65; overflow-x: auto; color: #c9d1d9; margin: 10px 0; white-space: pre; }
+  .separator { border: none; border-top: 1px dashed var(--border); margin: 10px 0; }
+  p { margin-bottom: 10px; font-size: 0.88rem; }
+
+  /* connection lines shown as decorative elements */
+  .connector { display: flex; align-items: center; color: rgba(255,255,255,0.08); font-size: 0.7rem; padding: 2px 10px; }
+  .layer-divider { border: none; border-top: 1px dashed rgba(255,255,255,0.05); margin: 8px 0; }
+  .row-label { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); color: rgba(255,255,255,0.12); padding: 0 4px; flex-shrink: 0; align-self: center; }
+
+  /* Color class for node titles */
+  .pink { color: var(--pink); }
+  .cyan { color: var(--accent); }
+  .purple { color: var(--purple); }
+  .amber { color: var(--amber); }
+  .green { color: var(--green); }
+  .blue { color: var(--blue); }
+  .orange { color: var(--orange); }
+  .teal { color: var(--teal); }
+  .gray { color: var(--muted); }
+
+  .wide-node { width: 100%; }
+
+  .section-note { font-size: 0.75rem; color: var(--muted); font-style: italic; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<h1>Lilith v6 — System Architecture</h1>
+<p class="subtitle">Vertical slice visual map · All components, all layers, all connections · June 2026</p>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(244,114,182,0.5); border: 1px solid var(--pink);"></div>UI / Frontend</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(79,195,201,0.3); border: 1px solid var(--accent);"></div>Processing / Logic</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(167,139,250,0.4); border: 1px solid var(--purple);"></div>Database / Storage</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(96,165,250,0.25); border: 1px solid var(--blue);"></div>AI / LLM</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(16,185,129,0.2); border: 1px solid var(--green);"></div>Voice / Audio</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(251,146,60,0.2); border: 1px solid var(--orange);"></div>Tools</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(45,212,191,0.15); border: 1px solid var(--teal);"></div>Enhancement Layer</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(245,158,11,0.1); border: 1px dashed var(--amber);"></div>External / Cloud</div>
+  <div class="legend-item"><div class="legend-rect" style="background:rgba(107,114,128,0.15); border: 1px solid var(--muted); border-radius: 2px;"></div>Infrastructure</div>
+</div>
+
+<!-- ==================== ARCHITECTURE DIAGRAM ==================== -->
+<div class="architecture">
+
+  <!-- LAYER 0: USER + DEVICES -->
+  <div class="layer">
+    <div class="layer-label">User Input Endpoints</div>
+    <div class="layer-content">
+      <div class="node node-voice w2" style="border-radius: 20px;">
+        <div class="node-title green">🎙 Microphone</div>
+        <div class="node-sub">Voice input<br>amplitude → orb</div>
+      </div>
+      <div class="node node-ui w2" style="border-radius: 20px;">
+        <div class="node-title pink">⌨ Chat Window</div>
+        <div class="node-sub">Typed text input<br>desktop / phone / browser</div>
+      </div>
+      <div class="node node-voice w2" style="border-radius: 20px;">
+        <div class="node-title green">🔊 Kitchen Speaker</div>
+        <div class="node-sub">Voice-only endpoint<br>no screen, max 150 tokens</div>
+      </div>
+      <div class="node node-infra w3">
+        <div class="node-title gray">Endpoint Manager</div>
+        <div class="node-sub">endpoint_id · capabilities · session_id<br>routes response back to correct device</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓ ↓ ↓</div>
+
+  <!-- LAYER 1: VOICE PIPELINE -->
+  <div class="layer">
+    <div class="layer-label">Voice Pipeline</div>
+    <div class="layer-content">
+      <div class="node node-voice w2">
+        <div class="node-title green">VAD</div>
+        <div class="node-sub">Voice Activity Detection<br>wake word / silence gate</div>
+      </div>
+      <div class="node node-voice w3">
+        <div class="node-title green">STT — Whisper</div>
+        <div class="node-sub">tiny (Tier 0 CPU) · small (Tier 1 GPU) · large (Tier 2 GPU)<br>audio → text · latency tracked in UCL</div>
+      </div>
+      <div class="node node-infra w2">
+        <div class="node-title gray">Hardware Detector</div>
+        <div class="node-sub">at startup: GPU VRAM → tier<br>Tier 0 / 1 / 2 sets model choice</div>
+      </div>
+      <div class="node node-voice w2">
+        <div class="node-title green">TTS Engine</div>
+        <div class="node-sub">Kokoro / neural TTS<br>text → audio → speaker</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- LAYER 2: ROUTING -->
+  <div class="layer">
+    <div class="layer-label">Routing Layer — Two-Mode Split (CONV-1)</div>
+    <div class="layer-content">
+      <div class="node node-proc w4">
+        <div class="node-title cyan">Query Classifier</div>
+        <div class="node-sub">modules/router/classifier.py<br>intent detection · confidence score · mode selection</div>
+        <span class="node-tag tag-proc">CONV-1</span>
+      </div>
+      <div class="node node-proc w3" style="border-left: 3px solid var(--accent);">
+        <div class="node-title cyan">Conversational Path</div>
+        <div class="node-sub">≤50 tokens · ≤3s to audio<br>≤1,200 token context · direct TTS</div>
+      </div>
+      <div class="node node-proc w3" style="border-left: 3px solid var(--orange);">
+        <div class="node-title orange">Artifact Path</div>
+        <div class="node-sub">immediate acknowledge → background task<br>narrative layer → handoff on complete</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓ (both paths)</div>
+
+  <!-- LAYER 3: CONTEXT WINDOW MANAGER -->
+  <div class="layer">
+    <div class="layer-label">Context Assembly — Context Window Manager (CWM-1)</div>
+    <div class="layer-content">
+      <div class="node node-proc w2">
+        <div class="node-title cyan">Intent → Block Map</div>
+        <div class="node-sub">which context blocks<br>are needed for this query?</div>
+        <span class="node-tag tag-proc">CWM-1</span>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">System Prompt</div>
+        <div class="node-sub">personality<br>always loaded</div>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">Personal Truths</div>
+        <div class="node-sub">PERS-1<br>stable prefix</div>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">Conv. History</div>
+        <div class="node-sub">last N turns<br>compressed</div>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">Calendar Block</div>
+        <div class="node-sub">if calendar intent<br>L2 enhanced data</div>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">People Block</div>
+        <div class="node-sub">if people intent<br>L2 enhanced data</div>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">Finance Block</div>
+        <div class="node-sub">if finance intent<br>L2 enhanced data</div>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">Memory Block</div>
+        <div class="node-sub">if recall intent<br>warm/cold store</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- LAYER 4: LLM + TOOLS -->
+  <div class="layer">
+    <div class="layer-label">Inference Layer</div>
+    <div class="layer-content">
+      <div class="node node-ai w4" style="border-width: 2px;">
+        <div class="node-title blue">LLM — Primary Inference</div>
+        <div class="node-sub">Claude claude-sonnet-4-6 (cloud) · local 7B quantized (Tier 2)<br>reads assembled context · generates response or tool calls<br>never reads raw DB — always through enhanced layers</div>
+        <span class="node-tag tag-ai">THE BRAIN</span>
+      </div>
+      <div class="node node-ai w2" style="border-style: dashed;">
+        <div class="node-title blue" style="opacity:0.7;">Personality Model</div>
+        <div class="node-sub" style="opacity:0.7;">PERS-2 — hardware gated<br>3B–7B local model<br>artifact mode only</div>
+        <span class="node-tag tag-ai">FUTURE — Tier 1+</span>
+      </div>
+      <div class="node node-tool w1">
+        <div class="node-title orange">get_calendar</div>
+        <div class="node-sub">reads calendar_db<br>L1/L2 enhanced</div>
+      </div>
+      <div class="node node-tool w1">
+        <div class="node-title orange">get_contacts</div>
+        <div class="node-sub">reads people_db<br>L2 profile blocks</div>
+      </div>
+      <div class="node node-tool w1">
+        <div class="node-title orange">get_finance</div>
+        <div class="node-sub">reads finance_db<br>spending summaries</div>
+      </div>
+      <div class="node node-tool w1">
+        <div class="node-title orange">memory_recall</div>
+        <div class="node-sub">warm_store<br>cold_store</div>
+      </div>
+      <div class="node node-tool w1">
+        <div class="node-title orange">write_truth</div>
+        <div class="node-sub">personal truths<br>→ truths_store</div>
+      </div>
+      <div class="node node-tool w1">
+        <div class="node-title orange">query_telemetry</div>
+        <div class="node-sub">UCL DB<br>L2 system stats</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- LAYER 5: NARRATIVE / RESPONSE -->
+  <div class="layer">
+    <div class="layer-label">Response Layer — Narrative Layer (CONV-2)</div>
+    <div class="layer-content">
+      <div class="node node-proc w3">
+        <div class="node-title cyan">Artifact Dispatcher</div>
+        <div class="node-sub">acknowledge narrative → background task → bridge timer → handoff<br>per-tool YAML: acknowledge / bridge / handoff / failure copy</div>
+        <span class="node-tag tag-proc">CONV-2</span>
+      </div>
+      <div class="node node-proc w2">
+        <div class="node-title cyan">Conversational Reply</div>
+        <div class="node-sub">direct text → TTS<br>no narrative overhead</div>
+      </div>
+      <div class="node node-proc w2">
+        <div class="node-title cyan">Endpoint Formatter</div>
+        <div class="node-sub">format for destination:<br>voice-only: no markdown, ≤150 tokens<br>desktop: full artifact, markdown OK</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- LAYER 6: DATA PIPELINE — ENHANCEMENT -->
+  <div class="layer">
+    <div class="layer-label">Data Pipeline — Sync → Enhancement → Gate</div>
+    <div class="layer-content">
+      <div class="node node-cloud w2">
+        <div class="node-title amber">Google Calendar API</div>
+        <div class="node-sub">OAuth 2.0 · sync on interval<br>external — dashed border</div>
+        <span class="node-tag tag-cloud">External</span>
+      </div>
+      <div class="node node-cloud w2">
+        <div class="node-title amber">Google Contacts API</div>
+        <div class="node-sub">OAuth 2.0 · sync on interval<br>tokens → OS keychain</div>
+        <span class="node-tag tag-cloud">External</span>
+      </div>
+      <div class="node node-cloud w2">
+        <div class="node-title amber">LLM Cloud APIs</div>
+        <div class="node-sub">Claude / OpenAI<br>BYOK — user's own keys<br>nothing stored cloud-side</div>
+        <span class="node-tag tag-cloud">External · BYOK</span>
+      </div>
+      <div class="node node-enhance w2">
+        <div class="node-title teal">L1 Enhancer</div>
+        <div class="node-sub">aggregates raw events<br>runs on schedule / trigger<br>writes summary tables</div>
+        <span class="node-tag" style="background:rgba(45,212,191,0.15);color:var(--teal);">L1</span>
+      </div>
+      <div class="node node-enhance w2">
+        <div class="node-title teal">L2 Enhancer</div>
+        <div class="node-sub">interprets L1 data<br>narrative summaries<br>staleness flags</div>
+        <span class="node-tag" style="background:rgba(45,212,191,0.15);color:var(--teal);">L2</span>
+      </div>
+      <div class="node node-proc w1">
+        <div class="node-title cyan">Staleness Gate</div>
+        <div class="node-sub">data age check<br>before context injection</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <!-- LAYER 7: STORAGE (widest — bottom heavy) -->
+  <div class="layer">
+    <div class="layer-label">Storage Layer — SQLCipher Encrypted Databases</div>
+    <div class="layer-content">
+      <div class="node node-db w2" style="border-radius: 60px;">
+        <div class="node-title purple">calendar_db</div>
+        <div class="node-sub">events · reminders<br>Google sync source<br>AES-256 encrypted</div>
+        <span class="node-tag tag-db">SQLCipher</span>
+      </div>
+      <div class="node node-db w2" style="border-radius: 60px;">
+        <div class="node-title purple">people_db</div>
+        <div class="node-sub">contacts · relationships<br>interaction history<br>dossier data</div>
+        <span class="node-tag tag-db">SQLCipher</span>
+      </div>
+      <div class="node node-db w2" style="border-radius: 60px;">
+        <div class="node-title purple">finance_db</div>
+        <div class="node-sub">transactions · accounts<br>spending patterns<br>budget data</div>
+        <span class="node-tag tag-db">SQLCipher</span>
+      </div>
+      <div class="node node-db w3" style="border-radius: 60px; border-width: 2px;">
+        <div class="node-title purple">ucl_db — Telemetry</div>
+        <div class="node-sub">every event · every mutation · all latencies<br>Lilith queries this to debug herself<br>L1/L2 enhanced views above raw events</div>
+        <span class="node-tag tag-db">UCL · Metacognition</span>
+      </div>
+      <div class="node node-db w2" style="border-radius: 60px;">
+        <div class="node-title purple">memory_db</div>
+        <div class="node-sub">warm store · cold store<br>personal truths<br>conversation summaries</div>
+        <span class="node-tag tag-db">SQLCipher</span>
+      </div>
+      <div class="node node-db w2" style="border-radius: 60px;">
+        <div class="node-title purple">conversation_db</div>
+        <div class="node-sub">full conversation log<br>cross-device sessions<br>source tagging</div>
+        <span class="node-tag tag-db">SQLCipher</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAYER 8: INFRASTRUCTURE (full width) -->
+  <div class="layer" style="margin-top: 4px;">
+    <div class="layer-label">Infrastructure — Cross-Cutting</div>
+    <div class="layer-content">
+      <div class="node node-infra w2">
+        <div class="node-title gray">OS Keychain</div>
+        <div class="node-sub">libsecret (Linux)<br>Keychain (macOS)<br>DPAPI (Windows)</div>
+        <span class="node-tag tag-infra">Credentials</span>
+      </div>
+      <div class="node node-infra w2">
+        <div class="node-title gray">Hardware Tier</div>
+        <div class="node-sub">GPU detection at startup<br>Tier 0–2 capability profile<br>routes STT/TTS/LLM</div>
+        <span class="node-tag tag-infra">TIER-1 Sprint</span>
+      </div>
+      <div class="node node-infra w2">
+        <div class="node-title gray">Process Supervisor</div>
+        <div class="node-sub">restart_lilith.sh<br>rebuild_app.sh<br>post-merge hook</div>
+        <span class="node-tag tag-infra">APPL-1 Sprint</span>
+      </div>
+      <div class="node node-infra w2">
+        <div class="node-title gray">Platform Plugins</div>
+        <div class="node-sub">OS-detected at startup<br>iMessage (macOS)<br>D-Bus (Linux) · DPAPI (Win)</div>
+        <span class="node-tag tag-infra">OS-Specific</span>
+      </div>
+      <div class="node node-infra w3">
+        <div class="node-title gray">CI/CD — GitHub Actions</div>
+        <div class="node-sub">ubuntu-latest · windows-latest · macos-latest runners<br>build + test on every push · cross-platform binary production</div>
+        <span class="node-tag tag-infra">Build</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRONTEND PANEL — separate section on right or below -->
+  <div class="layer" style="margin-top: 16px;">
+    <div class="layer-label">Frontend — Application Screens (PySide6 6.11.1 — LGPL v3 · decided)</div>
+    <div class="layer-content">
+      <div class="node node-ui w1">
+        <div class="node-title pink">🔮 Orb</div>
+        <div class="node-sub">3D animated · voice-reactive<br>state: idle / listen / think / speak</div>
+        <span class="node-tag tag-ui">ModernGL 5.x / QOpenGLWidget</span>
+      </div>
+      <div class="node node-ui w2">
+        <div class="node-title pink">💬 Chat Screen</div>
+        <div class="node-sub">unified conversation view<br>all sources · cross-device history<br>source-tagged messages</div>
+        <span class="node-tag tag-ui">Vertical Slice</span>
+      </div>
+      <div class="node node-ui w1">
+        <div class="node-title pink">📅 Calendar</div>
+        <div class="node-sub">timeline view<br>day / week / month</div>
+        <span class="node-tag tag-ui">AL-21/29</span>
+      </div>
+      <div class="node node-ui w1">
+        <div class="node-title pink">👥 People</div>
+        <div class="node-sub">contacts<br>relationships<br>dossier view</div>
+        <span class="node-tag tag-ui">AL-22/23</span>
+      </div>
+      <div class="node node-ui w1">
+        <div class="node-title pink">💰 Finance</div>
+        <div class="node-sub">transactions<br>spending summary<br>budget</div>
+        <span class="node-tag tag-ui">AL-24</span>
+      </div>
+      <div class="node node-ui w1">
+        <div class="node-title pink">🤖 Assistant</div>
+        <div class="node-sub">purpose screen<br>personal truths<br>brief</div>
+        <span class="node-tag tag-ui">AL-27/30</span>
+      </div>
+      <div class="node node-ui w1">
+        <div class="node-title pink">⚙ Settings</div>
+        <div class="node-sub">accounts<br>hardware tier info<br>data sovereignty</div>
+        <span class="node-tag tag-ui">PLAT-1</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end architecture -->
+
+<!-- ==================== FLOW NARRATIVES ==================== -->
+<h2>Key Data Flows</h2>
+<p class="section-note">Trace a message through the system — the diagram above shows components; these show movement.</p>
+
+<div class="flow-grid">
+
+  <div class="flow-card">
+    <div class="flow-title">Flow 1 — Conversational Voice Query</div>
+<pre>User: "What time is my dentist?"
+  🎙 Microphone → VAD → STT (Whisper)
+  → "What time is my dentist?"
+  → Endpoint Manager tags: desktop, voice input
+  → Classifier: CONVERSATIONAL (calendar.lookup intent)
+  → CWM: loads [system prompt, conv history, calendar block]
+  → Calendar block: L2 enhanced (today's events)
+     staleness gate: data is 2h old — OK
+  → LLM: 28-token response assembled
+  → "Your dentist is at 2 PM."
+  → TTS → speaker
+  → UCL log: latency, tokens, tool used, mode=conv
+Time to audio: &lt; 2 seconds</pre>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-title">Flow 2 — Artifact Mode (Restaurant Search)</div>
+<pre>User: "Find Italian restaurants near downtown for 6"
+  🎙 Microphone → STT → Endpoint Manager
+  → Classifier: ARTIFACT (tool.search intent)
+  → Dispatcher: immediate acknowledge
+  → TTS: "On it — looking for Italian options near downtown."
+  → Background task starts: restaurant search tool
+  → Tool runs (6 seconds)
+  → L1 enhancement: rank results, add metadata
+  → LLM: format handoff summary
+  → TTS: "Found three. Osteria Marco fits 6 people..."
+  → Chat screen: full artifact with comparison table
+  → UCL log: artifact.started, tool.call, artifact.complete</pre>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-title">Flow 3 — Data Sync Pipeline</div>
+<pre>Sync trigger (interval or user request)
+  → Google Calendar API (OAuth token from OS keychain)
+  → Pull: events in [-7d, +30d] window
+  → Write: calendar_db (SQLCipher)
+  → UCL log: sync.calendar.complete, records=847
+  → L1 Enhancer runs (background job)
+     → aggregates: events by day, participants, location
+     → writes: calendar_l1_summary table
+  → L2 Enhancer runs
+     → writes: narrative blocks ("3 meetings tomorrow")
+     → sets: staleness_ok = True
+  → Next query: CWM fetches L2 block
+     → staleness gate: passes (data is fresh)
+     → LLM receives pre-computed summary, not raw rows</pre>
+  </div>
+
+  <div class="flow-card">
+    <div class="flow-title">Flow 4 — Lilith Self-Debugs</div>
+<pre>User: "You've been slow lately."
+  → Classifier: CONVERSATIONAL (system.introspection)
+  → CWM: loads [system prompt, telemetry block]
+  → Telemetry block: L2 system stats (pre-computed)
+     → avg_response_ms: 4,200 (↑ from 1,800 yesterday)
+     → slowest tool: get_calendar (p95: 8,200ms)
+     → last_calendar_sync: 11:15 PM, pulled 847 events
+  → LLM assembles diagnostic:
+     "The slowdown started last night after a calendar sync
+     that pulled 847 events. The get_calendar tool is
+     running at 8 seconds for complex queries.
+     I'll run a targeted sync to rebuild the summary tables."
+  → tool: calendar_sync.targeted_rebuild()
+  → Latency returns to baseline
+  → UCL logs: self_debug.introspection event</pre>
+  </div>
+
+</div>
+
+<!-- COMPONENT COUNT / SIZE SUMMARY -->
+<h2>Scale Reality — The Backend is Heavy</h2>
+<p style="font-size: 0.88rem; color: var(--muted);">The architecture diagram is drawn bottom-heavy intentionally. The frontend is a thin UI layer over a substantial backend. Here's what "bottom-heavy" means in practice:</p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 16px;">
+  <div style="background: rgba(244,114,182,0.05); border: 1px solid rgba(244,114,182,0.2); border-radius: 8px; padding: 16px;">
+    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--pink); margin-bottom: 8px;">Frontend (thin layer)</div>
+    <div style="font-size: 0.88rem; color: var(--muted);">7 screens + orb<br>Reads data from backend via IPC<br>Sends events, receives responses<br>~10% of total codebase</div>
+  </div>
+  <div style="background: rgba(79,195,201,0.05); border: 1px solid rgba(79,195,201,0.2); border-radius: 8px; padding: 16px;">
+    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 8px;">Processing Layer (core)</div>
+    <div style="font-size: 0.88rem; color: var(--muted);">Voice pipeline · Classifier · CWM<br>Narrative layer · Formatters<br>Tool implementations · Sync<br>~45% of total codebase</div>
+  </div>
+  <div style="background: rgba(167,139,250,0.05); border: 1px solid rgba(167,139,250,0.2); border-radius: 8px; padding: 16px;">
+    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--purple); margin-bottom: 8px;">Data Layer (heaviest)</div>
+    <div style="font-size: 0.88rem; color: var(--muted);">6 SQLCipher databases<br>L1/L2 enhancement jobs<br>UCL telemetry schema<br>~45% of total codebase</div>
+  </div>
+</div>
+
+<p style="margin-top: 24px; font-size: 0.85rem; color: var(--muted);">
+  This is the right shape for Lilith. A thin, beautiful UI over a deep data and intelligence backend.
+  The frontend doesn't do computation — it displays what the backend has already computed.
+  The LLM doesn't touch raw data — it reads what the enhancement layers have already prepared.
+  The enhancement layers run continuously in the background so query time is fast.
+</p>
+
+<hr style="border: none; border-top: 1px solid var(--border); margin: 40px 0;">
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center;">
+  LILITH V6 — SYSTEM ARCHITECTURE VISUAL · June 2026<br>
+  Living document — update when major systems are added or removed<br>
+  See also: <code>lilith-v6-vertical-slice.html</code> · <code>lilith-data-telemetry-standards.html</code> · <code>lilith-orchestration-pipeline.html</code> · <code>lilith-frontend-framework.html</code>
+</p>
+</body>
+</html>

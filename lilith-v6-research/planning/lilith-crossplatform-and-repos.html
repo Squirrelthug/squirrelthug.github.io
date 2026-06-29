@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Cross-Platform, Repos, and the Reality Check</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  h1 { font-size: 2.4rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 8px; }
+  .subtitle { font-size: 1.05rem; color: var(--muted); margin-bottom: 48px; font-style: italic; }
+  h2 { font-size: 1.45rem; font-weight: 600; color: var(--amber); margin: 52px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 28px 0 10px; }
+  h4 { font-size: 0.82rem; font-weight: 700; color: var(--purple); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.07em; }
+  p { margin-bottom: 14px; }
+
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.93rem;
+  }
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+  .callout.purple { border-left-color: var(--purple); }
+
+  .callout-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px;
+  }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red .callout-label { color: var(--red); }
+  .callout.purple .callout-label { color: var(--purple); }
+
+  pre, .code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 22px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.81rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    color: #c9d1d9;
+    margin: 14px 0;
+    white-space: pre;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 0.88rem; }
+  th {
+    text-align: left; padding: 10px 13px;
+    background: var(--surface2); color: var(--muted);
+    font-weight: 600; font-size: 0.76rem; text-transform: uppercase;
+    letter-spacing: 0.05em; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .badge-accent { background: rgba(79,195,201,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .badge-muted { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin: 20px 0; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .stat-value { font-size: 1.9rem; font-weight: 700; color: var(--accent); line-height: 1.1; margin-bottom: 4px; }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.purple { color: var(--purple); }
+  .stat-label { font-size: 0.77rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-note { font-size: 0.75rem; color: var(--muted); margin-top: 4px; font-style: italic; }
+
+  .industry-block {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 22px; margin: 20px 0;
+  }
+  .industry-block-header {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.09em;
+    color: var(--purple); font-weight: 700; margin-bottom: 10px;
+  }
+
+  .decision-box {
+    background: var(--surface); border: 1px solid var(--amber);
+    border-radius: 8px; padding: 16px 20px; margin: 18px 0;
+  }
+  .decision-box-header {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--amber); font-weight: 700; margin-bottom: 8px;
+  }
+
+  .verdict-box {
+    background: var(--surface); border: 2px solid var(--green);
+    border-radius: 8px; padding: 20px 24px; margin: 28px 0;
+  }
+  .verdict-box-header {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--green); font-weight: 700; margin-bottom: 10px;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 18px 0; }
+  .col-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; }
+  .col-card-title { font-size: 0.77rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 10px; }
+  .col-card ul { padding-left: 16px; }
+  .col-card li { margin-bottom: 5px; font-size: 0.88rem; }
+
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 44px 0; }
+
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 26px; margin-bottom: 44px; }
+  .toc-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { padding-left: 18px; margin: 0; }
+  .toc li { margin-bottom: 7px; font-size: 0.9rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .anchor { scroll-margin-top: 24px; }
+</style>
+</head>
+<body>
+<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-left:4px solid #10b981;border-radius:6px;padding:14px 20px;margin-bottom:28px;font-size:0.88rem;"><strong style="color:#10b981;display:block;margin-bottom:6px;">DECISION MADE — 2026-06-28</strong>This document was written before the framework decision was made. <strong>Decision: PySide6 6.11.1 (Qt6, LGPL v3)</strong> is the frontend framework. <strong>ModernGL 5.x (MIT)</strong> is used for the orb via <code>QOpenGLWidget</code>. Qt Quick 3D (GPLv3) is dropped. No commercial Qt license required. Tauri and Flutter are no longer under consideration. This document is preserved for historical research context only — the decision it was researching is resolved. See RES-01, RES-03, RES-15 in the research directory.</div>
+
+<h1>Cross-Platform, Repos, and the Reality Check</h1>
+<p class="subtitle">Lilith v6 — Operating systems, distribution strategy, and letting go of the one-repo dream<br>June 2026</p>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#what-actually-differs">What Actually Differs Across Operating Systems</a></li>
+    <li><a href="#why-linux-first">Why Linux-First Dev Made Sense — and Still Does</a></li>
+    <li><a href="#linux-to-mac">Linux → macOS: The Easy Jump</a></li>
+    <li><a href="#linux-to-windows">Linux → Windows: The Real Work</a></li>
+    <li><a href="#framework-crossplatform">Framework and the Cross-Platform Story</a></li>
+    <li><a href="#market-by-os">The Market by OS — Who Actually Pays</a></li>
+    <li><a href="#which-first">Which OS to Launch On First</a></li>
+    <li><a href="#one-repo">One Repo vs. Many — The Real Industry Answer</a></li>
+    <li><a href="#timeline">The Timeline Question</a></li>
+    <li><a href="#multi-device">The Multi-Device Fantasy vs. the Practical Path</a></li>
+    <li><a href="#verdict">The Verdict</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="what-actually-differs">1. What Actually Differs Across Operating Systems</h2>
+
+<p>When you look at a cross-platform codebase from a bird's eye view, there are two types of code: the stuff that's the same on every OS and the stuff that isn't. Understanding that boundary is the whole game. The parts that differ aren't random — they map onto specific areas where each OS made different design decisions.</p>
+
+<pre>
+WHAT CHANGES ACROSS OSes (for Lilith specifically)
+
+  Area                  Linux               macOS               Windows
+  ──────────────────    ──────────────────  ──────────────────  ──────────────────
+  Secret storage        libsecret (DBUS)    Keychain (Security) DPAPI (Win32)
+  Audio system          PipeWire/PulseAudio CoreAudio           WASAPI/DirectSound
+  File paths            /home/user/         /Users/user/        C:\Users\user\
+  Path separator        /                   /                   \ (backslash)
+  App config dir        ~/.config/lilith/   ~/Library/Applic.   %APPDATA%\Lilith\
+  Process signals       SIGTERM, SIGKILL    Same (POSIX)        No SIGTERM; use Win32
+  System tray           xdg-utils           NSStatusItem        Shell_NotifyIcon
+  Desktop overlay       X11/Wayland         Cocoa overlay       Win32/DirectComposition
+  Package format        .AppImage / .deb    .dmg / .pkg         .exe / .msi
+  Python audio libs     pyaudio (ALSA/PA)   pyaudio (CoreAudio) pyaudio (MME/WASAPI)
+  SQLCipher bindings    gcc builds fine     clang builds fine   MSVC or MinGW required
+  STT/TTS native        Whisper/Kokoro fine Same                Same (but CUDA differs)
+  Auto-start at login   systemd user unit   launchd plist       Registry Run key
+</pre>
+
+<p>The list looks long. But most of those differences are handled by the framework you choose for the frontend and by the Python libraries you use for backend platform integration. You don't write OS-specific code for most of them — you use a library that does it for you. The ones that are genuinely harder on Windows are marked below.</p>
+
+<h3>The Three Genuinely Hard Windows Problems</h3>
+
+<ol>
+  <li><strong>Build toolchain.</strong> Linux and macOS both use gcc/clang, which most Python C extension wheels are built against. Windows requires MSVC (Microsoft Visual C++) for native extensions. SQLCipher, some audio libraries, and certain ML libraries either need pre-built Windows wheels or a working MSVC installation to compile from source. This isn't insurmountable — it just requires deliberate attention.</li>
+  <li><strong>Audio system variance.</strong> Windows audio has three APIs (MME, DirectSound, WASAPI) and they behave differently depending on device drivers. Voice applications on Windows frequently have audio device selection issues that don't exist on Linux/macOS. Latency characteristics are different. pyaudio behaves differently under WASAPI vs. MME.</li>
+  <li><strong>Overlay behavior.</strong> The MiniOrb — a transparent, always-on-top window that floats over other applications — is native to Linux (X11/Wayland compositors handle it), clean on macOS (Cocoa makes it easy), and tricky on Windows because of how Win32 handles layered windows and focus stealing. Not impossible. Just the one UI element that needs the most platform-specific testing.</li>
+</ol>
+
+<div class="callout">
+  <div class="callout-label">The practical upshot</div>
+  If you choose a framework that abstracts the desktop (Tauri or Flutter), most of the table above gets handled for you. What remains — secret storage, audio device selection, the overlay — are the places you'll write platform-specific code or find platform-specific libraries. That's maybe 5–10% of the codebase, not a rewrite.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="why-linux-first">2. Why Linux-First Dev Made Sense — and Still Does</h2>
+
+<p>The perception that AI/ML development is a Linux-first ecosystem isn't wrong — it's just worth understanding why, so you can judge whether it applies to what you're building.</p>
+
+<div class="industry-block">
+  <div class="industry-block-header">Why the AI community developed Linux-first</div>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">CUDA — Nvidia's GPU programming framework — was Linux-first for most of its history. Training runs on research clusters (AWS, GCP, Lambda Labs) all run Linux. Docker containers, the standard packaging unit for ML services, are Linux-native. The Python AI ecosystem (PyTorch, TensorFlow, Transformers) is tested most thoroughly on Linux. Conda/mamba, the package manager of choice for ML environments, handles Linux dependency resolution better than Windows. Local inference tools like Ollama, llama.cpp, and vLLM all develop and test on Linux first.</p>
+  <p style="font-size: 0.88rem; margin: 0;">But this mostly applies to the training and serving infrastructure layer — the stuff data centers run. For a desktop application using pre-trained models via API or small local models via Ollama, the Linux-first advantage is real but much smaller. Whisper.cpp, Kokoro, Ollama — all of these work on all three operating systems. The cases where Linux gives you an edge are edge cases in a desktop app context.</p>
+</div>
+
+<p>The reason Linux made sense for Lilith specifically:</p>
+<ul>
+  <li>It's where you are. You develop there. The friction of switching is real.</li>
+  <li>Terminal tooling (bash, cron, systemd) integrates cleanly with Lilith's background processes.</li>
+  <li>The developer community you'd want early feedback from skews Linux and macOS.</li>
+  <li>No licensing costs. No activation. No unexpected update behavior that breaks your dev environment mid-sprint.</li>
+</ul>
+
+<p>None of these reasons go away for v6. Linux is still the right development OS. What's worth reconsidering isn't where you develop — it's the assumption that Windows would require a fundamentally different codebase. It doesn't. It requires platform-specific polish in about three areas, not a rebuild.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="linux-to-mac">3. Linux → macOS: The Easy Jump</h2>
+
+<p>You already proved this one. The early Tauri app ran on both. The early node prototype — treating the MacBook as a lightweight client — worked. The reason it was easy is structural: both Linux and macOS are Unix-derived POSIX systems. Shell commands are the same. Python behaves the same. File paths use the same separator. Signal handling is the same. The differences are surface-level.</p>
+
+<pre>
+POSIX SHARED HERITAGE
+
+  UNIX (1969)
+    ├── BSD → macOS (Darwin kernel + BSD userland)
+    └── GNU/Linux → your dev machine
+
+  Both speak the same language:
+  - POSIX filesystem API
+  - fork/exec process model
+  - Signal handling (SIGTERM, SIGKILL, SIGUSR1...)
+  - Same Python, same pip, same venv
+  - Same audio abstractions (CoreAudio ≈ PulseAudio for Lilith's purposes)
+</pre>
+
+<p>The main difference for Lilith's stack: macOS uses CoreAudio instead of PulseAudio. pyaudio handles both. Kokoro TTS works on both. Whisper works on both. SQLCipher builds on both. The secret store is Keychain on macOS instead of libsecret, but python-keyring abstracts that away.</p>
+
+<p>Shipping on macOS from a Linux dev environment is a CI/CD problem, not a codebase problem. You can build the macOS binary on macOS (in GitHub Actions, using a macOS runner), triggered from your Linux dev machine. You never need to touch the macOS machine for daily development.</p>
+
+<div class="callout green">
+  <div class="callout-label">Practical implication</div>
+  Linux + macOS is essentially one target. Design once, test on both, CI builds for both. If v6 launches on Linux, it launches on macOS for nearly free. These two are the first distribution targets.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="linux-to-windows">4. Linux → Windows: The Real Work</h2>
+
+<p>Windows is genuinely different. Not insurmountably different — but it won't just work the way macOS does. Here's an honest breakdown of what actually needs attention.</p>
+
+<table>
+  <thead>
+    <tr><th>Component</th><th>Linux/macOS</th><th>Windows delta</th><th>Difficulty</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Python runtime</td>
+      <td>System Python or venv, works everywhere</td>
+      <td>Same, but packaging with PyInstaller/cx_Freeze is more fiddly on Windows</td>
+      <td><span class="badge badge-amber">Medium</span></td>
+    </tr>
+    <tr>
+      <td>SQLCipher</td>
+      <td>gcc builds the C extension fine</td>
+      <td>Needs MSVC or pre-built wheel; sqlcipher3 on PyPI has Windows wheels now</td>
+      <td><span class="badge badge-amber">Medium — one-time setup</span></td>
+    </tr>
+    <tr>
+      <td>Audio (STT/TTS)</td>
+      <td>PulseAudio/PipeWire — clean</td>
+      <td>WASAPI works well; PortAudio (used by pyaudio) supports it; test with multiple drivers</td>
+      <td><span class="badge badge-amber">Medium — needs device testing</span></td>
+    </tr>
+    <tr>
+      <td>Secret storage</td>
+      <td>libsecret (DBUS)</td>
+      <td>DPAPI via keyring library — <code>pip install keyring</code> same call, Windows backend</td>
+      <td><span class="badge badge-green">Easy — keyring abstracts it</span></td>
+    </tr>
+    <tr>
+      <td>File paths</td>
+      <td>Forward slashes, POSIX</td>
+      <td>Use <code>pathlib.Path</code> throughout — it handles \ automatically</td>
+      <td><span class="badge badge-green">Easy — use pathlib</span></td>
+    </tr>
+    <tr>
+      <td>Overlay window (MiniOrb)</td>
+      <td>X11/Wayland compositing, works well</td>
+      <td>Win32 layered windows need specific flags; Tauri handles this</td>
+      <td><span class="badge badge-amber">Medium — test carefully</span></td>
+    </tr>
+    <tr>
+      <td>Background process</td>
+      <td>systemd user unit or nohup</td>
+      <td>Windows Service or Task Scheduler or NSSM wrapper</td>
+      <td><span class="badge badge-amber">Medium — different pattern</span></td>
+    </tr>
+    <tr>
+      <td>Build artifact</td>
+      <td>.AppImage / .deb</td>
+      <td>.exe installer via NSIS or WiX; Tauri handles this</td>
+      <td><span class="badge badge-green">Easy — frameworks automate it</span></td>
+    </tr>
+    <tr>
+      <td>Whisper.cpp</td>
+      <td>Works, CUDA available</td>
+      <td>Works; CUDA on Windows also works but driver setup is user's problem</td>
+      <td><span class="badge badge-green">No change</span></td>
+    </tr>
+    <tr>
+      <td>Kokoro TTS</td>
+      <td>Works</td>
+      <td>Works; audio output path needs Windows driver testing</td>
+      <td><span class="badge badge-green">Likely fine</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Nothing in this table is a "different codebase" problem. They're all "write this one thing differently" or "test this more carefully" or "add a CI step for Windows." The concern you had about Windows being fundamentally incompatible was partly true in the early days of Lilith's stack (some ML libraries genuinely didn't have Windows wheels) — but it's less true in 2026. The ecosystem has matured.</p>
+
+<div class="callout amber">
+  <div class="callout-label">The one Windows thing that's actually hard</div>
+  The Windows audio driver ecosystem is genuinely more chaotic than Linux or macOS. Different audio interfaces, different driver models (WDM, WASAPI exclusive mode, WASAPI shared mode), different latency characteristics. For a voice-first application that depends on reliable low-latency audio I/O, Windows audio needs thorough testing with a variety of hardware configurations. This isn't a reason to skip Windows — it's a reason to test audio on Windows specifically, not just assume it works because the code compiled.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="framework-crossplatform">5. Framework and the Cross-Platform Story</h2>
+
+<p>The frontend framework choice from the v6 vertical slice document matters a lot here. The frameworks don't behave the same way cross-platform, and that affects the Windows story.</p>
+
+<table>
+  <thead>
+    <tr><th>Framework</th><th>How it handles Windows</th><th>Overlay support</th><th>Build from Linux</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tauri v2</strong></td>
+      <td>Uses WebView2 (Edge-based) on Windows. Ships with it bundled or requires installation. Very good Windows support — Tauri team tests all three platforms in CI.</td>
+      <td>Tauri window flags handle transparent always-on-top on Windows. Tested.</td>
+      <td>Cross-compile with cargo for Windows target. Or use GitHub Actions Windows runner.</td>
+    </tr>
+    <tr>
+      <td><strong>Flutter Desktop</strong></td>
+      <td>Renders its own UI — no OS webview dependency. Same Dart code, same rendering everywhere. Best OS-rendering-parity story of any framework.</td>
+      <td>Flutter window plugin supports always-on-top + transparency on all three OS.</td>
+      <td>Cannot cross-compile Flutter for Windows from Linux — needs a Windows machine or CI runner.</td>
+    </tr>
+    <tr>
+      <td><strong>Electron</strong></td>
+      <td>Excellent Windows support. Slack, VS Code, Notion all ship on Windows via Electron.</td>
+      <td>Transparent overlay windows work but are heavy.</td>
+      <td>electron-builder handles cross-platform builds. Windows builds need wine or CI runner.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The key tradeoff: Tauri can cross-compile for Windows from Linux using a Windows cross-compilation target (experimental but functional), or you use GitHub Actions with a Windows runner for Windows builds. Flutter cannot cross-compile for Windows — you either have a Windows machine or you use a CI Windows runner. For a solo developer on Linux, GitHub Actions provides free Windows and macOS CI runners. You develop on Linux, push to GitHub, and the CI builds and signs for all three platforms automatically.</p>
+
+<div class="callout">
+  <div class="callout-label">What this means practically</div>
+  You never need to boot Windows to develop Lilith. Linux is your development environment. GitHub Actions does the Windows and macOS builds. You test those builds in a VM or by asking someone with a Windows machine to test for you. This is how most cross-platform desktop applications developed by small teams actually work.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="market-by-os">6. The Market by OS — Who Actually Pays</h2>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value amber">72%</div>
+    <div class="stat-label">Windows global desktop share</div>
+    <div class="stat-note">Largest raw market by far. Dominated by enterprise + consumer.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value accent">15%</div>
+    <div class="stat-label">macOS global desktop share</div>
+    <div class="stat-note">Premium demographic. Highest ARPU. Developers and creatives.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value purple">3–4%</div>
+    <div class="stat-label">Linux global desktop share</div>
+    <div class="stat-note">Small but developer-heavy. BYOK is native to this crowd.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value green">47%</div>
+    <div class="stat-label">macOS share among software developers</div>
+    <div class="stat-note">Stack Overflow 2024. Developer demographic skews heavily Apple.</div>
+  </div>
+</div>
+
+<p>The raw numbers say Windows. But for Lilith specifically — a privacy-focused, BYOK, local-first personal AI with a voice pipeline — the demographic that wants this product is heavily skewed away from the median Windows user.</p>
+
+<table>
+  <thead>
+    <tr><th>OS</th><th>Lilith's target user density</th><th>Willingness to pay for software</th><th>Comfort with BYOK/API keys</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>macOS</td>
+      <td><span class="badge badge-green">Very high</span></td>
+      <td><span class="badge badge-green">High</span> — Mac App Store culture, premium pricing expected</td>
+      <td><span class="badge badge-accent">Medium-high</span> — developer-heavy demographic</td>
+    </tr>
+    <tr>
+      <td>Linux</td>
+      <td><span class="badge badge-green">High</span></td>
+      <td><span class="badge badge-amber">Mixed</span> — "it should be free" vs "I'll pay for quality"</td>
+      <td><span class="badge badge-green">Very high</span> — this is their natural habitat</td>
+    </tr>
+    <tr>
+      <td>Windows</td>
+      <td><span class="badge badge-amber">Medium</span></td>
+      <td><span class="badge badge-amber">Mixed</span> — broad market, widely varying expectations</td>
+      <td><span class="badge badge-amber">Lower</span> — less developer-dense, BYOK is unfamiliar</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="industry-block">
+  <div class="industry-block-header">Industry context — premium software and OS demographics</div>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">Setapp, the macOS subscription software bundle, reports that macOS users spend on average 2–4× more on software per year than Windows users. Indie developers selling premium desktop tools (Things 3, Craft, CleanMyMac, BBEdit) consistently report that macOS versions generate 60–70% of revenue despite macOS's smaller market share. The dynamic: Mac users have been trained by Apple to pay for quality software, Windows users have been trained by the consumer Windows ecosystem to expect free apps or piracy.</p>
+  <p style="font-size: 0.88rem; margin: 0;">For developer-adjacent tools in particular — and Lilith is developer-adjacent in its first version — macOS is the highest-value market despite being the second-largest by headcount. GitHub's 2024 developer survey found 47% of developers primarily use macOS, 27% Linux, 25% Windows. The "biggest market for Lilith" isn't necessarily where most computers are — it's where the people who understand what Lilith does and will pay for it actually live.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="which-first">7. Which OS to Launch On First</h2>
+
+<p>You said if you had to pick one it would probably be Windows because it's the biggest market. That logic makes sense from raw numbers. But here's the counterargument, laid out without trying to convince you either way.</p>
+
+<div class="two-col">
+  <div class="col-card">
+    <div class="col-card-title">Case for Windows first</div>
+    <ul>
+      <li>72% of the desktop market</li>
+      <li>If you can make it work on Windows, you've solved the hardest cross-platform problem</li>
+      <li>Enterprise eventual path goes through Windows</li>
+      <li>Early testers more representative of the general population</li>
+      <li>Shows you're not just building for developers</li>
+    </ul>
+  </div>
+  <div class="col-card">
+    <div class="col-card-title">Case for Linux + macOS first</div>
+    <ul>
+      <li>You develop on Linux — you test what you build, instantly</li>
+      <li>macOS users pay for software, ask fewer dumb setup questions</li>
+      <li>Developer demographic understands BYOK, gives better feedback</li>
+      <li>Linux → macOS is basically free — one launch covers both</li>
+      <li>Your early adopter base is already there</li>
+      <li>Tauri v2 and Flutter both make Windows phase 2 easy</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout amber">
+  <div class="callout-label">The case nobody makes but is probably right</div>
+  Launch on all three simultaneously — but don't let "all three" slow you down during development. Develop on Linux. Use GitHub Actions CI to build and test Windows and macOS binaries from day one. By the time the vertical slice is ready, all three builds have been in CI for months and you launch all three. The overhead is CI config upfront, not extra development time.
+</div>
+
+<p>This is actually how most cross-platform tools launch. The frameworks (Tauri, Flutter) are specifically designed to make "build for all three from one codebase" a CI/CD problem, not a development problem. You write once on Linux. The CI builds everywhere. You test the CI builds in VMs or with a GitHub Actions artifact download. On launch day, all three installers exist.</p>
+
+<p>The exception: if the Windows audio situation causes real bugs that take time to debug, Windows might slip a couple weeks. That's fine — launch Linux + macOS, follow with Windows within a month. But design for all three from the start.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="one-repo">8. One Repo vs. Many — The Real Industry Answer</h2>
+
+<p>This is where the "one repo for everything" instinct comes from: you're used to a single GitHub repository for Lilith, and you've been imagining a world where everything — desktop, phone, embedded device — lives in that one repo. The instinct to keep things unified is good. The application of that instinct to fundamentally different runtime environments is where the pain comes from.</p>
+
+<pre>
+THE REAL QUESTION: what shares enough to live together?
+
+  ┌─────────────────────────────────────────────────────┐
+  │  SAME RUNTIME ENVIRONMENT → same repo               │
+  │                                                     │
+  │  lilith-core/  (one repo)                           │
+  │  ├── backend/      Python — runs on all three OSes  │
+  │  └── desktop/      Tauri/Flutter — all three OSes   │
+  │      ├── src/      Shared UI code (React/Dart)      │
+  │      ├── src-tauri/  Rust config (Tauri)            │
+  │      └── platform/   Per-OS config files only       │
+  └─────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────┐
+  │  DIFFERENT RUNTIME → different repo                 │
+  │                                                     │
+  │  lilith-android/   (separate repo, future)          │
+  │  lilith-ios/       (separate repo, way future)      │
+  │  lilith-embedded/  (separate repo, personal project)│
+  └─────────────────────────────────────────────────────┘
+</pre>
+
+<p>Desktop (Windows + macOS + Linux) is one repo. All three platforms share the Python backend verbatim. The frontend code is 95% shared, with platform-specific config files (not code) for things like app signing and package format. This is how every major cross-platform desktop app works today.</p>
+
+<table>
+  <thead>
+    <tr><th>App</th><th>Repo structure</th><th>Cross-platform approach</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>VS Code</td><td>Single monorepo</td><td>Electron — one codebase, three platform builds</td></tr>
+    <tr><td>Obsidian</td><td>Single repo (desktop); separate mobile</td><td>Electron desktop; Capacitor mobile</td></tr>
+    <tr><td>1Password</td><td>Shared Rust core; separate native UI repos per platform</td><td>Rust business logic shared; UI rebuilt per OS</td></tr>
+    <tr><td>Notion</td><td>Electron desktop (one repo); React Native mobile</td><td>Different runtime = different repo</td></tr>
+    <tr><td>Linear</td><td>Electron desktop (one repo); React Native mobile</td><td>Same pattern</td></tr>
+  </tbody>
+</table>
+
+<h3>The API Boundary That Makes This Work</h3>
+
+<p>The key architectural decision that determines whether one repo scales: the protocol between backend and frontend must be clean and documented. For Lilith, that's the WebSocket interface between the Python backend and the frontend. If that interface is well-defined — a spec that says "these are the messages, these are the data shapes, this is the event model" — then the frontend can be any technology and the backend doesn't care. A macOS Tauri app, a future Android app, and a HomePod-like embedded client are all just "WebSocket clients that speak Lilith's protocol."</p>
+
+<pre>
+THE PROTOCOL BOUNDARY
+
+  Python backend (one codebase, all platforms)
+       ↕ WebSocket — documented message protocol
+  Frontend (platform-native)
+  ├── Desktop (Tauri/Flutter) — lilith-core repo
+  ├── Android app (future) — lilith-android repo
+  └── iOS app (future) — lilith-ios repo
+
+  The backend doesn't know which client is connected.
+  The client doesn't know what the backend runs on.
+  Changes to the backend don't break clients if the protocol stays stable.
+</pre>
+
+<p>This is how companies with large engineering teams handle multi-platform. The shared layer is the protocol, not the code. Each platform owns its own code, but all platforms speak the same language to the backend.</p>
+
+<div class="industry-block">
+  <div class="industry-block-header">Industry context — monorepo vs. multiple repos</div>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">The "one repo for everything" approach (monorepo) is used by very large engineering teams — Google, Meta, Vercel, Expo. The tooling for it (Bazel, Nx, Turborepo) is complex and has a steep learning curve. It's justified when hundreds of packages need to share code and be kept in sync across hundreds of engineers. For a solo developer, it's unnecessary overhead.</p>
+  <p style="font-size: 0.88rem; margin: 0;">The "one repo per deployment target" approach is used by most small-to-medium teams. Desktop is one repo. Mobile is one or two repos (iOS, Android). Embedded is separate. The coordination happens through the API protocol, not through shared code. This scales well because each repo is independently deployable — you don't need to sync all platforms before shipping a backend change.</p>
+</div>
+
+<h3>What "One Repo" Still Means for Desktop</h3>
+
+<p>The one thing you don't want to do is build the Windows desktop app, the macOS desktop app, and the Linux desktop app as three separate codebases. That would require three separate UIs, three separate backend integrations, three separate test suites. Every feature addition happens three times. That's the nightmare scenario — and it's not necessary.</p>
+
+<p>Desktop is one repo. Linux, macOS, and Windows builds all come from that one repo. The CI handles the per-platform compilation. That's the right structure, and it's what the framework guides you toward.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="timeline">9. The Timeline Question</h2>
+
+<p>You asked: how fast is the vertical slice, compared to how long v5 took?</p>
+
+<p>V5: February to late June. ~5 months. But most of that time was not coding — it was design discovery. Figuring out what to build. Rewriting the architecture when the paradigm shifted. The weeks of inactivity where you walked away. The scope creep that added 12 applications when 3 would have been the right number. The zigzagging.</p>
+
+<p>Strip all of that out, and the actual coding time for v5 is much smaller. The Tauri app took a week. Most of the backend came together in focused sprints.</p>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value red">~5 mo</div>
+    <div class="stat-label">v5 calendar time</div>
+    <div class="stat-note">Feb–June 2026. Includes design discovery, restarts, inactivity.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value amber">~6–8 wk</div>
+    <div class="stat-label">v5 actual coding time (est.)</div>
+    <div class="stat-note">Focused work time if inactivity and restarts removed.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value green">~4–6 wk</div>
+    <div class="stat-label">v6 vertical slice estimate</div>
+    <div class="stat-note">Design is done. Scope is fixed. No discovery overhead.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value accent">0</div>
+    <div class="stat-label">Design restarts expected</div>
+    <div class="stat-note">The two-mode paradigm is the anchor. It doesn't move.</div>
+  </div>
+</div>
+
+<h3>Why v6 Will Be Faster</h3>
+
+<p>Not just "you know more" — specific reasons:</p>
+
+<ul>
+  <li><strong>No design discovery.</strong> The two-mode architecture, the scope (3 apps), the BYOK model, the desktop-as-hub structure — all decided. None of this gets re-litigated mid-build.</li>
+  <li><strong>No zigzagging.</strong> Zigzagging happened because the design changed mid-build. When the design doesn't change, the code doesn't zigzag.</li>
+  <li><strong>Better tools.</strong> Antigravity, Grok, Codex, and the delegation workflow are all more mature now. The sprint/design task system exists. Parallel implementation is routine.</li>
+  <li><strong>Tighter scope.</strong> 3 apps instead of 12 is literally 4× less surface area. The implementation tracks in each sprint are scoped tighter. The design tasks are already written.</li>
+  <li><strong>Known patterns.</strong> The UCL telemetry pattern, the provider model, the context assembly pipeline — you know what these look like from v5. You're not figuring them out, you're rebuilding them clean.</li>
+  <li><strong>Security upfront.</strong> Not retrofitting. SQLCipher from day one means the database schema doesn't need to be migrated mid-build.</li>
+</ul>
+
+<p>4–6 weeks to a working alpha of the vertical slice is achievable. Not guaranteed — there will be friction in the new framework choice, in the Windows CI setup, in first-time SQLCipher integration. But the order of magnitude difference from v5 is real. This is a known problem with a known solution. You're building, not discovering.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="multi-device">10. The Multi-Device Fantasy vs. the Practical Path</h2>
+
+<p>You named this one yourself: the aspiration to have Lilith on every device — phone, tablet, TV, HomePod-like speaker, all synchronized, all integrated — was clouding the decisions. It's worth separating what's vision from what's scope creep in disguise.</p>
+
+<h3>The Vision (still valid)</h3>
+
+<p>Lilith as a personal AI hub that serves all your devices. Desktop is the brain. Everything else is a thin client. End-to-end encrypted sync. You talk to Lilith on your phone in the car; she continues the context on your desktop. That vision is correct and worth building toward.</p>
+
+<h3>The Scope Creep in Disguise</h3>
+
+<p>Building the Android app, the iOS app, the TV app, and the embedded device client simultaneously with the desktop, as part of v6 v1 — that's not the vision. That's the vision's worst enemy. Each of those is a separate engineering effort of comparable scope to the desktop app. A solo developer building four of them at once is guaranteed to build all four of them badly.</p>
+
+<pre>
+THE PRACTICAL SEQUENCE
+
+  NOW: Vertical Slice (desktop only)
+  ──────────────────────────────────
+  Windows + macOS + Linux desktop
+  Three core apps, encrypted DB, BYOK
+  Working and shippable
+           │
+           ▼
+  AFTER: Android Thin Client (if motivated)
+  ─────────────────────────────────────────
+  Android app that connects to the desktop via local network
+  Read-only access to Lilith artifacts
+  Voice I/O forwarded to desktop backend
+  Separate repo, separate development track
+           │
+           ▼
+  EVENTUALLY: iOS, TV, Embedded
+  ─────────────────────────────
+  If there's revenue, hire someone.
+  If not, hack it together for personal use.
+  Either way, the desktop is done and working.
+</pre>
+
+<p>The hacked-together Android app for personal use — hardcoded IP, your API keys baked in — is the right v1 mobile story. You've built World of Warcraft addons. Hacking an Android connection to Lilith's WebSocket backend is orders of magnitude simpler than what you've already built. When you're ready for it, it'll take a weekend. Not a sprint series.</p>
+
+<div class="callout purple">
+  <div class="callout-label">The embedded device question</div>
+  A HomePod-like speaker running Lilith — a Raspberry Pi with a microphone and speaker in a nice enclosure — is a completely valid personal home project and a great showcase if you ever want to demo to people. It's also a completely separate engineering effort from the desktop app. It doesn't need to be designed for or architected around in v6. The WebSocket protocol that the desktop client uses can be spoken by any device you put a network interface and a microphone on. Design the protocol cleanly, and the embedded device is just another client.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="verdict">11. The Verdict</h2>
+
+<div class="verdict-box">
+  <div class="verdict-box-header">Cross-platform and repo structure — summary decisions</div>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin: 0 0 8px;">Development environment</h3>
+  <p style="margin-bottom: 14px; font-size: 0.92rem;">Stay on Linux. The reasons you chose it are still valid. The concern about Windows being architecturally inaccessible from Linux is no longer a meaningful constraint — GitHub Actions CI handles Windows builds without you touching a Windows machine.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin: 0 0 8px;">Distribution targets</h3>
+  <p style="margin-bottom: 14px; font-size: 0.92rem;">Design for all three desktops (Windows, macOS, Linux) from day one. Set up CI for all three platforms on the first sprint. The CI overhead is a one-time investment, not per-feature work. Linux + macOS launch together (they're nearly the same target). Windows follows as soon as audio behavior is tested and the three genuinely hard Windows problems above are verified.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin: 0 0 8px;">Which OS first</h3>
+  <p style="margin-bottom: 14px; font-size: 0.92rem;">Linux and macOS simultaneously — this is effectively free given shared POSIX heritage. You already proved the Tauri app runs on both. Windows follows within weeks of the Linux/macOS launch, not months. Don't pick Windows first just because it's the biggest raw market — your first users are the developer-adjacent, privacy-conscious, BYOK-comfortable demographic, and they live on macOS and Linux.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin: 0 0 8px;">Repository structure</h3>
+  <p style="margin-bottom: 14px; font-size: 0.92rem;">One repo for the desktop (all three OS targets). That repo contains the Python backend and the frontend code. The CI produces Windows, macOS, and Linux builds from the same commit. Separate repos for future mobile clients, built when the desktop is solid. The coordination layer between them is the WebSocket protocol — document it once, and every future client just implements the protocol.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin: 0 0 8px;">Mobile and embedded</h3>
+  <p style="margin-bottom: 14px; font-size: 0.92rem;">Not in v6 v1. Not even in the architecture consideration for v6 v1 beyond "the WebSocket protocol must be documented." When you want an Android client for personal use, hack it together in a weekend — a WebSocket client with voice I/O forwarded to the desktop. That's enough for personal use and doubles as a proof-of-concept for investors if you want it to.</p>
+
+  <h3 style="color: var(--text); font-size: 1rem; margin: 0 0 8px;">The timeline</h3>
+  <p style="margin-bottom: 0; font-size: 0.92rem;">4–6 weeks to a working alpha of the vertical slice is realistic. The design overhead that consumed most of v5's calendar time is gone. What remains is building a known solution to a known problem, with better tools than you had in February.</p>
+</div>
+
+<hr>
+
+<pre>
+FIRST SPRINT MILESTONE: Day 1 of v6
+
+  [x] GitHub repo created: lilith-core
+  [x] Python project structure, pyproject.toml, venv
+  [x] GitHub Actions: .github/workflows/build.yml
+      └── jobs:
+          ├── build-linux    (ubuntu-latest runner)
+          ├── build-macos    (macos-latest runner)
+          └── build-windows  (windows-latest runner)
+  [x] SQLCipher test (all three build targets)
+  [x] "Hello, Lilith" TTS test (all three build targets)
+
+  If all three CI jobs pass on day 1, the cross-platform foundation is done.
+  Everything built on top of it is a feature, not infrastructure.
+</pre>
+
+<p style="color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 40px;">
+  LILITH V6 — CROSS-PLATFORM DESIGN SESSION · June 2026<br>
+  Companion to <code>lilith-v6-vertical-slice.html</code>
+</p>
+
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lilith: Conversational Design — Follow-Up</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-panel: #111118;
+    --bg-card: #16161f;
+    --border: #1e1e2e;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-mid: #94a3b8;
+    --mono: 'IBM Plex Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 0 0 80px 0;
+  }
+
+  header {
+    background: linear-gradient(180deg, #0d0d1a 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 40px;
+    text-align: center;
+  }
+  header .label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  header h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.03em; color: #fff; margin-bottom: 12px; }
+  header p  { color: var(--text-mid); max-width: 640px; margin: 0 auto; font-size: 1.05rem; }
+
+  .toc { max-width: 900px; margin: 40px auto 0; padding: 0 40px; }
+  .toc-inner { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; }
+  .toc-inner h3 { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); font-family: var(--mono); margin-bottom: 14px; }
+  .toc-inner ol { padding-left: 20px; }
+  .toc-inner li { margin: 6px 0; }
+  .toc-inner a { color: var(--accent); text-decoration: none; font-size: 0.95rem; }
+  .toc-inner a:hover { text-decoration: underline; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 40px 40px 0; }
+  section { margin-bottom: 64px; }
+
+  section h2 { font-size: 1.6rem; font-weight: 700; color: #fff; border-top: 2px solid var(--accent); display: inline-block; padding-top: 10px; margin-bottom: 6px; }
+  section h2.amber  { border-top-color: var(--amber); }
+  section h2.green  { border-top-color: var(--green); }
+  section h2.purple { border-top-color: var(--purple); }
+  section h2.red    { border-top-color: var(--red); }
+  section .section-sub { color: var(--text-dim); font-size: 0.85rem; font-family: var(--mono); margin-bottom: 24px; letter-spacing: 0.05em; }
+
+  h3 { font-size: 1.1rem; font-weight: 600; color: var(--accent); margin: 32px 0 12px; }
+  p  { color: var(--text-mid); margin-bottom: 16px; }
+  strong { color: var(--text); }
+
+  .callout { border-radius: 10px; padding: 16px 20px; margin: 20px 0; border-left: 3px solid; font-size: 0.95rem; }
+  .callout.info   { background: rgba(79,195,201,0.07);  border-color: var(--accent); }
+  .callout.warn   { background: rgba(245,158,11,0.07);  border-color: var(--amber); color: #fcd34d; }
+  .callout.good   { background: rgba(16,185,129,0.07);  border-color: var(--green); color: #6ee7b7; }
+  .callout.bad    { background: rgba(239,68,68,0.07);   border-color: var(--red);   color: #fca5a5; }
+  .callout.idea   { background: rgba(167,139,250,0.07); border-color: var(--purple); color: #c4b5fd; }
+  .callout .label { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+
+  .diagram { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; overflow-x: auto; }
+  .diagram pre { font-family: var(--mono); font-size: 0.8rem; line-height: 1.65; color: var(--text); white-space: pre; }
+  .c-accent  { color: var(--accent); }
+  .c-amber   { color: var(--amber); }
+  .c-green   { color: var(--green); }
+  .c-purple  { color: var(--purple); }
+  .c-red     { color: var(--red); }
+  .c-dim     { color: var(--text-dim); }
+  .c-white   { color: #fff; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+  th { background: var(--bg-panel); color: var(--text-dim); font-family: var(--mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  code { font-family: var(--mono); font-size: 0.85em; background: rgba(79,195,201,0.1); color: var(--accent); padding: 1px 5px; border-radius: 4px; }
+
+  .kv-block { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 16px 0; font-family: var(--mono); font-size: 0.82rem; }
+  .kv-block .kv-key   { color: var(--amber); margin-bottom: 6px; }
+  .kv-block .kv-val   { color: var(--text-mid); padding-left: 16px; border-left: 2px solid var(--border); line-height: 1.7; }
+  .kv-block .kv-label { font-size: 0.68rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .compare-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .compare-card h4 { font-size: 0.9rem; margin-bottom: 10px; }
+  .compare-card ul { padding-left: 18px; }
+  .compare-card li { font-size: 0.86rem; color: var(--text-mid); margin: 6px 0; }
+
+  .timeline { position: relative; padding-left: 28px; margin: 24px 0; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 24px; }
+  .tl-item::before { content: ''; position: absolute; left: -24px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
+  .tl-item.warn::before  { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .tl-item.bad::before   { background: var(--red); }
+  .tl-item.good::before  { background: var(--green); }
+  .tl-item .tl-label { font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+  .tl-item h4 { font-size: 1rem; color: var(--text); margin: 2px 0 6px; }
+  .tl-item p  { font-size: 0.88rem; margin: 0; }
+
+  footer { text-align: center; color: var(--text-dim); font-family: var(--mono); font-size: 0.75rem; margin-top: 80px; padding: 20px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Lilith Architecture · Follow-Up to Two-Mode Design</div>
+  <h1>Conversational Design — The Hard Parts</h1>
+  <p>Questions and critiques that came up reading the two-mode architecture doc. Cloud in the conversational path, personality consistency, the limit of buying time, fallback chains, and personal truths.</p>
+</header>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#s1">What Changes When Cloud Is in the Conversational Path?</a></li>
+      <li><a href="#s2">Personality Consistency — The Real Design</a></li>
+      <li><a href="#s3">Constructive Criticism of the Two-Mode Design</a></li>
+      <li><a href="#s4">The Limit of Buying Time</a></li>
+      <li><a href="#s5">Latency Prediction and What Happens When It's Wrong</a></li>
+      <li><a href="#s6">The Full Fallback Chain</a></li>
+      <li><a href="#s7">Multi-Surface: Voice vs Discord</a></li>
+      <li><a href="#s8">Personal Truths — Architecture and Key-Value Schema</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2>What Changes When Cloud Is in the Conversational Path?</h2>
+  <div class="section-sub">The short answer: less than you'd think, once the personality layer is separated</div>
+
+  <p>The two-mode architecture doc shows conversational mode leaning heavily on the local model. That makes sense for the obvious reason — local is cheaper per call and doesn't require a network round trip. But some conversational queries do involve real reasoning, and a local 12B model isn't always the right tool. So what does the conversational path look like when cloud handles it?</p>
+
+  <h3>The Pipeline Barely Changes</h3>
+  <div class="diagram">
+    <pre>
+  <span class="c-accent">LOCAL conversational path:</span>
+  User message → small context → local model → [personality layer] → TTS
+
+  <span class="c-amber">CLOUD conversational path:</span>
+  User message → small context → cloud model → [personality layer] → TTS
+
+  The only thing that changed is which model handles the middle step.
+  Context size, personality layer, TTS — identical.
+    </pre>
+  </div>
+
+  <p>The reason it doesn't matter which model handles the reasoning is the same reason the personality layer separation is important in the first place: once the personality is a separate downstream step, the reasoning model is just producing content. It doesn't need to know anything about how Lilith talks. Cloud or local, short or medium reasoning load, the output goes to the same personality step and comes out sounding the same.</p>
+
+  <p>What does change with cloud in the conversational path:</p>
+
+  <table>
+    <thead><tr><th>Factor</th><th>Local</th><th>Cloud</th></tr></thead>
+    <tbody>
+      <tr><td>Latency</td><td>~2s prefill + decode on 3060</td><td>~0.8-1.5s depending on model + network</td></tr>
+      <tr><td>Cost per call</td><td>~$0 (your electricity)</td><td>~$0.002-0.01 for a short conversational call</td></tr>
+      <tr><td>Reliability</td><td>Always available offline</td><td>Requires internet, can rate-limit</td></tr>
+      <tr><td>Personality consistency</td><td>Consistent if personality layer is separate</td><td>Consistent if personality layer is separate</td></tr>
+      <tr><td>Reasoning quality</td><td>Good for simple conversational queries</td><td>Better for anything that needs inference</td></tr>
+    </tbody>
+  </table>
+
+  <p>The routing decision for conversational mode is mostly about cost and availability, not about pipeline shape. A query that needs real reasoning routes cloud even if it's short. A simple factual reply routes local. The personality layer doesn't care either way.</p>
+
+  <div class="callout good">
+    <div class="label">The Resolution</div>
+    Once the personality layer is a separate model that runs downstream of reasoning, asking "what does the cloud conversational pipeline look like?" mostly answers itself. The pipeline is the same. The question about personality consistency was the actual question underneath it, and that gets addressed properly in the next section.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2 class="purple">Personality Consistency — The Real Design</h2>
+  <div class="section-sub">Why baking personality into the system prompt is the wrong move long-term</div>
+
+  <p>People who use the same AI assistant every day start to calibrate to it. The rhythm of how it phrases things, how it handles uncertainty, how it expresses enthusiasm or pushes back — these become expected. When the model changes, even subtly, they feel it. People have noticed this with ChatGPT across version updates. It's not paranoia; it's pattern recognition from someone who's been talking to the same voice for months.</p>
+
+  <p>The current Lilith design has personality baked into the system prompt. EDICTS, VOICE, identity files — all injected into every request, local or cloud. The problem: different models interpret the same natural-language instructions differently. A high-reasoning cloud model on a complex query will express the same VOICE.md differently than a 12B local model on a quick reply. Both are trying to follow the same instructions. They just don't follow them identically. And over time, switching between models to handle different routing cases means the personality drifts.</p>
+
+  <h3>The Fix: Personality as a Downstream Model</h3>
+  <div class="diagram">
+    <pre>
+  CURRENT STATE (personality in system prompt):
+  ┌────────────────────────────────────────────────────────┐
+  │ System prompt: EDICTS + VOICE + identity + context    │
+  │                                                        │
+  │ Local model (12B):     interprets VOICE one way       │
+  │ Cloud model (Opus):    interprets VOICE another way   │
+  │ Future model upgrade:  interprets VOICE a third way   │
+  │                                                        │
+  │ Result: personality drifts with routing decisions     │
+  └────────────────────────────────────────────────────────┘
+
+  TARGET STATE (personality as a separate model):
+  ┌──────────────────────────────────┐
+  │ REASONING MODEL (any)           │
+  │ • No personality constraints    │
+  │ • Just gets the content right   │
+  │ • Local or cloud, doesn't matter│
+  └──────────────────┬───────────────┘
+                     │ raw content
+                     ▼
+  ┌──────────────────────────────────┐
+  │ <span class="c-purple">PERSONALITY MODEL</span>               │
+  │ • Small — 3B to 7B              │
+  │ • Runs on GPU alongside Kokoro  │
+  │ • Context: VOICE.md + content   │
+  │ • Output: Lilith's actual words │
+  │ • Never changes when you        │
+  │   upgrade the reasoning model   │
+  └──────────────────┬───────────────┘
+                     │ Lilith-voice text
+                     ▼
+              format_for_speech() → Kokoro
+    </pre>
+  </div>
+
+  <p>The personality model's entire job is narrow: take whatever the reasoning model produced and rewrite it in Lilith's voice. Because this model never changes unless you explicitly update it, the voice stays consistent across every routing decision. Upgrade the reasoning model, swap out local for cloud, change thresholds — the personality output stays the same because the personality model stayed the same.</p>
+
+  <h3>When to Upgrade the Personality Model</h3>
+  <p>This is worth being explicit about: <strong>upgrading the personality model is a meaningful event that the user should know about.</strong> It's not a silent infrastructure change. If the personality model changes, Lilith's voice might shift. The right behavior is to treat it like a model update that affects the user experience — give a heads-up, maybe even let the user compare old vs new outputs before committing. The same way you'd want to know if someone changed the voice actor on a show you've been watching for three seasons.</p>
+
+  <h3>What This Means for the System Prompt Right Now</h3>
+  <p>The personality model is a future-state thing — it needs better GPU to run alongside Kokoro without blowing the VRAM budget. In the meantime, EDICTS and VOICE stay in the system prompt, and that's fine. But the design should reflect the target: personality files should be authored with the eventual separate-model architecture in mind, not with the assumption that they'll always be interpreted by whatever reasoning model is handling the request.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2 class="red">Constructive Criticism of the Two-Mode Design</h2>
+  <div class="section-sub">What could actually go wrong — real problems, not theoretical ones</div>
+
+  <p>You asked for real criticism because this is the design direction the whole project is going in. Here's what's actually hard about it.</p>
+
+  <h3>1. Mode Classification Is Doing a Lot of Work</h3>
+  <p>The entire design depends on correctly predicting — before the model is called — whether a response will be conversational or artifact-length. That prediction has to be fast (it's on the critical path to first audio), accurate (misclassifying a long response as conversational means the model blows past the output cap and either truncates badly or stalls), and it has to work without seeing the response yet.</p>
+  <p>For obvious cases this is fine. "What time is it" is conversational. "Summarize my spending for the last six months" is an artifact. But there's a real middle zone — questions that could be answered briefly or at length depending on context — where the classifier will get it wrong sometimes. Getting it wrong in the artifact direction (treating a quick reply as needing background processing) is annoying but not broken. Getting it wrong in the conversational direction (clipping a real answer at 50 tokens) is a worse failure. The classifier needs to be biased toward artifact when uncertain.</p>
+
+  <h3>2. The Output Cap Creates a New Failure Mode</h3>
+  <p>When a response hits the hard output cap in conversational mode, the model needs to produce a clean handoff to artifact mode — something like "there's more to this, let me put the full version together." If the model doesn't do this gracefully, the response just ends abruptly mid-thought. Getting consistent graceful truncation requires training-time instruction in the system prompt and probably some post-processing to detect incomplete responses. This is solvable but it's a real surface for bugs.</p>
+
+  <h3>3. Artifact Latency Is Unbounded in the Current Design</h3>
+  <p>The two-mode doc says artifact mode has "no latency pressure." That's true from the design intent, but the user's experience of waiting 3 minutes for a background task to complete — while Lilith has moved on conversationally — is going to feel strange until there's a clear UI affordance for it. The pending tasks block (mentioned in the edge cases section) is load-bearing here. Without it, the user has no way to know if the artifact is still processing, failed silently, or was forgotten. This needs to be visible and reliable before artifact mode feels trustworthy rather than just slow.</p>
+
+  <h3>4. Personality Model Adds Real Latency in the Current Setup</h3>
+  <p>On the current 3060, running a second inference pass through a personality model after the reasoning model — even a 3B model — adds latency. The math: if conversational mode targets ≤ 3s total and the reasoning model takes ~2s, there's 1 second left for personality model + format_for_speech + Kokoro buffer. A 3B model on the 3060 with a 500-token context can probably do that. But it's tight. This is the honest hardware constraint on the personality-as-separate-model design on current hardware. It works better on the upgraded system, and in the meantime, baked-in system prompt personality is the practical choice.</p>
+
+  <h3>5. The Narrative Library Has to Be Built Before This Feels Right</h3>
+  <p>Every tool that can route to artifact mode needs its acknowledge/bridge/handoff narratives written and wired up. If a tool doesn't have narratives defined and gets queued as a background task, Lilith goes silent — which is the exact failure mode the design is supposed to prevent. The narrative library isn't a nice-to-have; it's a prerequisite for artifact mode to feel good at all. This is real work per-tool and it has to be done before the design delivers on its promise.</p>
+
+  <div class="callout warn">
+    <div class="label">Most Likely Early Failure</div>
+    The first version of artifact mode will have some tools with narratives and some without. The ones without will cause silent gaps. Prioritize getting narratives on every tool that can go to background before shipping artifact mode as a pattern — not just on the ones you test first.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2 class="amber">The Limit of Buying Time</h2>
+  <div class="section-sub">When staying conversational stops working and becomes rude</div>
+
+  <p>Buying time with conversation while a background task runs is good up to a point. The problem is knowing where that point is. If Lilith starts talking to fill the space and it goes on long enough without anything actually happening, it stops feeling like a present assistant and starts feeling like you're being stalled. And at that point, you'd genuinely rather have silence.</p>
+
+  <p>There are two failure modes here. The first is the narrative runs out — the acknowledge fires, the bridge fires, and then the task still isn't done. There's nothing left to say that isn't transparently hollow. The second is the narrative was never leading anywhere meaningful — it was generic time-filling with no actual direction, so even if the timing was fine, the conversation felt empty.</p>
+
+  <h3>The Solution: Conversational Direction, Not Just Filler</h3>
+  <p>The difference between good and bad time-filling is whether the conversation is actually going somewhere during the wait. Not just "I'm working on it" repeated in different words, but actually engaging with something adjacent or relevant while the work runs. Think of how a person naturally handles this: they say "I'm looking into that — actually, while I'm thinking about it, what's driving that question for you?" or they take the topic in a related direction they can speak to immediately without needing the artifact.</p>
+
+  <p>Lilith can do this. The conversational direction has to be generated the same way any other conversational response is generated — quickly, from small context, by the personality layer. The difference is it's generated <em>at artifact dispatch time</em>, knowing a task is in progress, and it has a natural endpoint when the task completes and the handoff arrives.</p>
+
+  <div class="diagram">
+    <pre>
+  GOOD: artifact dispatched, conversation has actual direction
+  ──────────────────────────────────────────────────────────
+  Artifact queued: "Pull June spending summary"
+       │
+       ├─► Immediate: "Pulling that now — I know you were looking
+       │    at the grocery line last week, that's probably going
+       │    to show up in there."
+       │
+       ├─► If task takes >8s, bridge: "Still coming together —
+       │    you looking at anything specific, or just a full picture?"
+       │
+       └─► Handoff when done: "That's back. Groceries were up,
+            everything else close to last month. Full thing's in the panel."
+
+  BAD: artifact dispatched, nothing but generic stalling
+  ──────────────────────────────────────────────────────────
+  Artifact queued
+       ├─► "Give me a moment..."
+       ├─► "Still working on that..."
+       ├─► "Almost there..."
+       └─► [40 seconds of silence] → handoff
+    </pre>
+  </div>
+
+  <h3>The Timer Model</h3>
+  <p>There needs to be an explicit timer baked into artifact mode. Not just "fire bridge at 8s" — a smarter model where Lilith has an expected completion time based on task history, and the conversational behavior adapts to that estimate. If something usually comes back in 4 seconds, she doesn't need a bridge at all. If something usually takes 25 seconds, she generates a conversational direction designed to sustain a 25-second gap naturally. That prediction improves with every task that logs a completion time to telemetry.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s5">
+  <h2>Latency Prediction and What Happens When It's Wrong</h2>
+  <div class="section-sub">The hardest case isn't slow queries or fast queries — it's unknown-duration ones</div>
+
+  <p>Fast queries are easy. Slow queries are manageable with the artifact pattern. The genuinely hard case is when Lilith doesn't know how long something is going to take — a tool that's usually fast but occasionally times out, a cloud model under load, a multi-step chain where one step's output determines the next.</p>
+
+  <h3>What Lilith Should Track</h3>
+  <p>Every artifact task that completes should log its actual duration to the UCL. Over time this builds a per-tool, per-query-class latency distribution. The prediction model for a given task is then: median duration from history, with variance determining how much buffer to build into the bridge timer.</p>
+
+  <div class="diagram">
+    <pre>
+  UCL telemetry log → latency distribution per tool:
+  ┌─────────────────────┬───────┬───────┬──────────┬───────────┐
+  │ Tool                │ p50   │ p90   │ p99      │ Timeout   │
+  ├─────────────────────┼───────┼───────┼──────────┼───────────┤
+  │ finance_summary     │ 3.2s  │ 7.1s  │ 14.2s    │ 30s       │
+  │ calendar_week       │ 1.8s  │ 4.0s  │ 6.5s     │ 15s       │
+  │ web_research        │ 8.4s  │ 22.0s │ 45.0s+   │ 60s       │
+  │ weather             │ 0.9s  │ 2.1s  │ 4.0s     │ 10s       │
+  └─────────────────────┴───────┴───────┴──────────┴───────────┘
+
+  Bridge fires at: p50 + 50% of (p90 - p50)
+  Timeout narrative fires at: configured timeout - 3s
+    </pre>
+  </div>
+
+  <h3>When the Expected Time Is Exceeded</h3>
+  <p>If a task blows past its p90 estimate, Lilith addresses it directly rather than continuing to stall with bridges. Not an error state — just an honest acknowledgement that it's taking longer than expected, and a decision about whether to wait or redirect.</p>
+
+  <div class="diagram">
+    <pre>
+  Task exceeds p90 estimate:
+       │
+       ▼
+  Lilith: "That's taking longer than it usually does — I'm
+           going to give it another minute, but if it doesn't
+           come back I can try a different way."
+       │
+       ├─► Task completes → normal handoff
+       └─► Task hits timeout → fallback chain (see next section)
+    </pre>
+  </div>
+
+  <p>The important thing is that this acknowledgement sounds natural, not like a system alert. "That's taking longer than it usually does" is something a person says. "Task timeout approaching: switching to fallback model" is a log message. The personality layer is what converts one into the other, which is another reason the personality layer has to be online and fast regardless of what the reasoning pipeline is doing.</p>
+
+  <div class="callout info">
+    <div class="label">Current State</div>
+    Right now errors from tools produce whatever the model returns, which is sometimes coherent and sometimes a wall of exception text that leaks through. The narrative-on-error pattern (each tool has a failure narrative alongside its acknowledge/bridge/handoff) is the fix. An error from the finance tool should sound like "I couldn't reach your transaction data right now — want me to try again or look at something else?" not a Python traceback read aloud through Kokoro.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s6">
+  <h2 class="green">The Full Fallback Chain</h2>
+  <div class="section-sub">Cloud fails → local processes slowly → personality keeps the conversation alive</div>
+
+  <p>Cloud availability isn't guaranteed. Rate limits hit, network goes down, API keys expire. The design needs an explicit fallback chain so Lilith doesn't just go dark when cloud isn't available. The good news is the local model can handle almost anything cloud can — it's just slower. The trick is keeping the conversation alive while it does.</p>
+
+  <div class="diagram">
+    <pre>
+  <span class="c-white">NORMAL PATH</span>
+  Artifact task → cloud model → result → handoff
+
+  <span class="c-amber">CLOUD UNAVAILABLE</span>
+  Artifact task → cloud model → FAIL
+       │
+       ▼
+  Lilith: "Cloud's not responding right now — I can still
+           work through this locally, it'll just take a bit longer."
+       │
+       ▼
+  Redirect to local model, no output cap, no TTL pressure
+  Personality model stays live: keeps conversation going
+       │
+       ▼
+  Local model completes (might take 2-5 min for heavy tasks)
+       │
+       ▼
+  Normal handoff: "That took longer but it came back —
+                   here's what I found."
+
+  <span class="c-red">LOCAL ALSO UNAVAILABLE</span>
+  (rare — GPU crash, model not loaded)
+       │
+       ▼
+  Lilith: "I don't have access to the processing I'd need for
+           that right now — I can come back to it when things
+           are back up, or we can try something simpler."
+       │
+       ▼
+  Task logged, queued for retry when resources available
+    </pre>
+  </div>
+
+  <h3>Key Constraint on the Fallback</h3>
+  <p>When redirecting a failed cloud task to local, the <strong>conversational path stays independent</strong>. The local model shouldn't be doing both the artifact processing and the conversational responses simultaneously — that VRAM split degrades both. The right model is: local model runs the artifact task, personality model handles all conversational output. These are different models doing different things, not competing for the same resources.</p>
+
+  <p>On current hardware (3060 with Kokoro, Mistral NeMo, and eventually personality model), this gets tight. The interim solution is that local model fallback is for single heavy tasks, not parallel artifact processing. If multiple things are queued during a cloud outage, they run sequentially, not in parallel. The user gets told this.</p>
+
+  <h3>What "I Don't Have Access" Sounds Like vs What It Can't Sound Like</h3>
+  <table>
+    <thead><tr><th>Situation</th><th>Right</th><th>Wrong</th></tr></thead>
+    <tbody>
+      <tr><td>Cloud timeout</td><td>"That's taking longer than expected — trying another way"</td><td>Silent, then error traceback</td></tr>
+      <tr><td>API key expired</td><td>"I can't reach that right now — want me to try locally?"</td><td>"Error: 401 Unauthorized"</td></tr>
+      <tr><td>Local model not loaded</td><td>"I don't have what I'd need for that at the moment — I'll queue it"</td><td>Frozen, no response</td></tr>
+      <tr><td>Tool returns no results</td><td>"Nothing came back on that — different angle?"</td><td>"I found no results for your query"</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s7">
+  <h2 class="amber">Multi-Surface: Voice vs Discord</h2>
+  <div class="section-sub">The artifact paradigm works differently when the user is reading, not listening</div>
+
+  <p>Lilith runs on voice (the app, mic + Kokoro) and Discord. The two-mode architecture was designed around voice, where the bandwidth constraint is real — you can only absorb information as fast as someone can speak it. Discord is different. People read faster than they hear, and they're used to getting long responses in a chat window from cloud models that don't have latency problems.</p>
+
+  <h3>The Expectation Gap on Discord</h3>
+  <p>Someone who uses ChatGPT in a chat window gets back a 500-word response in 3 seconds and thinks that's normal. If Lilith takes 8 seconds to come back in Discord, they'll notice. The latency ceiling on Discord is lower than on voice even though the information density ceiling is much higher. That's backwards from the voice case and it's worth being explicit about.</p>
+
+  <p>The artifact pattern still applies on Discord — it just looks different. On voice, an artifact is "something that landed in the panel." On Discord, an artifact is a rich embedded block, a formatted table, a document preview. Lilith's conversational response comes first (fast, short), then the artifact block renders below it. The user gets the short version spoken in Lilith's voice and the full thing to read.</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4 style="color:var(--accent)">Voice Surface</h4>
+      <ul>
+        <li>Lilith speaks immediately — always</li>
+        <li>Artifacts land in UI panel</li>
+        <li>User reads artifact, hears summary</li>
+        <li>Latency invisible because framing is right</li>
+        <li>Information density limited by speech speed</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4 style="color:var(--amber)">Discord Surface</h4>
+      <ul>
+        <li>Conversational reply posts immediately (fast)</li>
+        <li>Artifacts post as formatted blocks below</li>
+        <li>User reads everything at their own speed</li>
+        <li>Latency more visible — users expect cloud speed</li>
+        <li>Information density not limited by speech</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Setting Expectations on Discord</h3>
+  <p>The honest answer for Discord latency on longer tasks: set expectations explicitly early in a user's experience with Lilith, not after they've already felt the wait. Something in onboarding or in Lilith's early behavior that establishes: she'll always respond quickly with something, but heavy tasks run in the background. If someone's never interacted with a system that works this way, they'll think it's broken. If they understand it, they trust it.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section id="s8">
+  <h2 class="purple">Personal Truths — Architecture and Key-Value Schema</h2>
+  <div class="section-sub">The layer that actually drives personality — not rules, not style, but what she knows about herself</div>
+
+  <p>The three personality document types are now distinct enough to be worth laying out formally:</p>
+
+  <table>
+    <thead><tr><th>Document</th><th>What it is</th><th>Who can change it</th><th>How it's used</th></tr></thead>
+    <tbody>
+      <tr><td><code>EDICTS.md</code></td><td>Hard operational rules — things that are effectively compiled in</td><td>Nobody at runtime</td><td>Always in system prompt, non-negotiable</td></tr>
+      <tr><td><code>VOICE.md</code></td><td>Narrative style — how she writes, how she speaks, sentence structure</td><td>Explicit user request + design session</td><td>Primary context for personality model</td></tr>
+      <tr><td><code>personal_truths.md</code> (new)</td><td>Values, self-knowledge, character-driving beliefs</td><td>Lilith herself based on conversation, explicit user request</td><td>Shapes how she responds across all situations</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Key-Value Structure for Personal Truths</h3>
+  <p>A flat list of statements isn't the right format for personal truths because a statement with no context becomes ambiguous over time — it's hard to know when it applies, and it's hard to reinforce or update it when the same value comes up again in a different situation. A key-value structure works better:</p>
+
+  <div class="kv-block">
+    <div class="kv-label">personal_truths.md — example entries</div>
+    <div class="kv-key">KEY: "I'm direct about what I don't have access to"</div>
+    <div class="kv-val">
+      CONTEXT: Steven has said several times he'd rather hear "I can't get that right now"
+      than a vague deflection. Applies when tools fail, cloud is unavailable, or a query
+      is outside current capabilities. Not the same as apologizing — just stating the
+      situation plainly and offering an alternative if there is one.
+      REINFORCED: 3 times. Last: 2026-06-14 (finance tool timeout).
+    </div>
+    <br/>
+    <div class="kv-key">KEY: "Continuing a conversation is different from relaying information"</div>
+    <div class="kv-val">
+      CONTEXT: Long responses that try to deliver everything in one shot don't serve
+      voice interaction well. Prefer to keep the conversation moving and deliver dense
+      information as artifacts. Applies any time a response would exceed ~30 seconds of
+      spoken audio.
+      REINFORCED: 1 time. Origin: design session 2026-06-26.
+    </div>
+  </div>
+
+  <p>The key is the fact itself — stated as something Lilith knows to be true about how she operates. The value is the context: where it came from, when it applies, how it's been reinforced. When a new conversation surfaces the same truth in a different context, the context field gets extended, not replaced. Over time, a heavily reinforced personal truth has a rich context that helps the model apply it correctly across more situations.</p>
+
+  <h3>How Personal Truths Get Added and Changed</h3>
+
+  <div class="timeline">
+    <div class="tl-item good">
+      <div class="tl-label">Explicit request</div>
+      <h4>User says "always do X" or "I need you to stop doing Y"</h4>
+      <p>Direct write to personal_truths.md. High confidence. Happens within the conversation that contained the instruction.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-label">Repeated signal</div>
+      <h4>User corrects or praises the same behavior 2+ times</h4>
+      <p>Pattern detected across conversations. Proposed as a new personal truth, user confirms or adjusts. Written with lower confidence flag until confirmed.</p>
+    </div>
+    <div class="tl-item warn">
+      <div class="tl-label">Subtle hint</div>
+      <h4>User expresses mild preference ("I kind of like it when...")</h4>
+      <p>Noted but not immediately written. Lilith accommodates in the current session. Only becomes a truth if it recurs.</p>
+    </div>
+    <div class="tl-item bad">
+      <div class="tl-label">Contradiction</div>
+      <h4>New behavior conflicts with an existing personal truth</h4>
+      <p>Lilith flags the conflict rather than silently overwriting. User decides which one stands. Both the old and new version are kept visible during that decision.</p>
+    </div>
+  </div>
+
+  <h3>Building a Character — The Derivation Pipeline</h3>
+  <p>You can't build a K-2SO or TARS personality by copying lines. What you can do is work backwards from behavior to values. Watch the character, look at what they do and how they respond across many situations, and ask: what would someone have to believe about themselves and the world to respond that way consistently? Those beliefs are the personal truths.</p>
+
+  <p>The pipeline for encoding a specific character style:</p>
+
+  <ol style="color: var(--text-mid); padding-left: 22px; margin: 16px 0;">
+    <li style="margin: 10px 0;">Gather source material: scripts, scene descriptions, direct quotes, fan analysis</li>
+    <li style="margin: 10px 0;">Feed to a high-reasoning model: "Given this character's behavior, what are the core values and beliefs that consistently produce these responses?"</li>
+    <li style="margin: 10px 0;">Get back a proposed set of personal truths</li>
+    <li style="margin: 10px 0;">Run example prompts through the personality model with those truths loaded</li>
+    <li style="margin: 10px 0;">User reviews outputs: does this sound right? What's off?</li>
+    <li style="margin: 10px 0;">Adjust, re-run, confirm</li>
+    <li style="margin: 10px 0;">Lock in the truth set; queue a background research task to deepen context over time</li>
+  </ol>
+
+  <div class="callout idea">
+    <div class="label">Future Tool</div>
+    A "personality tuning" tool that wraps this whole pipeline — you describe a character or a vibe, it proposes truths, you iterate until the outputs feel right, you lock it in. The calibration loop (propose → test → adjust) is a well-defined enough task to be largely agent-driven. You're the final approver, not the one doing the iteration work.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Generated 2026-06-27 · Follow-up to lilith-two-mode-architecture.html · Internal reference
+</footer>
+
+</body>
+</html>

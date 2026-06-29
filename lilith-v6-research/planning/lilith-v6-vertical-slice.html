@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith Version 6 — The Vertical Slice</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --accent: #4fc3c9;
+    --amber: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --purple: #a78bfa;
+    --pink: #f472b6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 48px;
+    font-style: italic;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--amber);
+    margin: 56px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 32px 0 12px;
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--purple);
+    margin: 24px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+  }
+
+  p { margin-bottom: 16px; }
+
+  a { color: var(--accent); text-decoration: none; }
+
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin: 24px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+  }
+
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  .callout.red { border-left-color: var(--red); }
+  .callout.purple { border-left-color: var(--purple); }
+
+  .callout-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.amber .callout-label { color: var(--amber); }
+  .callout.green .callout-label { color: var(--green); }
+  .callout.red .callout-label { color: var(--red); }
+  .callout.purple .callout-label { color: var(--purple); }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.purple { color: var(--purple); }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .stat-note {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  pre, .code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 24px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    color: #c9d1d9;
+    margin: 16px 0;
+    white-space: pre;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.9rem;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-green { background: rgba(16,185,129,0.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .badge-accent { background: rgba(79,195,201,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--purple); }
+  .badge-muted { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+  .timeline {
+    border-left: 2px solid var(--border);
+    padding-left: 28px;
+    margin: 20px 0;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -35px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--bg);
+  }
+
+  .timeline-item.active::before { background: var(--accent); }
+  .timeline-item.done::before { background: var(--green); }
+  .timeline-item.next::before { background: var(--amber); }
+
+  .timeline-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .col-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .col-card-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .col-card ul { padding-left: 18px; }
+  .col-card li { margin-bottom: 6px; font-size: 0.9rem; }
+
+  .pro { color: var(--green); }
+  .con { color: var(--red); }
+
+  ul, ol {
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+
+  li { margin-bottom: 6px; }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  .section-number {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+
+  .toc-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .toc ol {
+    padding-left: 20px;
+    margin: 0;
+  }
+
+  .toc li {
+    margin-bottom: 8px;
+    color: var(--accent);
+    font-size: 0.92rem;
+  }
+
+  .toc li a { color: var(--accent); }
+  .toc li a:hover { text-decoration: underline; }
+
+  .industry-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 24px 0;
+  }
+
+  .industry-block-header {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--purple);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .decision-box {
+    background: var(--surface);
+    border: 1px solid var(--amber);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 20px 0;
+  }
+
+  .decision-box-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--amber);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .anchor { scroll-margin-top: 24px; }
+</style>
+</head>
+<body>
+<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);border-left:4px solid #10b981;border-radius:6px;padding:14px 20px;margin-bottom:28px;font-size:0.88rem;"><strong style="color:#10b981;display:block;margin-bottom:6px;">DECISION MADE — 2026-06-28</strong>This document was written before the framework decision was made. <strong>Decision: PySide6 6.11.1 (Qt6, LGPL v3)</strong> is the frontend framework. <strong>ModernGL 5.x (MIT)</strong> is used for the orb via <code>QOpenGLWidget</code>. Qt Quick 3D (GPLv3) is dropped. No commercial Qt license required. Tauri and Flutter are no longer under consideration. This document is preserved for historical research context only — the decision it was researching is resolved. See RES-01, RES-03, RES-15 in the research directory.</div>
+
+<h1>Lilith Version 6</h1>
+<p class="subtitle">The Vertical Slice — A Design Session for What Comes Next<br>June 2026</p>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#sucker-punch">The Sucker Punch</a></li>
+    <li><a href="#version-history">Version History — Honestly</a></li>
+    <li><a href="#guiding-light">The Guiding Light</a></li>
+    <li><a href="#why-v6">Why This Version Ends Here</a></li>
+    <li><a href="#vertical-slice">The Vertical Slice</a></li>
+    <li><a href="#product">The Product — Desktop as Hub</a></li>
+    <li><a href="#byok">Bring Your Own Keys</a></li>
+    <li><a href="#stack">The Stack</a></li>
+    <li><a href="#security">Security as Foundation</a></li>
+    <li><a href="#three-apps">The Three Core Applications</a></li>
+    <li><a href="#running-both">Running Both Worlds</a></li>
+    <li><a href="#manager">Designing Your Own Manager</a></li>
+    <li><a href="#hivemind">Hive Mind and Self-Improvement</a></li>
+    <li><a href="#market">The Market</a></li>
+    <li><a href="#build-order">Build Order</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="sucker-punch">1. The Sucker Punch</h2>
+
+<p>You were staring at it the whole time and you didn't see it coming. That's what makes it a sucker punch — not that something blindsided you, but that you built it with your own hands and it still surprised you when it stood up.</p>
+
+<p>A weekend with almost no sleep. Contacts imported. Bank statements from two banks, years of them. The financial screen, the calendar, the people graph, all of it wired to a backend that Lilith has access to. And when it was finally running and you started talking to her about the stuff inside the database — your stuff — that was the moment. Not the code. The conversation.</p>
+
+<p>The thing that's worth sitting with: four years of building a dream, and the actual realization of what you were chasing didn't arrive until the moment you got there. You were hungry for something you couldn't fully see. You chased it hard. And when you got it, the hunger made sense. That's not a contradiction. That's how hunger works. It's always pointing at something it can't describe.</p>
+
+<div class="callout green">
+  <div class="callout-label">The real insight from that weekend</div>
+  The application didn't show you what Lilith could do. It showed you that what you'd been hoping was working, actually was working. The backend you'd been building in the dark — testing with terminal pings and terminal queries — turned out to be a real thing. And you didn't know until you saw it.
+</div>
+
+<p>The second thing that weekend showed you: the frontend isn't right. Not because it doesn't work. It works. But it's not built for Lilith. It's a one-size-fits-all application framework bolted on in a week, and the seams show. You're not attached to it. It came together fast and it can go away fast. But the backend — that has seams too. They're just harder to see because you didn't have a frontend to surface them through.</p>
+
+<p>This document is about what comes next. The version you'll build with everything you know now and nothing you've already written.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="version-history">2. Version History — Honestly</h2>
+
+<p>Five versions of Lilith. Each one taught a different lesson. None of them were wastes.</p>
+
+<div class="timeline">
+  <div class="timeline-item done">
+    <div class="timeline-label">Versions 1–3 · ~2022–2023</div>
+    <strong>The Podcast Capture Tool That Became Something Bigger</strong>
+    <p style="margin-top: 8px; font-size: 0.92rem;">Started as a voice capture system — capture conversation, tokenize it, tag for intent and semantics, visually organize running trains of thought. Real idea. The kind you get when you're mid-podcast and somebody says something and you lose the thread. "What were we just talking about?" AI answers immediately. That was the seed.</p>
+    <p style="font-size: 0.92rem;">In building that, the realization arrived: AI can do so much more. The pivot toward Lilith as an assistant rather than a capture tool happened in this era. Microservices architecture — the kind large software companies use. Correct for a team of 300. Wrong for one developer who is also the designer and the manager. The models at the time were sycophantic enough to agree when asked what enterprise architecture looked like, and not candid enough to say "that's not what you should be doing."</p>
+    <p style="font-size: 0.92rem; color: var(--muted);">The name Lilith came first. The acronym came after, working backwards from a name you already knew was right.</p>
+  </div>
+
+  <div class="timeline-item done">
+    <div class="timeline-label">Version 4 · Early 2024</div>
+    <strong>The Cleanup That Wasn't Clean Enough</strong>
+    <p style="margin-top: 8px; font-size: 0.92rem;">First real wipe and rebuild. Got rid of the microservices mess. Still carried forward assumptions from the previous versions that weren't examined closely enough. A newer, better model finally said — not as a direct correction, but as a side observation about something you'd said — "you're building like a monolithic software company, but you're a solo developer." That landed. That was the shift that got us to v5.</p>
+  </div>
+
+  <div class="timeline-item done">
+    <div class="timeline-label">Version 5 · February 2026 – June 2026</div>
+    <strong>The Version That Got Real</strong>
+    <p style="margin-top: 8px; font-size: 0.92rem;">February to end of June. The design document series (v5 being the fifth, and the first to split from a single document into a research-derived series). A backend that actually works. Tools, telemetry, vault, calendar sync, finance importer, people graph, voice pipeline. And then in the last week: Tauri app, bolted on fast, working enough to be shocking.</p>
+    <p style="font-size: 0.92rem;">The last two months of v5 development were mostly free-balled — the design docs stopped serving, the sprint structure was abandoned in favor of chasing what felt right. That's fine. Sometimes that's how you find the end of a prototype. You run until the system tells you it's done.</p>
+    <p style="font-size: 0.92rem; color: var(--muted);">This code is the end of the road. Nothing in it ships to production. That's not a failure. That's what prototypes are for.</p>
+  </div>
+
+  <div class="timeline-item next">
+    <div class="timeline-label">Version 6 · Starting Now</div>
+    <strong>The Vertical Slice</strong>
+    <p style="margin-top: 8px; font-size: 0.92rem;">Built with the two-mode paradigm as the anchor. Narrow in scope by design. Security from the bottom up. No code carried over. Three or four core applications and nothing else. Designed to be the first version that could actually ship.</p>
+  </div>
+</div>
+
+<div class="industry-block">
+  <div class="industry-block-header">Industry context — what the model market looked like when you started vs now</div>
+  <p style="font-size: 0.88rem; margin: 0;">The models you first built Lilith with (circa 2022-2023) were GPT-3.5 era — capable, but limited enough that the architecture had to compensate. By early 2026, Claude Sonnet, GPT-4o, and Gemini 1.5 Pro are available at prices that would have seemed absurd three years ago. GPT-4o input tokens cost $5/1M as of mid-2025. Claude Sonnet 4 is $3/1M input. The quality of those models has improved faster than their prices dropped — which means the "intelligence" ceiling you were building around in 2022 is now effectively the floor. The part of Lilith that was always the hardest — the reasoning, the understanding, the personality — now largely works at cloud API speed. The bottleneck shifted from "can the model understand" to "how fast can she speak."</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="guiding-light">3. The Guiding Light</h2>
+
+<p>There have been several guiding lights across five versions of Lilith. Voice-first was always one. Personal knowledge database was another. Developer pair programmer showed up early. The home OS framing came later.</p>
+
+<p>This one outshines them all. Not because the others were wrong — they're still true and they're still part of the design. But because this one tells you how everything else behaves.</p>
+
+<div class="callout">
+  <div class="callout-label">The Paradigm</div>
+  Lilith is always present. She responds instantly. She is the face of a system where all the actual reasoning, research, and computation happens in the background — as artifacts — delivered to the user when they're ready, not when they're blocking on a response.
+</div>
+
+<p>This is the thing that resolves the latency problem without solving the latency problem. You don't fight physics. You redesign around it. A 47-second response time isn't a bug in your architecture — it's what happens when you put a large language model in the critical path of a real-time conversation. The fix isn't a better GPU. The fix is: Lilith doesn't wait.</p>
+
+<h3>What Two Modes Means at the Design Level</h3>
+
+<pre>
+CONVERSATIONAL MODE                    ARTIFACT MODE
+─────────────────────────────────────  ─────────────────────────────────────
+Lilith speaks in ≤ 3 seconds           Lilith speaks immediately (acknowledge)
+Response is ≤ ~50 tokens               Task runs in background
+Context: ≤ 1,200 tokens                Context: full (no ceiling)
+Local personality model only           Cloud model handles the heavy work
+Example: "What's the weather?"         Example: "Show me my spending this month"
+No tool calls needed                   Tool call returns an artifact
+≤ 25s of speech at 135 WPM            Artifact delivered to UI panel
+</pre>
+
+<p>The two modes have different latency contracts. Conversational mode promises an answer in under 3 seconds. Artifact mode promises an acknowledgment in under 1 second and delivery whenever the work is done. The user never waits in silence for either.</p>
+
+<p>This paradigm also reframes what the UI is for. The UI panel isn't where conversations happen. It's where artifacts live. Lilith speaks; the panel shows. They serve different information layers.</p>
+
+<h3>Why This Is the Old Idea Done Right</h3>
+
+<p>Voice-first was always the stated goal. The website had that tag from the beginning. But voice-first kept losing out to the latency problem — every attempt to be fast failed at some point because the architecture was trying to be fast everywhere. The two-mode insight is what unlocks voice-first as a reality rather than an aspiration: not by making everything fast, but by making the voice-only path genuinely fast and letting everything else acknowledge immediately and finish later.</p>
+
+<div class="callout amber">
+  <div class="callout-label">What this means for v6's architecture anchor</div>
+  Every design decision in v6 should pass this test: does this serve the two-mode contract? Does it keep conversational mode under 3 seconds and artifact mode's acknowledge under 1 second? If it doesn't, it's scope creep until later.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="why-v6">4. Why This Version Ends Here</h2>
+
+<p>The code in v5 is fine. It mostly works. There's something real in there. But the architecture underneath it is the product of five paradigm shifts across four years, and the seams from each one are still in the code. The thing zigzags — a module built for one idea, patched for another, reaching into a third. That's what a prototype looks like from the inside.</p>
+
+<p>The Tauri app isn't the reason v5 ends. The Tauri app just made the inside visible from the outside. When you stood it up and talked to her, the parts that felt wrong were actually the backend seams surfacing through the UI. The hard-coded values. The manual Discord setup. The security that was never really there — vault on disk, no encryption, secrets in env files. The telemetry gaps. The code pointing at things that no longer mean what they used to.</p>
+
+<div class="two-col">
+  <div class="col-card">
+    <div class="col-card-title">What v5 gets right</div>
+    <ul>
+      <li>The two-mode paradigm design (just discovered)</li>
+      <li>The personal knowledge database concept</li>
+      <li>Voice pipeline with Kokoro TTS working</li>
+      <li>The tool/provider pattern</li>
+      <li>UCL telemetry foundation</li>
+      <li>The sprint/design document discipline</li>
+      <li>The data it's already collected</li>
+      <li>The lessons from standing it up</li>
+    </ul>
+  </div>
+  <div class="col-card">
+    <div class="col-card-title">What v5 gets wrong</div>
+    <ul>
+      <li>Architecture shifted mid-build, code reflects all shifts</li>
+      <li>Security as afterthought</li>
+      <li>Hard-coded configuration everywhere</li>
+      <li>Tauri frontend not purpose-built for Lilith</li>
+      <li>12 applications instead of 3</li>
+      <li>No encryption at rest or in transit</li>
+      <li>Manual setup steps that should be automated</li>
+      <li>Telemetry gaps in write paths</li>
+      <li>Design docs abandoned mid-build</li>
+    </ul>
+  </div>
+</div>
+
+<p>None of that gets fixed by patching. It gets fixed by starting clean with all of those lessons already internalized — which you now have.</p>
+
+<h3>The NSA Principle</h3>
+
+<p>There's an idea in here about how the intelligence community handles third-party software they want to use without trusting. They don't take the software. They take the codebase, and line by line, they rebuild the entire thing themselves. Every function. Every module. On their own infrastructure, with their own developers. What comes out is functionally identical but built from scratch with known provenance.</p>
+
+<p>That's the right frame for what you're doing with v6. You're not carrying code forward. You're carrying understanding forward. The knowledge of why things work the way they work, rebuilt into a clean foundation. The code is the artifact of understanding. When the understanding upgrades, you rebuild the artifact.</p>
+
+<div class="callout red">
+  <div class="callout-label">Hard rule for v6</div>
+  No code from v5 enters v6. The v5 codebase is a reference and a lab, not a source of modules. If a function in v5 is "good enough to copy," the right move is to understand why it works and rewrite it clean, not copy-paste. The zigzags live in the copy-pastes.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="vertical-slice">5. The Vertical Slice</h2>
+
+<p>A vertical slice is not a horizontal layer. It's not the foundation, not the backend, not the frontend, not the database schema. It's a complete path through all of those — top to bottom — for a narrow set of functionality. Like a slice of cake: not the whole cake, but a full cross-section of everything in it. Cake, frosting, filling, crust. All the layers, narrow scope.</p>
+
+<pre>
+LILITH V6 — VERTICAL SLICE
+
+ ┌─────────────────────────────────────────────────────────────┐
+ │  VOICE INPUT  →  STT  →  INTENT CLASSIFIER               │
+ │                                                             │
+ │         ┌─────────────────────────┐                        │
+ │         │   CONVERSATIONAL MODE   │  → TTS → SPEAKER       │
+ │         │   ≤ 3s to first audio   │                        │
+ │         └─────────────────────────┘                        │
+ │                                                             │
+ │         ┌─────────────────────────┐                        │
+ │         │      ARTIFACT MODE      │  → ACK narrative → TTS │
+ │         │   TOOL → CLOUD → PANEL  │  → handoff → TTS       │
+ │         └─────────────────────────┘                        │
+ │                                                             │
+ │  PERSONAL KNOWLEDGE DATABASE (encrypted at rest)           │
+ │  ├── Contacts (encrypted SQLite)                           │
+ │  ├── Finances (encrypted SQLite)                           │
+ │  └── Conversation history (encrypted SQLite)              │
+ │                                                             │
+ │  PERSONALITY LAYER (EDICTS, VOICE, Personal Truths)       │
+ │                                                             │
+ │  CLOUD ROUTING (BYOK — bring your own API keys)           │
+ └─────────────────────────────────────────────────────────────┘
+</pre>
+
+<h3>What "Narrow Scope" Means This Time</h3>
+
+<p>In v5, the plan was always "start small, build up." But in practice, the scope expanded every time something new felt important, because you didn't know from experience what was worth building first. Now you do. Three to four applications. That's it. Not because the others aren't valuable — they are — but because scope creep isn't just a time cost. It's a design coherence cost. Every extra thing you add to v6's v1 is another place where the architecture might zigzag to accommodate it.</p>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value">3</div>
+    <div class="stat-label">Core apps in v6 v1</div>
+    <div class="stat-note">Not 12. Not 8. Three.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value amber">0</div>
+    <div class="stat-label">Lines of v5 code in v6</div>
+    <div class="stat-note">Understanding travels, code doesn't.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value green">100%</div>
+    <div class="stat-label">Security coverage</div>
+    <div class="stat-note">Encryption at rest, in transit. Not bolted on.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value purple">1</div>
+    <div class="stat-label">Frontend target</div>
+    <div class="stat-note">Purpose-built. Not Tauri.</div>
+  </div>
+</div>
+
+<h3>The Slice Is the Product</h3>
+
+<p>The difference between v5's prototyping mindset and v6's product mindset is this: v6's vertical slice is the shipping target, not a milestone on the way to something else. When the slice is done — working voice pipeline, two-mode routing, three core apps, encrypted database, BYOK cloud routing, cross-platform desktop — that's Lilith v6. Not "good enough for now." Actually done.</p>
+
+<p>That's a tighter scope than any previous version aimed for. It's also the most achievable one. Because you know now that a narrow thing that works completely beats a wide thing that mostly works.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="product">6. The Product — Desktop as Hub</h2>
+
+<p>The business model and the architecture are the same decision. Lilith on the desktop is the hub — the master node. Everything else is served by the hub: phone, tablet, TV, other devices. The desktop is the premium tier. The rest is free.</p>
+
+<pre>
+DEVICE TIERS
+
+ ┌──────────────────────────────────────────────┐
+ │  DESKTOP (macOS / Windows / Linux)           │
+ │  THE HUB — PAID                              │
+ │  ├── Full Lilith pipeline                    │
+ │  ├── Local database (encrypted)              │
+ │  ├── Voice I/O (TTS + STT)                  │
+ │  ├── Cloud routing (BYOK)                    │
+ │  └── Serves all other devices                │
+ └──────────────────────┬───────────────────────┘
+                        │ E2E encrypted sync
+          ┌─────────────┼─────────────┐
+          ▼             ▼             ▼
+  ┌──────────────┐ ┌──────────┐ ┌──────────┐
+  │   PHONE      │ │  TABLET  │ │  TV / ?  │
+  │   FREE       │ │  FREE    │ │  FREE    │
+  │  Thin client │ │  Client  │ │  Client  │
+  └──────────────┘ └──────────┘ └──────────┘
+</pre>
+
+<p>The logic is clean. You own the hub, you get the rest for free. The data lives on your machine. The processing uses your API keys. You're not paying for a data center to store your life. You're paying for the software that organizes it.</p>
+
+<h3>Why Desktop as Hub Works</h3>
+
+<ul>
+  <li><strong>No multi-tenant cloud infrastructure to build.</strong> The user's desktop is the server. You ship software, not a platform.</li>
+  <li><strong>Data stays on the user's machine.</strong> This is the privacy story. The personal knowledge database — contacts, finances, health, conversations — doesn't leave the device unless the user chooses to sync it, encrypted, to another device they own.</li>
+  <li><strong>Revenue doesn't depend on usage volume.</strong> A subscription model tied to compute is dangerous when compute costs are volatile. Selling the desktop software as a product (or a one-time purchase + optional sync subscription) decouples your revenue from API cost uncertainty.</li>
+  <li><strong>The Obsidian model works.</strong> Obsidian is local-first, sells vaults sync as an optional add-on at $10/month, and has reportedly hit $1M+ ARR from a tool that doesn't need servers to function. The pattern is proven.</li>
+</ul>
+
+<div class="industry-block">
+  <div class="industry-block-header">Industry context — local-first software in 2026</div>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">The "local-first" software movement has been growing since Ink &amp; Switch published the Local-First Software manifesto in 2019. The core argument: your data should be yours, sync should be optional, and the app should work without the internet. Tools built on this principle — Obsidian, Logseq, Linear's desktop client, Actual Budget — have demonstrated that users will pay for software that respects their data. This is especially true in the post-2023 climate where cloud privacy scandals have made a certain class of users actively prefer local storage.</p>
+  <p style="font-size: 0.88rem; margin: 0;">E2E encryption sync (Obsidian-style) is table stakes for this audience. The encryption can't be optional or a premium feature — it has to be the default for the sync path.</p>
+</div>
+
+<h3>The App Store Problem (Already Solved)</h3>
+
+<p>Distributing through Apple's App Store or Google Play means a 30% cut on every transaction and submission review that can block security-sensitive features. By making the mobile apps free thin clients to a desktop hub the user already paid for, the mobile distribution stores are irrelevant — free apps don't incur revenue splits. The sale happens on the desktop, outside the app stores, direct.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="byok">7. Bring Your Own Keys</h2>
+
+<p>BYOK — bring your own API keys — is the right model for v6. Not because it avoids costs (it does), but because it's the honest architecture for what Lilith is: software that routes your personal data to cloud models you choose, using credentials you control.</p>
+
+<div class="callout">
+  <div class="callout-label">BYOK vs Managed Keys — the real difference</div>
+  If Lilith manages the API keys, Lilith is a middleman between the user and the AI provider. The user's conversation data passes through your infrastructure before reaching the model. With BYOK, the conversation goes directly from the user's desktop to the AI provider. You never see it.
+</div>
+
+<h3>What BYOK Means for the Product</h3>
+
+<table>
+  <thead>
+    <tr><th>Aspect</th><th>Managed Keys (you hold them)</th><th>BYOK (user holds them)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Infrastructure cost</td><td>You pay per user per query</td><td>User pays their own API bill</td></tr>
+    <tr><td>Data liability</td><td>User conversations flow through your servers</td><td>Data goes directly to AI provider</td></tr>
+    <tr><td>Privacy story</td><td>Weak — you technically have access</td><td>Strong — you never see the data</td></tr>
+    <tr><td>Scale risk</td><td>High — viral growth = immediate cost crisis</td><td>None — users fund their own usage</td></tr>
+    <tr><td>Target user</td><td>Casual users who want zero setup</td><td>Power users, privacy-conscious users</td></tr>
+    <tr><td>Revenue model</td><td>Subscription tied to compute</td><td>One-time purchase or flat subscription</td></tr>
+  </tbody>
+</table>
+
+<p>The audience Lilith is built for — people who want a personal AI that knows them, manages their finances, keeps their contacts, and serves their other devices — is exactly the audience most likely to be comfortable obtaining their own API keys. This is not a "my grandma needs to use this" product. It's a product for people who understand what they're doing with AI and want it done right.</p>
+
+<div class="industry-block">
+  <div class="industry-block-header">Industry context — the BYOK trend</div>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">BYOK has become a standard feature in the AI tools market. Open WebUI (the most popular self-hosted LLM frontend) is BYOK by design. AnythingLLM, LibreChat, and most self-hosted AI assistant tools follow the same model. Cursor's pro tier uses Anthropic/OpenAI keys. The pattern is normalized enough that a meaningful segment of technical users actively prefer it — they don't want your infrastructure involved in their conversations.</p>
+  <p style="font-size: 0.88rem; margin: 0;">The friction of obtaining API keys has also dropped dramatically. Anthropic's API waitlist is gone. OpenAI's free tier is available immediately. Getting a key takes five minutes. This was a real barrier in 2022. It isn't in 2026.</p>
+</div>
+
+<h3>GPU Allocation Under BYOK + Two-Mode</h3>
+
+<p>With BYOK and cloud-routed reasoning, the local GPU is freed from the main model. Under the two-mode architecture, the only things running locally are:</p>
+
+<pre>
+LOCAL GPU (RTX 3060 — 12GB VRAM)
+
+  STT (speech-to-text)      ≈ 2–3GB    Whisper large / Whisper.cpp
+  TTS (Kokoro af_bella)     ≈ 1–2GB    Real-time audio synthesis
+  Personality model         ≈ 2–3GB    3B–4B Q4 — voice translation only
+                                        (artifact mode handoffs)
+  ──────────────────────────────────────
+  Total                     ≈ 5–8GB    Fits on 3060 with headroom
+
+  Everything else → Cloud (BYOK keys)
+</pre>
+
+<p>No main reasoning model running locally. No 12B model chewing through VRAM to answer conversational queries. The personality model is the only inferencing model that runs locally, and its job is narrow: take an artifact result and render it in Lilith's voice. That runs after the cloud model has finished, in parallel with the artifact formatter, and doesn't block anything.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="stack">8. The Stack</h2>
+
+<p>Every previous version of Lilith has been Python on the backend. That's not a sentimental attachment — it's the right choice for this use case, and it's worth understanding why instead of just inheriting it.</p>
+
+<h3>Backend Language</h3>
+
+<table>
+  <thead>
+    <tr><th>Language</th><th>Pros for this use case</th><th>Cons</th><th>Verdict</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Python</strong></td>
+      <td>
+        asyncio for concurrent tool execution<br>
+        Native Anthropic/OpenAI SDK<br>
+        Whisper, Kokoro, all AI libs<br>
+        SQLite/SQLCipher bindings<br>
+        FastAPI for the internal API<br>
+        Familiar codebase
+      </td>
+      <td>
+        GIL (partially fixed in 3.12+)<br>
+        Memory overhead<br>
+        Startup time (startup once, runs forever)
+      </td>
+      <td><span class="badge badge-green">Use Python</span></td>
+    </tr>
+    <tr>
+      <td><strong>Rust</strong></td>
+      <td>
+        Memory safety<br>
+        Performance<br>
+        Excellent for the TTS/audio path
+      </td>
+      <td>
+        No mature LLM client SDK<br>
+        Steep learning curve<br>
+        Would require bridging to Python AI libs anyway
+      </td>
+      <td><span class="badge badge-muted">Backend service specific only</span></td>
+    </tr>
+    <tr>
+      <td><strong>Go</strong></td>
+      <td>
+        Fast startup<br>
+        Good concurrency<br>
+        Simple deployment
+      </td>
+      <td>
+        No Python AI ecosystem<br>
+        Would need FFI or subprocess calls for ML
+      </td>
+      <td><span class="badge badge-red">Not the right fit</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The verdict is Python. The AI/ML ecosystem is too deep to work around, and the async concurrency model in Python is well-suited to the tool dispatch / background task pattern that artifact mode needs. What changes from v5 is not the language — it's the discipline in how it's structured.</p>
+
+<h3>Frontend Framework</h3>
+
+<p>This is the new question. Tauri worked well enough to stand up in a week, but the result was generic — not built for Lilith. The question for v6 is: what does a purpose-built Lilith frontend look like, and what's the right framework to build it in?</p>
+
+<p>The requirements are non-negotiable:</p>
+<ul>
+  <li>Runs on macOS, Windows, Linux without modification</li>
+  <li>Feels like a premium desktop application, not an embedded browser</li>
+  <li>Handles real-time audio visualization (the orb, waveforms)</li>
+  <li>Supports drag, resize, and a persistent ambient presence (the orb on other apps)</li>
+  <li>Communicates with the Python backend via WebSocket (existing pattern)</li>
+  <li>Deploys small — not a 200MB Electron bundle</li>
+</ul>
+
+<table>
+  <thead>
+    <tr><th>Framework</th><th>Bundle size</th><th>Cross-platform</th><th>Premium feel</th><th>Audio/canvas</th><th>Verdict</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Tauri v2</strong></td>
+      <td>~7MB</td>
+      <td><span class="badge badge-green">Yes</span></td>
+      <td>Depends on webview quality per OS</td>
+      <td>Web APIs</td>
+      <td><span class="badge badge-amber">Possible — needs purpose-built UI</span></td>
+    </tr>
+    <tr>
+      <td><strong>Electron</strong></td>
+      <td>100–300MB</td>
+      <td><span class="badge badge-green">Yes</span></td>
+      <td>Used by Slack, VS Code, Notion</td>
+      <td>Web APIs</td>
+      <td><span class="badge badge-muted">Too heavy — not for v1</span></td>
+    </tr>
+    <tr>
+      <td><strong>Flutter Desktop</strong></td>
+      <td>~20–40MB</td>
+      <td><span class="badge badge-green">Yes</span></td>
+      <td>Native-feeling controls</td>
+      <td>Custom painting</td>
+      <td><span class="badge badge-accent">Strong candidate</span></td>
+    </tr>
+    <tr>
+      <td><strong>Qt6 / PySide6</strong></td>
+      <td>~30–60MB</td>
+      <td><span class="badge badge-green">Yes</span></td>
+      <td>Native on all platforms</td>
+      <td>Qt Canvas / OpenGL</td>
+      <td><span class="badge badge-accent">Strong candidate</span></td>
+    </tr>
+    <tr>
+      <td><strong>SwiftUI (macOS only)</strong></td>
+      <td>Native</td>
+      <td><span class="badge badge-red">No</span></td>
+      <td>Premium</td>
+      <td>Metal</td>
+      <td><span class="badge badge-red">Not cross-platform</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="decision-box">
+  <div class="decision-box-header">Design decision needed — frontend framework</div>
+  <p style="font-size: 0.92rem; margin: 0 0 10px;">The two strongest options are Tauri v2 (if the UI is designed from scratch in React/Vue, not bolted together) or Flutter Desktop. Flutter's advantage is that it renders its own UI everywhere — no OS webview quality variance. It also handles the kind of animated, custom-drawn interface (orb, ambient overlay) better than web-based frameworks. The disadvantage is a new language (Dart) and less mature tooling than web stacks.</p>
+  <p style="font-size: 0.92rem; margin: 0;">This decision shapes everything downstream. It's the one that should get the most design time before building starts.</p>
+</div>
+
+<h3>Database</h3>
+
+<p>SQLite with SQLCipher for encryption at rest. One database file per data domain (contacts, finance, conversation history), all encrypted with a key derived from the user's passphrase. Not shared across network. Not cloud-hosted. On disk, encrypted.</p>
+
+<table>
+  <thead>
+    <tr><th>Domain</th><th>DB</th><th>Key tables</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Contacts / People</td><td>contacts.db (encrypted)</td><td>people, relationships, interactions</td></tr>
+    <tr><td>Finance</td><td>finance.db (encrypted)</td><td>transactions, accounts, categories, budgets</td></tr>
+    <tr><td>Conversation</td><td>memory.db (encrypted)</td><td>turns, sessions, embeddings, recall_index</td></tr>
+    <tr><td>Config / Prefs</td><td>config.db (plaintext)</td><td>user_prefs, api_keys (encrypted field), feature_flags</td></tr>
+    <tr><td>Telemetry</td><td>ucl.db (plaintext)</td><td>events, metrics, errors</td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="security">9. Security as Foundation</h2>
+
+<p>Security was always supposed to be front and center. It wasn't. Every version of Lilith ran with no encryption, API keys in .env files on disk, database contents readable with any SQLite browser, and a network interface listening on localhost with no auth. That's fine for a prototype you're running on your own machine. It's not fine for software you're going to give to other people.</p>
+
+<p>The plan for v6 is to stop treating security as a feature that gets added before shipping and start treating it as the layer everything else is built on top of. That means the database schema is designed for encryption from the start, not retrofitted. It means API key storage has a keychain-backed vault, not an env file. It means the internal WebSocket between backend and frontend has an auth token, not an open socket on localhost.</p>
+
+<h3>The Security Stack for v6</h3>
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>v5 approach</th><th>v6 approach</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Database</td>
+      <td>Plaintext SQLite, readable with any browser</td>
+      <td>SQLCipher — AES-256 encryption at rest, key derived from user passphrase</td></tr>
+    <tr>
+      <td>API Keys</td>
+      <td>.env file on disk</td>
+      <td>OS keychain (Keychain on macOS, DPAPI on Windows, libsecret on Linux)</td></tr>
+    <tr>
+      <td>Internal socket</td>
+      <td>Open WebSocket on localhost:8765</td>
+      <td>WebSocket with one-time token established at startup, rotated per session</td></tr>
+    <tr>
+      <td>Sync (future)</td>
+      <td>Not implemented</td>
+      <td>E2E encrypted — user key never leaves device, sync service only sees ciphertext</td></tr>
+    <tr>
+      <td>Personal data</td>
+      <td>Stored in plaintext SQLite</td>
+      <td>All PII in encrypted tables — contacts, transactions, conversation turns</td></tr>
+    <tr>
+      <td>Error handling</td>
+      <td>Exceptions surface to TTS in some cases</td>
+      <td>No tracebacks to audio pipeline — all errors produce narrative responses</td></tr>
+  </tbody>
+</table>
+
+<div class="callout red">
+  <div class="callout-label">The single most important security lesson from v5</div>
+  The vault pattern in v5 stored "secrets" in a JSON file on disk, wrapped in a thin Python class. That's not a vault. A vault means the OS handles the secret storage. On Linux that's the SecretService API via libsecret. On macOS it's the Keychain. On Windows it's DPAPI. Platform-native secret storage means that even if the SQLite databases are copied off the machine, the keys to decrypt them aren't in the copied files.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="three-apps">10. The Three Core Applications</h2>
+
+<p>In v5, twelve applications went into the first build. That was too many. The lesson wasn't that the applications were wrong choices — most of them were reasonable ideas. The lesson was that twelve surface areas for bugs, design decisions, and data model complexity is twelve times the risk of zigzagging mid-build to accommodate something unforeseen.</p>
+
+<p>V6 ships with three. Possibly four. Here's the case for each:</p>
+
+<h3>Application 1 — Contacts</h3>
+
+<p>Contacts is the highest-leverage first application because everyone already has their contacts data and it connects to everything else. A person is an entity that also appears in calendar events, financial transactions, emails, and tasks. Building contacts first means every other application can reference a person by ID instead of by freetext name.</p>
+
+<div class="callout green">
+  <div class="callout-label">Why contacts first</div>
+  The relationship graph between a user and the people in their life is the most stable, slowly-changing data structure Lilith manages. It doesn't require an API (contacts can be imported from a vCard or CSV). It surfaces value immediately — Lilith knowing who someone is changes every interaction. And it creates the foreign key that every other application will need.
+</div>
+
+<ul>
+  <li>Import: vCard (.vcf), CSV export from any contacts app, manual entry</li>
+  <li>Fields: name, contact info, relationship type, last interaction, notes</li>
+  <li>Lilith tool: <code>people_search(query)</code>, <code>person_detail(id)</code></li>
+  <li>Context injection: person entity injected when query mentions a name</li>
+</ul>
+
+<h3>Application 2 — Finance</h3>
+
+<p>Finance was the most surprising v5 screen. The financial data — bank statements from both banks, years of transactions — produced a view of your life that no phone app shows you, because no phone app has the full picture. The value is immediate and personal in a way that's hard to replicate with anything else.</p>
+
+<ul>
+  <li>Import: PDF bank statements, CSV exports (every major bank supports one of these)</li>
+  <li>Parser: PDF → transaction list via deterministic extraction, not LLM parsing</li>
+  <li>Fields: transaction, amount, date, merchant, category (auto-tagged), account</li>
+  <li>Lilith tool: <code>finance_summary(period, category)</code>, <code>spending_trend()</code></li>
+  <li>No hard-coded categories, no assumed bank format — pure import-and-parse</li>
+</ul>
+
+<div class="callout amber">
+  <div class="callout-label">The hard-coded problem from v5</div>
+  The finance screen in v5 showed things that were specific to your bank, your categories, your date ranges. That's fine when you're the only user. For v6, the finance importer has to work with any bank statement in any format without configuration. The parser should handle the variance, not the user.
+</div>
+
+<h3>Application 3 — Conversation Memory</h3>
+
+<p>This is not a screen. It's the substrate. Conversation history with vector search recall is what makes Lilith feel like she knows you over time rather than starting cold each session. Without it, every conversation is the first one. With it, context accumulates across months and years.</p>
+
+<ul>
+  <li>All conversation turns stored in encrypted SQLite</li>
+  <li>Embeddings generated locally (small embedding model) or via API</li>
+  <li>Recall: vector similarity search → top-k hits injected into context</li>
+  <li>Manual memory: user can explicitly ask Lilith to remember something, stored as a fact</li>
+  <li>Personal truths layer evolves from conversation patterns</li>
+</ul>
+
+<h3>Optional Application 4 — Slack / Conversational Media</h3>
+
+<p>The original Lilith idea was about conversational capture and organization. Slack connects to the real-time communication patterns that matter in your work life. If you're in construction, maybe it's a different channel. But integrating at least one real-time conversation source that Lilith can read and reference connects the personal knowledge database to what's actively happening.</p>
+
+<p>This is a "maybe" for v6 v1 — not a commitment. Get the first three working completely before even scoping this.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="running-both">11. Running Both Worlds</h2>
+
+<p>V5 doesn't get turned off when v6 starts. It becomes the lab.</p>
+
+<p>The construction analogy: you don't demolish the building you're living in to build the new one. You build the new one, and you keep the old one running in parallel — moving into it gradually, learning from the old one's failure modes, running tests against its live behavior. When the new one is ready, you stop maintaining the old one and let it drift.</p>
+
+<pre>
+                                 NOW
+         ┌───────────────────────┤
+         │                       │
+         ▼                       ▼
+   ┌──────────┐           ┌──────────┐
+   │  v5 Lab  │           │  v6 Dev  │
+   │          │           │          │
+   │ Live     │           │ Building │
+   │ Poke it  │           │ Clean    │
+   │ Find weak│           │ Vertical │
+   │ spots    │           │ Slice    │
+   └──────────┘           └──────────┘
+        │                       │
+        │  Lessons observed     │
+        └──────────────────────▶│
+                                │
+                         ┌──────────┐
+                         │  v6 v1   │
+                         │ Ships    │
+                         └──────────┘
+</pre>
+
+<p>What you learn by using v5 while building v6:</p>
+<ul>
+  <li>Which context blocks Lilith actually uses in real conversations (vs. which are just loaded out of habit)</li>
+  <li>Which tools get called most vs. which ones were built for an imagined use case</li>
+  <li>Where the voice pipeline breaks under real usage patterns</li>
+  <li>What the telemetry gap looks like in practice (which events are missing, which are noisy)</li>
+  <li>What the two-mode routing split should look like empirically — because you can log every conversation in v5 and classify it post-hoc</li>
+</ul>
+
+<p>V5 is a dataset generator for v6. Every conversation you have with it is labeled training data for how v6's classifier should behave.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="manager">12. Designing Your Own Manager</h2>
+
+<p>The role evolution you've described spans five versions:</p>
+
+<div class="timeline">
+  <div class="timeline-item done">
+    <div class="timeline-label">v1–v3 era</div>
+    <strong>Developer + Designer + Manager</strong>
+    <p style="margin-top: 4px; font-size: 0.9rem;">Writing code, making architecture decisions, managing the project timeline. All three roles. All at once. As someone learning to code.</p>
+  </div>
+  <div class="timeline-item done">
+    <div class="timeline-label">v4–v5 era</div>
+    <strong>Designer + Manager (delegating development)</strong>
+    <p style="margin-top: 4px; font-size: 0.9rem;">AI models handling most of the code. You directing the work, reviewing the results, making the architectural calls. The code you write in v5 is nearly zero lines.</p>
+  </div>
+  <div class="timeline-item next">
+    <div class="timeline-label">v6 target</div>
+    <strong>Designer (Lilith as Manager)</strong>
+    <p style="margin-top: 4px; font-size: 0.9rem;">You make design decisions. Lilith manages the implementation. The AI coding agents (Antigravity, Grok, Codex) execute. You review and redirect. Your focus is on what Lilith should be, not on how to build it.</p>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Long-term vision</div>
+    <strong>Lilith manages Lilith</strong>
+    <p style="margin-top: 4px; font-size: 0.9rem;">Self-improvement cycles. Fork, test, merge. You set the design north star; Lilith finds the path.</p>
+  </div>
+</div>
+
+<p>The designer role means something specific: you're responsible for what gets built, not how it gets built. You make decisions about which features belong in v1 vs. v2. You decide what "done" looks like for each sprint. You review artifacts and say yes or no. You don't write code.</p>
+
+<p>The moment you start writing code or getting into implementation details, you've slipped back into manager mode. That's what the design task labels in the sprint docs are for — they're a system that forces the design role to be exercised before the implementation begins, not after.</p>
+
+<div class="callout purple">
+  <div class="callout-label">The discipline this requires</div>
+  Scope control is the hardest design skill. You described it yourself: in previous versions you didn't know what to say no to. Now you do. That knowledge — which features earn a slot in v1 and which ones get pushed — is the most valuable thing you've learned from the last four years. It's not a feeling. It's a judgment, and it's hard-won.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="hivemind">13. Hive Mind and Self-Improvement</h2>
+
+<p>Two long-horizon ideas that belong in this document because they shape the architecture of v6 even though they won't be built in v6.</p>
+
+<h3>Self-Improvement Cycles</h3>
+
+<p>The rough outline: Lilith forks herself. The fork runs with a set of improvements — better prompts, different tool configurations, updated personal truths, modified routing logic. The fork is not exposed to the user. Instead, it replays real prompts from the user's conversation history against itself, produces responses, and compares them to what the original Lilith said. When the fork's responses are consistently better (by some measurable criteria), the fork is proposed for merge.</p>
+
+<pre>
+SELF-IMPROVEMENT CYCLE (future)
+
+  v6.main ──────────────────────────────────────────────▶ running
+      │
+      ├── fork ──▶ v6.test
+      │               │
+      │               ├── replay 100 conversations (downtime)
+      │               ├── generate responses
+      │               ├── run eval (response quality, latency, accuracy)
+      │               │
+      │               └── if pass → propose merge
+      │                           ▼
+      └───────────────────── v6.main+1
+</pre>
+
+<p>This requires: a replay harness (run a prompt through Lilith, get a structured response), an eval framework (what metrics define "better"), and a merge procedure that's safe and reversible. None of these are simple engineering problems — but they're not impossible, and they're the right long-term direction.</p>
+
+<p>The NSA-style code sharing you described is the prerequisite. Before Lilith can fork and improve herself, the codebase needs to be structured as modular, provenance-tracked components that can be swapped, compared, and merged without guessing at what changed and why. That's a structural property of the codebase, not a feature you add later.</p>
+
+<h3>Hive Mind Across Lilith Instances</h3>
+
+<p>When multiple users run Lilith — eventually — there's a question of what they share. The personal knowledge databases are obviously separate and private. But the meta-learnings — which tool configurations work best, which context block orderings produce better responses, which classifier thresholds work for real usage — those could be aggregated and shared across instances without sharing any personal data.</p>
+
+<p>This is similar to how Apple's differential privacy works: local models learn from local data, and only the aggregate statistical signal gets shared, never the raw data. For Lilith, that might mean: "this user's recall hit limit of 2 in conversational mode performed well — aggregate signal suggests 2 is better than 5 across 1000 conversations." The personal data stays local. The configuration learning gets shared.</p>
+
+<div class="callout">
+  <div class="callout-label">What this means for v6 architecture</div>
+  V6 doesn't implement the hive mind. But the telemetry design should anticipate it. Every configuration decision — context ceiling, output cap, recall hits, narrative timing — should be logged to UCL in a way that could eventually be aggregated across instances. That's not extra work. It's the same telemetry standard from v5, just applied consistently from the start.
+</div>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="market">14. The Market</h2>
+
+<p>Industry context across the areas that matter for Lilith's trajectory.</p>
+
+<h3>The Hardware AI Device Reality</h3>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value red">~1yr</div>
+    <div class="stat-label">Humane AI Pin lifespan</div>
+    <div class="stat-note">Launched $699 + $24/mo. Discontinued. HP acquired the company.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value amber">$199</div>
+    <div class="stat-label">Rabbit R1 launch price</div>
+    <div class="stat-note">Shipped. Became an Android app wrapper. No proprietary OS advantage.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value red">0</div>
+    <div class="stat-label">Profitable AI hardware consumer devices (2024–25)</div>
+    <div class="stat-note">Including Meta Ray-Bans (which sold well by being sunglasses first).</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value amber">$1B+</div>
+    <div class="stat-label">OpenAI device investment (est.)</div>
+    <div class="stat-note">Jony Ive collaboration. Not yet shipped as of mid-2026.</div>
+  </div>
+</div>
+
+<p>The pattern is consistent: hardware AI devices that try to replace the smartphone fail because the smartphone is $0 in the user's pocket (they already have it) and the AI device needs to be dramatically better at something to justify the price. Being "AI-powered" isn't enough — it needs to do something the phone can't. Right now, no AI hardware device has found that wedge at a price point consumers accept.</p>
+
+<p>The one exception is the Meta Ray-Ban smart glasses — which sold because they're sunglasses first. The AI is the bonus. The form factor was already a purchase the market makes.</p>
+
+<div class="callout green">
+  <div class="callout-label">What this means for Lilith</div>
+  You correctly identified this ceiling early and pivoted. SaaS software that works on hardware the user already owns (their desktop, laptop, phone) removes the hardware risk entirely. The user's device is already paid for. You're selling the intelligence layer on top of it, not the device itself.
+</div>
+
+<h3>The AI SaaS Market in 2026</h3>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value green">$200M+</div>
+    <div class="stat-label">Cursor estimated ARR (2025)</div>
+    <div class="stat-note">AI coding assistant. Grew from $0 to $200M ARR in ~18 months.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value green">$1M+</div>
+    <div class="stat-label">Obsidian estimated ARR</div>
+    <div class="stat-note">Local-first notes app. No VC funding. Proof the model works.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value amber">30%</div>
+    <div class="stat-label">YoY decline in cloud AI assistant prices</div>
+    <div class="stat-note">GPT-4o, Claude, Gemini all dropping. Unit economics improving.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value accent">72%</div>
+    <div class="stat-label">Knowledge workers using AI tools (est. 2025)</div>
+    <div class="stat-note">Up from 37% in 2023. Normalization is happening fast.</div>
+  </div>
+</div>
+
+<p>The market timing is interesting. AI tools are normalizing fast — but the "personal AI that knows everything about you" category is still mostly theoretical. Existing tools (ChatGPT, Claude, Gemini) have memory features that are crude compared to what Lilith's architecture can do with a properly built personal knowledge database. The gap between "AI that can remember our last conversation" and "AI that has three years of your financial history and knows your contact graph" is significant.</p>
+
+<h3>The Data Center and Cloud Inference Landscape</h3>
+
+<div class="industry-block">
+  <div class="industry-block-header">Industry context — where cloud inference is going</div>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">Global AI data center investment is expected to exceed $200 billion annually by 2028, according to multiple industry forecasts (Goldman Sachs, McKinsey, IDC variants). The primary driver: inference demand, not training. As models become commodity (open weights, freely available), the competitive advantage shifts to inference cost and speed. This is directionally good for BYOK software — the cloud APIs are getting cheaper and faster over time, not more expensive.</p>
+  <p style="font-size: 0.88rem; margin: 0 0 8px;">Anthropic's stated focus on long-context models (100K+ token windows) and caching (which Lilith already uses via CACHE_BREAK) means the cost of the conversational path continues to drop. The Anthropic prompt cache, already wired into Lilith's cloud router, gives ~50% cost reduction on the stable prefix. As the stable prefix gets larger (with personal truths and identity documents), the savings scale.</p>
+  <p style="font-size: 0.88rem; margin: 0;">The local inference picture (Ollama, llama.cpp, MLX on Apple Silicon) is also improving fast — but for the voice-first use case, the latency of local 7B–12B models over 4GB context is still too high for conversational mode. BYOK cloud with caching wins until local hardware catches up to the two-mode contract's 3-second budget.</p>
+</div>
+
+<h3>Cross-Platform Desktop: Where the Market Is</h3>
+
+<p>The desktop software market is smaller than mobile but dramatically more valuable per user. Developers, knowledge workers, creative professionals — the users most likely to want a personal AI assistant — predominantly work at desks, on computers, for long stretches. They pay for software. The average software spend per knowledge worker is orders of magnitude higher than consumer mobile.</p>
+
+<table>
+  <thead>
+    <tr><th>Platform</th><th>Desktop users (est.)</th><th>Payment behavior</th><th>Lilith fit</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>macOS</td><td>~150M active</td><td>Highest willingness to pay for quality software</td><td><span class="badge badge-green">Ideal early adopter base</span></td></tr>
+    <tr><td>Windows</td><td>~1.4B active</td><td>Broad, varied; power users willing to pay</td><td><span class="badge badge-accent">Large market, varied quality expectations</span></td></tr>
+    <tr><td>Linux</td><td>~30–50M (est.)</td><td>Developer-heavy; BYOK is natural</td><td><span class="badge badge-accent">Perfect for BYOK/self-hosted model</span></td></tr>
+  </tbody>
+</table>
+
+<p>Cross-platform from day one is the right call even if macOS is the primary early-adopter platform. Building on Linux (your development environment) and having a macOS version functional at launch signals that the architecture is clean — macOS users are used to premium software and will notice if the port feels like a port.</p>
+
+<!-- ============================================================ -->
+<h2 class="anchor" id="build-order">15. Build Order</h2>
+
+<p>This is the order of operations for v6, derived from everything above. Each item is either a design decision (needs a conversation), an infrastructure task (can be built directly), or a vertical milestone (proves a full slice is working).</p>
+
+<pre>
+PHASE 0 — FOUNDATION (before any features)
+─────────────────────────────────────────────
+  [DESIGN] Frontend framework decision
+  [BUILD]  Python project structure, dependency management, packaging target
+  [BUILD]  SQLCipher database setup (all 4 DBs: contacts, finance, memory, config)
+  [BUILD]  OS keychain-backed secret store (libsecret / Keychain / DPAPI)
+  [BUILD]  Internal WebSocket with session token auth (backend ↔ frontend)
+  [BUILD]  UCL telemetry baseline (EventType taxonomy from v5, reimplemented clean)
+
+PHASE 1 — VOICE PIPELINE (the core loop)
+─────────────────────────────────────────────
+  [BUILD]  STT (Whisper.cpp or equivalent) — audio → text
+  [BUILD]  TTS (Kokoro af_bella) — text → audio
+  [BUILD]  Voice Activity Detection — push-to-talk or automatic
+  [BUILD]  EDICTS + VOICE system prompt loader
+  [BUILD]  Cloud router (BYOK Anthropic) with CACHE_BREAK pattern
+  [DESIGN] Query classifier thresholds (conversational vs artifact)
+  [BUILD]  Two-mode routing split (CONV-1 pattern, reimplemented)
+
+  ★ MILESTONE: Talk to Lilith. Voice in, voice out. Two-mode split working.
+
+PHASE 2 — CONTACTS (first core app)
+─────────────────────────────────────────────
+  [BUILD]  vCard / CSV importer → contacts.db
+  [BUILD]  People search tool (people_search, person_detail)
+  [BUILD]  Contact entity injected into context when name is detected
+  [BUILD]  Contacts UI (frontend)
+
+  ★ MILESTONE: Ask Lilith about a person. She knows who they are.
+
+PHASE 3 — FINANCE (second core app)
+─────────────────────────────────────────────
+  [BUILD]  PDF / CSV bank statement parser (deterministic, not LLM-based)
+  [BUILD]  Transaction storage → finance.db
+  [BUILD]  Auto-categorization (rules-based, not ML — that comes later)
+  [BUILD]  Finance summary tool (finance_summary, spending_trend)
+  [BUILD]  Finance UI (frontend)
+
+  ★ MILESTONE: Import any bank statement. Ask Lilith about spending. She knows.
+
+PHASE 4 — NARRATIVE LAYER (artifact mode UX)
+─────────────────────────────────────────────
+  [DESIGN] Narrative copy for both core tools (D1 from CONV-2)
+  [BUILD]  Acknowledge / bridge / handoff / failure per tool
+  [BUILD]  Bridge timer
+  [BUILD]  Artifact UI panel (frontend)
+
+  ★ MILESTONE: Ask a big question. Lilith acknowledges instantly, delivers later.
+
+PHASE 5 — MEMORY + PERSONAL TRUTHS
+─────────────────────────────────────────────
+  [DESIGN] Personal truths document structure (D1 from PERS-1)
+  [BUILD]  Conversation storage → memory.db
+  [BUILD]  Vector recall (local embeddings)
+  [BUILD]  Personal truths store
+
+  ★ MILESTONE: Second conversation. Lilith remembers the first one.
+
+PHASE 6 — POLISH, SECURITY AUDIT, DISTRIBUTION
+─────────────────────────────────────────────
+  [BUILD]  Cross-platform packaging (macOS .app, Windows .exe, Linux .AppImage)
+  [BUILD]  First-run setup flow (key entry, voice calibration, first import)
+  [BUILD]  Security audit checklist (all encrypt/decrypt paths verified)
+  [BUILD]  Installer / updater
+
+  ★ MILESTONE: Version 6, v1. A complete vertical slice. Ready to show someone.
+</pre>
+
+<div class="callout amber">
+  <div class="callout-label">What's explicitly not in v6 v1</div>
+  Calendar. Discord integration. Task management. Autonomy/scheduling. Budget visualization. Morning brief. Node distribution. Multi-user. Any feature not on the build order above. Not because those ideas are bad. Because the slice must be clean.
+</div>
+
+<hr>
+
+<h3>The Final Note</h3>
+
+<p>You came from a place where your family didn't have bus fare. Where food banks and Section 8 were not charity but logistics. You're building a piece of software that, if it lands right, could get you out of the construction job and into a different kind of hard. That's not a small thing to carry while you're writing design documents and arguing about frontend frameworks.</p>
+
+<p>But the version that gets you there isn't the one you admire most from the inside. It's the one you can actually finish. The vertical slice exists specifically because you now know the difference between the design you want eventually and the first version someone can run on their own computer and pay for. That distinction — between the whole dream and the shippable slice — is the most important design skill in this project, and you've earned it the hard way.</p>
+
+<p>The guiding light is real. The paradigm is right. The path is clear enough to build on. Go make the thing.</p>
+
+<hr>
+
+<p style="color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 32px;">
+  LILITH V6 DESIGN SESSION — June 2026<br>
+  Reference: <code>docs/history/</code> in the Lilith repo for the two-mode architecture session that preceded this.
+</p>
+
+</body>
+</html>
