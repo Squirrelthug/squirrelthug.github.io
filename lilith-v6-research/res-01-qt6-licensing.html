@@ -95,9 +95,9 @@
   <p><strong>CRITICAL BLOCKER:</strong> Yes. Unlike core Qt/PySide6 modules which are dual-licensed under LGPLv3 and Commercial, <strong>Qt Quick 3D is licensed under GPLv3 (and Commercial) only. It is NOT available under LGPLv3.</strong></p>
   <p>If we distribute a closed-source desktop application that imports or links to Qt Quick 3D under the open-source license, the GPLv3's strong copyleft triggers. This would legally obligate us to release the <strong>entire proprietary source code of Lilith v6</strong> under the GPLv3. This directly conflicts with the closed-source business model of Lilith v6.</p>
 
-<div class="decision-pending">
-  <strong>Pending decision — 3D renderer choice not yet made</strong>
-  Qt Quick 3D is technically capable of the orb (see RES-03), but GPLv3-only under open-source licensing. Two paths are under evaluation: (1) Qt Small Business commercial license (~$499–618/yr, resolves this blocker completely), (2) MIT-licensed 3D rendering within a PySide6 <code>QOpenGLWidget</code> (PyOpenGL, ModernGL, or Vispy). The orb specification — glowing sphere, amplitude-synced pulse, smooth positional movement — is achievable on either path. A decision must be made before RES-03 is finalized. This file and RES-03 will be updated once the decision is locked.
+<div class="note">
+  <strong>Decision made — ModernGL (MIT) chosen for the orb</strong>
+  Qt Quick 3D is dropped. The animated orb is implemented using <strong>ModernGL 5.x</strong> (MIT license) embedded in a PySide6 <code>QOpenGLWidget</code>. ModernGL attaches to Qt's existing OpenGL context inside <code>initializeGL()</code>, requiring zero additional windowing setup. The orb is a UV sphere mesh rendered with a custom GLSL Fresnel glow shader; amplitude from Kokoro TTS drives a <code>u_amplitude</code> uniform each frame. Full implementation details in <strong>RES-03 (ModernGL — Animated Orb)</strong>. No commercial Qt license is required. This blocker is fully resolved.
 </div>
 
   <h2>Q6. Qt Commercial License — Cost and Scope</h2>
@@ -138,15 +138,21 @@
     <li><strong>Plex Media Player:</strong> Closed-source desktop client that uses LGPL Qt libraries and interacts with the paid Plex Pass cloud subscription.</li>
   </ul>
 
-  <div class="verdict block">
-    <strong>Recommendation: BLOCKER</strong>
-    While using PySide6 (core modules) is fully compliant under LGPLv3 via PyInstaller <code>--onedir</code> distribution, the inclusion of <strong>Qt Quick 3D is a hard blocker</strong>. Because Qt Quick 3D is GPLv3-only under the open-source license, distributing Lilith v6 with Qt Quick 3D forces the entire application to be open-sourced under GPLv3.
-    <br><br>
-    <strong>Resolution Path:</strong>
-    <ol>
-      <li><strong>Purchase a commercial Qt license</strong> (approx. $499-$618/year under the Small Business tier) to permit closed-source distribution with Qt Quick 3D.</li>
-      <li><strong>Drop Qt Quick 3D</strong> and implement the animated orb using dynamic 2D canvas shaders, a pre-rendered video/Lottie animation, or an MIT-licensed 3D library (e.g., PyOpenGL/ModernGL) embedded in a standard QWidget.</li>
-    </ol>
+  <div class="verdict">
+    <strong>Verdict: RESOLVED — PySide6 LGPL compliance is clear, no commercial license needed</strong>
+    Qt Quick 3D has been dropped. ModernGL (MIT) is used for the orb instead. PySide6 core modules (LGPL v3) are fully compatible with closed-source commercial distribution when distributed via PyInstaller <code>--onedir</code>, with attribution notice in the About dialog and a link to Qt source. No Qt commercial license is required. The SaaS sync model does not trigger additional Qt licensing. All distribution requirements are straightforward packaging steps — zero codebase impact.
+  </div>
+
+  <div class="action-plan">
+    <span class="ap-head">Action Plan — PySide6 LGPL Compliance</span>
+    <ul>
+      <li><strong>Distribution:</strong> PyInstaller <code>--onedir</code> on all platforms — never <code>--onefile</code>. Enforced in CI config.</li>
+      <li><strong>About dialog:</strong> Full LGPL v3 attribution notice with clickable Qt source link (<code>https://code.qt.io/cgit/pyside/pyside-setup.git/</code>) and replacement instructions.</li>
+      <li><strong>License texts:</strong> Include GPL v3 and LGPL v3 text files in the <code>licenses/</code> folder of every distribution.</li>
+      <li><strong>3D renderer:</strong> Qt Quick 3D dropped — ModernGL (MIT) used instead via <code>QOpenGLWidget</code>. No commercial Qt license needed.</li>
+      <li><strong>SaaS sync:</strong> Server-side backend is not distributed to end users — no LGPL/GPL obligations apply to the sync backend.</li>
+      <li><strong>LGPL compliance cost:</strong> Zero runtime or codebase impact. All obligations are packaging and attribution only.</li>
+    </ul>
   </div>
 
   <h2>Sources</h2>

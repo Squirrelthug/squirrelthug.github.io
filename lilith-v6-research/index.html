@@ -50,49 +50,46 @@
 <p class="doc-subtitle">Targeted research on specific technologies in the chosen stack. Research Sprint — Round 01.</p>
 
 <div class="status-bar">
-  <div class="stat"><div class="stat-num">10</div><div class="stat-label">Complete</div></div>
+  <div class="stat"><div class="stat-num">15</div><div class="stat-label">Complete</div></div>
   <div class="stat-divider"></div>
   <div class="stat"><div class="stat-num">0</div><div class="stat-label">In Progress</div></div>
   <div class="stat-divider"></div>
-  <div class="stat"><div class="stat-num red">5</div><div class="stat-label">Blockers Found</div></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-label">Blockers Found</div></div>
   <div class="stat-divider"></div>
   <div class="stat"><div class="stat-num">15</div><div class="stat-label">Total Reports</div></div>
 </div>
 
-<div class="blocker-note">
-  <strong>5 reports flagged blockers.</strong> RES-01/03/15: Qt Quick 3D is GPLv3-only under open-source license — incompatible with closed-source distribution without a commercial Qt license. RES-02: <code>sqlcipher3</code> must be installed as <code>sqlcipher3-wheels</code> on Windows. RES-08: Google OAuth refresh tokens require publishing the app to Production (not Testing mode).
-</div>
 
 <h2>Agent 1 — Reports RES-01 to RES-07</h2>
 
-<div class="report-row blocker">
+<div class="report-row done">
   <div class="r-id">RES-01</div>
   <div class="r-info">
-    <div class="r-title"><span class="agent-badge a1">A1</span> Qt6 / PySide6 — Licensing for Commercial SaaS <span class="priority-high">⚠ BLOCKER</span></div>
-    <div class="r-topic">LGPL compliance · commercial license requirements · distribution terms · Qt Quick 3D GPL</div>
+    <div class="r-title"><span class="agent-badge a1">A1</span> Qt6 / PySide6 — Licensing for Commercial SaaS</div>
+    <div class="r-topic">LGPL --onedir compliance · no commercial license needed · Qt Quick 3D dropped (ModernGL MIT)</div>
   </div>
-  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
   <a href="res-01-qt6-licensing.html" class="r-link">View report →</a>
 </div>
 
-<div class="report-row blocker">
+<div class="report-row done">
   <div class="r-id">RES-02</div>
   <div class="r-info">
-    <div class="r-title"><span class="agent-badge a1">A1</span> Qt6 / PySide6 — Cross-Platform Build &amp; Packaging <span class="priority-high">⚠ BLOCKER</span></div>
-    <div class="r-topic">AppImage · .dmg · .exe · PyInstaller/cx_Freeze/Briefcase · sqlcipher3-wheels required on Windows</div>
+    <div class="r-title"><span class="agent-badge a1">A1</span> Qt6 / PySide6 — Cross-Platform Build &amp; Packaging</div>
+    <div class="r-topic">AppImage · .dmg · .exe · PyInstaller --onedir · sqlcipher3-wheels resolves Windows compile issue</div>
   </div>
-  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
   <a href="res-02-qt6-packaging.html" class="r-link">View report →</a>
 </div>
 
-<div class="report-row blocker">
+<div class="report-row done">
   <div class="r-id">RES-03</div>
   <div class="r-info">
-    <div class="r-title"><span class="agent-badge a1">A1</span> Qt Quick 3D — Orb Implementation Specifics <span class="priority-high">⚠ BLOCKER</span></div>
-    <div class="r-topic">PrincipledMaterial sphere · real-time animation · particle effects · GPLv3 license issue</div>
+    <div class="r-title"><span class="agent-badge a1">A1</span> ModernGL — Animated Orb (MIT, QOpenGLWidget)</div>
+    <div class="r-topic">ModernGL 5.x · PySide6 QOpenGLWidget · GLSL Fresnel shader · UV sphere · Kokoro amplitude sync</div>
   </div>
-  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
-  <a href="res-03-qt-quick-3d-orb.html" class="r-link">View report →</a>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
+  <a href="res-03-moderngl-orb.html" class="r-link">View report →</a>
 </div>
 
 <div class="report-row done">
@@ -137,13 +134,13 @@
 
 <h2>Agent 2 — Reports RES-08 to RES-15</h2>
 
-<div class="report-row blocker">
+<div class="report-row done">
   <div class="r-id">RES-08</div>
   <div class="r-info">
-    <div class="r-title"><span class="agent-badge a2">A2</span> Google OAuth + APIs — Scopes, Limits, Installed App Flow <span class="priority-high">⚠ BLOCKER</span></div>
-    <div class="r-topic">PKCE loopback flow · incremental sync tokens · refresh token requires Production publish</div>
+    <div class="r-title"><span class="agent-badge a2">A2</span> Google OAuth + APIs — Scopes, Limits, Installed App Flow</div>
+    <div class="r-topic">PKCE loopback · dual path: Squirrelthug-managed app + BYOK OAuth for power users · both persist refresh tokens</div>
   </div>
-  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
   <a href="res-08-google-oauth.html" class="r-link">View report →</a>
 </div>
 
@@ -207,13 +204,13 @@
   <a href="res-14-sounddevice.html" class="r-link">View report →</a>
 </div>
 
-<div class="report-row blocker">
+<div class="report-row done">
   <div class="r-id">RES-15</div>
   <div class="r-info">
-    <div class="r-title"><span class="agent-badge a2">A2</span> Dependency License Audit — Full Stack <span class="priority-high">⚠ BLOCKER</span></div>
-    <div class="r-topic">Overall BLOCKED pending Qt Quick 3D resolution · 4 caution items · most deps permissive</div>
+    <div class="r-title"><span class="agent-badge a2">A2</span> Dependency License Audit — Full Stack</div>
+    <div class="r-topic">All clear · ModernGL MIT replaces Qt Quick 3D · MIT/Apache/BSD/LGPL stack · 3 attribution tasks pre-ship</div>
   </div>
-  <div class="r-status"><span class="pill p-blocker">Blocker</span></div>
+  <div class="r-status"><span class="pill p-done">Complete</span></div>
   <a href="res-15-license-audit.html" class="r-link">View report →</a>
 </div>
 

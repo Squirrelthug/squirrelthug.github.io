@@ -18,7 +18,8 @@
 <h2>Core Infrastructure</h2>
 <table><thead><tr><th>Dependency</th><th>License</th><th>Commercial OK?</th><th>Attribution Required?</th><th>Source Required?</th><th>Notes</th></tr></thead><tbody>
 <tr><td>PySide6 6.11.1</td><td>LGPL-3.0-only OR GPL/commercial</td><td class="warncell">Yes with conditions</td><td>Yes, LGPL/GPL texts and Qt notice</td><td>No proprietary source if dynamically replaceable</td><td>Use onedir/dynamic distribution; allow library replacement.</td></tr>
-<tr><td>Qt Quick 3D</td><td>GPL-3.0/commercial for some distributions per RES-01</td><td class="bad">Problematic</td><td>GPL notice if OSS</td><td>Yes if GPL path</td><td>RES-01 flagged a blocker: closed-source app likely needs commercial Qt license or no Qt Quick 3D.</td></tr>
+<tr><td>Qt Quick 3D</td><td>GPL-3.0 / commercial (not used)</td><td class="ok">Resolved</td><td>N/A — not in stack</td><td>N/A — not in stack</td><td>Dropped. ModernGL 5.x (MIT) used instead — see RES-03. No GPL exposure.</td></tr>
+<tr><td>ModernGL 5.x</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Replaces Qt Quick 3D. Embedded in PySide6 QOpenGLWidget. Fully permissive.</td></tr>
 <tr><td>sqlcipher3 0.6.2</td><td>Unclear package metadata</td><td class="warncell">Needs verification</td><td>Match bundled license</td><td>No if permissive wrapper</td><td>Binding metadata is weak; audit exact source/wheel used.</td></tr>
 <tr><td>SQLCipher</td><td>BSD-style/commercial options</td><td class="warncell">Yes with notice</td><td>Yes</td><td>No</td><td>Confirm whether using Zetetic community source or commercial binary.</td></tr>
 <tr><td>python-keyring 25.7.0</td><td>MIT</td><td class="ok">Yes</td><td>MIT notice</td><td>No</td><td>Permissive.</td></tr>
@@ -53,7 +54,7 @@
 </tbody></table>
 
 <h2>Blockers</h2>
-<ul><li><strong>Qt Quick 3D:</strong> RES-01 indicates GPL/commercial licensing creates a blocker for closed-source distribution unless Lilith buys a commercial Qt license or avoids Qt Quick 3D.</li></ul>
+<p style="color:#10b981;font-weight:600;">No blockers. Qt Quick 3D has been dropped and replaced with ModernGL (MIT). All remaining dependencies are permissive or LGPL-compliant.</p>
 
 <h2>Caution Items</h2>
 <ul>
@@ -63,7 +64,7 @@
 <li><strong>PyTorch CUDA wheels:</strong> if shipped, include NVIDIA/CUDA third-party notices and check redistribution terms for bundled CUDA libraries.</li>
 </ul>
 
-<div class="verdict block"><strong>Overall verdict: blocked until Qt Quick 3D licensing is resolved.</strong> Most dependencies are permissive and compatible with closed-source commercial distribution. The decisive issue is Qt Quick 3D; the practical path is a commercial Qt license or replacing Qt Quick 3D with a permissively licensed rendering approach.</div>
+<div class="verdict"><strong>Overall verdict: CLEAR — full stack is permissive-compatible with closed-source commercial distribution.</strong> Qt Quick 3D is dropped; ModernGL (MIT) is used for the orb. All other dependencies are MIT, Apache 2.0, BSD-3-Clause, or PySide6 LGPL (compliant via --onedir distribution). Remaining caution items (Kokoro weights verification, sqlcipher3 wheel audit, PyTorch CUDA notices) are attribution tasks, not blockers. No dependency prevents closed-source commercial distribution.</div>
 
 <h2>Sources</h2><ul class="source-list">
 <li><a href="https://pypi.org/project/PySide6/">PySide6 PyPI</a> · <a href="https://doc.qt.io/qt-6/licensing.html">Qt licensing</a></li>
@@ -75,8 +76,21 @@
 <li><a href="https://pypi.org/project/anthropic/">anthropic PyPI</a> · <a href="https://pypi.org/project/openai/">openai PyPI</a> · <a href="https://pypi.org/project/google-auth-oauthlib/">google-auth-oauthlib PyPI</a> · <a href="https://pypi.org/project/google-api-python-client/">google-api-python-client PyPI</a></li>
 <li><a href="https://apscheduler.readthedocs.io/en/3.x/">APScheduler docs</a> · <a href="https://www.sqlite.org/copyright.html">SQLite copyright</a></li>
 </ul>
-<div class="decision-pending">
-<strong>Status — audit complete, overall verdict pending Qt Quick 3D decision</strong>
-This audit is complete and accurate. The overall BLOCKED verdict reflects the Qt Quick 3D GPLv3 issue (see RES-01), not any problem with the rest of the stack. All other dependencies are clear for commercial closed-source distribution: MIT, Apache 2.0, BSD-3-Clause, and PySide6/LGPLv3 with <code>--onedir</code> packaging compliance. Once the Qt Quick 3D question is resolved — commercial license, MIT 3D alternative, or 2D approach — this audit will be updated to reflect the final dependency list and the overall verdict will move to CLEAR.
+<div class="note">
+<strong>Status — audit complete, verdict CLEAR as of 2026-06-28</strong>
+Qt Quick 3D is removed from the stack. ModernGL (MIT) replaces it. All remaining dependencies are permissive. Attribution tasks (Kokoro weight license confirmation, sqlcipher3 wheel source audit, PyTorch CUDA component notices) should be completed before first public release — these are pre-ship checklist items, not distribution blockers.
+</div>
+
+<div class="action-plan">
+<span class="ap-head">Action Plan — License Compliance</span>
+<ul>
+<li><strong>PySide6 (LGPL v3):</strong> PyInstaller <code>--onedir</code> on all platforms. Include GPL v3 + LGPL v3 license texts in <code>licenses/</code> folder. About dialog with attribution and Qt source link.</li>
+<li><strong>ModernGL (MIT):</strong> Include MIT license text in <code>licenses/</code>. Replaces Qt Quick 3D — no GPL exposure.</li>
+<li><strong>Kokoro weights:</strong> Verify exact weight artifact license on the Kokoro model card before bundling in installers. If Apache 2.0, include NOTICE file and attribution.</li>
+<li><strong>sqlcipher3-wheels:</strong> Audit the exact wheel source — confirm BSD/commercial terms for the SQLCipher C library and the Python binding. Include attribution.</li>
+<li><strong>PyTorch CUDA wheels:</strong> If CUDA wheels are bundled in the installer (not dynamic download), include NVIDIA/CUDA third-party notices per PyTorch redistribution guidelines.</li>
+<li><strong>All MIT/Apache/BSD deps:</strong> Include license texts in <code>licenses/</code> folder. Automate this with <code>pip-licenses</code> or similar in the CI build pipeline.</li>
+<li><strong>Pre-ship checklist:</strong> (1) Kokoro weight license confirmed, (2) sqlcipher3 wheel audit complete, (3) PyTorch CUDA notices included (if applicable), (4) <code>licenses/</code> folder populated by CI, (5) About dialog QA-tested on all 3 platforms.</li>
+</ul>
 </div>
 </body></html>

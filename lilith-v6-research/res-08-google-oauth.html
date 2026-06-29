@@ -17,7 +17,7 @@
 <h2>Q1. Correct OAuth 2.0 Flow for Locally Installed Desktop Apps</h2>
 <p>Use Google's installed-app OAuth 2.0 authorization code flow with PKCE and a loopback redirect. The deprecated out-of-band redirect <code>urn:ietf:wg:oauth:2.0:oob</code> must not be used. Google documents that desktop apps open the system browser, start a temporary HTTP listener on <code>127.0.0.1</code> or <code>::1</code> using a random available port, and receive the authorization code on that loopback URL.</p>
 <p>The user should create an OAuth client of type <strong>Desktop app</strong>, not Web application. Installed apps cannot keep a client secret confidential; Google treats the downloaded secret as an app identifier, not a server-side secret. A local temporary port is normal for this flow; Lilith does not expose a persistent server.</p>
-<div class="verdict block"><strong>Publishing status caveat:</strong> The app should not remain in external <code>Testing</code> mode indefinitely if durable refresh tokens are required. Google documents refresh-token expiration for external apps in Testing; the user's OAuth consent app should be moved to Production or be an internal Workspace app.</div>
+<div class="note"><strong>Publishing status — move to Production for durable refresh tokens</strong> The app should not remain in external <code>Testing</code> mode indefinitely. Google documents refresh-token expiration for external apps in Testing; the Squirrelthug-managed OAuth app must be moved to Production before GA. For BYOK users, the same applies to their own GCP project's consent screen.</div>
 
 <h2>Q2. Required OAuth Scopes</h2>
 <table><thead><tr><th>API</th><th>Purpose</th><th>Scope String</th></tr></thead><tbody>
@@ -111,7 +111,21 @@ def load_credentials(account: str) -&gt; Credentials:
 
 <div class="note"><strong>Architectural note — BYOK OAuth should be one option, not the only path</strong> The current design requires users to create their own Google Cloud project and OAuth credentials — high-friction for non-technical users. Both paths should be available: (1) Squirrelthug-managed OAuth app — user clicks "Connect Google" and authorizes via standard Google Sign-In; no GCP project needed, but requires Squirrelthug's app to pass Google verification and remain active. (2) BYOK OAuth — user creates their own GCP project and credentials, full independence, suitable for power users and privacy-focused users. This principle extends to LLM API key onboarding as well — the vertical slice should minimize friction for non-technical users while keeping BYOK as an option.</div>
 
-<div class="verdict warn"><strong>Final recommendation:</strong> Viable, with UX risk. Use Desktop app OAuth + loopback redirect + OS keychain refresh-token storage. The main caution is BYOK setup complexity and the need to move the user's OAuth consent app out of external Testing for durable refresh tokens.</div>
+<div class="verdict"><strong>Final recommendation: CLEAR — dual OAuth path resolves UX friction.</strong> Lilith ships two paths: (1) Squirrelthug-managed OAuth app — one-click "Connect Google" for non-technical users; requires Squirrelthug to pass Google OAuth verification and move the app to Production before GA. (2) BYOK OAuth — user creates their own GCP project, imports <code>client_secret.json</code>, full independence for power users. Both paths use the loopback PKCE flow and store the refresh token in the OS keychain via python-keyring. No blocker remains.</div>
+
+<div class="action-plan">
+<span class="ap-head">Action Plan — Google OAuth + APIs</span>
+<ul>
+<li><strong>Auth module:</strong> <code>lilith/integrations/google.py</code> — handles both BYOK and managed-app paths. Detects which path is configured and uses the correct client credentials.</li>
+<li><strong>BYOK path:</strong> Wizard UI imports <code>client_secret.json</code>, calls <code>InstalledAppFlow.run_local_server(host="127.0.0.1", port=0)</code>, stores serialized credentials in OS keychain under <code>KEYCHAIN_SERVICE / "google_credentials"</code>.</li>
+<li><strong>Managed-app path:</strong> Lilith ships a bundled client ID/secret (non-secret for desktop apps), user clicks Connect, same PKCE flow. Squirrelthug moves consent screen to Production before GA.</li>
+<li><strong>Token refresh:</strong> On load, check expiry; if expired and refresh token present, call <code>creds.refresh(Request())</code> and re-store in keychain.</li>
+<li><strong>Incremental sync:</strong> Store <code>nextSyncToken</code> (Calendar) and People sync token in the local Calendar/Contacts SQLCipher DB. Handle 410 Gone by clearing cache and re-syncing.</li>
+<li><strong>Rate limits:</strong> Exponential backoff with jitter on 403/429. Persist last successful sync token on every page to survive partial failures.</li>
+<li><strong>Scopes — v6 v1:</strong> <code>calendar.readonly</code> and <code>contacts.readonly</code> only — read-only external APIs, no writes in v6 v1.</li>
+<li><strong>Error recovery:</strong> On <code>RefreshError</code>: clear Google token from keychain, disable sync, surface re-auth action in UI — do not delete local synced data.</li>
+</ul>
+</div>
 
 <h2>Sources</h2><ul class="source-list">
 <li><a href="https://developers.google.com/identity/protocols/oauth2/native-app">Google OAuth 2.0 for iOS &amp; Desktop Apps</a></li>
