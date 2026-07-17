@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §28 Screen Architecture & Navigation</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§28 · Screen Architecture &amp; Navigation — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-ui">Frontend Layer</div>
+
+<details id="s28" open>
+  <summary><span class="s-num">28</span><span class="s-title">Screen Architecture &amp; Navigation</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Five named screens in a QStackedWidget. The Orb floats above the stack and persists across all screens. Navigation is always initiated via UICommandBus, never directly between screens.</strong></p>
+
+    <pre>MainWindow layout:
+┌─────────────────────────────────────────┐
+│  OrbWidget (QOpenGLWidget, floating)    │
+├────────┬────────────────────────────────┤
+│ Side-  │  QStackedWidget                │
+│  bar   │  ┌──────────────────────────┐  │
+│  nav   │  │ conversation (default)   │  │
+│        │  │ contacts                 │  │
+│        │  │ finance                  │  │
+│        │  │ settings                 │  │
+│        │  │ onboarding (first-run)   │  │
+│        │  └──────────────────────────┘  │
+└────────┴────────────────────────────────┘</pre>
+
+    <ul>
+      <li><strong>Screen names (string identifiers):</strong> <code>"conversation"</code> (default after onboarding), <code>"contacts"</code>, <code>"finance"</code>, <code>"settings"</code>, <code>"onboarding"</code> (only during first-run flow).</li>
+      <li><strong>Navigation:</strong> <code>UICommandBus.show_screen(name: str)</code> calls <code>QStackedWidget.setCurrentWidget()</code>. Sidebar nav buttons call UICommandBus — they do not call the stack directly.</li>
+      <li><strong>Orb behavior by screen:</strong>
+        <ul>
+          <li><code>conversation</code> — orb center-top, state driven by voice pipeline</li>
+          <li><code>contacts</code> / <code>finance</code> — orb contracted (<code>doing</code> state), positioned near the active UI region</li>
+          <li><code>settings</code> — orb idle, corner position</li>
+          <li><code>onboarding</code> — orb center, large, <code>speaking</code> state during Lilith's intro</li>
+        </ul>
+      </li>
+      <li><strong>Screen implementations:</strong> each screen is a <code>QWidget</code> subclass in <code>lilith/ui/screens/</code>. Screens do not communicate with each other — all inter-screen data flows through UICommandBus or the backend.</li>
+      <li><strong>Sidebar:</strong> fixed-width icon + label nav. Active screen item highlighted. Hidden during onboarding flow.</li>
+      <li><strong>UCL events:</strong> <code>user.screen.navigate</code> (from_screen, to_screen) on every navigation</li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s28">§28</a> · Touches: §22 Conversation App, §26 Frontend, §27 Orb</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s27.html">← §27 The Orb</a><a href="../index.html">▲ Overview</a><a href="s29.html">§29 Vault Architecture &amp; Data Ownership →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §28 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

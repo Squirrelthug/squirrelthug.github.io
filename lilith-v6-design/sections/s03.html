@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §03 Encryption at Rest — SQLCipher</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§03 · Encryption at Rest — SQLCipher — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-found">Foundation Layer</div>
+
+<details id="s3" open>
+  <summary><span class="s-num">03</span><span class="s-title">Encryption at Rest — SQLCipher</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>All six databases are encrypted with AES-256 using the sqlcipher3-wheels package, bypass connection latency via raw hex keys derived by Argon2id, and manage concurrent thread access using WAL mode.</strong></p>
+
+    <ul>
+      <li><strong>Python Package:</strong> <code>sqlcipher3-wheels</code> (AES-256 database engine). Pre-compiled binaries are utilized to ensure cross-platform installation success without local build dependencies, with fallback build instructions logged.</li>
+      <li><strong>Database Inventory:</strong>
+        <ul>
+          <li><code>ucl_db</code>: Telemetry and Universal Communication Log event rows.</li>
+          <li><code>calendar_db</code>: Google Calendar read-caches and local calendar events.</li>
+          <li><code>contacts_db</code>: Google Contacts read-caches and local people roster.</li>
+          <li><code>finance_db</code>: Accounts, transactions, and category YAML paths.</li>
+          <li><code>memory_db</code>: Memory graphs, vector indexes, and personal truths.</li>
+          <li><code>conversation_db</code>: Chat sessions, message turns, and token metrics.</li>
+        </ul>
+      </li>
+      <li><strong>Key Derivation Pipeline:</strong>
+        <pre>Master Passphrase (User Input/Keychain) + Salt (salts.dat Index)
+  &darr;
+Argon2id (time_cost=3, memory_cost=65536 KiB, parallelism=2)
+  &darr;
+32-byte Binary Output &rarr; SessionKeyManager-owned Hex String (64 chars)
+  &darr;
+PRAGMA key = "x'&lt;64 hex chars&gt;'" (Bypasses SQLCipher internal PBKDF2)</pre>
+      </li>
+      <li><strong>Key Manager Object:</strong> Database keys are derived once per unlocked session and held by a single <code>SessionKeyManager</code> object. Callers request database-specific keying through that object instead of passing loose hex strings between functions. <code>SessionKeyManager.__repr__</code> and <code>__str__</code> must return a constant redacted value such as <code>&lt;SessionKeyManager redacted&gt;</code>, never key bytes, hex strings, salts, passphrases, or PRAGMA statement text.</li>
+      <li><strong>Connection PRAGMA Sequence:</strong> Every connection must be keyed immediately after opening through the key manager wrapper:
+        <pre>
+conn = sqlcipher3.connect(str(db_path))
+key_manager.apply_sqlcipher_key(conn, db_name)
+conn.execute("PRAGMA journal_mode = WAL;")
+conn.execute("PRAGMA synchronous = NORMAL;")
+conn.execute("PRAGMA busy_timeout = 5000;")
+conn.execute("PRAGMA foreign_keys = ON;")
+conn.execute("SELECT count(*) FROM sqlite_master;") # Lazy eval verify</pre>
+      </li>
+      <li><strong>Keying Exception Boundary:</strong> <code>apply_sqlcipher_key()</code> constructs and executes the <code>PRAGMA key</code> statement in a narrow internal scope. If any exception occurs while applying or verifying the key, it raises a generic <code>DatabaseKeyingFailed</code> error with database identity and recovery category only. The raised exception message, <code>__cause__</code>, telemetry payload, and user-facing recovery text must not include key material, the PRAGMA statement, local variables, raw driver exception text, or tracebacks.</li>
+      <li><strong>Connection-Per-Thread:</strong> Separate database connection objects are opened per thread/background job and closed on completion. Connections are never shared across threads to avoid transaction collision.</li>
+      <li><strong>WAL Mode:</strong> Write-Ahead Logging is enabled for all databases to allow concurrent readers without blocking writes. WAL files are encrypted using the same key as the main database.</li>
+      <li><strong>Schema Migration:</strong> Numbered SQL migration scripts (e.g. <code>0001_init.sql</code>) are run sequentially on startup by a custom migration manager. Migrations are idempotent and run inside a transaction.</li>
+      <li><strong>Backup Strategy:</strong> <code>VACUUM INTO</code> is called for online same-key backups. Different-key exports use the <code>sqlcipher_export()</code> API.</li>
+      <li><strong>Key Rotation Mechanics (SEC-009):</strong> The passphrase-change flow (§02) re-keys by <em>export and swap</em>, never in place. For each database: the live file is opened under the old key, a staged file under <code>APP_INTERNAL_DIR/databases/rotation-&lt;timestamp&gt;/</code> is <code>ATTACH</code>ed with the new key, content is copied via <code>sqlcipher_export()</code> (the same API already used for different-key backup exports — no new dependencies), and the staged copy passes <code>PRAGMA integrity_check</code> before it counts as staged. <code>PRAGMA rekey</code> is deliberately not used: it re-encrypts pages in place, so a crash mid-rekey can leave a file readable under neither key with no clean rollback, whereas export-and-swap leaves the original untouched until the §06 commit point. Salts are always regenerated on rotation (a salt shares its key's lifetime, and fresh salts guarantee fresh keys even for related passphrases); the staged 192-byte <code>salts.dat</code> is swapped in the same committed batch as the staged databases, never separately — the salts file and the database files must never be observable in a mixed old/new state. All connections are closed before the swap, and after it a new <code>SessionKeyManager</code> is constructed for the new keys; key managers are never mutated in place. Failures during staging follow the keying exception boundary above: no key material, salts, or PRAGMA text in any exception, log, or journal entry.</li>
+      <li><strong>Relock Support:</strong> <code>SessionKeyManager</code> exposes a <code>relock()</code> operation that closes registered connections and drops all derived key material from process memory (best-effort clearing; Python cannot guarantee memory scrubbing, consistent with §02's threat model). After <code>relock()</code>, any keying request raises <code>DatabaseKeyingFailed</code> until a new unlock derives keys again.</li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s3">§03</a> · Touches: §02 Security, §16 UCL, §18 Memory, §20–22 Apps</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §04 Cross-Platform, §16 UCL (Key Hygiene)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s02.html">← §02 Security &amp; Credential Management</a><a href="../index.html">▲ Overview</a><a href="s04.html">§04 Cross-Platform Foundations →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §03 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

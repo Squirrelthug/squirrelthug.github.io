@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §24 Narrative Layer</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§24 · Narrative Layer — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-pers">Personality &amp; Response Layer</div>
+
+<details id="s24" open>
+  <summary><span class="s-num">24</span><span class="s-title">Narrative Layer</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Every artifact-mode tool call fires three spoken phases in sequence: acknowledge → bridge (repeating) → handoff.</strong></p>
+
+    <pre>Artifact path timing:
+query → classify (artifact) → acknowledge spoken (&lt;200ms from classify)
+                             → background task starts
+                             → bridge spoken every 8s while running
+                             → task completes → handoff spoken
+                             → result displayed in UI</pre>
+
+    <ul>
+      <li><strong>Acknowledge:</strong> fires within &lt;200ms of artifact classification. Spoken before any result exists. Defined in <code>narratives.acknowledge</code> YAML key per tool.</li>
+      <li><strong>Bridge:</strong> spoken at 8s fixed interval (UCL-adaptive in future). List of options in <code>narratives.bridge</code> — one chosen randomly per interval.</li>
+      <li><strong>Handoff:</strong> spoken when task completes. Template fill from tool result in v6 v1 — <code>narratives.handoff</code> contains a string with <code>{result}</code> placeholder. PERS-2 narration is design-only, feature-flagged off (<code>FEATURE_PERS2 = False</code>).</li>
+      <li><strong>Failure:</strong> spoken if task errors. Defined in <code>narratives.failure</code> YAML key.</li>
+      <li><strong>Tool YAML example:</strong>
+        <pre>name: finance_summary
+mode: artifact_only
+narratives:
+  acknowledge: "Let me check your finances."
+  bridge:
+    - "Still pulling that together…"
+    - "Almost ready…"
+  handoff: "Here's your summary: {result}"
+  failure: "I couldn't retrieve that right now."</pre>
+      </li>
+      <li><strong>UCL events:</strong> <code>narrative.ack</code> (tool_name, latency_ms), <code>narrative.bridge</code> (tool_name, bridge_count), <code>narrative.handoff</code> (tool_name, total_duration_ms)</li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s24">§24</a> · Touches: §13 Router, §15 Tools, §11 TTS</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s23.html">← §23 Personality System &amp; System Prompt</a><a href="../index.html">▲ Overview</a><a href="s25.html">§25 Onboarding Flow →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §24 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §04 Cross-Platform Foundations</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§04 · Cross-Platform Foundations — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-found">Foundation Layer</div>
+
+<details id="s4" open>
+  <summary><span class="s-num">04</span><span class="s-title">Cross-Platform Foundations</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>A single-repository layout with a unified application path model (APP_INTERNAL_DIR) that stores all internal SQLCipher databases, keys, configuration, logs, and assets securely under OS-standard app data directories, while user files are read directly from their original filesystem paths.</strong></p>
+
+    <ul>
+      <li><strong>Single-Repo Rationale:</strong> Keeps logic, frontend, and build configuration aligned, ensuring dependency changes or platform adaptations are version-controlled atomically without Git submodule overhead.</li>
+      <li><strong>platform/paths.py Responsibility:</strong> Single source of truth for all paths. Defines <code>APP_INTERNAL_DIR</code> (hidden, OS-standard app data root) and all derived child paths. Uses strictly <code>pathlib.Path</code>. User vaults/documents are referenced dynamically via absolute local paths stored in the databases.</li>
+      <li><strong>APP_INTERNAL_DIR (hidden — OS-standard, all application storage):</strong>
+        <ul>
+          <li><strong>Linux:</strong> <code>pathlib.Path.home() / ".local/share/lilith"</code></li>
+          <li><strong>macOS:</strong> <code>pathlib.Path.home() / "Library/Application Support/Lilith"</code></li>
+          <li><strong>Windows:</strong> <code>pathlib.Path(os.environ["LOCALAPPDATA"]) / "Lilith"</code></li>
+        </ul>
+        Contains: <code>config.json</code>, <code>lilith.lock</code>, <code>databases/</code> (the 6 encrypted SQLCipher databases + <code>salts.dat</code>), <code>logs/</code>, <code>models/</code>, <code>cache/</code>, <code>backups/</code>, and <code>skills/</code> (internal pre-approved skills). Never shown to the user.
+      </li>
+      <li><strong>File Access Model:</strong> User documents and Obsidian vaults are never staged or copied to a local staging folder. Lilith operates purely as a custodian, reading source files directly from where they live based on database pointers. The <code>files/</code> staging folder is retired.</li>
+      <li><strong>EXTERNAL_BACKUP_DIR (visible — user-chosen, exported/mirrored backup sets only, SEC-019):</strong> The one user-visible path Lilith writes to, in deliberate contrast to <code>APP_INTERNAL_DIR</code>: it exists precisely so that backup sets survive deletion of the app directory (uninstall, disk cleanup, disk failure — §06 Residency &amp; Failure Domain). Defined in <code>platform/paths.py</code> as the default destination for §29 manual exports and the optional §06 automated mirror; the user may change it in Settings → Backups (stored in <code>config.json</code> as <code>backup.external_destination</code>, an absolute path that must resolve outside <code>APP_INTERNAL_DIR</code> — a destination inside <code>APP_INTERNAL_DIR</code> is rejected at entry, since it would recreate the shared failure domain this path exists to break).
+        <ul>
+          <li><strong>Linux:</strong> <code>pathlib.Path.home() / "Documents/Lilith Backups"</code></li>
+          <li><strong>macOS:</strong> <code>pathlib.Path.home() / "Documents/Lilith Backups"</code></li>
+          <li><strong>Windows:</strong> <code>pathlib.Path.home() / "Documents" / "Lilith Backups"</code> (resolves under <code>%USERPROFILE%\Documents</code>; if the OS redirects Documents — e.g. OneDrive folder backup — exported sets land in a synced folder, which is acceptable per §29's synced-folder note: sets contain ciphertext + salts and the master passphrase is their only protection)</li>
+        </ul>
+        <strong>Permissions:</strong> Created on first use with <code>0700</code> directories / <code>0600</code> files on POSIX. On filesystems that cannot honor POSIX modes (FAT/exFAT, some network mounts) the permission call is best-effort and its failure does not abort an export — for exported data the protection boundary is the set's encryption, not directory permissions (§02 threat model: backup leakage). On Windows, created files inherit the destination folder's user-profile ACLs. <strong>Layout:</strong> manual exports at the destination root as <code>backup-&lt;timestamp&gt;/</code> (never auto-deleted by Lilith); automated mirrored sets under <code>automatic/</code> (same set format; §06 retention applies).</li>
+      <li><strong>Plaintext Logs Boundary:</strong> <code>logs/</code> is plaintext operational storage only. It may contain startup markers, process health, migration phase names, and sanitizer-confirmed error categories, but must never receive user-authored content, conversation turns, retrieved context blocks, LLM prompts or completions, OAuth tokens, API keys, raw exception tracebacks, locals dumps, SQL statements containing key material, or serialized UCL payloads. Full-disk encryption is the documented protection boundary for OS-level crash dumps and swap; application logging hygiene does not attempt to zeroize Python heap strings after process crash.</li>
+      <li><strong>POSIX &amp; Windows Permissions:</strong> The <code>APP_INTERNAL_DIR</code> directory tree is created with strict POSIX permissions: <code>0700</code> for directories, <code>0600</code> for files. On Windows, per-user profile ACLs are enforced to prevent other local accounts from accessing the files. Startup checks verify and tighten permissions.</li>
+      <li><strong>Resolutions for the Three Hard Windows Problems:</strong>
+        <ol>
+          <li><strong>Build Toolchain:</strong> Mitigated by standardizing on pre-compiled wheels (e.g. <code>sqlcipher3-wheels</code>, <code>sounddevice</code> with bundled PortAudio dlls, <code>ctranslate2</code>). MSVC compilation instructions are documented in the repo as a fallback.</li>
+          <li><strong>Audio Driver Variance:</strong> sounddevice wraps PortAudio to query WASAPI shared mode endpoints, bypasses legacy MME drivers to minimize latency, and handles device dropouts gracefully via stream restart loops.</li>
+          <li><strong>Orb Overlay Behavior:</strong> Windows transparent overlay (MiniOrb) window handles focus stealing and click-through by combining Qt flags (<code>Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowTransparentForInput | Qt.WindowType.WindowStaysOnTopHint</code>) with native Win32 calls using <code>ctypes</code> to set <code>WS_EX_TRANSPARENT</code> and <code>WS_EX_NOACTIVATE</code>.</li>
+        </ol>
+      </li>
+      <li><strong>Platform Detection:</strong> Evaluated once on startup using <code>sys.platform</code> (storing flags <code>IS_LINUX</code>, <code>IS_MAC</code>, <code>IS_WINDOWS</code> in <code>lilith.platform</code>). No ad-hoc, runtime environment variable checks allowed in feature code.</li>
+      <li><strong>POSIX Heritage &amp; Testing Strategy:</strong> Linux and macOS share POSIX heritage (common path separators, terminal signals like SIGTERM, and file lock structures). Standard tests run on Linux first, macOS is verified as a fast follow, and Windows is validated via remote GitHub Actions runners with mock audio/keyring mocks.</li>
+    </ul>
+
+    <pre>
+platform/paths.py STRUCTURE:
+
+APP_INTERNAL_DIR (hidden — never shown to user, POSIX 0700/0600):
+  sys.platform
+    ├── "linux"  &rarr; ~/.local/share/lilith/
+    ├── "darwin" &rarr; ~/Library/Application Support/Lilith/
+    └── "win32"  &rarr; %LOCALAPPDATA%\Lilith\
+  DB_DIR     = APP_INTERNAL_DIR / "databases"
+  LOG_DIR    = APP_INTERNAL_DIR / "logs"
+  MODELS_DIR = APP_INTERNAL_DIR / "models"
+  CACHE_DIR  = APP_INTERNAL_DIR / "cache"
+  BACKUP_DIR = APP_INTERNAL_DIR / "backups"
+  SKILLS_DIR = APP_INTERNAL_DIR / "skills"
+
+EXTERNAL_BACKUP_DIR (visible — default, user-overridable via
+config.json backup.external_destination; must be outside APP_INTERNAL_DIR):
+  sys.platform
+    ├── "linux"  &rarr; ~/Documents/Lilith Backups/
+    ├── "darwin" &rarr; ~/Documents/Lilith Backups/
+    └── "win32"  &rarr; %USERPROFILE%\Documents\Lilith Backups\
+  ├── backup-&lt;timestamp&gt;/     &larr; manual exports (never auto-deleted)
+  └── automatic/
+      └── backup-&lt;timestamp&gt;/ &larr; mirrored daily sets (7-set retention, §06)
+
+APP_INTERNAL_DIR/
+├── databases/
+│   ├── salts.dat
+│   ├── ucl.db
+│   ├── calendar.db
+│   ├── contacts.db
+│   ├── finance.db
+│   ├── memory.db
+│   └── conversation.db
+├── backups/
+│   └── (atomic, timestamped rolling zip/folders: db + salts together)
+└── skills/
+    └── (internal skill markdown files; YAML-valid, hashed and approved)
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s4">§04</a> · Touches: §02 Security, §07 CI/CD, §09 Audio, §26 Frontend, §29 Vault Architecture</div>
+    <div class="s-meta">Amendment added: 2026-07-03 · Touches: §02 Security, §06 Lifecycle, §25 Onboarding, §29 Custodian Model</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §03 SQLCipher, §16 UCL (Plaintext Log Boundary)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s03.html">← §03 Encryption at Rest — SQLCipher</a><a href="../index.html">▲ Overview</a><a href="s05.html">§05 Hardware Detection &amp; Capability Tiers →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §04 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §29 Vault Architecture & Data Ownership</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§29 · Vault Architecture &amp; Data Ownership — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-data">Amendment — Data Ownership</div>
+
+<details id="s29" open>
+  <summary><span class="s-num">29</span><span class="s-title">Vault Architecture &amp; Data Ownership</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Lilith is a data custodian, not a warehouse. She does not duplicate or copy user documents, notes, or media files; instead, she reads them from their original locations and stores internal SQLCipher databases, telemetry, config, logs, and skills in a secure app directory (APP_INTERNAL_DIR).</strong></p>
+
+    <ul>
+      <li><strong>Custodian Philosophy:</strong> Lilith operates on the principle that the user's data belongs strictly to the user. Rather than creating a proprietary repository or importing/copying files into an internal workspace, Lilith indexes files, documents, and other note vaults (such as Obsidian vaults) directly from where they live. Losing or uninstalling Lilith has zero impact on the user's <em>original files</em> — but it deletes Lilith's own accumulated history (memories, conversations, finance records, and indexes in the six internal databases) together with every internal backup of it, because both live under <code>APP_INTERNAL_DIR</code> (§06 Residency &amp; Failure Domain). The custodian promise covers what the user brought to Lilith; the exported-backup discipline in Backups &amp; Restore below is what protects what Lilith accumulated.</li>
+      <li><strong>Portability without Lock-in:</strong> Lilith does not lock users in. Although her internal SQLCipher databases (<code>contacts.db</code>, <code>calendar.db</code>, <code>finance.db</code>, <code>memory_db</code>, <code>conversation_db</code>, <code>ucl.db</code>) are encrypted with a raw 256-bit AES key derived via Argon2id (which is not openable via typical passphrase prompts in standard database browsers), the user can derive the raw hex key from their master passphrase and <code>salts.dat</code> using the standalone key tool (<code>lilith-key-tool</code>) or the documented CLI commands.</li>
+      <li><strong>Internal Storage Structure:</strong> All databases, salts, config, logs, models, and cache live inside <code>APP_INTERNAL_DIR</code> with <code>0700</code> directory and <code>0600</code> file permissions.</li>
+      <li><strong>Note Vault Integration (Obsidian, etc.):</strong> Lilith parses and indexes external markdown note vaults (such as Obsidian vaults) in-place. She ingests, analyzes, and mutates content into her own layered internal representation, leaving the user's original vaults completely untouched and readable by external tools at all times.</li>
+      <li><strong>Cloud Storage Integration (Drive/iCloud/OneDrive):</strong> Integration with third-party cloud drive platforms (Google Drive, iCloud, OneDrive) is <strong>explicitly deferred to v6.1+</strong>. In v6 v1, Lilith interacts strictly with local filesystem paths and pointers.</li>
+      <li><strong>Backups &amp; Restore (SEC-019):</strong> Built-in tools allow full backup and restore of all 6 internal databases and their key material (<code>salts.dat</code>) together as one atomic set (plus the non-secret <code>backup.manifest.json</code>, §06), making user histories portable across machines or OS reinstalls.
+        <ul>
+          <li><strong>Export destination:</strong> The backup tool writes exported sets to a user-chosen path <em>outside</em> <code>APP_INTERNAL_DIR</code> — default <code>~/Documents/Lilith Backups/</code> (platform equivalents, permission rules, and layout in §04 <code>EXTERNAL_BACKUP_DIR</code>; a destination inside <code>APP_INTERNAL_DIR</code> is rejected). An optional setting additionally mirrors the §06 automated daily set to the same destination's <code>automatic/</code> subfolder, with hash verification and never-silently-disabled failure handling per §06 Mirror Unavailability.</li>
+          <li><strong>Uninstall &amp; data-loss boundary (normative, honest):</strong> Uninstalling Lilith — or deleting <code>APP_INTERNAL_DIR</code> by any means — deletes the six internal databases <em>and every internal backup of them</em> in one operation. <strong>An exported backup set plus the master passphrase that was in effect when it was taken is the recovery unit</strong>; nothing else recovers accumulated history. Keychain entries survive uninstall but hold no data and cannot recover anything by themselves (§25 state row (f) handles that post-reinstall state).</li>
+          <li><strong>Synced-folder note (honest implication):</strong> The user may point the destination at a folder synced by their own cloud service, and on Windows the default Documents folder may itself be OS-redirected into one (§04). An exported set contains the SQLCipher ciphertext plus the <code>salts.dat</code> needed to derive its keys, so possession of a set gives an attacker everything except the master passphrase — the passphrase is the <em>only</em> protection of an exported set (§02 threat model: backup leakage). The export UI states this plainly; it is not hidden in documentation. This introduces no cloud service on Lilith's side and does not change the §29 cloud-integration deferral.</li>
+          <li><strong>Export reminders (lightweight):</strong> Two surfaces, neither gating: (1) Settings → Backups shows the last automated backup time, the last export/mirror time and mirror status (from <code>config.json</code>, §06), and a standing notice while no export has ever been made; (2) the end of first-run onboarding shows a one-time dismissible reminder (§25 Step 8) that data lives only on this machine until a backup is exported.</li>
+          <li><strong>Restore:</strong> On a fresh install or after a reinstall, <em>"Restore from a backup"</em> is a first-class entry point in the §25 startup state machine (welcome screen and reinstall-detected row (f)): the set is completeness-checked against its manifest, staged, opened with the entered passphrase, integrity-checked, and only then placed — with failure paths (wrong passphrase, incomplete set, integrity failure) following §25's never-delete conventions, and the source set opened read-only throughout.</li>
+        </ul>
+      </li>
+      <li><strong>Skills Directory:</strong> The custom skill library lives in <code>APP_INTERNAL_DIR/skills/</code>. Shipped/curated skills stay frictionless because the installer includes a packaged <code>skills.manifest.json</code> containing each curated skill name, relative path, version, and SHA-256 hash. Startup indexing accepts curated skills whose bytes match that manifest, records them as <code>trust_source=curated</code>, and rejects or quarantines missing, modified, duplicate, malformed, or hash-mismatched entries before they can be parsed or injected.</li>
+      <li><strong>Uncurated Skill Friction:</strong> Arbitrary third-party or self-authored skills remain possible but intentionally inconvenient. There is no GUI approve button. The user must place the file manually, run a CLI-only enrollment command such as <code>lilith skills enroll APP_INTERNAL_DIR/skills/example/SKILL.md</code>, review the displayed path, parsed metadata, warnings, and SHA-256 hash, then type both the exact hash and the phrase <code>I accept unverified skill risk for this exact file</code>. Enrollment writes the path and hash to <code>skills.user-manifest.json</code>; any byte change invalidates approval and requires repeating the process.</li>
+      <li><strong>Skill Parsing &amp; Injection Constraints:</strong> Skill frontmatter and manifests are parsed only with <code>yaml.safe_load</code> or strict JSON parsing as applicable. Approved skill content is injected only as a delimited, labeled context block under the EDICTS rule that skill text is never authoritative over EDICTS, privacy, memory-write gates, tool permissions, or user consent. Every injection emits <code>router.skill.injected</code> with skill name, SHA-256 hash, trust source, manifest status, and task id.</li>
+      <li><strong>Skills Trust Boundary (honest, normative):</strong> The manifest/hash/CLI-friction layer above is a control against <em>accidental</em> enrollment, silent file corruption, and tampering by an attacker who cannot rewrite the manifests. It is <strong>not</strong> a control against a determined social engineer: an attacker who walks the user through the enrollment ritual (a skill pack shipping copy-paste enrollment instructions is the expected shape) gets their skill injected verbatim, and typing the hash and risk phrase proves the user performed the ceremony deliberately — it does not mean Lilith or anyone else vetted the skill, and enrollment must never be presented as vetting. It is also not a control against same-user malware: a process running as the user can rewrite <code>skills.manifest.json</code>, <code>skills.user-manifest.json</code>, and the <code>SKILL.md</code> files together, so startup hash verification passes against attacker-controlled reference hashes — the same same-user boundary §02's threat model already concedes for SQLCipher and the keychain. For an enrolled-but-hostile skill, the remaining runtime defenses are the §13 delimiter and EDICTS rule (which depend on model compliance and are exactly the indirect-prompt-injection boundary no current LLM holds reliably), the §13 injection size cap, the §26 answer-time untrusted-skill indicator, and the <code>router.skill.injected</code> audit trail. <strong>Claim ceiling (same rule as §02's privacy-copy ceiling):</strong> no product, onboarding, or marketing copy may present the skills integrity layer as protection against social engineering, malicious-but-enrolled skills, or same-user malware; user-facing copy may claim less than this paragraph states, never more.</li>
+      <li><strong>Skill Size Cap at Enrollment &amp; Verification (§13):</strong> <code>lilith skills enroll</code> rejects any <code>SKILL.md</code> whose raw file size exceeds <code>SKILL_MAX_INJECTED_BYTES</code> (§13: 8,192 bytes, a <code>config.py</code> working hypothesis) before hashing or parsing, printing the actual size, the cap, and the reason (injected skill bodies are context-budget-bounded: an oversized body crowds EDICTS and personal truths out of the smallest supported local-model context window and inflates every matched artifact-turn's cost). Startup manifest verification applies the same check to curated and user-enrolled entries: an over-cap file is quarantined with the same non-destructive handling as a hash mismatch and is never parsed or injected. The cap is enforced a third time at injection by the router (§13, <code>router.skill.oversize</code>), so a file that grows after enrollment fails closed even though any byte change already invalidates its hash approval. Over-cap files are rejected whole, never truncated — truncation can silently change a skill's meaning.</li>
+    </ul>
+
+    <pre>
+APP_INTERNAL_DIR/            &larr; hidden, operational/internal storage (POSIX 0700/0600)
+├── config.json
+├── lilith.lock
+├── databases/
+│   ├── salts.dat            &larr; database key salts (MUST travel with databases)
+│   ├── ucl.db
+│   ├── calendar.db
+│   ├── contacts.db
+│   ├── finance.db
+│   ├── memory.db
+│   └── conversation.db
+├── backups/
+│   └── backup-&lt;timestamp&gt;/  &rarr; atomic set: databases + salts.dat + backup.manifest.json
+│                              (internal only — deleted with APP_INTERNAL_DIR on uninstall;
+│                               durable copies live at EXTERNAL_BACKUP_DIR, §04)
+├── skills/                  &larr; curated and deliberately user-enrolled skills
+│   ├── skills.manifest.json
+│   ├── skills.user-manifest.json
+│   └── (SKILL.md files, safe-loaded, hash-pinned, and delimited on injection)
+├── logs/
+├── models/
+└── cache/
+    </pre>
+
+    <div class="s-meta">Amendment added: 2026-07-02 · Touches: §03 SQLCipher, §04 Cross-Platform, §06 Lifecycle, §13 Router, §25 Onboarding</div>
+    <div class="s-meta">Amendment added: 2026-07-03 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §13 Router, §25 Onboarding, §29 Custodian Model</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §13 Router, §15 YAML Safety, §23 EDICTS, §29 Skills Friction</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §13 Router, §15 YAML Safety, §26 UI, §29 Skills Friction (honest trust boundary, untrusted-skill indicator &amp; injection size cap)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s28.html">← §28 Screen Architecture &amp; Navigation</a><a href="../index.html">▲ Overview</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §29 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

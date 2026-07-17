@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Design Document</title>
+<link rel="stylesheet" href="assets/site.css">
+
+<style>
+  /* ---- overview dashboard (presentation only; content law lives in sections/) ---- */
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 26px 0; }
+  .stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+  .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-top: 4px; }
+  .stat-note { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .stat-good .stat-value { color: var(--green); }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; margin: 18px 0; }
+  .panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
+
+  .tl { list-style: none; padding: 0; }
+  .tl-item { display: flex; gap: 14px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.84rem; }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date { color: var(--accent); font-weight: 700; font-size: 0.75rem; white-space: nowrap; width: 92px; flex-shrink: 0; padding-top: 2px; }
+  .tl-body { color: var(--text); }
+  .tl-body strong { color: var(--text); }
+
+  .mile-list { list-style: none; padding: 0; }
+  .mile { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.84rem; }
+  .mile:last-child { border-bottom: none; }
+  .mile-icon { flex-shrink: 0; width: 16px; text-align: center; }
+  .mile-name { font-weight: 700; white-space: nowrap; flex-shrink: 0; width: 92px; }
+  .mile-desc { flex: 1; color: var(--muted); }
+  .mile-status { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+  .mile-pending .mile-icon, .mile-pending .mile-status { color: var(--muted); }
+  .mile-pending .mile-name { color: var(--text); }
+  .mile-current .mile-icon, .mile-current .mile-status, .mile-current .mile-name { color: var(--amber); }
+  .mile-complete .mile-icon, .mile-complete .mile-status { color: var(--green); }
+
+  .dir-group { margin: 22px 0; }
+  .dir-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin-top: 8px; }
+  .dir-card { display: flex; align-items: baseline; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; text-decoration: none; transition: border-color 0.15s; }
+  .dir-card:hover { border-color: var(--accent); }
+  .dir-num { font-size: 0.7rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
+  .dir-title { font-size: 0.84rem; font-weight: 600; color: var(--text); }
+</style>
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">The guiding light. All architectural decisions are made here before a single line of v6 code is written.</p>
+
+<nav class="doc-nav">
+  <a class="nav-active" href="index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="status-banner">
+  <div class="status-phase">🔒 FROZEN — Design complete. Build phase begins.</div>
+  <p style="margin: 8px 0; font-size: 0.88rem; color: var(--text);">
+    <strong>Build Sequencing Plan:</strong> To mitigate risk, see the new <a href="BUILD_SEQUENCING.md" style="color: var(--accent); text-decoration: underline; font-weight: bold;">BUILD_SEQUENCING.md</a> plan. Milestone 1 establishes a walking-skeleton voice loop prior to database and sync integration.
+  </p>
+  <div class="status-note">
+    All 29 sections are complete and reviewed. This document is now law.
+    No architectural decisions are made during the build phase without a documented design session.
+    Agents implement against this document exactly as written.
+    <br><br>
+    Sprint spec, design checklist, planning documents, and research reports are linked above and now live alongside this document in this same folder.
+  </div>
+</div>
+
+<div class="stat-row">
+  <div class="stat-tile stat-good"><div class="stat-value">29 / 29</div><div class="stat-label">Sections complete</div><div class="stat-note">frozen 2026-06-29</div></div>
+  <div class="stat-tile stat-good"><div class="stat-value">3 / 3</div><div class="stat-label">Review rounds passed</div><div class="stat-note">cleared for build 2026-07-17</div></div>
+  <div class="stat-tile stat-good"><div class="stat-value">29</div><div class="stat-label">Security findings resolved</div><div class="stat-note">SEC-001..029, none open</div></div>
+  <div class="stat-tile"><div class="stat-value">23</div><div class="stat-label">Amendment entries</div><div class="stat-note"><a href="amendments.html" style="color: var(--accent); text-decoration: none;">view ledger →</a></div></div>
+  <div class="stat-tile"><div class="stat-value">0 / 7</div><div class="stat-label">Build milestones</div><div class="stat-note">build phase not started</div></div>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Design phase — how this document became law</div>
+  <ul class="tl">
+    <li class="tl-item"><span class="tl-date">2026-06-29</span><span class="tl-body"><strong>Design frozen</strong> — 29/29 sections complete; document becomes law</span></li>
+    <li class="tl-item"><span class="tl-date">2026-07-02</span><span class="tl-body"><strong>Review round 1</strong> — Security (SEC-001..016) + Fool's review; Critical vault self-contradiction found → custodian pivot</span></li>
+    <li class="tl-item"><span class="tl-date">2026-07-03/04</span><span class="tl-body"><strong>Remediation 1</strong> — 13-task pass; custodian model, PII tokenization pipeline, skills integrity, logging hygiene</span></li>
+    <li class="tl-item"><span class="tl-date">2026-07-11</span><span class="tl-body"><strong>Review round 2</strong> — Remediations verified 14/16; SEC-017..024; two load-bearing gaps (staleness gate, PII overclaim)</span></li>
+    <li class="tl-item"><span class="tl-date">2026-07-12</span><span class="tl-body"><strong>Remediation 2</strong> — 11-task pass; rotation, external backups, three-class PII detector, staleness completion, CI security jobs</span></li>
+    <li class="tl-item"><span class="tl-date">2026-07-17</span><span class="tl-body"><strong>Review round 3 — final gate</strong> — Fool's: 0 load-bearing, confidence HIGH · Security: 9/9 resolved, risk Low · CLEARED FOR BUILD</span></li>
+    <li class="tl-item"><span class="tl-date">2026-07-17</span><span class="tl-body"><strong>Residual fixes</strong> — SEC-025..029 amended same day (salt-rule reconciliation, installer trust anchor, hold-rule enumeration)</span></li>
+  </ul>
+</div>
+
+<div class="panel">
+  <div class="panel-title">Build progress — Milestone 1 and Phases 2–7 (see <a href="BUILD_SEQUENCING.md" style="color: var(--accent);">BUILD_SEQUENCING.md</a>)</div>
+  <div class="progress-bar-wrap" style="margin: 6px 0 16px;">
+    <div class="progress-label"><span>Milestones complete</span><span class="count">0 / 7</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
+  </div>
+  <ul class="mile-list">
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Milestone 1</span><span class="mile-desc">Core voice-loop walking skeleton + Experiments 1–2 (latency benchmark, router dry-run)</span><span class="mile-status">pending</span></li>
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 2</span><span class="mile-desc">Foundation hardening & telemetry (UCL DB, logging sanitizer, CI/CD + security jobs)</span><span class="mile-status">pending</span></li>
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 3</span><span class="mile-desc">Security & key management (passphrase rotation, cloud PII tokenizer completion)</span><span class="mile-status">pending</span></li>
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 4</span><span class="mile-desc">Local intelligence & fallbacks (Ollama installer, local LLM tiers)</span><span class="mile-status">pending</span></li>
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 5</span><span class="mile-desc">Custodian app suite (Google Contacts/Calendar sync, Contacts UI)</span><span class="mile-status">pending</span></li>
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 6</span><span class="mile-desc">Finance app integration (CSV parsing, duplicate flagging, PDF parser)</span><span class="mile-status">pending</span></li>
+    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 7</span><span class="mile-desc">Onboarding, extension & final freeze (UI flow, skills manifests)</span><span class="mile-status">pending</span></li>
+  </ul>
+</div>
+
+<div class="decisions-box">
+  <h3>Architecture decisions already locked</h3>
+  <ul>
+    <li><span class="decision-marker">✓</span> <strong>Frontend framework:</strong> PySide6 6.11.1 (LGPL v3) + ModernGL 5.x (MIT) for the orb via QOpenGLWidget. Qt Quick 3D dropped (GPLv3-only, incompatible with closed-source distribution).</li>
+    <li><span class="decision-marker">✓</span> <strong>Voice is the default, non-negotiable at the Tier 0 minimum:</strong> STT (Whisper) + TTS (Kokoro) run on every supported machine. The desktop chat screen also accepts typed input at any time, with TTS available on demand per message rather than forced — see §13, §22.</li>
+    <li><span class="decision-marker">✓</span> <strong>All databases:</strong> SQLCipher from first migration. No plaintext SQLite anywhere.</li>
+    <li><span class="decision-marker">✓</span> <strong>All credentials:</strong> OS keychain via python-keyring. Never in .env, never in config files.</li>
+    <li><span class="decision-marker">✓</span> <strong>External APIs (v6 v1):</strong> Read-only. Lilith manages her own calendar and contact roster separately.</li>
+    <li><span class="decision-marker">✓</span> <strong>Two-mode router architecture:</strong> Conversational vs Artifact (acknowledge → background → handoff). The two-mode split itself is locked; its tuning numbers (≤50 output tokens, ≤3 s to audio, ≤1200 context tokens) are v6 v1 working hypotheses to be validated in Milestone 1, not immutable constants — see §13.</li>
+    <li><span class="decision-marker">✓</span> <strong>LLM access:</strong> L1/L2 enhanced data only. Raw DB rows never enter the context window.</li>
+    <li><span class="decision-marker">✓</span> <strong>BYOK:</strong> User-provided API keys. No managed cloud inference from Lilith.</li>
+    <li><span class="decision-marker">✓</span> <strong>Path handling:</strong> pathlib.Path everywhere. No string path concatenation, no hardcoded separators.</li>
+    <li><span class="decision-marker">✓</span> <strong>Distribution model:</strong> Lilith v6 is free, closed-source, no license key, no activation. Wide distribution is the goal. Revenue comes from a future cloud sync subscription (Obsidian model). v6 v1 has no paid features — users bring their own API keys and their own Google account. No piracy surface to protect against.</li>
+    <li><span class="decision-marker">✓</span> <strong>Memory recall (v6 v1):</strong> Recency-first + FTS5 keyword search. No local embeddings or vector search in v6 v1 — that is a future phase. See §18 for full spec.</li>
+    <li><span class="decision-marker">✓</span> <strong>Custodian Model:</strong> All internal data (SQLCipher databases, salts, config, logs, cache, models, and skills) lives in a single OS-standard application directory (<code>APP_INTERNAL_DIR</code>) with strict POSIX 0700/0600 permissions. The user's primary files, notes, and documents (including external Obsidian note vaults) are never copied to Lilith's storage; she acts as a custodian, maintaining paths/pointers and indexing summaries. Accumulated history (UCL, memory, conversation DBs) is portable via Lilith's backup/restore utility. See §04, §29.</li>
+  </ul>
+</div>
+
+<h2 style="font-size: 1.1rem; color: var(--accent); margin: 36px 0 4px;">The 29 Sections</h2>
+<p style="font-size: 0.84rem; color: var(--muted); margin-bottom: 6px;">Each section is its own page, verbatim from the frozen document. Sprints are generated per section; a section's sprints must guarantee that section is complete.</p>
+
+  <div class="dir-group">
+    <div class="layer l-found">Foundation Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-found" href="sections/s01.html"><span class="dir-num">§01</span><span class="dir-title">Project Structure &amp; Conventions</span></a>
+      <a class="dir-card card-l-found" href="sections/s02.html"><span class="dir-num">§02</span><span class="dir-title">Security &amp; Credential Management</span></a>
+      <a class="dir-card card-l-found" href="sections/s03.html"><span class="dir-num">§03</span><span class="dir-title">Encryption at Rest — SQLCipher</span></a>
+      <a class="dir-card card-l-found" href="sections/s04.html"><span class="dir-num">§04</span><span class="dir-title">Cross-Platform Foundations</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-infra">Infrastructure Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-infra" href="sections/s05.html"><span class="dir-num">§05</span><span class="dir-title">Hardware Detection &amp; Capability Tiers</span></a>
+      <a class="dir-card card-l-infra" href="sections/s06.html"><span class="dir-num">§06</span><span class="dir-title">Process Lifecycle &amp; Recovery</span></a>
+      <a class="dir-card card-l-infra" href="sections/s07.html"><span class="dir-num">§07</span><span class="dir-title">CI/CD Pipeline</span></a>
+      <a class="dir-card card-l-infra" href="sections/s08.html"><span class="dir-num">§08</span><span class="dir-title">Testing Standards</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-voice">Voice Pipeline</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-voice" href="sections/s09.html"><span class="dir-num">§09</span><span class="dir-title">Audio I/O &amp; Platform Audio APIs</span></a>
+      <a class="dir-card card-l-voice" href="sections/s10.html"><span class="dir-num">§10</span><span class="dir-title">Speech-to-Text (STT)</span></a>
+      <a class="dir-card card-l-voice" href="sections/s11.html"><span class="dir-num">§11</span><span class="dir-title">Text-to-Speech (TTS)</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-intel">Intelligence Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-intel" href="sections/s12.html"><span class="dir-num">§12</span><span class="dir-title">LLM Integration &amp; Provider Abstraction</span></a>
+      <a class="dir-card card-l-intel" href="sections/s13.html"><span class="dir-num">§13</span><span class="dir-title">Two-Mode Router</span></a>
+      <a class="dir-card card-l-intel" href="sections/s14.html"><span class="dir-num">§14</span><span class="dir-title">Context Window Manager</span></a>
+      <a class="dir-card card-l-intel" href="sections/s15.html"><span class="dir-num">§15</span><span class="dir-title">Tool System</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-data">Data Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-data" href="sections/s16.html"><span class="dir-num">§16</span><span class="dir-title">UCL Telemetry</span></a>
+      <a class="dir-card card-l-data" href="sections/s17.html"><span class="dir-num">§17</span><span class="dir-title">Enhancement Layers (L1/L2)</span></a>
+      <a class="dir-card card-l-data" href="sections/s18.html"><span class="dir-num">§18</span><span class="dir-title">Memory System</span></a>
+      <a class="dir-card card-l-data" href="sections/s19.html"><span class="dir-num">§19</span><span class="dir-title">Data Sync Pipeline</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-app">Application Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-app" href="sections/s20.html"><span class="dir-num">§20</span><span class="dir-title">Contacts / People App</span></a>
+      <a class="dir-card card-l-app" href="sections/s21.html"><span class="dir-num">§21</span><span class="dir-title">Finance App</span></a>
+      <a class="dir-card card-l-app" href="sections/s22.html"><span class="dir-num">§22</span><span class="dir-title">Conversation / Chat App</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-pers">Personality &amp; Response Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-pers" href="sections/s23.html"><span class="dir-num">§23</span><span class="dir-title">Personality System &amp; System Prompt</span></a>
+      <a class="dir-card card-l-pers" href="sections/s24.html"><span class="dir-num">§24</span><span class="dir-title">Narrative Layer</span></a>
+      <a class="dir-card card-l-pers" href="sections/s25.html"><span class="dir-num">§25</span><span class="dir-title">Onboarding Flow</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-ui">Frontend Layer</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-ui" href="sections/s26.html"><span class="dir-num">§26</span><span class="dir-title">Frontend Framework &amp; Application Shell</span></a>
+      <a class="dir-card card-l-ui" href="sections/s27.html"><span class="dir-num">§27</span><span class="dir-title">The Orb</span></a>
+      <a class="dir-card card-l-ui" href="sections/s28.html"><span class="dir-num">§28</span><span class="dir-title">Screen Architecture &amp; Navigation</span></a>
+    </div>
+  </div>
+  <div class="dir-group">
+    <div class="layer l-data">Amendment — Data Ownership</div>
+    <div class="dir-cards">
+      <a class="dir-card card-l-data" href="sections/s29.html"><span class="dir-num">§29</span><span class="dir-title">Vault Architecture &amp; Data Ownership</span></a>
+    </div>
+  </div>
+
+<hr>
+
+<div class="how">
+  <div class="how-title">How to use this document</div>
+  <ol>
+    <li>Cross-reference each section with <a href="checklist.html" style="color: var(--accent);">lilith-v6-design-checklist.html</a> to see what must be covered.</li>
+    <li>After the research sprint delivers reports, fill in each section using research + prior design sessions.</li>
+    <li>A section is "complete" when every checklist item is answered with a specific implementation decision — no vague language, no TBDs.</li>
+    <li>When all 29 are complete: freeze. Build begins. No architecture changes during build without a documented design session.</li>
+  </ol>
+</div>
+<p style="font-size: 0.78rem; color: var(--muted); margin-top: -18px;"><em>The box above is the original design-phase usage note, preserved as written. The design phase is complete; during build, agents read the relevant section page, the <a href="standards.html" style="color: var(--accent);">Non-Negotiable Standards</a>, and <a href="BUILD_SEQUENCING.md" style="color: var(--accent);">BUILD_SEQUENCING.md</a>. See <code>README.md</code> for how this site is organized.</em></p>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · 29/29 sections complete · FROZEN 2026-06-29 · CLEARED FOR BUILD 2026-07-17 · full amendment history: <a href="amendments.html">Amendment Ledger</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §09 Audio I/O & Platform Audio APIs</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§09 · Audio I/O &amp; Platform Audio APIs — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-voice">Voice Pipeline</div>
+
+<details id="s9" open>
+  <summary><span class="s-num">09</span><span class="s-title">Audio I/O &amp; Platform Audio APIs</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Audio I/O is managed using the sounddevice package with PortAudio, separating capture and playback callbacks onto dedicated worker threads, using WASAPI shared mode on Windows, and handling device disconnections via automatic recovery loops.</strong></p>
+
+    <ul>
+      <li><strong>Audio Library Choice:</strong> <code>sounddevice</code> + PortAudio (MIT licensed). Offers robust, cross-platform wheels containing pre-compiled PortAudio binaries, avoiding legacy compilation bugs common with PyAudio on modern Python versions.</li>
+      <li><strong>Microphone Stream (Capture):</strong> <code>sounddevice.InputStream</code> callback is locked to 16 kHz mono float32 with a block size of 480 frames (30ms). The callback only copies the chunk and pushes it to a thread-safe <code>audio_q</code> queue. No allocations or model inference may run on this thread.</li>
+      <li><strong>TTS Playback Stream (Output):</strong> <code>sounddevice.OutputStream</code> runs at 24 kHz mono float32 with a block size of 1024 frames, pulling compiled audio segments from a bounded <code>playback_q</code>. Playback runs concurrently and independently of capture.</li>
+      <li><strong>Windows WASAPI Integration:</strong> The device manager queries and binds to the WASAPI Host API index. Runs in WASAPI Shared Mode by default to prevent exclusive-access locks that conflict with other desktop applications (browsers, Discord).</li>
+      <li><strong>Resampling Fallback:</strong> If a microphone device rejects native 16 kHz capture, Lilith opens the hardware stream at the default native rate (44.1 kHz or 48 kHz) and resamples the captured chunks down to 16 kHz in the VAD thread using <code>numpy.interp</code> before processing.</li>
+      <li><strong>Stream Restart &amp; Hot-Plug Recovery:</strong> The audio manager handles stream exceptions or status flags (underflow/overflow) by closing the active stream, executing device re-enumeration, selecting the system's new default device, and restarting the stream.</li>
+      <li><strong>Device Diagnostics:</strong> A developer diagnostics widget allows device enumeration, latency loopback measurements, and manual channel overrides. Exposes real-time RMS amplitude values to the Orb widget.</li>
+    </ul>
+
+    <pre>
+AUDIO PIPELINE CONCURRENCY MODEL:
+[ sounddevice callback (Mic Thread) ] &rarr; (copy &amp; enqueue)
+            │
+            ▼
+        [ audio_q ] (Queue of 480-frame chunks)
+            │
+            ▼
+    [ VAD Worker Thread (Silero VAD) ] &rarr; (computes speech probability)
+            │
+            ▼ (On End-of-Utterance)
+       [ utterance_q ] &rarr; [ STT Worker Thread (faster-whisper) ]
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s9">§09</a> · Touches: §04 Cross-Platform, §10 STT, §11 TTS, §27 Orb</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s08.html">← §08 Testing Standards</a><a href="../index.html">▲ Overview</a><a href="s10.html">§10 Speech-to-Text (STT) →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §09 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

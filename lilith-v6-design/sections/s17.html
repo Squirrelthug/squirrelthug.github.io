@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §17 Enhancement Layers (L1/L2)</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§17 · Enhancement Layers (L1/L2) — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-data">Data Layer</div>
+
+<details id="s17" open>
+  <summary><span class="s-num">17</span><span class="s-title">Enhancement Layers (L1/L2)</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Every LLM-visible data domain flows through background L1 aggregation followed by L2 narrative summarization, with L1 jobs prioritized and raw tables never exposed to CWM.</strong></p>
+
+    <ul>
+      <li><strong>Scheduler:</strong> <code>APScheduler==3.11.3</code> <code>BackgroundScheduler</code> handles periodic timers; a small internal priority queue handles triggered enhancement jobs where L1 must run before L2.</li>
+      <li><strong>L1 job:</strong> Triggered by DB write UCL events and polled every <code>2</code> s with an APScheduler interval trigger; idempotent, no LLM calls, writes normalized/aggregated <code>*_l1</code> tables.</li>
+      <li><strong>L2 job:</strong> Enqueued only after the matching L1 job succeeds. For domains that contain untrusted third-party or externally-sourced text (specifically calendar events and contacts sync), the L2 job strictly uses template-based (non-LLM) generation in v6 v1 to mitigate prompt injection risks, extending the deterministic template pattern of §21. Other domains (like memory) may use templates or an LLM in artifact/background mode. Writes human-readable <code>*_l2_summaries</code> rows for CWM.</li>
+      <li><strong>Priority:</strong> Queue priorities are <code>0=L1</code>, <code>10=L2</code>, <code>20=maintenance</code>; L2 for a DB/domain is blocked until the latest L1 watermark is at or beyond the source write timestamp.</li>
+      <li><strong>Intent-triggered refresh (§14 staleness gate):</strong> CWM may request a targeted refresh for a single domain when a stale or absent block matches turn intent. The request enqueues that domain's jobs at the head of their existing priority classes (L1 at <code>0</code> before L2 at <code>10</code> — ordering and L1-watermark rules unchanged), preceded by an incremental source sync (§19) when the source watermark is stale and the domain supports automated sync. Every domain registered with the pipeline declares a <code>refresh_capability</code>: <code>sync_and_enhance</code> (calendar, contacts — sync then L1/L2), <code>enhance_only</code> (memory, telemetry-derived tool context — L1/L2 recompute only), or <code>manual_source</code> (finance PDF import — requires user action). <code>manual_source</code> domains are never auto-refreshed; CWM discloses absence with <code>status=&quot;source_unsupported&quot;</code> instead. Refresh jobs obey the same overlap controls (<code>coalesce=True</code>, <code>max_instances=1</code>); a refresh that outlives the requesting turn's §14 lane budget keeps running in the background so the next turn reads fresh summaries. CWM emits the <code>context.refresh.*</code> events (§14); the jobs themselves emit the existing <code>sync.l1.complete</code>/<code>sync.l2.complete</code>.</li>
+      <li><strong>Database access:</strong> Every job opens its own keyed SQLCipher connection with <code>pathlib.Path</code>, sets <code>PRAGMA journal_mode=WAL</code> and <code>PRAGMA busy_timeout=5000</code>, runs short transactions, then closes.</li>
+      <li><strong>Overlap control:</strong> Scheduler defaults are <code>coalesce=True</code>, <code>max_instances=1</code>, <code>misfire_grace_time=60</code>; stale <code>running</code> jobs reset to <code>queued</code> on startup.</li>
+      <li><strong>CWM freshness:</strong> §14 thresholds apply to L2 summaries: tool context 5m, calendar/contact entity context 30m, memory recall 24h, personal truths 7d, system identity 24h.</li>
+      <li><strong>Telemetry:</strong> Emit <code>sync.l1.complete</code> (db_name, rows_processed, watermark) and <code>sync.l2.complete</code> (db_name, summaries_written, source_watermark).</li>
+    </ul>
+
+    <pre>DB write -&gt; log_event(...) -&gt; enhancement queue
+  priority 0: L1 aggregate/normalize -&gt; *_l1 tables -&gt; sync.l1.complete
+  priority 10: L2 summarize/narrate  -&gt; *_l2_summaries -&gt; sync.l2.complete
+  CWM reads only fresh *_l2_summaries, never source tables or raw UCL rows</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s17">§17</a> · Touches: §16 UCL, §14 CWM, §19 Sync, §20–22 Apps</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §14 CWM, §17 Enhancement, §23 EDICTS (staleness-gate refresh, absence disclosure &amp; anti-fabrication)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s16.html">← §16 UCL Telemetry</a><a href="../index.html">▲ Overview</a><a href="s18.html">§18 Memory System →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §17 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

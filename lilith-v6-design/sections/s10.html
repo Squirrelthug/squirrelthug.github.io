@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §10 Speech-to-Text (STT)</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§10 · Speech-to-Text (STT) — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-voice">Voice Pipeline</div>
+
+<details id="s10" open>
+  <summary><span class="s-num">10</span><span class="s-title">Speech-to-Text (STT)</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Speech-to-Text uses faster-whisper with a CTranslate2 backend, dynamically scaling the model size by hardware tier, and filtering stream input via Silero VAD on a dedicated worker thread.</strong></p>
+
+    <ul>
+      <li><strong>Python Package &amp; Backend:</strong> <code>faster-whisper</code> (v1.2.1) utilizing the <code>CTranslate2</code> backend. Permissively licensed under the MIT license, allowing for closed-source commercial redistribution.</li>
+      <li><strong>Model Selection by Tier:</strong>
+        <ul>
+          <li><strong>Tier 0:</strong> <code>base</code> model (int8 quantized) executed on the CPU, maintaining a &lt;1.0s transcription latency.</li>
+          <li><strong>Tier 1 &amp; 2:</strong> <code>small</code> model (float16 quantized) executed on CUDA GPUs or optimized CPU paths (Apple Silicon NEON), balancing high accuracy with a &lt;0.5s transcription latency.</li>
+        </ul>
+      </li>
+      <li><strong>Silero VAD Parameters:</strong>
+        <ul>
+          <li><strong>Input chunk size:</strong> 480 frames (30ms at 16 kHz sample rate mono float32).</li>
+          <li><strong>Speech threshold:</strong> 0.5 (probability cutoff).</li>
+          <li><strong>End-of-speech window:</strong> 600ms of contiguous silence (<code>min_silence_duration_ms=600</code>).</li>
+          <li><strong>Padding:</strong> 250ms pre/post padding (<code>speech_pad_ms=250</code>) to ensure word boundaries are not truncated.</li>
+        </ul>
+      </li>
+      <li><strong>Speech Pipeline Architecture:</strong>
+        <ol>
+          <li><code>sounddevice.InputStream</code> pushes 30ms audio chunks to <code>audio_q</code>.</li>
+          <li>The VAD worker thread pulls chunks, calculates speech probabilities, and buffers speech frames.</li>
+          <li>When VAD triggers end-of-utterance, the buffered frames are concatenated into a single NumPy array and dispatched to the <code>transcription_q</code>.</li>
+          <li>The Whisper worker thread pops the array, transcribes it in a batch, and sends the raw string to the two-mode router.</li>
+        </ol>
+      </li>
+      <li><strong>Output Structure:</strong> A single plain text string. Downstream components (the router) receive the string directly without metadata or timestamp arrays.</li>
+      <li><strong>UCL Telemetry Events:</strong>
+        <ul>
+          <li><code>voice.stt.start</code>: Emitted when the VAD identifies speech starting.</li>
+          <li><code>voice.stt.complete</code>: Emitted on successful transcription. Payload includes: <code>duration_ms</code> (processing latency), <code>audio_len_ms</code> (utterance length), and <code>word_count</code>.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <pre>
+STT PIPELINE DATAFLOW:
+ [ Audio Callback ]
+        │ (float32 array, 480 frames)
+        ▼
+   [ audio_q ]
+        │
+        ▼
+ [ VAD Worker Thread (Silero VAD) ] ── (Speech pad: 250ms, Silence: 600ms)
+        │
+        ▼ (Speech array on end-of-utterance)
+ [ transcription_q ]
+        │
+        ▼
+ [ Whisper Worker Thread ] ──&gt; voice.stt.complete (UCL Event)
+        │ (Raw text string)
+        ▼
+ [ Two-Mode Router ]
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s10">§10</a> · Touches: §05 Hardware Tiers, §09 Audio, §13 Router</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s09.html">← §09 Audio I/O &amp; Platform Audio APIs</a><a href="../index.html">▲ Overview</a><a href="s11.html">§11 Text-to-Speech (TTS) →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §10 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

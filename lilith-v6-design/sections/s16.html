@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §16 UCL Telemetry</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§16 · UCL Telemetry — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-data">Data Layer</div>
+
+<details id="s16" open>
+  <summary><span class="s-num">16</span><span class="s-title">UCL Telemetry</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>The Universal Communication Log is an encrypted SQLCipher event ledger with one required <code>log_event()</code> call at every mutation point and L2 summaries as the only LLM-readable telemetry surface.</strong></p>
+
+    <ul>
+      <li><strong>Schema:</strong> <code>ucl_events(id TEXT PRIMARY KEY, event_type TEXT NOT NULL, payload JSON NOT NULL, timestamp REAL NOT NULL, session_id TEXT)</code>; <code>id</code> is UUIDv7 and <code>timestamp</code> is UTC Unix seconds with millisecond precision.</li>
+      <li><strong>Event namespaces:</strong> <code>llm.*</code>, <code>tool.*</code>, <code>voice.*</code>, <code>router.*</code>, <code>context.*</code>, <code>sync.*</code>, <code>user.*</code>, <code>memory.*</code>, <code>error.*</code>, <code>onboarding.*</code>, <code>narrative.*</code>, and <code>security.*</code> (rekey, relock, and unlock lifecycle events defined in §02/§06; payloads carry phase, database name, and durations only — never key material).</li>
+      <li><strong>Function:</strong> <code>lilith.telemetry.ucl.log_event(event_type: str, payload: dict) -&gt; str</code> writes the event and returns the UUIDv7 event id.</li>
+      <li><strong>Write rule:</strong> Every write/mutation path calls <code>log_event()</code> at the actual mutation site, including failures; wrappers are not sufficient for done criteria.</li>
+      <li><strong>Sanitizer Gate:</strong> All exception logging must pass through <code>lilith.telemetry.sanitize_exception()</code> before <code>log_event()</code>, plaintext logs, recovery logs, or UI recovery text are written. The sanitizer redacts known secret patterns, including 64-character SQLCipher hex keys, <code>sk-ant-</code> API key prefixes and following token material, <code>Bearer </code> authorization tokens, OAuth refresh tokens, and common provider credential fields. Sanitized output is the only representation allowed to cross the telemetry boundary.</li>
+      <li><strong><code>error.*</code> Payload Rule:</strong> <code>error.*</code> events carry declared fields only: exception type, redacted message, recovery category, component, and non-secret identifiers such as event id or database name. They must never include raw tracebacks, stack frames, locals, reprs of key-manager objects, SQL statements, HTTP headers, request/response bodies, prompts, completions, retrieved context, or user-authored content.</li>
+      <li><strong>Payload Content Boundary:</strong> UCL payloads are compact operational facts. Free-text user content and context blocks are stored in <code>conversation_db</code> or the relevant source database, with UCL events referencing them by non-secret id where needed.</li>
+      <li><strong>LLM boundary:</strong> LLMs never read <code>ucl_events</code> directly; L1 aggregates telemetry into stats tables, and L2 writes narrative summaries for CWM injection.</li>
+      <li><strong>Search:</strong> Create <code>ucl_events_fts</code> as an external-content FTS5 table over serialized <code>payload</code> text for developer/debug search; assert <code>ENABLE_FTS5</code> from <code>pragma_compile_options</code> at startup and CI.</li>
+      <li><strong>Concurrency:</strong> Open <code>ucl_db</code> through <code>sqlcipher3-wheels==0.5.7</code>, set <code>PRAGMA journal_mode=WAL</code> and <code>PRAGMA busy_timeout=5000</code>, and use one connection per thread/job.</li>
+    </ul>
+
+    <pre>CREATE TABLE ucl_events (
+  id         TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL,
+  payload    JSON NOT NULL,
+  timestamp  REAL NOT NULL,
+  session_id TEXT
+);
+
+    CREATE VIRTUAL TABLE ucl_events_fts USING fts5(
+  payload_text,
+  event_type UNINDEXED,
+  content='ucl_events',
+  content_rowid='rowid',
+  tokenize='unicode61'
+);</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s16">§16</a> · Touches: §17 Enhancement, §12 LLM, §13 Router, §14 CWM, §15 Tools</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §03 SQLCipher, §04 Cross-Platform, §08 Testing (Telemetry Hygiene)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s15.html">← §15 Tool System</a><a href="../index.html">▲ Overview</a><a href="s17.html">§17 Enhancement Layers (L1/L2) →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §16 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

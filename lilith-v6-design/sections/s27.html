@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §27 The Orb</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§27 · The Orb — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-ui">Frontend Layer</div>
+
+<details id="s27" open>
+  <summary><span class="s-num">27</span><span class="s-title">The Orb</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>ModernGL 5.x UV sphere rendered in a PySide6 QOpenGLWidget at 60fps. Voice-reactive amplitude. Five-state state machine. Spring-physics position.</strong></p>
+
+    <ul>
+      <li><strong>Rendering:</strong> <code>moderngl.create_context()</code> attaches to Qt's existing OpenGL context in <code>initializeGL()</code>. UV sphere: 48 sectors × 24 stacks, radius 0.18. Vertex layout: 6 floats per vertex (<code>3f 3f</code> = position + normal). Two GLSL shaders: <code>lilith/ui/shaders/orb.vert</code> (model matrix from position uniforms), <code>lilith/ui/shaders/orb.frag</code> (Fresnel glow effect). QTimer at 16ms (~60fps) drives <code>update()</code> → <code>paintGL()</code>.</li>
+      <li><strong>State machine:</strong> five states driven by <code>UICommandBus.set_orb_state(state)</code>:
+        <ul>
+          <li><code>idle</code> — gentle slow pulse, center position</li>
+          <li><code>listening</code> — amplitude-reactive (VAD RMS input), slightly enlarged</li>
+          <li><code>processing</code> — animated spin/shimmer, neutral size</li>
+          <li><code>speaking</code> — amplitude-reactive (TTS RMS output), slightly enlarged</li>
+          <li><code>doing</code> — contracted (smaller radius), moved toward UI area being modified</li>
+        </ul>
+      </li>
+      <li><strong>Position:</strong> spring-physics interpolation toward <code>(target_x, target_y)</code> in clip space. Step: <code>pos += (target - pos) * 0.07</code> per frame. Call <code>OrbWidget.set_target(x, y)</code> from UICommandBus to move it.</li>
+      <li><strong>Amplitude:</strong> <code>OrbWidget.set_amplitude(rms: float)</code> called from audio thread via Qt signal. Exponential smoothing: <code>smooth_amp = smooth_amp * 0.82 + raw_amp * 0.18</code>. Prevents popping on transients.</li>
+      <li><strong>Uniforms:</strong> <code>u_pos_x</code>, <code>u_pos_y</code>, <code>u_amplitude</code>, <code>u_time</code> (increments 0.016/frame).</li>
+      <li><strong>Public API:</strong> <code>set_amplitude(value: float)</code>, <code>set_target(x: float, y: float)</code>, <code>set_state(state: str)</code>.</li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s27">§27</a> · Research: RES-03 ModernGL Orb. · Touches: §09 Audio, §11 TTS, §26 Frontend</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s26.html">← §26 Frontend Framework &amp; Application Shell</a><a href="../index.html">▲ Overview</a><a href="s28.html">§28 Screen Architecture &amp; Navigation →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §27 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

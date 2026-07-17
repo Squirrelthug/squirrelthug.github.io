@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §01 Project Structure & Conventions</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§01 · Project Structure &amp; Conventions — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-found">Foundation Layer</div>
+
+<details id="s1" open>
+  <summary><span class="s-num">01</span><span class="s-title">Project Structure &amp; Conventions</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Standardized on a clean multi-layered Python 3.12 architecture with a strictly enforced downwards-only dependency flow and cross-platform pathlib.Path handling.</strong></p>
+
+    <ul>
+      <li><strong>Python Version:</strong> Python 3.12 (enforced via <code>.python-version</code> and <code>pyproject.toml</code>) for stability and wheel compatibility with core binary libraries (e.g., ctranslate2, sqlcipher3-wheels).</li>
+      <li><strong>Package Management:</strong> pip + <code>requirements.txt</code> (generated from <code>pyproject.toml</code>) for reproducible, deterministic dependency resolution.</li>
+      <li><strong>Path Handling:</strong> Strict <code>pathlib.Path</code> usage for all I/O, database paths, and platform calls (no string concatenation, no hardcoded separators; enforced via lint checks).</li>
+      <li><strong>Module Boundaries:</strong> <code>ui</code> &rarr; <code>logic</code> &rarr; <code>data</code> &rarr; <code>platform</code>. Circular imports are blocked and verified using <code>import-linter</code> in CI.</li>
+      <li><strong>Naming Conventions:</strong> snake_case for files, PascalCase for classes, UPPER_SNAKE for constants, snake_case for database tables, and dot.namespaced (e.g., <code>voice.stt.complete</code>) for event types.</li>
+      <li><strong>Configuration Management:</strong> Stored in <code>config.json</code> located in the OS-appropriate app directory. Schema migrations for config options are handled programmatically on startup.</li>
+      <li><strong>Error Handling:</strong> Recoverable errors are caught at module boundaries, passed through the telemetry sanitizer, logged to the UCL database with redacted messages only, and surfaced to the user. Unrecoverable failures (missing keychain, corrupted database) display a dedicated recovery screen or hard exit.</li>
+      <li><strong>Logging:</strong> Stdout/stderr reserved for dev/startup. UCL database logs all user and system behavioral telemetry. Exception logging must go through the same sanitizer before any write, including dev logs, startup logs, UCL payloads, and recovery telemetry.</li>
+      <li><strong>Git Workflow:</strong> <code>feature/*</code> or <code>bugfix/*</code> branch naming, mandatory PRs, and commit messages prefixed with <code>[scope]:</code>.</li>
+      <li><strong>Done-Criteria Standard:</strong> <code>log_event()</code> on all success paths, security audits for raw data, UCL payload schema review for every new event, 80%+ test coverage (excluding hardware/audio I/O), and a wiki page updated.</li>
+    </ul>
+
+    <pre>
+lilith/ (Root Package)
+├── app.py           # Application entrypoint & Qt initialization
+├── config.py        # Config loader/migrator & global constants
+├── platform/        # OS Abstractions (Paths, Keyring, Audio I/O)
+│   ├── paths.py     # OS-specific base directories (XDG/Library/AppData)
+│   ├── keyring.py   # Wrapper for OS-level secure keyring
+│   └── audio.py     # PortAudio input/output stream management
+├── data/            # Persistence Layer (SQLCipher schema, queries, UCL)
+│   ├── db.py        # SQLCipher connection lifecycle & pool
+│   ├── ucl.py       # Universal Communication Log writing/reading
+│   └── conversation.py # Chat & session DB interface
+├── logic/           # Domain Layer (Core business rules & workers)
+│   ├── router.py    # Two-mode conversational/artifact router
+│   ├── stt.py       # faster-whisper pipeline wrapper
+│   ├── tts.py       # kokoro-onnx pipeline wrapper
+│   └── cwm.py       # Context Window Manager & prompt assembler
+└── ui/              # Presentation Layer (PySide6 & ModernGL)
+    ├── bus.py       # UICommandBus for thread-safe main thread updates
+    ├── screens/     # Stacked screen views (onboarding, chat, etc.)
+    ├── widgets/     # Custom UI widgets (floating Orb, chat bubble)
+    └── shaders/     # GLSL vertex/fragment files for Orb rendering
+
+Module Dependency Flow (Downwards Only):
+[ ui ] ===> [ logic ] ===> [ data ] ===> [ platform ]
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s1">§01</a> · Touches: §02 Security, §07 CI/CD, §08 Testing, §16 UCL</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §03 SQLCipher, §04 Cross-Platform, §08 Testing, §16 UCL (Logging &amp; Key Hygiene)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="../index.html">▲ Overview</a><a href="s02.html">§02 Security &amp; Credential Management →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §01 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

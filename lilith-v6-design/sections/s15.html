@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §15 Tool System</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§15 · Tool System — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-intel">Intelligence Layer</div>
+
+<details id="s15" open>
+  <summary><span class="s-num">15</span><span class="s-title">Tool System</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Tools are startup-discovered YAML contracts with explicit mode eligibility and narrative templates that let artifact work acknowledge immediately, run in the background, and hand back results cleanly.</strong></p>
+
+    <ul>
+      <li><strong>Definition format:</strong> <code>lilith/tools/*.yaml</code>, parsed with <code>PyYAML==6.0.3</code>, requiring <code>name</code>, <code>description</code>, JSON-schema-like <code>parameters</code>, <code>mode</code>, and <code>narratives</code>.</li>
+      <li><strong>YAML safety rule:</strong> All tool contracts and skill frontmatter are untrusted input and MUST be parsed with <code>yaml.safe_load</code> only. <code>yaml.load</code>, <code>yaml.full_load</code>, custom YAML object constructors, or any parser mode that can instantiate Python objects are prohibited for <code>lilith/tools/*.yaml</code>, <code>SKILL.md</code> frontmatter, packaged manifests, and user-enrolled manifests. Skill files are additionally size-gated before parsing: a <code>SKILL.md</code> whose raw file size exceeds <code>SKILL_MAX_INJECTED_BYTES</code> (§13) is rejected at CLI enrollment and quarantined at startup manifest verification without ever reaching <code>yaml.safe_load</code> — the size check runs on raw bytes, ahead of any parser.</li>
+      <li><strong>Mode enum:</strong> <code>conversational_only</code>, <code>artifact_only</code>, or <code>both</code>; router rejects unavailable tools before any LLM call.</li>
+      <li><strong>Narrative keys:</strong> <code>acknowledge</code>, <code>bridge</code>, <code>handoff</code>, and <code>failure</code> are mandatory for every artifact-capable tool.</li>
+      <li><strong>Acknowledge:</strong> Artifact tools fire <code>narratives.acknowledge</code> to TTS within <code>&lt;200</code> ms after router classification.</li>
+      <li><strong>Bridge:</strong> Default bridge interval is <code>8</code> s; v6 v1 uses static templates such as <code>Still working on that...</code>, with UCL-adaptive timing deferred.</li>
+      <li><strong>Handoff:</strong> v6 v1 handoff is deterministic template fill from the typed tool result; PERS-2 narration is not in the first implementation.</li>
+      <li><strong>Telemetry:</strong> Emit <code>tool.call.start</code> (tool_name, mode), <code>tool.call.complete</code> (duration_ms, success), <code>tool.narrative.ack</code> (tool_name), and <code>tool.narrative.handoff</code> (tool_name, artifact_id).</li>
+    </ul>
+
+    <pre>name: contact_lookup
+description: Look up a person in contacts_db L2 context.
+mode: artifact_only
+parameters:
+  type: object
+  required: [name]
+  properties:
+    name: {type: string, minLength: 1}
+narratives:
+  acknowledge: "I'll look that person up."
+  bridge: "Still checking the contact record..."
+  handoff: "{display_name}: {summary}"
+  failure: "I couldn't find a matching contact."</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s15">§15</a> · Touches: §12 LLM, §13 Router, §20–22 App tools</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §13 Router, §15 YAML Safety, §29 Skills Friction</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §13 Router, §15 YAML Safety, §26 UI, §29 Skills Friction (honest trust boundary, untrusted-skill indicator &amp; injection size cap)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s14.html">← §14 Context Window Manager</a><a href="../index.html">▲ Overview</a><a href="s16.html">§16 UCL Telemetry →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §15 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

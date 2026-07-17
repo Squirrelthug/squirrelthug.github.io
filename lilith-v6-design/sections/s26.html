@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §26 Frontend Framework & Application Shell</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§26 · Frontend Framework &amp; Application Shell — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-ui">Frontend Layer</div>
+
+<details id="s26" open>
+  <summary><span class="s-num">26</span><span class="s-title">Frontend Framework &amp; Application Shell</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>PySide6 6.11.1 (LGPL v3). Qt Signals/Slots is the event bus. All UI mutations go through a UICommandBus that the backend calls — the UI never calls the backend directly.</strong></p>
+
+    <ul>
+      <li><strong>Framework:</strong> PySide6 6.11.1 (LGPL v3). ModernGL 5.x (MIT) for the orb via <code>QOpenGLWidget</code>. Qt Quick 3D dropped (GPLv3-only, incompatible with closed-source distribution).</li>
+      <li><strong>Module dependency direction:</strong> UI layer → logic layer → data layer → platform layer. No circular imports. Backend never imports from UI modules.</li>
+      <li><strong>UICommandBus:</strong> a <code>QObject</code> subclass that lives on the main thread. Exposes <code>@Slot</code> methods that the backend calls via <code>QMetaObject.invokeMethod(..., Qt.ConnectionType.QueuedConnection)</code>. This ensures all UI mutations happen on the Qt main thread regardless of which thread the backend is on.
+        <pre>class UICommandBus(QObject):
+    @Slot(str)
+    def set_orb_state(self, state: str): ...
+    @Slot(str)
+    def append_message(self, json_payload: str): ...
+    @Slot(str)
+    def show_screen(self, screen_name: str): ...</pre>
+      </li>
+      <li><strong>Screen navigation:</strong> <code>QStackedWidget</code> as the central widget. Screens are named: <code>"onboarding"</code>, <code>"conversation"</code>, <code>"contacts"</code>, <code>"finance"</code>, <code>"settings"</code>. Navigation via <code>UICommandBus.show_screen(name)</code>.</li>
+      <li><strong>MainWindow:</strong> frameless or custom-framed window. Contains: <code>OrbWidget</code> (top or floating), <code>QStackedWidget</code> (content area), sidebar navigation.</li>
+      <li><strong>Untrusted-skill indicator (answer time — §13/§29 skills trust surface):</strong> When a reply was generated with a user-enrolled (non-curated) skill injected, the shell displays a persistent indicator at answer time, following the §12 provider-indicator pattern: always visible while it applies, in the main application shell, never a toast, transient notification, or log-only signal. It is driven exclusively by the router's injection signal — the same signal that emits <code>router.skill.injected</code> with <code>trust_source=user-enrolled</code> — delivered over the UICommandBus (<code>@Slot(str) set_skill_indicator(json_payload)</code> carrying skill name, SHA-256 hash, trust source, and turn/task id); the UI never re-parses skill files or manifests to decide indicator state. Normative content requirements (not final copy): the indicator states that an unverified skill the user enrolled shaped this reply, and names the skill. Mode coverage: in text mode the affected answer message permanently carries an inline unverified-skill badge in the transcript, and the shell indicator is visible while that answer is the active turn; in voice mode — including voice-only turns with no artifact panel open — the indicator is shown on the session (conversation) screen at answer time, and that turn's transcript entry permanently carries the same badge, so the fact remains discoverable after the audio ends. Curated skills never trigger this indicator: it marks the trust-boundary crossing, not skill use in general — firing it for hash-pinned curated skills would train banner blindness and dilute the warning. <code>router.skill.injected</code> remains the audit record; a failure to render the indicator when the signal was sent is a §08-tested defect, not a soft-fail.</li>
+      <li><strong>LGPL compliance:</strong> PyInstaller <code>--onedir</code> required (users must be able to replace Qt shared libraries). LGPL and GPL license texts in <code>licenses/</code> folder. Qt attribution notice with clickable Qt source link in About dialog.</li>
+      <li><strong>UCL events:</strong> <code>user.screen.navigate</code> (from_screen, to_screen)</li>
+    </ul>
+
+    <p><strong>Functional Requirements — Untrusted-Skill Indicator (EARS Format)</strong></p>
+    <ul>
+      <li><strong>FR-STS-001:</strong> While an artifact response was generated with an injected skill whose trust source is <code>user-enrolled</code>, when that response is delivered to the user (first text render, artifact panel creation, or first handoff audio), the system shall display the untrusted-skill indicator, naming the enrolled skill.</li>
+      <li><strong>FR-STS-002:</strong> The system shall render the untrusted-skill indicator as persistent shell or screen content visible without opening logs, menus, tooltips, hover states, or settings; a transient toast or notification shall not satisfy this requirement.</li>
+      <li><strong>FR-STS-003:</strong> When a message shaped by a user-enrolled skill is written to the conversation transcript, the system shall permanently attach an unverified-skill badge (skill name and trust source) to that message in every transcript view.</li>
+      <li><strong>FR-STS-004:</strong> While a turn is voice-only, when a reply shaped by a user-enrolled skill is spoken, the system shall display the indicator on the session (conversation) screen at answer time and shall attach the badge to that turn's transcript entry.</li>
+      <li><strong>FR-STS-005:</strong> The system shall derive indicator state exclusively from the router's injection signal delivered over the UICommandBus; the UI shall not read skill files or manifests.</li>
+      <li><strong>FR-STS-006:</strong> Where the injected skill's trust source is <code>curated</code>, the system shall not display the untrusted-skill indicator.</li>
+    </ul>
+    <p><strong>Acceptance Criteria — Untrusted-Skill Indicator (Given/When/Then)</strong></p>
+    <ul>
+      <li><strong>AC-STS-001 (Text mode):</strong> Given a user-enrolled skill matches an artifact task in text mode, when the reply renders, then a persistent indicator naming the skill is visible in the shell at answer time without opening any log or menu, and the reply's transcript message permanently carries the unverified-skill badge.</li>
+      <li><strong>AC-STS-002 (Voice-only turn):</strong> Given a user-enrolled skill matches an artifact task on a voice-only turn, when the handoff is spoken, then the indicator is visible on the session (conversation) screen at answer time, and the turn's entry in the transcript view permanently carries the badge.</li>
+      <li><strong>AC-STS-003 (Curated skill):</strong> Given a curated skill matches an artifact task, when the reply is delivered, then no untrusted-skill indicator is shown, and the §12 provider indicator is unaffected.</li>
+      <li><strong>AC-STS-004 (Oversize skill — nothing injected, nothing indicated):</strong> Given an enrolled skill whose <code>SKILL.md</code> exceeds <code>SKILL_MAX_INJECTED_BYTES</code>, when it is the highest-confidence match for an artifact task, then the router refuses injection, emits <code>router.skill.oversize</code>, the task runs as if no skill matched, and no untrusted-skill indicator is displayed.</li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s26">§26</a> · Decision: PySide6 6.11.1 + ModernGL 5.x (Qt Quick 3D dropped). · Touches: §04 Cross-Platform, §27 Orb, §28 Screens</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §13 Router, §15 YAML Safety, §26 UI, §29 Skills Friction (honest trust boundary, untrusted-skill indicator &amp; injection size cap)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s25.html">← §25 Onboarding Flow</a><a href="../index.html">▲ Overview</a><a href="s27.html">§27 The Orb →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §26 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

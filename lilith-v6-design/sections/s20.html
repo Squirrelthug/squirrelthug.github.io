@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §20 Contacts / People App</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§20 · Contacts / People App — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-app">Application Layer</div>
+
+<details id="s20" open>
+  <summary><span class="s-num">20</span><span class="s-title">Contacts / People App</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong><code>contacts_db</code> is the encrypted people graph: Google People data syncs read-only into canonical contacts, while Lilith can maintain her own local roster rows with L2 relationship summaries.</strong></p>
+
+    <ul>
+      <li><strong>Database:</strong> <code>contacts_db</code> uses SQLCipher with WAL and <code>busy_timeout=5000</code>; all contact PII is encrypted at rest.</li>
+      <li><strong>Google mapping:</strong> People API <code>resourceName</code> -&gt; <code>google_id</code>, first <code>names[].displayName</code> -&gt; <code>name</code>, primary <code>emailAddresses[].value</code> -&gt; <code>email</code>, primary <code>phoneNumbers[].value</code> -&gt; <code>phone</code>, first <code>biographies[].value</code> -&gt; <code>notes</code>, <code>etag</code> -&gt; <code>etag</code>, sync time -&gt; <code>synced_at</code>.</li>
+      <li><strong>Lilith roster:</strong> Contacts created by Lilith/manual entry set <code>google_id=NULL</code>, <code>etag=NULL</code>, and are never written back to Google in v6 v1.</li>
+      <li><strong>L1 enhancement:</strong> Deduplicate by normalized lowercase email first, then E.164-normalized phone; write canonical merge decisions to contacts L1 tables and preserve source ids.</li>
+      <li><strong>L2 enhancement:</strong> <code>contact_l2_summaries.summary</code> answers who this person is, recent interactions from conversation history, and Lilith's local notes; CWM reads only L2 summaries.</li>
+      <li><strong>Tools:</strong> <code>contact_lookup(name: str) -&gt; str</code> and <code>contact_context(name: str) -&gt; str</code>, both <code>artifact_only</code>, both returning L2 text rather than raw contact rows.</li>
+      <li><strong>Telemetry:</strong> Google sync uses <code>sync.contacts.complete</code> from §19; tools emit <code>tool.call.start</code> and <code>tool.call.complete</code> from §15.</li>
+    </ul>
+
+    <pre>CREATE TABLE contacts (
+  id TEXT PRIMARY KEY, google_id TEXT, name TEXT, email TEXT, phone TEXT,
+  notes TEXT, etag TEXT, synced_at REAL, updated_at REAL
+);
+
+CREATE TABLE contact_l2_summaries (
+  id TEXT PRIMARY KEY, contact_id TEXT, summary TEXT, generated_at REAL
+);
+
+People API -&gt; contacts -&gt; L1 dedup canonical person -&gt; L2 relationship summary -&gt; artifact tools/CWM</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s20">§20</a> · Note: Read-only from Google Contacts. Lilith manages her own roster. · Touches: §17 Enhancement, §19 Sync</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s19.html">← §19 Data Sync Pipeline</a><a href="../index.html">▲ Overview</a><a href="s21.html">§21 Finance App →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §20 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

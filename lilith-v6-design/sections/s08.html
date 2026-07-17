@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §08 Testing Standards</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§08 · Testing Standards — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-infra">Infrastructure Layer</div>
+
+<details id="s8" open>
+  <summary><span class="s-num">08</span><span class="s-title">Testing Standards</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>A strict testing framework uses pytest, enforces timeouts, bans database mocking by testing against real SQLCipher connections, and mandates telemetry assertions for all write paths.</strong></p>
+
+    <ul>
+      <li><strong>Test Execution Timeouts:</strong> Enforced to prevent CI hangs. Fast unit sweeps are run via <code>timeout 60 pytest tests/unit/</code>, while the full test suite runs via <code>timeout 180 pytest</code>. A known pre-existing stall in the full-suite interface API tests is acknowledged and temporarily bypassed during CI sweeps.</li>
+      <li><strong>No-DB-Mocking Policy:</strong> Unit and integration tests must run against real SQLCipher databases, not mocked database objects (which cause v5 bugs like lazy evaluation crashes to be missed). A <code>conftest.py</code> fixture creates an in-memory SQLCipher database, keys it with a fixed test passphrase, runs migrations, and tears it down after each test.</li>
+      <li><strong>LLM Testing Integration:</strong> Cloud LLM providers are not mocked. Instead, tests utilize canned JSON fixtures matching the provider's exact payload schema. Live integration tests can optionally run if the <code>ANTHROPIC_API_KEY</code> environment variable is set on the runner.</li>
+      <li><strong>UCL Telemetry Assertions:</strong> Every test covering a write path must assert that the correct dot-namespaced UCL event was emitted. The <code>log_event()</code> function is mocked or wrapped via a custom test handler to record emitted events for validation:
+        <pre>
+def test_create_contact(db_conn, mock_ucl):
+    contact_id = contacts.create(db_conn, name="Steven")
+    assert mock_ucl.has_event("contacts.write.created", {"contact_id": contact_id})</pre>
+      </li>
+      <li><strong>Payload Schema Review:</strong> Every new UCL event must declare its payload fields explicitly in the event schema before implementation. Review must reject catch-all <code>message</code>, <code>context</code>, <code>prompt</code>, <code>traceback</code>, <code>locals</code>, or arbitrary JSON payload fields unless a named exception is approved in the design session. Free-text user content, conversation turns, retrieved context blocks, and LLM-visible prose belong in <code>conversation_db</code> or the source domain database, not in UCL event payloads.</li>
+      <li><strong>Test Layout Directory Mirroring:</strong> Tests mirror the source structure exactly:
+        <ul>
+          <li><code>tests/unit/</code>: Fast, isolated tests for individual functions and classes. Uses LLM response fixtures; mock-free except for external APIs.</li>
+          <li><code>tests/integration/</code>: Multi-component workflows, real database migrations, and optional external API queries. Skipped if necessary credentials are missing.</li>
+        </ul>
+      </li>
+      <li><strong>Sprint Done-Criteria Standard:</strong> Writing a new database insert or mutation function requires delivering a corresponding test that asserts its UCL event emission and validates the event payload against the declared schema before the PR can be merged.</li>
+      <li><strong>Backup→Wipe→Reinstall→Restore Drill (SEC-019, mandatory CI):</strong> <code>tests/integration/test_backup_restore_drill.py</code> is a required, merge-blocking CI test that exercises the full §29 recovery unit end-to-end against real SQLCipher files (no DB mocking, per policy), with the keyring mocked per existing integration conventions. Steps: (1) build a temp <code>APP_INTERNAL_DIR</code> store — all 6 databases keyed with the fixed test passphrase and seeded with known fixture rows, plus <code>salts.dat</code>; (2) export a backup set to a temp external destination through the §29 backup-tool code path, recording per-table row counts and the set's <code>backup.manifest.json</code> hashes; (3) delete the entire temp <code>APP_INTERNAL_DIR</code> (simulated uninstall); (4) create a fresh temp <code>APP_INTERNAL_DIR</code> (simulated reinstall) and run the §25 restore-from-backup flow programmatically against the exported set; (5) open the restored store with the test passphrase. <strong>Pass criteria:</strong> all six restored databases open with the passphrase and pass <code>PRAGMA integrity_check</code>; per-table row counts equal the pre-wipe counts; restored file hashes match the manifest; <code>salts.dat</code> is byte-identical to the exported copy. The drill additionally asserts the §25 failure paths: a wrong passphrase and a deliberately incomplete set must each refuse the restore, leave the exported set unmodified, and emit <code>error.recovery.restore_failed</code> with the correct reason code.</li>
+      <li><strong>PII Detector Recall Corpus (SEC-018, mandatory CI):</strong> The §14 cloud-PII detector is gated by <code>tests/unit/test_pii_detector_recall.py</code>, a merge-blocking unit test that measures detection recall against the fixture corpus <code>tests/unit/fixtures/pii_corpus.json</code> (following the §08 <code>fixtures/</code> convention). The corpus contains annotated positive spans for the three v1 detection classes: person names — including unusual names, nicknames, possessives, and names embedded inside quoted message text — and email/phone format variants (international prefixes, separator styles, extensions; plus-addressed and subdomained emails). <strong>Pass criteria:</strong> person-name recall ≥ 95%, email recall = 100%, phone recall = 100%, computed over the corpus's annotated spans. <strong>Corpus growth rule:</strong> when a recall failure is observed in dogfooding, adding the failing case (or an anonymized equivalent) to the corpus is required as part of the fix, and the fix must restore the thresholds before merge. Precision is not CI-gated in v1 — over-substitution is privacy-conservative; egregious false positives are handled as ordinary bugs.</li>
+    </ul>
+
+    <pre>
+TESTING ARCHITECTURE:
+[ tests/unit/ ] &rarr; Fast, isolated sweeps (timeout 60s)
+  ├── conftest.py          # Real SQLCipher in-memory DB fixture
+  ├── mock_ucl             # Captures and asserts emitted telemetry events
+  └── fixtures/            # Canned JSON payloads for LLM provider schemas
+
+[ tests/integration/ ] &rarr; Full system flows (timeout 180s)
+  ├── conftest.py          # Real temp file DBs, keyring mock setup
+  └── test_voice_stt.py    # Marked as hardware-bound, skipped in headless CI
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s8">§08</a> · Touches: §07 CI/CD, §16 UCL</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §16 UCL (Payload Hygiene)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §08 Testing, §14 CWM (PII claim reconciliation &amp; detector scope)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s07.html">← §07 CI/CD Pipeline</a><a href="../index.html">▲ Overview</a><a href="s09.html">§09 Audio I/O &amp; Platform Audio APIs →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §08 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §11 Text-to-Speech (TTS)</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§11 · Text-to-Speech (TTS) — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-voice">Voice Pipeline</div>
+
+<details id="s11" open>
+  <summary><span class="s-num">11</span><span class="s-title">Text-to-Speech (TTS)</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Lilith v6 uses Kokoro ONNX for local CPU text-to-speech on every hardware tier, with streaming synthesis into a callback-driven output stream so first audio starts within 500 ms.</strong></p>
+
+    <ul>
+      <li><strong>Package pin:</strong> <code>kokoro-onnx==0.5.0</code> with <code>onnxruntime==1.23.2</code> and <code>sounddevice==0.5.5</code>; Kokoro model and code are Apache 2.0 and must be listed in <code>licenses/</code>.</li>
+      <li><strong>Voice:</strong> <code>af_bella</code>, target speaking rate <code>135</code> WPM, mono <code>float32</code> PCM output.</li>
+      <li><strong>Backend:</strong> CPU-only ONNX Runtime provider for Tier 0, Tier 1, and Tier 2; TTS never consumes GPU VRAM reserved for local LLM inference.</li>
+      <li><strong>Latency target:</strong> <code>voice.tts.first_chunk</code> must be emitted within <code>500</code> ms of <code>voice.tts.start</code>; synthesize by sentence/clause and enqueue the first playable PCM chunk as soon as Kokoro yields it.</li>
+      <li><strong>Cloud-path input gate (Fool's NC-4):</strong> On cloud-provider turns, text reaches the sentence/clause chunker only <em>after</em> the §14 reverse-substitution pass: the stream filter holds any open partial tag candidate at a chunk tail (a partial <code>&lt;…&gt;</code> pattern is never released) until it resolves as a tag or is proven not-a-tag — a bounded hold of at most one 16-character candidate per §14's partial-tag hold rule. TTS therefore never receives, and never speaks, a literal or partial anonymous tag; unmapped tags arrive already replaced by §14's neutral placeholders. The 500 ms <code>voice.tts.first_chunk</code> target is measured from <code>voice.tts.start</code> and is unaffected by this upstream hold, whose cost is accounted in §13's conversational budget and measured by the Experiment-1 tokenization on/off delta.</li>
+      <li><strong>Playback:</strong> Use <code>sounddevice.OutputStream(channels=1, samplerate=24000, blocksize=1024)</code>; the PortAudio callback drains a bounded PCM queue, pads underruns with silence, and computes RMS for orb animation.</li>
+      <li><strong>Telemetry:</strong> Emit <code>voice.tts.start</code> (voice, chars), <code>voice.tts.first_chunk</code> (latency_ms, frames), and <code>voice.tts.complete</code> (duration_ms, chunks, success).</li>
+    </ul>
+
+    <pre>text (cloud path: post-§14 reverse-substitution, partial-tag hold applied upstream)
+     -&gt; sentence/clause chunks -&gt; kokoro_onnx CPU synth -&gt; PCM queue -&gt; sounddevice.OutputStream callback -&gt; speakers
+                                  │                                      └-&gt; RMS amplitude -&gt; orb bridge
+                                  └-&gt; UCL: voice.tts.start / first_chunk / complete</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s11">§11</a> · Touches: §05 Hardware Tiers, §09 Audio, §24 Narrative, §27 Orb</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §11 Voice, §12 LLM, §13 Router, §14 CWM (tokenization lifecycle, streaming &amp; latency accounting)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s10.html">← §10 Speech-to-Text (STT)</a><a href="../index.html">▲ Overview</a><a href="s12.html">§12 LLM Integration &amp; Provider Abstraction →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §11 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §18 Memory System</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§18 · Memory System — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-data">Data Layer</div>
+
+<details id="s18" open>
+  <summary><span class="s-num">18</span><span class="s-title">Memory System</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong><code>memory_db</code> separates durable personal truths from warm/cold memory entries, then exposes only fresh L2 memory summaries to the LLM.</strong></p>
+
+    <ul>
+      <li><strong>Database:</strong> <code>memory_db</code> is SQLCipher encrypted and opened with WAL plus <code>busy_timeout=5000</code>.</li>
+      <li><strong>Personal truths:</strong> <code>personal_truths</code> are runtime facts about this user, distinct from EDICTS rules and VOICE style; updates come from explicit user instruction or high-confidence Lilith inference.</li>
+      <li><strong>Warm tier:</strong> <code>tier='warm'</code> for entries accessed within <code>30</code> days or accessed at least <code>3</code> times in the last <code>90</code> days; eligible for CWM recall after L2 summarization.</li>
+      <li><strong>Cold tier:</strong> <code>tier='cold'</code> for older or low-access entries; retained in SQLCipher but deprioritized and only recalled for explicit memory searches or artifact work.</li>
+      <li><strong>Consolidation:</strong> APScheduler daily cron at <code>03:20</code> local time moves warm entries to cold when <code>last_accessed</code> is older than <code>30</code> days and regenerates affected <code>memory_l2_summaries</code>.</li>
+      <li><strong>CWM boundary:</strong> CWM injects <code>personal_truths</code> and <code>memory_l2_summaries</code> only; raw <code>memory_entries</code> bodies never enter provider payloads.</li>
+      <li><strong>Recall mechanism (v6 v1 — single-developer practical implementation):</strong> Two-stage retrieval. Stage 1: recency — <code>SELECT * FROM memory_entries WHERE tier='warm' ORDER BY last_accessed DESC LIMIT 20</code>. Stage 2: FTS5 keyword relevance — <code>SELECT * FROM memory_fts WHERE memory_fts MATCH :query ORDER BY rank LIMIT 10</code>. Results merged, deduplicated, scored by recency + FTS5 rank, top entries passed to L2 for summary. FTS5 external-content table indexes <code>heading || ' ' || body || ' ' || tags</code>. Semantic/vector recall (local embeddings) is a future phase — not in v6 v1. Cold entries only surface on explicit recall queries in artifact mode.</li>
+      <li><strong>Telemetry:</strong> Emit <code>memory.write</code> (tier, action, memory_id), <code>memory.truth.update</code> (key, source), and <code>memory.recall</code> (query_hash, results_returned, stage: 'recency'|'fts5').</li>
+    </ul>
+
+    <pre>CREATE TABLE personal_truths (
+  id TEXT PRIMARY KEY, key TEXT UNIQUE, value TEXT, source TEXT,
+  created_at REAL, updated_at REAL
+);
+
+CREATE TABLE memory_entries (
+  id TEXT PRIMARY KEY, heading TEXT, body TEXT,
+  tier TEXT CHECK(tier IN ('warm','cold')), tags TEXT,
+  created_at REAL, last_accessed REAL
+);
+
+CREATE TABLE memory_l2_summaries (
+  id TEXT PRIMARY KEY, period TEXT, summary TEXT, generated_at REAL
+);</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s18">§18</a> · Touches: §14 CWM, §23 Personality &amp; Truths</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s17.html">← §17 Enhancement Layers (L1/L2)</a><a href="../index.html">▲ Overview</a><a href="s19.html">§19 Data Sync Pipeline →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §18 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

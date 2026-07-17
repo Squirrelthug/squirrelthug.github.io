@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §22 Conversation / Chat App</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§22 · Conversation / Chat App — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-app">Application Layer</div>
+
+<details id="s22" open>
+  <summary><span class="s-num">22</span><span class="s-title">Conversation / Chat App</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Every message is tagged with an endpoint — response format and capabilities are determined by the endpoint, not by the content.</strong></p>
+
+    <p><strong>Database schemas (conversation_db — SQLCipher encrypted):</strong></p>
+    <pre>sessions(
+  id          TEXT PRIMARY KEY,
+  started_at  REAL NOT NULL,
+  ended_at    REAL,                -- NULL = session still open
+  endpoint_id TEXT NOT NULL,
+  turn_count  INTEGER DEFAULT 0
+)
+
+turns(
+  id            TEXT PRIMARY KEY,
+  session_id    TEXT REFERENCES sessions(id),
+  role          TEXT CHECK(role IN ('user','assistant')),
+  text          TEXT NOT NULL,
+  timestamp     REAL NOT NULL,
+  endpoint_id   TEXT NOT NULL,
+  endpoint_type TEXT NOT NULL,
+  mode          TEXT CHECK(mode IN ('conversational','artifact')),
+  token_count   INTEGER
+)</pre>
+
+    <ul>
+      <li><strong>Endpoint types:</strong>
+        <ul>
+          <li><code>desktop</code> — full artifacts OK, markdown rendered, no token cap</li>
+          <li><code>kitchen_speaker</code> (deferred, future) — voice-only, ≤150 tokens, no markdown, no artifacts. Integrates with the "zero clearance, candid decline" model when implemented.</li>
+          <li><code>mobile</code> (future) — voice + text, artifacts deferred to desktop hub</li>
+        </ul>
+      </li>
+      <li><strong>Response format rules:</strong> router checks <code>endpoint.capabilities</code> before generating. <code>kitchen_speaker</code> receives a stripped plain-text response regardless of artifact mode — artifacts are queued for desktop delivery.</li>
+      <li><strong>Desktop text mode:</strong> The desktop chat screen is always available regardless of which endpoint lane the user is viewing. It includes a standard typed input composer, sends typed submissions through the same router and CWM policy as voice turns, records them as ordinary conversation turns, and returns the assistant response as text in the chat UI. Typed chat does not force TTS playback.</li>
+      <li><strong>TTS on demand:</strong> Every assistant message rendered in desktop chat exposes a per-message speaker/play control. When the user activates that control, Lilith speaks that message through the configured TTS voice and records the playback request separately from the original assistant turn. Highlighted text inside an assistant message exposes the same speak-selection affordance, speaking only the selected text. Automatic voice playback remains a voice-surface behavior; desktop text mode is opt-in for TTS.</li>
+      <li><strong>Endpoint Isolation Architecture:</strong> To prevent data crossover and leakage, each endpoint operates as a fully isolated communication lane.
+        <ul>
+          <li><strong>Session Scoping:</strong> Every session in the database is strictly bound to a single <code>endpoint_id</code>. Sessions cannot span or continue across multiple endpoints, avoiding shared "active context" bleed.</li>
+          <li><strong>Context and Notification Isolation:</strong> Dynamic context blocks (L1/L2) are built exclusively from the active session's parameters. Notifications and outbound payloads are sent only to the initiating endpoint; a message on one endpoint never triggers alerts or notifications on another.</li>
+          <li><strong>Centralized Desktop Chat:</strong> The sole exception is the desktop chat screen, which offers a centralized, side-by-side view of each distinct lane (rendered per conversation/endpoint) rather than a merged single timeline.</li>
+        </ul>
+      </li>
+      <li><strong>Endpoint Authorization Tiers:</strong> Endpoints are categorized by identity verification:
+        <ul>
+          <li><strong>Identity-Bound:</strong> Endpoints with reliable identity signals (e.g., Discord username) can be configured to filter and respond only to an authorized user identity, ignoring all other requests.</li>
+          <li><strong>Zero-Clearance Ambient:</strong> Ambient/no-login devices (e.g., future <code>kitchen_speaker</code>) are granted zero security clearance. Sensitive queries involving finances, contacts, or personal memories are candidly declined over voice ("I cannot access that information without authentication") and redirect the user to an authenticated app surface.</li>
+        </ul>
+      </li>
+      <li><strong>Session lifecycle:</strong> session created on first turn. Session closed after 30 minutes of silence (APScheduler periodic check). A new turn after closure creates a new session.</li>
+      <li><strong>Chat screen rendering:</strong> <code>QListView</code> with virtualized delegate. Conversational turn → speech bubble (left-aligned, minimal). Artifact response → panel card (full width, tool name header, timestamp, expandable content). Pending response → inline latency bridge tied to the active turn. Source tag on each item: endpoint type + timestamp.</li>
+      <li><strong>Cross-device indicator:</strong> (Obsoleted by endpoint isolation) Because sessions cannot continue across different endpoints, this indicator is no longer used for session continuation; the desktop chat screen instead uses endpoint tags to label separate lanes in its centralized view.</li>
+      <li><strong>UCL events:</strong> <code>user.query.received</code> (endpoint_id, endpoint_type, input_modality), <code>user.query.classified</code> (mode), <code>tts.playback.requested</code> (turn_id, scope, char_count), logged per turn.</li>
+      <li><strong>Endpoint-Authorization Policy Home (SEC-024 / Fool's NC-5, Normative — ADR-013):</strong> The frozen database schema's <code>endpoint_id</code> in the <code>sessions</code> and <code>turns</code> tables is sufficient to scope history and enforce isolation. There is deliberately <em>no</em> schema table for endpoint configurations, authorized user identities, or clearance settings, because v6 v1 ships only the local <code>desktop</code> endpoint (deferred <code>kitchen_speaker</code> is zero-clearance ambient, needing no stored identity). <strong>Decision (v6 v1):</strong> endpoint-authorization policy — endpoint configurations, authorized identities, and clearance settings — lives in the file-based <code>config.json</code>. This is recorded as an <strong>explicit accepted risk within §02's same-user threat boundary</strong>: <code>config.json</code> sits under <code>APP_INTERNAL_DIR</code> with <code>0700/0600</code> permissions and carries <em>no secrets</em> (all secrets stay in the keychain per §02), and the same-user local adversary who could read or rewrite it is already conceded by §02's threat model, so plaintext policy adds no exposure v1 does not already accept. <strong>Binding migration trigger (normative, not a vague "future migration"):</strong> before any <em>identity-bound</em> endpoint (e.g., Discord — §22 Endpoint Authorization Tiers) is implemented, this policy MUST move out of <code>config.json</code> into an encrypted SQLCipher database with every authorization change written through the UCL (§16) as an auditable event. Identity-bound authorization is a security decision whose integrity and audit trail a plaintext file cannot provide; implementing such an endpoint while its policy still lives in <code>config.json</code> is a spec violation. See <code>ADR-013-endpoint-authz-policy-home.md</code>.</li>
+      <li><strong>Accessibility scope:</strong> Blind/deaf-user accommodation and broader accessibility design are deliberately out of scope for v6 v1, not omitted by accident; this v1 decision should be revisited in a future accessibility pass.</li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s22">§22</a> · Touches: §13 Router, §14 CWM, §18 Memory, §24 Narrative, §28 Screens</div>
+    <div class="s-meta">Amendment added: 2026-07-03 · Touches: §13 Router, §22 Conversation App (Endpoint Isolation &amp; Authorization Tiers)</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §13 Router, §22 Conversation App, BUILD_SEQUENCING.md (Latency Bridge &amp; Text Mode)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §06 Lifecycle, §12 LLM, §22 Conversation App (consistency pass: bearer-token keychain row, lifecycle diagram redraw, locked-box reconciliation, endpoint-authz decision)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s21.html">← §21 Finance App</a><a href="../index.html">▲ Overview</a><a href="s23.html">§23 Personality System &amp; System Prompt →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §22 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

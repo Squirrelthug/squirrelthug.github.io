@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §07 CI/CD Pipeline</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§07 · CI/CD Pipeline — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-infra">Infrastructure Layer</div>
+
+<details id="s7" open>
+  <summary><span class="s-num">07</span><span class="s-title">CI/CD Pipeline</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>A GitHub Actions matrix runs build-and-test sequences across Linux, macOS, and Windows, generating platform-specific packages via PyInstaller --onedir mode to guarantee LGPL Relinking compliance.</strong></p>
+
+    <ul>
+      <li><strong>Pipeline Triggers:</strong> Executes automatically on <code>push</code> to the <code>main</code> branch and on all <code>pull_request</code> events targeting <code>main</code>.</li>
+      <li><strong>Multi-Platform Runner Matrix:</strong>
+        <ul>
+          <li><code>ubuntu-latest</code> (Linux AppImage output)</li>
+          <li><code>macos-latest</code> (macOS Apple Silicon/Intel .dmg output)</li>
+          <li><code>windows-latest</code> (Windows x64 installer/.exe output)</li>
+        </ul>
+      </li>
+      <li><strong>Standard Build Steps (All Jobs):</strong>
+        <ol>
+          <li>Checkout code via <code>actions/checkout@v4</code>.</li>
+          <li>Set up Python 3.12 via <code>actions/setup-python@v5</code> (pip cache enabled).</li>
+          <li>Install dependencies via <code>pip install -r requirements.txt</code> (prefer-binary flag active for C extensions).</li>
+          <li>Run test suite via <code>pytest --timeout=60 -v</code> (skips hardware-bound audio/keyring tests).</li>
+          <li>Compile resources via <code>pyside6-rcc lilith/ui/resources.qrc -o lilith/ui/resources_rc.py</code>.</li>
+          <li>Run PyInstaller via <code>pyinstaller lilith.spec --onedir</code>.</li>
+          <li>Upload compiled directory as build artifact via <code>actions/upload-artifact@v4</code>.</li>
+        </ol>
+      </li>
+      <li><strong>Windows Build Environment:</strong> The <code>windows-latest</code> runner utilizes its pre-installed MSVC C++ Build Tools to resolve source compilations if wheels fail. Developer signing keys are injected securely via GitHub Secrets.</li>
+      <li><strong>PyInstaller Hidden Imports:</strong> The <code>lilith.spec</code> includes explicit hidden imports required for runtime resolution: <code>["PySide6.QtOpenGLWidgets", "moderngl", "sqlcipher3-wheels", "ctranslate2", "sounddevice"]</code>.</li>
+      <li><strong>LGPL Relinking Compliance:</strong> Distributing using <code>--onedir</code> (One-Folder mode) is a strict requirement. It keeps Python source bytecode (compiled to <code>.pyc</code>) and native PySide6 dynamic libraries (<code>.so</code> / <code>.dylib</code> / <code>.dll</code>) as separate files. This enables end-users to swap out the Qt binary files with modified versions, complying with the GNU LGPL v3 license.</li>
+      <li><strong>Security Tooling Jobs (mandatory from Sprint 1):</strong> A dedicated <code>security</code> job group runs on <code>ubuntu-latest</code> only — static analysis is platform-independent, so it does not enter the 3-OS build matrix and never pays the 10&times; macOS/Windows runner cost — executing in parallel with the build matrix. All four jobs are <strong>required status checks</strong>: a failure blocks merge to <code>main</code> exactly as a failing build or test does (this is the §07 counterpart to §08's merge-blocking CI tests; the two do not overlap — §08 gates behavioural test coverage, §07 gates static security posture). None of these jobs require or receive production credentials, keychain material, SQLCipher passphrases, or BYOK cloud LLM keys — they are static readers of source and dependency metadata. The only token in scope is the auto-provided, ephemeral <code>GITHUB_TOKEN</code> (checkout and annotation posting); any token a job ever needs is supplied through GitHub's encrypted-secrets mechanism and never committed to a file, consistent with §02's keychain-only / no-secrets-in-files standard.
+        <ol>
+          <li><strong><code>bandit</code> — Python SAST over the source tree:</strong> runs <code>bandit -r lilith/ -c pyproject.toml</code> on every <code>push</code> and every <code>pull_request</code>. Baseline configuration lives in a <code>[tool.bandit]</code> table in <code>pyproject.toml</code> (single source of truth, versioned with the code). <strong>Gate:</strong> findings at <em>HIGH severity with &ge; MEDIUM confidence</em> block the merge; MEDIUM severity is surfaced as a warning annotation; LOW severity/confidence is informational only. <strong>Suppression:</strong> a specific inline <code>&#35; nosec BXXX &mdash; &lt;justification&gt;</code> comment naming the rule id and the reason; a rule-less blanket <code>&#35; nosec</code> is rejected in review.</li>
+          <li><strong><code>semgrep</code> — multi-rule SAST:</strong> runs <code>semgrep ci --config=auto --error</code> on every <code>push</code> and every <code>pull_request</code>. <code>--config=auto</code> selects the community-registry ruleset matched to the repository's languages; it runs with no <code>SEMGREP_APP_TOKEN</code> and no login, uploads no source, and transmits only anonymous language/framework metadata to select rules. <strong>Gate:</strong> <code>ERROR</code>-severity findings block the merge; <code>WARNING</code>/<code>INFO</code> warn only. <strong>Suppression:</strong> an inline <code>&#35; nosemgrep: &lt;rule-id&gt; &mdash; &lt;justification&gt;</code> comment, or a path entry in <code>.semgrepignore</code> carrying a justifying comment.</li>
+          <li><strong><code>pip-audit</code> — dependency vulnerabilities:</strong> runs <code>pip-audit -r requirements.txt --strict</code> on every <code>push</code> and <code>pull_request</code>, and additionally on a weekly <code>schedule</code> trigger to catch advisories newly disclosed against unchanged, already-merged pins. <strong>Gate:</strong> any advisory <em>for which a fixed version is available</em> blocks the merge; an advisory with no upstream fix warns and is tracked through an explicit <code>--ignore-vuln &lt;ID&gt;</code> entry that carries a comment (advisory id plus why it is unfixable or not reachable in Lilith's usage), re-reviewed at every dependency bump. <strong>Suppression:</strong> the <code>--ignore-vuln</code> allowlist only; there is no blanket disable.</li>
+          <li><strong><code>gitleaks</code> — secret scanning over the repo and history:</strong> on every <code>push</code> and <code>pull_request</code> it scans the incoming commit range (fast, PR-scoped); on <code>push</code> to <code>main</code> and on a weekly <code>schedule</code> it scans the <strong>full history</strong> (<code>--log-opts="--all"</code>). This split keeps per-PR runs cheap while guaranteeing a periodic whole-history sweep so a secret introduced and later force-pushed away on a branch is still caught, and any historical leak that slipped past a diff scan is surfaced. Baseline is the default gitleaks ruleset, optionally extended by a repo <code>.gitleaks.toml</code>. <strong>Gate:</strong> any finding blocks the merge — a committed secret has no "low severity" tier. <strong>Suppression:</strong> a fingerprint line in <code>.gitleaksignore</code> with a trailing justification comment, or an inline <code>gitleaks:allow</code> on a confirmed false positive.</li>
+        </ol>
+      </li>
+      <li><strong>Anti-Rot Triage Discipline:</strong> Every suppression across all four tools is (a) per-finding, never a blanket disable; (b) co-located with the flagged code or committed as a tracked config line; (c) accompanied by a written justification; and (d) therefore visible in the pull-request diff and reviewed before merge. Disabling a security job, deleting its severity gate, or committing a rule-less blanket suppress is a spec violation, not a shortcut. A per-sprint <em>suppression audit</em> greps for <code>nosec</code>, <code>nosemgrep</code>, <code>.semgrepignore</code>, <code>--ignore-vuln</code>, and <code>.gitleaksignore</code> entries and re-confirms each justification still holds, removing stale ones so the gate cannot silently rot into ignore-everything. The severity thresholds are deliberately tuned to the true-positive tier of each tool (bandit HIGH+MEDIUM, semgrep ERROR, pip-audit fixable-only, gitleaks any) so the gate is cheap enough for a solo developer to keep enabled rather than route around — an over-noisy gate that gets disabled protects nothing.</li>
+    </ul>
+
+    <pre>
+GITHUB ACTIONS WORKFLOW:
+Trigger: push/PR to main
+  ├── job: build-linux   (ubuntu-latest)  &rarr; AppImage &rarr; Upload Artifact
+  ├── job: build-macos   (macos-latest)   &rarr; codesign &rarr; .dmg &rarr; Notarize &rarr; Upload
+  ├── job: build-windows (windows-latest) &rarr; MSVC build &rarr; OV Sign &rarr; .zip &rarr; Upload
+  └── security (ubuntu-latest, parallel; every job a required status check):
+        ├── bandit    &rarr; Python SAST over lilith/    (gate: HIGH sev + &ge;MED conf)
+        ├── semgrep   &rarr; --config=auto               (gate: ERROR severity)
+        ├── pip-audit &rarr; requirements.txt CVEs        (gate: fixable advisory; + weekly schedule)
+        └── gitleaks  &rarr; secrets: PR-range on push/PR (gate: any finding; full history on main + weekly)
+
+PyInstaller Rationale:
+  [ --onedir ] distribution folder:
+  ├── lilith.exe (proprietary code, compiled bytecode)
+  ├── PySide6/   (dynamic link libraries: users can replace these files)
+  └── licenses/  (copies of LGPL v3 and GPL v3 license agreements)
+    </pre>
+
+    <p><strong>Normative example — <code>.github/workflows/security.yml</code></strong> (the <code>security</code> job group; may be merged into the main CI workflow file). The four jobs are static analysers, take no production credentials, and run under least-privilege <code>contents: read</code> permissions:</p>
+    <pre>
+name: Security
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'        # weekly Mon 06:00 UTC: pip-audit + gitleaks full-history sweep
+
+permissions:
+  contents: read              # least privilege; no packages / deployments scope
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install bandit
+      # baseline in [tool.bandit] of pyproject.toml; HIGH sev + >=MED confidence blocks
+      - run: bandit -r lilith/ -c pyproject.toml --severity-level high --confidence-level medium
+
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install semgrep
+      - run: semgrep ci --config=auto --error     # ERROR blocks; no SEMGREP_APP_TOKEN, no source upload
+
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install pip-audit
+      # add justified `--ignore-vuln &lt;ID&gt;` entries only for advisories with no upstream fix
+      - run: pip-audit -r requirements.txt --strict
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }   # full history available for main-push / scheduled sweep
+      # PRs scan the incoming range; main-push &amp; schedule scan --log-opts="--all"
+      - run: gitleaks detect --redact --exit-code 1
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s7">§07</a> · Touches: §04 Cross-Platform, §08 Testing</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §07 CI Pipeline (mandatory security tooling jobs: bandit, semgrep, pip-audit, gitleaks)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s06.html">← §06 Process Lifecycle &amp; Recovery</a><a href="../index.html">▲ Overview</a><a href="s08.html">§08 Testing Standards →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §07 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

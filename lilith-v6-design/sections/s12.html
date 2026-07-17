@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §12 LLM Integration & Provider Abstraction</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§12 · LLM Integration &amp; Provider Abstraction — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-intel">Intelligence Layer</div>
+
+<details id="s12" open>
+  <summary><span class="s-num">12</span><span class="s-title">LLM Integration &amp; Provider Abstraction</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Lilith v6 uses a small in-house async provider adapter, with Anthropic as the BYOK primary provider and Ollama as the Tier 1/2 local fallback.</strong></p>
+
+    <ul>
+      <li><strong>Adapter contract:</strong> <code>complete(messages: list[dict], system: list[dict], stream: bool = True) -&gt; AsyncIterator[str]</code>; one implementation per provider, no LiteLLM in v6 v1.</li>
+      <li><strong>Anthropic primary:</strong> <code>anthropic==0.112.0</code>, model <code>claude-sonnet-4-6</code>, streaming enabled, with <code>cache_control={&quot;type&quot;:&quot;ephemeral&quot;}</code> on stable EDICTS and VOICE prefix blocks only.</li>
+      <li><strong>Ollama fallback:</strong> Use the OpenAI-compatible local endpoint through <code>openai==2.44.0</code> with <code>base_url=&quot;http://127.0.0.1:11434/v1&quot;</code> (the base URL is user-configurable in <code>config.json</code> to support custom reverse-proxy setups; any bearer token for that proxy is a secret and is read from the OS keychain key <code>ollama_bearer_token</code> under service <code>"com.squirrelthug.lilith"</code> — §02's canonical credentials table — never from <code>config.json</code>); keep the selected local model warm on Tier 1/2.</li>
+      <li><strong>Provider selection:</strong> Read key <code>anthropic_api_key</code> under service <code>"com.squirrelthug.lilith"</code> from python-keyring (as defined in §02's canonical credentials table); if present use Anthropic, otherwise use Ollama when hardware tier is 1 or 2, otherwise return onboarding error <code>missing_cloud_key</code>.</li>
+      <li><strong>Budgets:</strong> Conversational mode hard cap <code>&lt;=1200</code> volatile context tokens and <code>&lt;=50</code> output tokens; artifact mode has no fixed output cap but still streams and records usage.</li>
+      <li><strong>Context safety:</strong> Provider payloads receive only CWM-approved L1/L2 context; raw DB rows are never passed to <code>complete()</code>.</li>
+      <li><strong>Telemetry:</strong> Emit <code>llm.call.start</code> (provider, model, mode) and <code>llm.call.complete</code> (tokens_in, tokens_out, latency_ms, success).</li>
+      <li><strong>Ollama Auto-Setup &amp; Installer:</strong> If Ollama fallback is selected but the Ollama binary is absent, the daemon is not running, or the required local model is missing, Lilith triggers an automated setup flow. Before initiating downloads, the system presents a clear disclosure screen detailing the estimated download size (up to several gigabytes for CUDA dependencies and LLM models), estimated time, and warns that a system reboot may be required. Download and installation proceed only upon receiving explicit user consent. Progress state is persisted to a setup marker file (<code>APP_INTERNAL_DIR/config.json</code>) so that setup can resume automatically if interrupted (e.g., by a system restart).</li>
+      <li><strong>Installer Provenance &amp; Integrity (SEC-017):</strong> The auto-installer is the only place in the design where Lilith fetches remote code and executes it, and it is hardened accordingly. Installer binaries are downloaded exclusively from a compile-time allowlist of official Ollama HTTPS release endpoints; redirects that leave the allowlisted hosts are refused, and TLS certificate validation is always enforced with no configuration or UI override. Every downloaded artifact is verified against a pinned SHA-256 checksum or vendor signature (see the trust anchor below) <em>before</em> it is executed; on mismatch the artifact is deleted, the flow aborts (<code>error.ollama.install_integrity_failed</code>), and no "run anyway" option exists. <strong>Trust anchor (SEC-026):</strong> the reference the artifact is verified against is pinned in the application, never fetched over the same channel as the artifact. Where the platform artifact carries a vendor signature — at the time of writing, <code>OllamaSetup.exe</code> is Authenticode-signed on Windows and the macOS app is Developer ID-signed and notarized — the signature is verified against a signing identity pinned in the application. Where it does not (the Linux release tarballs ship unsigned), the artifact is verified against a per-release SHA-256 hash pinned in the application, updated only through app updates — themselves the developer-signed channel. A checksum fetched at runtime from the same origin as the artifact (e.g. the release's published <code>sha256sum.txt</code> asset) is never acceptable as the sole integrity mechanism: a compromised origin serves a tampered artifact and its matching checksum together, which is precisely the supply-chain adversary this paragraph exists to defend against. Elevation is never invoked silently — the verified installer is handed to the OS-standard elevation prompt (Windows UAC, Linux polkit, macOS Authorization Services) so the user sees what is executing. On resume after an interruption or reboot, prior consent may persist but integrity is re-proven by re-hashing the artifact before installation continues. Successful installs are audited to the UCL as <code>sync.ollama.install_verified</code> (installer version + verified hash). Model pulls via the Ollama registry API inherit whatever integrity Ollama's own registry mechanisms provide; that reliance is a documented, accepted dependency.</li>
+      <li><strong>Ollama Endpoint Verification &amp; Security (SEC-008):</strong> To mitigate unauthenticated localhost binding risks, Lilith performs a startup verification check (querying <code>/api/version</code> and confirming that the configured model exists in the local registry) before sending any context data during a session. Custom endpoints can configure a custom base URL (in <code>config.json</code>) and a bearer token (in the keychain as <code>ollama_bearer_token</code>, §02's canonical table — SEC-020: a bearer token is a credential and is never written to <code>config.json</code>). If verification fails or a port hijack is detected, all outbound context is blocked, and an error is logged. <strong>Composition with the §14 tokenization bypass (Fool's NC-3):</strong> because the §14 cloud-PII tokenization pass is bypassed for local inference, un-tokenized names, email addresses, and phone numbers flow to this endpoint while its verification remains best-effort — see §14's Local-Path Composition recorded decision (2026-07-12), which accepts this composition within §02's same-user threat boundary.</li>
+      <li><strong>Provider Visibility (SEC-008):</strong> The application UI displays a persistent, always-visible status indicator showing the active LLM provider (Anthropic Cloud vs. Local Ollama) so the user is always aware of where their context is sent, updating dynamically upon any provider selection changes.</li>
+    </ul>
+
+    <pre>select_provider()
+  if keyring has anthropic_api_key (service "com.squirrelthug.lilith") -&gt; AnthropicAdapter(claude-sonnet-4-6)
+  elif tier in {1,2}          -&gt; 
+    verify_ollama_endpoint()
+    if success -&gt; OllamaAdapter(http://127.0.0.1:11434/v1)
+    else       -&gt; run_automated_installer_flow()
+  else                        -&gt; onboarding error: missing_cloud_key
+
+CWM messages + system -&gt; adapter.complete(..., stream=True) -&gt; text deltas -&gt; router/TTS</pre>
+
+    <p><strong>Functional Requirements (EARS Format)</strong></p>
+    <ul>
+      <li>When the provider selection logic falls back to Ollama, the system shall check for the presence of the Ollama binary in the system PATH (or application internal directory) and verify if the Ollama service is active.</li>
+      <li>When Ollama installation, service activation, or model pulling is required, the system shall present a clear disclosure screen detailing the estimated download size, download time, and a disclaimer that a system restart may be required.</li>
+      <li>The system shall only initiate the download and installation process after the user explicitly accepts the disclosure.</li>
+      <li>If the Ollama binary is absent and user consent is granted, the system shall download the installer subject to the provenance requirements below and shall run the platform-appropriate installation only after integrity verification succeeds.</li>
+      <li>When the Ollama daemon is running but the configured model is missing from the local registry, the system shall invoke the Ollama model pull API automatically.</li>
+      <li>While an installation or model pull is active, the system shall persist progress state to a setup marker file, enabling the system to resume the setup flow from the last known state if the application is restarted or the OS reboots.</li>
+      <li>Before sending any CWM context payload during a session, the system shall verify the Ollama endpoint by querying <code>/api/version</code> and checking that the target model is present in the local registry.</li>
+      <li>If endpoint verification fails, the system shall block all context transmission to localhost and log the verification failure.</li>
+      <li>Where the user opts to front Ollama with a custom reverse proxy, the system shall read the configurable base URL from <code>config.json</code> and shall read the optional bearer authentication token exclusively from the OS keychain (<code>ollama_bearer_token</code>, service <code>"com.squirrelthug.lilith"</code>, per §02's canonical credentials table), written by Settings; the system shall never persist that bearer token in <code>config.json</code> or any other plaintext file.</li>
+      <li>The system shall display a persistent, always-visible UI indicator in the main application shell reflecting the active LLM provider.</li>
+      <li>If the Anthropic key is removed or fails validation, forcing a fallback to Ollama, the system shall update the provider indicator immediately.</li>
+      <li>The system shall download Ollama installer artifacts only from an allowlist of official Ollama HTTPS release endpoints compiled into the application; the allowlist shall not be extendable at runtime by configuration or user input.</li>
+      <li>If an installer download response redirects to a host outside the compiled-in allowlist, the system shall refuse the redirect, abort the download, delete any partial artifact, and log <code>error.ollama.install_source_refused</code>.</li>
+      <li>The system shall enforce TLS certificate validation on every installer download connection and shall provide no mechanism — configuration flag, environment variable, or UI action — to disable or override it.</li>
+      <li>Before executing any downloaded installer artifact, the system shall verify the artifact for the exact release being installed against a trust anchor pinned in the application: a vendor signature checked against an application-pinned signing identity where the platform artifact is signed, otherwise an application-pinned per-release SHA-256 hash; the system shall not treat a checksum fetched at runtime from the same origin as the artifact as the sole integrity mechanism (SEC-026).</li>
+      <li>If installer integrity verification fails, the system shall abort the installation without executing the artifact, delete the artifact, log <code>error.ollama.install_integrity_failed</code>, and display a user-facing integrity error; the system shall offer no option to execute an unverified artifact.</li>
+      <li>Where installer execution requires elevated privileges, the system shall request elevation exclusively through the operating system's standard elevation mechanism (Windows UAC, Linux polkit, macOS Authorization Services) so the user sees what is executing; the system shall never invoke elevation silently.</li>
+      <li>While a setup marker indicates an interrupted installer download or installation, when the setup flow resumes after an application restart or OS reboot, the system shall re-verify the artifact's SHA-256 hash before installation continues; persisted consent shall not substitute for re-verification, and a mismatch shall take the same abort path as a failed initial verification.</li>
+      <li>When installer integrity verification succeeds and installation completes, the system shall log the installer version and verified SHA-256 hash to the UCL as <code>sync.ollama.install_verified</code>.</li>
+      <li>The system shall treat model pulls performed through the Ollama registry API as relying on Ollama's own registry integrity mechanisms; this reliance is a documented accepted dependency, and the system shall not represent pulled models as independently integrity-verified by Lilith.</li>
+    </ul>
+
+    <p><strong>Acceptance Criteria (Given/When/Then)</strong></p>
+    <ul>
+      <li><strong>AC-001 (Happy Path - Auto-Install):</strong> Given a Tier 1/2 user without an Anthropic API key and lacking Ollama, when Lilith starts up, then Lilith displays the Ollama Disclosure Screen warning of a multi-gigabyte download and potential system restart. When the user accepts, then Lilith downloads the installer from an allowlisted official Ollama release endpoint over validated TLS, verifies its SHA-256 checksum or vendor signature before execution, runs it (via the OS-standard elevation prompt where elevation is required), starts the daemon, pulls the model, displays progress, and updates the persistent UI indicator to "Local Ollama" upon completion.</li>
+      <li><strong>AC-002 (Setup Resumption):</strong> Given an Ollama setup flow that was interrupted mid-download by a system reboot, when Lilith restarts, then Lilith detects the partial setup marker and resumes the model pull/installation automatically without re-prompting the user for consent; before any previously downloaded installer artifact is executed, Lilith re-verifies its SHA-256 hash and proceeds only if re-verification succeeds (a mismatch takes the AC-005 abort path).</li>
+      <li><strong>AC-003 (Disk Space Failure):</strong> Given a target installation directory with less than 15 GB of available disk space, when the user accepts the Ollama installation prompt, then Lilith halts the installation, displays a disk space error message, and writes the <code>error.ollama.disk_full</code> event to the UCL.</li>
+      <li><strong>AC-004 (Port Hijack Detection):</strong> Given an unauthorized local process bound to port 11434 that does not respond to <code>/api/version</code>, when Lilith attempts the startup endpoint check, then Lilith halts the connection, blocks context outflow, logs <code>error.ollama.port_hijack</code>, and displays a warning to the user that the port is occupied by an unexpected process.</li>
+      <li><strong>AC-005 (Installer Integrity Mismatch):</strong> Given a fully downloaded installer artifact whose SHA-256 hash does not match the application-pinned per-release checksum or whose vendor signature fails validation against the application-pinned signing identity, when Lilith performs pre-execution verification, then Lilith aborts the installation without executing the artifact, deletes the artifact, writes <code>error.ollama.install_integrity_failed</code> to the UCL, and displays an integrity error screen that offers a fresh retry but no option to run the unverified artifact.</li>
+      <li><strong>AC-006 (Off-Allowlist Source Refused):</strong> Given a download attempt whose URL or redirect chain resolves to a host outside the compiled-in allowlist of official Ollama HTTPS endpoints (e.g., a network-position attacker or a compromised/typosquatted mirror), when Lilith processes the redirect, then Lilith refuses it, aborts the download, deletes any partial artifact, writes <code>error.ollama.install_source_refused</code> to the UCL, and displays a source-verification error — no artifact bytes are ever executed.</li>
+      <li><strong>AC-007 (Tampered Artifact on Resume):</strong> Given an interrupted setup with a persisted marker whose downloaded artifact was modified on disk during the interruption, when Lilith restarts and resumes the setup flow, then re-verification of the artifact's SHA-256 hash fails and Lilith takes the identical abort path as AC-005 — delete the artifact, write <code>error.ollama.install_integrity_failed</code>, display the integrity error — without executing the artifact, despite the persisted consent.</li>
+      <li><strong>AC-008 (No Silent Elevation):</strong> Given a verified installer that requires elevated privileges, when Lilith launches it, then the operating system's standard elevation prompt (UAC / polkit / macOS Authorization Services) is presented to the user and installation proceeds only after the user approves at the OS level; at no point does Lilith elevate without the OS prompt being shown.</li>
+      <li><strong>AC-009 (Verified Install Audit Trail):</strong> Given an installation that passed integrity verification and completed successfully, when the setup flow finishes, then the UCL contains a <code>sync.ollama.install_verified</code> event recording the installer version and the verified SHA-256 hash.</li>
+    </ul>
+
+    <p><strong>Error Handling</strong></p>
+    <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; border: 1px solid var(--border); background: var(--surface2);">
+      <thead>
+        <tr style="background: var(--surface); border-bottom: 2px solid var(--border); color: var(--accent);">
+          <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">Error Event Code</th>
+          <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">Trigger Condition</th>
+          <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">System Mitigation</th>
+          <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">User Experience</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.install_failed</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Install script or command fails with a non-zero exit code or timeout.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Release partial setup lock; log installer stdout/stderr to <code>logs/setup.log</code>.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Displays installer failure screen with a "Retry" button and a link to local logs.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.pull_failed</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Model pull API returns an error or connection drops repeatedly.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Await network restoration; keep partial download state using Ollama's resume capability.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Displays a connection error with a "Resume Download" button.</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.port_hijack</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Port 11434 is bound, but verification check fails or returns incorrect version metadata.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Block all connection attempts to the localhost port; raise a startup error.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Displays warning: "Port 11434 is bound by an unexpected process. Please close conflicting software."</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.verify_failed</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Ollama service is active but the required model is missing from registry.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Trigger a background model pull request to fetch the missing model.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Shows a progress bar: "Pulling required model. Please wait..."</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.disk_full</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">System reports less than 15 GB free space before starting downloads.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Terminate setup flow before downloading; log available and required space.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Displays warning: "Insufficient disk space. 15 GB required, [X] GB available. Please free up space."</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.install_source_refused</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Installer download URL or redirect chain resolves outside the compiled-in allowlist of official Ollama HTTPS endpoints, or TLS certificate validation fails.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Refuse before any artifact bytes are executed; abort the download; delete partial artifacts; do not retry against the refused host.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Displays error: "Installer download blocked — the download source could not be verified as official Ollama. Check your network and retry."</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.ollama.install_integrity_failed</code></td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Downloaded installer artifact fails SHA-256 checksum or vendor signature verification before execution (initial download or resume-after-reboot re-verification).</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Abort without executing; delete the artifact; require a fresh download from an allowlisted source on retry. No "run anyway" path exists.</td>
+          <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Displays error: "The downloaded installer failed integrity verification and was deleted. Retry the download."</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="s-meta">Checklist: <a href="../checklist.html#s12">§12</a> · Touches: §02 Security, §05 Tiers, §13 Router, §14 CWM, §15 Tools</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §05 Tiers, §12 Ollama Auto-Install, §25 Onboarding, §26 UI Indicator</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §12 LLM (reconciled keychain service and keys)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §12 LLM (installer provenance &amp; integrity verification)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §11 Voice, §12 LLM, §13 Router, §14 CWM (tokenization lifecycle, streaming &amp; latency accounting)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §06 Lifecycle, §12 LLM, §22 Conversation App (consistency pass: bearer-token keychain row, lifecycle diagram redraw, locked-box reconciliation, endpoint-authz decision)</div>
+    <div class="s-meta">Amendment added: 2026-07-17 · Touches: §12 LLM (round-3 security review SEC-026: installer verification trust anchor pinned in the application)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s11.html">← §11 Text-to-Speech (TTS)</a><a href="../index.html">▲ Overview</a><a href="s13.html">§13 Two-Mode Router →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §12 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

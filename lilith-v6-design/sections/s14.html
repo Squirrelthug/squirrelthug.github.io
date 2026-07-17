@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §14 Context Window Manager</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§14 · Context Window Manager — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-intel">Intelligence Layer</div>
+
+<details id="s14" open>
+  <summary><span class="s-num">14</span><span class="s-title">Context Window Manager</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>The Context Window Manager injects only fresh, priority-ordered L1/L2 context blocks and enforces the conversational hard cap of 1,200 volatile tokens.</strong></p>
+
+    <ul>
+      <li><strong>Priority order:</strong> <code>system_identity</code>, <code>personal_truths</code>, <code>memory_recall</code>, <code>entity_context</code>, then <code>tool_context</code>.</li>
+      <li><strong>Freshness thresholds:</strong> <code>system_identity</code> 24h, <code>personal_truths</code> 7d, <code>memory_recall</code> 24h, <code>entity_context</code> 30m for calendar/contacts and 24h for memory entities, <code>tool_context</code> 5m.</li>
+      <li><strong>Staleness gate (withheld, never silently):</strong> Blocks older than their threshold are withheld from the prompt; CWM emits <code>context.block.withheld</code> with <code>reason=&quot;stale&quot;</code>. Withholding is never silent: when the withheld (or entirely absent) block belongs to a family the turn's intent selected, CWM MUST first attempt an intent-matched refresh (below) and, if fresh data is still unavailable, MUST inject an absence disclosure (below). Serving stale data and omitting intent-relevant data without disclosure are both prohibited.</li>
+      <li><strong>Intent-matched refresh:</strong> &quot;Matching intent&quot; is defined by the existing intent-selection table: if intent selection includes a block family for this turn and that family's block is stale or absent, the match holds — deterministic, no LLM on the voice path (§13). On match, CWM requests a targeted refresh from the enhancement layer (§17): an incremental source sync first when the source watermark is stale and the domain supports automated sync (§19), then L1 → L2 for that domain. A refresh is always a pipeline sync/enhancement trigger — the LLM never fetches live data. The wait is bounded per lane: conversational turns wait at most <code>STALE_REFRESH_BUDGET_CONV_MS = 1000</code>, artifact turns at most <code>STALE_REFRESH_BUDGET_ARTIFACT_MS = 10000</code>. Both are <code>config.py</code> working hypotheses in the same sense as §13's latency targets, tuned via the Milestone 1 walking-skeleton benchmark and dogfooding; 1000 ms is chosen so a successful in-turn refresh still leaves ≥2 s of the ≤3 s first-audio budget for LLM + TTS, with the §13 750 ms latency bridge covering the perceived wait. If the refresh completes inside the budget, CWM re-reads the fresh L2 summary and injects it normally. On timeout, on failure, or when the domain's <code>refresh_capability</code> is <code>manual_source</code> (§17 — e.g. §21 finance PDF import, which requires user action), CWM falls back to absence disclosure while any in-flight refresh continues in the background so the <em>next</em> turn sees fresh data.</li>
+      <li><strong>Mandatory absence disclosure:</strong> Whenever a block relevant to the turn is withheld as stale or is absent (domain never synced, refresh timed out, refresh failed, or source unsupported), the compiled context MUST include a compact machine-generated data-status notice stating: the domain, the status (<code>stale</code>, <code>missing</code>, <code>refresh_timeout</code>, <code>refresh_failed</code>, or <code>source_unsupported</code>), the last successful sync time when known, and an explicit statement that the data is unavailable this turn and must not be guessed. Example shape (normative content requirements, not final copy): <code>[data-status domain=calendar status=stale last_synced=2026-07-12T09:14Z — calendar data is unavailable for this turn; do not guess or invent it; offer to refresh]</code>. The notice is generated by CWM itself (trusted system-side content, never third-party text), counts toward the 1,200-token cap, and is never evicted or dropped for budget reasons while its domain remains intent-relevant — the eviction order applies to data blocks, not to disclosure notices.</li>
+      <li><strong>Conversational cap:</strong> Total volatile context is <code>&lt;=1200</code> tokens; over-budget eviction order is <code>tool_context</code>, <code>entity_context</code>, <code>memory_recall</code>, then oldest conversation turns. <code>system_identity</code> and <code>personal_truths</code> are never evicted, only compacted.</li>
+      <li><strong>Intent selection:</strong> Router mode and intent choose block families: small talk gets identity/truths only; person questions add <code>entity_context</code>; recall requests add <code>memory_recall</code>; artifact/tool turns add <code>tool_context</code>.</li>
+      <li><strong>Message format:</strong> Stable EDICTS/VOICE/system identity are system content blocks; personal truths and L2 summaries are labeled assistant-context blocks. Externally-sourced L2 blocks (e.g., from Google sync, calendar invites, or contact notes) are marked with clear provenance labels (e.g., <code>[source: google_sync - untrusted third-party text]</code>). Tool context is injected as a provider tool-result or artifact summary, never as raw rows.</li>
+      <li><strong>Cloud PII Tokenization (SEC-018 — v1 detection scope: person names, email addresses, phone numbers):</strong> On the path to a cloud provider (bypassed for local Ollama inference to minimize latency and CPU load), CWM runs the compiled context window through an in-memory tokenization pipeline:
+        <ul>
+          <li><strong>PII Detector (three classes, full v1 scope):</strong> A rule-and-pattern-based detector (not an allowlist) scans the assembled prompt context for <em>person names</em> (rule-based; best-effort — recall is not guaranteed, particularly for unusual names, nicknames, possessives, and names inside quoted message text), <em>email addresses</em>, and <em>phone numbers</em> (both via deterministic patterns — the classes where pattern matching is reliable). <strong>This is the full v1 detection scope:</strong> merchant names, monetary amounts, health and relationship details, free-text notes, and location text outside §19's calendar-address preprocessing are <em>not</em> detected and egress as-is. §02's Data Hygiene paragraph is the user-facing statement of this boundary and must never claim more than this bullet specifies.</li>
+          <li><strong>Substitution Pass:</strong> Every detected item is replaced with a stable, distinct tag from its class's tag family: the user becomes <code>&lt;principal_user&gt;</code> and contacts map to <code>&lt;contact_1&gt;</code>, <code>&lt;contact_2&gt;</code>, …; email addresses map to <code>&lt;email_1&gt;</code>, <code>&lt;email_2&gt;</code>, …; phone numbers map to <code>&lt;phone_1&gt;</code>, <code>&lt;phone_2&gt;</code>, ….</li>
+          <li><strong>Ephemeral Mapping Table — Session Scope (SEC-022):</strong> The tag-to-value mapping (all three classes) is stored in local, volatile memory, never persisted or sent to the cloud. <strong>&quot;Stable&quot; means stable for the unlocked session:</strong> the mapping table shares the lifecycle of the §03 <code>SessionKeyManager</code> — it is created empty at unlock, the same detected value maps to the same tag for the entire unlocked session (tag counters only ever grow, never reassign), and the table is dropped in full at explicit re-lock (§02, alongside <code>SessionKeyManager.relock()</code>) and at app exit. Session-stable tags keep cloud-side coreference coherent across the turns of one session; after a re-lock or restart, tag counters start fresh and any tag echoed from a previous session is by definition unmapped and takes the unmapped-tag path below.</li>
+          <li><strong>Reverse-Substitution Pass:</strong> Reverse substitution is applied exactly once, to the response text stream as it arrives from the cloud provider, upstream of the §11 sentence/clause chunker; every downstream consumer (TTS, the chat UI, memory, databases) receives only post-substitution text. Tags (all three families) are replaced with the true values from the session mapping table — or, for background artifact tasks, from the task-owned snapshot below. On the streaming path the pass obeys the partial-tag hold rule below.</li>
+          <li><strong>Recall Done-Criterion (merge-blocking, see §08):</strong> The detector ships with the §08 fixture corpus <code>tests/unit/fixtures/pii_corpus.json</code> (unusual names, nicknames, possessives, names embedded in quoted message text, plus email/phone format variants). <code>tests/unit/test_pii_detector_recall.py</code> measures recall against the corpus in CI and is merge-blocking: <strong>person-name recall ≥ 95%, email recall = 100%, phone recall = 100%</strong>. When a recall failure is found in dogfooding, extending the corpus with the failing case is required (§08 corpus growth rule). Precision is not CI-gated in v1: over-substitution is privacy-conservative and only degrades response quality.</li>
+          <li><strong>Unmapped-Tag Handling (SEC-022):</strong> On reverse substitution, a tag with no entry in the applicable mapping table (a model-invented tag, a tag echoed from a previous session after re-lock or restart, or a mapping lost to a crash) is <strong>stripped and replaced with a neutral placeholder by tag family</strong>: <code>&lt;contact_n&gt;</code> → &quot;a contact&quot;, <code>&lt;email_n&gt;</code> → &quot;an email address&quot;, <code>&lt;phone_n&gt;</code> → &quot;a phone number&quot;, <code>&lt;principal_user&gt;</code> → &quot;the user&quot;. Each replacement emits <code>context.token.unmapped</code> to the UCL (tags are anonymous and carry no PII, so the literal tag is a permitted payload field under §16's rules). An unmapped tag is never spoken literally by TTS, never written to memory or any database, and never bound to a guessed identity.</li>
+          <li><strong>Task-Owned Mappings for Artifact Tasks (SEC-022):</strong> A background artifact task (§13) never depends on the live session table: at dispatch, the substitution pass hands the task an immutable snapshot of exactly the mappings it applied to that task's outbound payload. The task owns its snapshot until it completes or is abandoned, so an artifact that outlives UI state still reverse-substitutes correctly; a response tag missing even from the snapshot takes the unmapped-tag path above. <strong>Re-lock fails closed:</strong> §02 re-lock drops the session table <em>and</em> every task-owned snapshot. An in-flight artifact task holding a snapshot is cancelled at re-lock — any late response is discarded unprocessed, <code>error.artifact.relock_cancelled</code> (task_id, tool_name) is logged, and after the next unlock the task is reported as failed via its §15 <code>failure</code> narrative. No identity mapping ever survives a lock.</li>
+          <li><strong>Streaming Reconciliation — Partial-Tag Hold Rule (Fool's NC-4):</strong> Because §11 releases audio sentence-by-sentence, a tag may straddle a stream chunk. The reverse-substitution scanner is a deterministic, single-pass, O(stream length) filter: text flows through freely, but when a <code>&lt;</code> opens a <em>tag candidate</em>, the characters from that <code>&lt;</code> onward are held — never released to the sentence chunker — until the candidate resolves. It resolves as a tag when it closes with <code>&gt;</code> and matches the tag grammar <code>&lt;(principal_user|contact_N|email_N|phone_N)&gt;</code> (N a decimal integer); it is proven not-a-tag the moment a character outside <code>[a-z0-9_]</code> appears before <code>&gt;</code>, when it closes with <code>&gt;</code> without matching the tag grammar (e.g. <code>&lt;abc&gt;</code> or <code>&lt;contact_&gt;</code>), when it exceeds 16 characters without closing (the longest valid tag, <code>&lt;principal_user&gt;</code>, is exactly 16), or at end of stream — in every not-a-tag case the held text is released verbatim, and this enumeration is exhaustive: every candidate resolves to exactly one of substituted-as-tag or released-verbatim (SEC-027). Tags contain no sentence-ending punctuation, so a resolved tag never spans a §11 sentence boundary. <strong>Worst-case added hold:</strong> the stream time of one 16-character candidate (≈4 tokens) per occurrence, incurred only when the stream pauses mid-candidate; the measured cost is the tokenization on/off delta in the Experiment-1 benchmark (<code>BUILD_SEQUENCING.md</code>).</li>
+          <li><strong>Local-Path Composition — Recorded Decision (2026-07-12, Fool's NC-3):</strong> The tokenization bypass for local Ollama (above) composes with §12's endpoint posture: un-tokenized names, email addresses, and phone numbers flow to a localhost endpoint whose impersonation detection is best-effort (§12 <code>error.ollama.port_hijack</code>) — the local path is simultaneously the least-verified path and the one without the tokenization safety net. This is an <strong>accepted composition</strong> within §02's threat boundary: a same-user local process that can bind <code>127.0.0.1:11434</code> is the already-conceded same-user adversary. It is recorded here so it is a documented decision rather than an omission; revisit if §02's threat model tightens or if §12's endpoint verification becomes cryptographic rather than best-effort.</li>
+        </ul>
+      </li>
+      <li><strong>Telemetry:</strong> Emit <code>context.block.injected</code> (type, token_count, source_table, age_seconds) and <code>context.block.withheld</code> (type, reason, age_seconds, threshold_seconds). The refresh/disclosure path adds, in the same <code>context.*</code> family and under §16's payload rules (compact operational facts and non-secret identifiers only — never block content or user text): <code>context.refresh.attempt</code> (type, domain, lane, budget_ms), <code>context.refresh.success</code> (type, domain, duration_ms, age_seconds_after), <code>context.refresh.timeout</code> (type, domain, budget_ms, background_continued), <code>context.refresh.failure</code> (type, domain, error_category, background_continued), and <code>context.absence.disclosed</code> (type, domain, status, age_seconds, last_synced_at). The tokenization lifecycle adds <code>context.token.unmapped</code> (tag, tag_family, turn_id or task_id, consumer) and <code>error.artifact.relock_cancelled</code> (task_id, tool_name) — tag strings are anonymous placeholders, so both stay within §16's non-secret payload rules.</li>
+    </ul>
+
+    <pre>CWM build(mode, intent, provider)
+  1. select candidate L1/L2 blocks only
+  2. reject stale blocks by per-type threshold
+  2a. stale/absent block in an intent-selected family?
+        -&gt; request §17 targeted refresh; wait &lt;= lane budget (conv 1000ms / artifact 10000ms)
+        -&gt; success: re-read fresh L2 summary, inject normally
+        -&gt; timeout / failure / manual_source: inject data-status absence notice
+           (in-flight refresh continues in background for the next turn)
+  3. order by priority
+  4. count tokens before provider dispatch
+  5. evict lowest priority until &lt;=1200 conversational tokens
+  6. if provider is cloud:
+       a. detect person names (rule-based, best-effort) + emails/phones (deterministic patterns)
+       b. map detections to class tags (&lt;principal_user&gt;, &lt;contact_1&gt;, &lt;email_1&gt;, &lt;phone_1&gt;)
+          in the session-scoped ephemeral table (created at unlock; dropped at re-lock/exit)
+       c. substitute detections in prompt with tags
+       d. artifact dispatch: hand the task an immutable snapshot of the mappings applied to its payload
+  7. emit injected/withheld UCL events
+  8. [On response] if provider is cloud:
+       a. reverse-substitute on the response stream, single pass, upstream of the §11 sentence
+          chunker (partial-tag hold rule: never release an open &lt;... candidate; 16-char bound)
+       b. mapping source: session table (conversational) or task-owned snapshot (artifact)
+       c. unmapped tag -&gt; neutral placeholder per family + context.token.unmapped
+          (never spoken literally, never persisted, never guess-bound)</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s14">§14</a> · Touches: §13 Router, §17 Enhancement, §18 Memory</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §08 Testing, §14 CWM (PII claim reconciliation &amp; detector scope)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §14 CWM, §17 Enhancement, §23 EDICTS (staleness-gate refresh, absence disclosure &amp; anti-fabrication)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §11 Voice, §12 LLM, §13 Router, §14 CWM (tokenization lifecycle, streaming &amp; latency accounting)</div>
+    <div class="s-meta">Amendment added: 2026-07-17 · Touches: §14 CWM (round-3 security review SEC-027: partial-tag hold rule enumeration completed)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s13.html">← §13 Two-Mode Router</a><a href="../index.html">▲ Overview</a><a href="s15.html">§15 Tool System →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §14 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

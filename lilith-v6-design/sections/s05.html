@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §05 Hardware Detection & Capability Tiers</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§05 · Hardware Detection &amp; Capability Tiers — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-infra">Infrastructure Layer</div>
+
+<details id="s5" open>
+  <summary><span class="s-num">05</span><span class="s-title">Hardware Detection &amp; Capability Tiers</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>A hardware profile is generated once on application startup to assign the host to Tier 0, 1, or 2, which dynamically gates local model allocation and routing.</strong></p>
+
+    <ul>
+      <li><strong>Hardware Tier Definitions:</strong>
+        <ul>
+          <li><strong>Tier 0 (Low VRAM/CPU-only):</strong> &lt; 8 GB VRAM. Whisper <code>base</code> STT (int8 CPU) and Kokoro TTS on CPU. All LLM inference (conversational and artifact paths) routes to cloud (Anthropic).</li>
+          <li><strong>Tier 1 (Mid VRAM):</strong> 8 GB to 20 GB VRAM (e.g. RTX 3060 12GB, Apple M-series with 16GB+ unified RAM). Whisper <code>small</code> STT (float16 GPU) and Kokoro TTS. Conversational LLM runs locally (8B model); artifact-mode LLM routes to cloud.</li>
+          <li><strong>Tier 2 (High VRAM):</strong> &ge; 20 GB VRAM. Whisper <code>small</code> STT and Kokoro TTS. All LLM inference (conversational and artifact paths) runs locally.</li>
+        </ul>
+      </li>
+      <li><strong>Detection Mechanisms:</strong>
+        <ul>
+          <li><strong>Windows/Linux (NVIDIA):</strong> subprocess query to <code>nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits</code> with a strict 1000ms execution timeout, parsing VRAM directly in MB.</li>
+          <li><strong>macOS (Apple Silicon):</strong> Unified memory size query via <code>sysctl hw.memsize</code>. Unified memory behaves as both system memory and VRAM.</li>
+          <li><strong>System RAM:</strong> <code>psutil.virtual_memory().total</code> to verify minimum memory availability (16GB required for local LLM execution in Tier 1+).</li>
+        </ul>
+      </li>
+      <li><strong>Detection Timing &amp; Scope:</strong> Runs once during the early boot sequence (before the databases or UI are initialized). The result is stored as an immutable <code>CapabilityProfile</code> dataclass in the in-memory session state (<code>lilith.platform.session_state</code>). It is never saved to the database.</li>
+      <li><strong>Hardware Support &amp; Detection Scope Statement:</strong>
+        <ul>
+          <li><strong>Supported Scope at Launch:</strong> Hardware detection and acceleration are verified and actively supported only for <strong>NVIDIA GPUs</strong> (on Windows/Linux via <code>nvidia-smi</code>) and <strong>Apple Silicon</strong> (on macOS via unified memory size query).</li>
+          <li><strong>Other Hardware (AMD, Intel Arc, etc.):</strong> Detection for non-NVIDIA/non-Apple Silicon GPUs is not implemented at launch; such hardware will return no VRAM during detection and implicitly fallback to <strong>Tier 0 (CPU-only/Cloud)</strong>. Acceleration on these platforms is "best effort, unverified" and unsupported in v6 v1 due to developer QA hardware constraints.</li>
+          <li><strong>Post-Build Verification Checklist:</strong> As Apple Silicon (M1/M2/M3) unified memory graphics acceleration via Metal has not yet been physically tested by the sole developer, a mandatory post-first-build checklist item requires verifying Whisper/Kokoro Metal performance on an actual M1 machine before the official release.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <pre>
+STARTUP HARDWARE PROFILER FLOW:
+┌─────────────────────────┐
+│       App Boot          │
+└────────────┬────────────┘
+             │
+             ▼
+┌─────────────────────────┐
+│ Detect VRAM &amp; Sys RAM   │
+│ (nvidia-smi / sysctl)   │
+└────────────┬────────────┘
+             │
+             ▼
+    VRAM &ge; 20 GB? ────────── Yes ──&gt; [ TIER 2 ] &rarr; All Local
+             │ No
+             ▼
+    VRAM &ge; 8 GB? ─────────── Yes ──&gt; [ TIER 1 ] &rarr; Local Conversational / Cloud Artifact
+             │ No
+             ▼
+        [ TIER 0 ] &rarr; All Cloud (STT/TTS run locally on CPU)
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s5">§05</a> · Touches: §10 STT, §11 TTS, §12 LLM, §23 Personality</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §05 Hardware Tiers (explicit hardware detection scope &amp; M1 metal verification)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s04.html">← §04 Cross-Platform Foundations</a><a href="../index.html">▲ Overview</a><a href="s06.html">§06 Process Lifecycle &amp; Recovery →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §05 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

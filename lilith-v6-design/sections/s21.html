@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §21 Finance App</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§21 · Finance App — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-app">Application Layer</div>
+
+<details id="s21" open>
+  <summary><span class="s-num">21</span><span class="s-title">Finance App</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>finance_db stores encrypted transaction and account data.</strong> Import is deterministic (no LLM parsing). Categorization is rules-based in v6 v1.</p>
+
+    <p><strong>Database schema (finance_db — SQLCipher encrypted):</strong></p>
+    <pre>accounts(
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  institution TEXT,
+  type        TEXT CHECK(type IN ('checking','savings','credit','investment')),
+  currency    TEXT DEFAULT 'USD',
+  created_at  REAL NOT NULL
+)
+
+transactions(
+  id              TEXT PRIMARY KEY,
+  account_id      TEXT REFERENCES accounts(id),
+  date            REAL NOT NULL,
+  amount          REAL NOT NULL,          -- positive = credit, negative = debit
+  merchant        TEXT,
+  category        TEXT,                   -- see category list below
+  description     TEXT,
+  import_source   TEXT,                   -- 'pdf', 'csv', 'manual'
+  import_batch_id TEXT,                   -- groups rows from one import run
+  raw_source_fingerprint TEXT,            -- stable hash of source row/page/statement identity
+  dedup_status   TEXT DEFAULT 'clear' CHECK(dedup_status IN ('clear','candidate','confirmed_duplicate','confirmed_distinct')),
+  dedup_group_id TEXT,                    -- groups ambiguous duplicate candidates for review
+  created_at      REAL NOT NULL
+)</pre>
+
+    <ul>
+      <li><strong>Import — PDF:</strong> <code>pdfplumber</code> remains deterministic, but v6 v1 does not claim universal PDF adaptivity. PDF import is a named adapter pipeline per institution and statement family. Supported v6 v1 adapters are: Chime Checking statements, Chime Savings statements, Chime Credit Builder/Credit statements, Cash App Account statements, and Cash App Savings statements. Each adapter owns its institution detection, page/table extraction, sign convention, date parsing, multiline-description handling, and corpus fixtures. Additional banks are unsupported until real sample statements are collected and a bank-specific adapter is added.</li>
+      <li><strong>Import — CSV:</strong> header keyword matching for column mapping. Handles any export with date + amount + description columns.</li>
+      <li><strong>Auto-categorization:</strong> keyword rules applied to <code>merchant</code> field at import time. Nine categories: <code>Housing</code>, <code>Food</code>, <code>Transport</code>, <code>Healthcare</code>, <code>Entertainment</code>, <code>Shopping</code>, <code>Utilities</code>, <code>Income</code>, <code>Other</code>. Rules live in <code>data/finance/categories.yaml</code> — editable without code changes.</li>
+      <li><strong>Unsupported PDF behavior:</strong> When a dropped-in PDF does not match a supported adapter signature, Lilith rejects PDF import for that file with a clear unsupported-bank message, records no transaction rows from that PDF, and offers CSV/manual import or "add bank adapter" guidance. Unsupported PDFs are never silently parsed through a generic best-guess table mapper.</li>
+      <li><strong>L1:</strong> duplicate detection job — exact source fingerprints may be treated as already-imported rows, but same date + amount + merchant within a 24h window is only a duplicate candidate. Before flagging, the job checks stronger disambiguating signals when present: source transaction id/reference, timestamp precision beyond calendar date, posted/settled date pair, running balance/net amount continuity, statement line index/page identity, account id, import batch id, and normalized raw row fingerprint. If the available signals cannot prove the rows are the same source transaction, both rows are preserved and grouped with <code>dedup_status='candidate'</code> for user review. The job never silently discards an ambiguous finance transaction.</li>
+      <li><strong>L2:</strong> spending summaries by category and period. Produced by template (not LLM) in v6 v1. LLM reads this output only.</li>
+      <li><strong>Tools:</strong> <code>finance_summary(period: str, category: str | None) → str</code> — returns narrative spending summary. <code>spending_trend(periods: int) → str</code> — compares N periods against prior N. Both <code>artifact_only</code> mode.</li>
+      <li><strong>UCL events:</strong> <code>tool.call.start</code>, <code>tool.call.complete</code> (from §15). Import-specific: <code>sync.finance.import_complete</code> (batch_id, row_count, duplicate_candidate_count, auto_deduped_exact_count) and <code>sync.finance.unsupported_bank_pdf</code> (institution_hint, filename_hash, reason).</li>
+    </ul>
+    <p><strong>EARS requirements — PDF import scope:</strong></p>
+    <ul>
+      <li>Where PDF import is active, the finance importer shall route each PDF through an explicit supported-bank adapter selected by institution and statement-family signature.</li>
+      <li>When a Chime Checking, Chime Savings, Chime Credit Builder/Credit, Cash App Account, or Cash App Savings statement is imported, the matching adapter shall parse transaction rows using that statement family's mapped layout, sign convention, date fields, and multiline-description rules.</li>
+      <li>When a PDF does not match a supported adapter signature, the finance importer shall stop before row creation and show a clear unsupported-bank message.</li>
+      <li>When a new institution is added, the system shall require real sample statements and adapter-specific fixtures before the institution is listed as supported.</li>
+    </ul>
+    <p><strong>EARS requirements — duplicate handling:</strong></p>
+    <ul>
+      <li>When an imported row has the same raw source fingerprint as an existing row for the same account, the deduplication job shall treat it as an exact previously imported source row.</li>
+      <li>When two rows share date, amount, and normalized merchant within 24 hours, the deduplication job shall compare stronger disambiguating signals before deciding whether the rows are the same transaction.</li>
+      <li>When stronger disambiguating signals prove two rows are different legitimate transactions, the deduplication job shall preserve both rows as clear transactions.</li>
+      <li>When stronger disambiguating signals are missing or inconclusive, the deduplication job shall preserve both rows and flag the pair or group for user review.</li>
+      <li>The deduplication job shall not discard a same-day, same-amount, same-merchant row solely because it resembles another row.</li>
+    </ul>
+    <p><strong>Acceptance criteria:</strong></p>
+    <ul>
+      <li>Given a supported Chime or Cash App statement PDF, when the user imports it, then Lilith selects the matching bank adapter, parses the statement without LLM parsing, creates the expected transaction rows, and emits <code>sync.finance.import_complete</code>.</li>
+      <li>Given a PDF statement from an unlisted bank, when the user drops it into finance import, then Lilith shows an unsupported-bank message, creates no transaction rows from that PDF, and offers CSV/manual import or adapter-addition guidance.</li>
+      <li>Given a statement contains two same-day, same-amount, same-merchant purchases, when no timestamp, source id, running balance, or other stronger signal proves they are the same transaction, then Lilith preserves both rows and flags them for user review instead of discarding either row.</li>
+    </ul>
+    <p><strong>Future/conditional:</strong> Plaid-style bank linking is worth investigating after v6 v1 only if it is genuinely free or low-cost for a small independent developer and does not require a large-institution partnership. It is not a v6 v1 requirement and is excluded from the acceptance criteria above.</p>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s21">§21</a> · Touches: §02 Security, §03 SQLCipher, §15 Tools, §17 Enhancement</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §21 Finance App (named PDF adapter scope, unsupported-bank handling, duplicate review queue)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s20.html">← §20 Contacts / People App</a><a href="../index.html">▲ Overview</a><a href="s22.html">§22 Conversation / Chat App →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §21 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

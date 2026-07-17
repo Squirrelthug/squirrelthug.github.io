@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — Design Document (Full, Single File)</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">The guiding light. All architectural decisions are made here before a single line of v6 code is written.</p>
+
+<nav class="doc-nav">
+  <a href="index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a class="nav-active" href="full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="status-banner">
+  <div class="status-phase">🔒 FROZEN — Design complete. Build phase begins.</div>
+  <p style="margin: 8px 0; font-size: 0.88rem; color: var(--text);">
+    <strong>Build Sequencing Plan:</strong> To mitigate risk, see the new <a href="BUILD_SEQUENCING.md" style="color: var(--accent); text-decoration: underline; font-weight: bold;">BUILD_SEQUENCING.md</a> plan. Milestone 1 establishes a walking-skeleton voice loop prior to database and sync integration.
+  </p>
+  <div class="status-note">
+    All 29 sections are complete and reviewed. This document is now law.
+    No architectural decisions are made during the build phase without a documented design session.
+    Agents implement against this document exactly as written.
+    <br><br>
+    Sprint spec, design checklist, planning documents, and research reports are linked above and now live alongside this document in this same folder.
+  </div>
+</div>
+
+<div class="decisions-box">
+  <h3>Architecture decisions already locked</h3>
+  <ul>
+    <li><span class="decision-marker">✓</span> <strong>Frontend framework:</strong> PySide6 6.11.1 (LGPL v3) + ModernGL 5.x (MIT) for the orb via QOpenGLWidget. Qt Quick 3D dropped (GPLv3-only, incompatible with closed-source distribution).</li>
+    <li><span class="decision-marker">✓</span> <strong>Voice is the default, non-negotiable at the Tier 0 minimum:</strong> STT (Whisper) + TTS (Kokoro) run on every supported machine. The desktop chat screen also accepts typed input at any time, with TTS available on demand per message rather than forced — see §13, §22.</li>
+    <li><span class="decision-marker">✓</span> <strong>All databases:</strong> SQLCipher from first migration. No plaintext SQLite anywhere.</li>
+    <li><span class="decision-marker">✓</span> <strong>All credentials:</strong> OS keychain via python-keyring. Never in .env, never in config files.</li>
+    <li><span class="decision-marker">✓</span> <strong>External APIs (v6 v1):</strong> Read-only. Lilith manages her own calendar and contact roster separately.</li>
+    <li><span class="decision-marker">✓</span> <strong>Two-mode router architecture:</strong> Conversational vs Artifact (acknowledge → background → handoff). The two-mode split itself is locked; its tuning numbers (≤50 output tokens, ≤3 s to audio, ≤1200 context tokens) are v6 v1 working hypotheses to be validated in Milestone 1, not immutable constants — see §13.</li>
+    <li><span class="decision-marker">✓</span> <strong>LLM access:</strong> L1/L2 enhanced data only. Raw DB rows never enter the context window.</li>
+    <li><span class="decision-marker">✓</span> <strong>BYOK:</strong> User-provided API keys. No managed cloud inference from Lilith.</li>
+    <li><span class="decision-marker">✓</span> <strong>Path handling:</strong> pathlib.Path everywhere. No string path concatenation, no hardcoded separators.</li>
+    <li><span class="decision-marker">✓</span> <strong>Distribution model:</strong> Lilith v6 is free, closed-source, no license key, no activation. Wide distribution is the goal. Revenue comes from a future cloud sync subscription (Obsidian model). v6 v1 has no paid features — users bring their own API keys and their own Google account. No piracy surface to protect against.</li>
+    <li><span class="decision-marker">✓</span> <strong>Memory recall (v6 v1):</strong> Recency-first + FTS5 keyword search. No local embeddings or vector search in v6 v1 — that is a future phase. See §18 for full spec.</li>
+    <li><span class="decision-marker">✓</span> <strong>Custodian Model:</strong> All internal data (SQLCipher databases, salts, config, logs, cache, models, and skills) lives in a single OS-standard application directory (<code>APP_INTERNAL_DIR</code>) with strict POSIX 0700/0600 permissions. The user's primary files, notes, and documents (including external Obsidian note vaults) are never copied to Lilith's storage; she acts as a custodian, maintaining paths/pointers and indexing summaries. Accumulated history (UCL, memory, conversation DBs) is portable via Lilith's backup/restore utility. See §04, §29.</li>
+  </ul>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-label"><span>Sections complete</span><span class="count">29 / 29</span></div>
+  <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
+</div>
+
+<div class="how">
+  <div class="how-title">How to use this document</div>
+  <ol>
+    <li>Cross-reference each section with <a href="checklist.html" style="color: var(--accent);">lilith-v6-design-checklist.html</a> to see what must be covered.</li>
+    <li>After the research sprint delivers reports, fill in each section using research + prior design sessions.</li>
+    <li>A section is "complete" when every checklist item is answered with a specific implementation decision — no vague language, no TBDs.</li>
+    <li>When all 29 are complete: freeze. Build begins. No architecture changes during build without a documented design session.</li>
+  </ol>
+</div>
+
+<!-- =========================================================== -->
+
+<!-- ============ GENERATED: do not edit below; run tools/build_fulldoc.py ============ -->
+{SECTIONS}
+
+<hr>
+<p style="color: var(--muted); font-size: 0.75rem; text-align: center; margin-top: 8px;">
+{LEDGER}
+</p>
+</body>
+</html>

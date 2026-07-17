@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §25 Onboarding Flow</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§25 · Onboarding Flow — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-pers">Personality &amp; Response Layer</div>
+
+<details id="s25" open>
+  <summary><span class="s-num">25</span><span class="s-title">Onboarding Flow</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>First-run is detected from database/key-material existence plus non-secret onboarding sentinels, never from <code>master_passphrase</code> presence alone, so convenience mode and prompt mode share the same recovery-safe startup path.</strong></p>
+
+    <pre>Startup detection:
+install_sentinel = python-keyring.get_password("com.squirrelthug.lilith", "install_sentinel")
+security_tier = python-keyring.get_password("com.squirrelthug.lilith", "security_tier")  # convenience|prompt
+keyring_pass = python-keyring.get_password("com.squirrelthug.lilith", "master_passphrase")  # convenience only
+dbs_exist = all_databases_exist(APP_INTERNAL_DIR / "databases")
+salts_exist = (APP_INTERNAL_DIR / "databases" / "salts.dat").exists()
+onboarding_marker = onboarding_complete_marker_exists(APP_INTERNAL_DIR)
+rotation_journal = (APP_INTERNAL_DIR / "databases" / "rotation.journal").exists()
+keychain_evidence = any of install_sentinel, security_tier, keyring_pass present  # keychain entries survive uninstall on all three platforms
+local_data = any file exists under APP_INTERNAL_DIR / "databases"  # DBs, salts.dat, staging or quarantine leftovers
+→ rotation_journal: interrupted passphrase rotation → resolve per §06 rotation journal BEFORE any classification below (pre-commit: roll back, passphrase unchanged; post-commit: roll forward, prompt for NEW passphrase)
+→ not keychain_evidence and not local_data and not onboarding_marker: first run → onboarding screen (welcome offers "Restore from a backup" alongside setup — see restore-from-backup flow)
+→ keychain_evidence and not local_data and not onboarding_marker: reinstall detected → offer restore-from-backup or start fresh (state row (f), SEC-023)
+→ install_sentinel and dbs_exist and salts_exist and security_tier == "convenience" and keyring_pass is not None: derive keys → DB open → main UI
+→ install_sentinel and dbs_exist and salts_exist and security_tier == "prompt": prompt for passphrase → derive keys → DB open → main UI
+→ install_sentinel and dbs_exist and salts_exist and security_tier == "convenience" and keyring_pass is None: credential missing → ask user to enter passphrase and choose restore convenience storage or switch to prompt mode
+→ dbs_exist and not salts_exist: missing key material → halt; never delete DBs
+→ partial DB/salt/onboarding state mismatch: setup interruption or path problem → explicit recovery screen; never delete without confirmation
+→ KeyringError: show "keychain unavailable" error, exit</pre>
+
+    <ul>
+      <li><strong>First-run detection:</strong> Query non-secret keychain state (<code>install_sentinel</code>, <code>security_tier</code>) and verify <code>APP_INTERNAL_DIR/databases/</code>, <code>salts.dat</code>, and the local onboarding completion marker. Onboarding starts only when all durable install evidence is absent. The presence or absence of <code>master_passphrase</code> is never the first-run flag.</li>
+      <li><strong>Onboarding steps (in order):</strong>
+        <ol>
+          <li>Welcome screen — Lilith introduces herself via TTS (af_bella voice, first audio within 500ms). The screen offers two first-class actions: continue with setup (Steps 2–8 below) or <em>"Restore from a backup"</em> (enters the restore-from-backup flow defined below — for users migrating machines or recovering after an OS reinstall).</li>
+          <li>Name collection — user speaks or types their name. Stored as personal truth: <code>key="name"</code></li>
+          <li>Passphrase creation — typed, not spoken. Requires a minimum of 12 characters, a second matching confirmation entry, a static unmissable warning that losing the passphrase results in permanent data loss, and a strength check that rejects trivially weak patterns/common passphrases.</li>
+          <li>Security tier selection — both tiers are presented side by side as first-class choices with symmetric copy (see tier-presentation requirements below): <code>convenience</code> (preselected default on all platforms) stores <code>master_passphrase</code> in the OS keychain for auto-unlock (as defined in §02's canonical credentials table); <code>prompt</code> stores no passphrase and requires typed unlock at every launch. On Linux, this step additionally displays the static keyring-exposure warning defined below — the same unmissable pattern as Step 3's no-recovery warning.</li>
+          <li>Key derivation → DB creation (all 6 DBs in <code>APP_INTERNAL_DIR/databases/</code>) → salts generation (if clean install) → first migration run</li>
+          <li>API key collection — user pastes Anthropic key. Tested with a live call before acceptance. Stored in keychain under key <code>anthropic_api_key</code>.</li>
+          <li>Google auth (optional, skippable) — opens system browser for OAuth flow and stores only the offline refresh token.</li>
+          <li>Onboarding complete → write <code>install_sentinel</code> and <code>security_tier</code> non-secret keychain entries → emit <code>onboarding.complete</code> UCL event and local completion marker → normal main UI, showing a one-time dismissible backup reminder (§29 export reminders): <em>"Your memories and history live only on this machine. You can export a backup anytime in Settings → Backups."</em> The reminder is informational only — it never gates completion or requires an action.</li>
+        </ol>
+      </li>
+      <li><strong>Functional Requirements (EARS Format):</strong>
+        <ul>
+          <li>When the user is on the passphrase creation screen, the system shall display an unmissable static warning: <em>"There is no recovery — losing this passphrase permanently loses access to your data."</em></li>
+          <li>When the user submits a passphrase during onboarding, the system shall require a second matching confirmation entry before key derivation.</li>
+          <li>When the user enters a passphrase, the system shall reject the input if it fails a strength check or matches a blocklist of trivially weak common passphrases (e.g. repeating patterns, common dictionary words, or low score on a complexity estimator).</li>
+          <li>While onboarding is running on Linux, when the security tier selection step (Step 4) renders, the system shall display a static, plain-language warning stating that convenience mode stores the master passphrase in the system keyring where any program running as the same user can read it (the Freedesktop Secret Service API provides no per-application access control), and that prompt mode does not store the passphrase. Reference wording (normative content, final phrasing may be edited for tone without removing any of the three facts): <em>"On Linux, convenience mode saves your master passphrase in the system keyring. Any program running as your user can read it — Linux has no per-app lock on the keyring. Prompt mode never saves it; you type it each time Lilith starts."</em></li>
+          <li>The system shall render the Linux keyring-exposure warning as static screen content that is visible without any user interaction — never behind a tooltip, hover state, expandable element, scroll fold, or documentation link.</li>
+          <li>When the security tier selection step renders on any platform, the system shall present both tiers with equal visual prominence and symmetric copy that states, for each tier: (a) what it protects against (convenience: powered-off/stolen-disk/copied-file scenarios per §02's threat model; prompt: additionally avoids persisting the master passphrase in the keychain), and (b) what it costs at startup (convenience: none, hands-free auto-unlock; prompt: typing the passphrase at every launch). Neither tier's copy may use subordinating framing (e.g. "advanced", "for experts", "not recommended"), and selecting prompt mode shall require no more interactions than selecting convenience mode. This defines normative content requirements, not final marketing text.</li>
+        </ul>
+      </li>
+      <li><strong>Acceptance Criteria (Given/When/Then):</strong>
+        <ul>
+          <li><strong>AC-OB-001 (Passphrase Match):</strong> Given the user is on Step 3 of onboarding, when the user enters mismatched passphrases in the creation and confirmation inputs, then the system disables the "Next" action and displays a mismatch warning.</li>
+          <li><strong>AC-OB-002 (Weak Passphrase):</strong> Given the user enters matching inputs, when the passphrase is weak or blocklisted, then the system blocks progress and displays a weak passphrase warning.</li>
+          <li><strong>AC-OB-003 (Static Warning):</strong> Given the user is on the Step 3 screen, when the screen renders, then the warning of permanent data loss is prominently and statically visible in the UI.</li>
+          <li><strong>AC-OB-004 (Linux Keyring Warning):</strong> Given onboarding is running on Linux, when the Step 4 tier-selection screen renders, then a static warning is visible without hover, click, expansion, or scrolling, stating that in convenience mode any program running as the same user can read the master passphrase from the system keyring and that prompt mode does not store it.</li>
+          <li><strong>AC-OB-005 (Warning Platform Scoping):</strong> Given onboarding is running on macOS or Windows, when the Step 4 screen renders, then the Linux-specific keyring warning is not displayed, while the symmetric tier copy of AC-OB-006 is still displayed.</li>
+          <li><strong>AC-OB-006 (Symmetric Tier Presentation):</strong> Given the user is on Step 4 on any platform, when the screen renders, then both tiers are visible with equal visual prominence, each stating what it protects against and what it costs at startup, and prompt mode can be selected directly on the screen with no more interactions than convenience mode.</li>
+          <li><strong>AC-OB-007 (Warning Does Not Gate):</strong> Given onboarding is running on Linux with convenience mode preselected, when the user proceeds from Step 4 without changing the selection, then the system continues with convenience mode without any additional confirmation dialog — the warning informs the choice but does not block it.</li>
+        </ul>
+      </li>
+      <li><strong>Restore-from-Backup Flow (SEC-019):</strong> Entry points: the first-run welcome screen (Step 1) and the reinstall-detected state row (f). Restoring a set means placing the set's 6 databases + <code>salts.dat</code> into <code>APP_INTERNAL_DIR/databases/</code> after verification, then proceeding per the chosen security tier. The flow, in order:
+        <ol>
+          <li><strong>Select:</strong> The user picks a backup set folder — an exported or mirrored set (typically under the §04 external backup destination) or any copy of one (USB drive, synced folder). The set's creation timestamp from <code>backup.manifest.json</code> is shown before anything else happens (<em>"Restore the backup from &lt;timestamp&gt;?"</em>). The source set is opened read-only and is never modified or deleted by this flow, in any outcome.</li>
+          <li><strong>Completeness check:</strong> The set is validated against its <code>backup.manifest.json</code> (§06 set composition): all files present, sizes and SHA-256 hashes match. A set without a manifest (pre-manifest era) is validated structurally instead: the 6 named databases + a 192-byte <code>salts.dat</code>. An incomplete or hash-mismatched set is refused with the missing or failing files named, and the user may pick another set.</li>
+          <li><strong>Stage:</strong> The set is copied to <code>APP_INTERNAL_DIR/databases/restore-staging-&lt;timestamp&gt;/</code>; all verification below runs against the staged copy, never against the source set.</li>
+          <li><strong>Passphrase verification:</strong> The user types the master passphrase that was in effect when the set was taken (§06 Backups Across Rotation: sets are never re-keyed, and the UI states this for sets that predate a passphrase change). Keys are derived from the staged <code>salts.dat</code> per §03 and verified against all six staged databases, then <code>PRAGMA integrity_check</code> runs on each. <strong>Wrong passphrase:</strong> re-prompt (no attempt limit), with the option to pick a different set; nothing is deleted. <strong>Integrity failure:</strong> the set is refused, the failing database(s) are named, and the user may pick another set; the staging copy is removed (it is Lilith's own copy — the source set is untouched).</li>
+          <li><strong>Place:</strong> Only after all six staged databases verify does the staged content move into <code>APP_INTERNAL_DIR/databases/</code> as one batch. If any files already exist there (partial state), they are moved to <code>databases/quarantine-&lt;timestamp&gt;/</code> first — never overwritten in place, never deleted (existing §06/§25 conventions).</li>
+          <li><strong>Tier &amp; keychain:</strong> The user selects a security tier on the Step 4 screen (same requirements, including the Linux keyring-exposure warning and symmetric presentation). In convenience mode the verified passphrase is written to the keychain only now — after the restored store has been placed, opened, and verified (§02 keychain-write-last rule). <code>install_sentinel</code>, <code>security_tier</code>, and the local onboarding completion marker are then written. <code>onboarding.complete</code> is not emitted; the flow emits <code>error.recovery.restore_complete</code> instead.</li>
+          <li><strong>Credentials are not in backups:</strong> Backup sets contain only the 6 databases + <code>salts.dat</code> + manifest — never keychain credentials (§02 canonical table). After a restore on a fresh machine, Lilith prompts for the Anthropic API key (as in onboarding Step 6) and offers Google auth (Step 7); both are skippable there and re-enterable later in Settings.</li>
+        </ol>
+        <strong>UCL events:</strong> <code>error.recovery.restore_started</code>, <code>error.recovery.restore_complete</code> (set timestamp), <code>error.recovery.restore_failed</code> (reason: <code>wrong_passphrase</code> | <code>incomplete_set</code> | <code>integrity_fail</code> | <code>aborted</code>). Payloads carry reason codes, set timestamps, and durations only — never passphrases, salts, or key material (§16 sanitizer gate).</li>
+      <li><strong>Crash recovery &amp; Prior-install detection:</strong>
+        <ul>
+          <li><strong>Normal Startup:</strong> <code>install_sentinel</code> present AND all 6 DB files exist AND <code>salts.dat</code> exists at <code>APP_INTERNAL_DIR/databases/salts.dat</code>. Convenience mode reads <code>master_passphrase</code> from keychain; prompt mode asks the user to type it.</li>
+          <li><strong>Credential Missing (Prompt-Compatible):</strong> Databases and <code>salts.dat</code> exist, <code>security_tier</code> is <code>convenience</code>, but <code>master_passphrase</code> is absent. Lilith treats this as missing credential state, not first run. It prompts for the passphrase, verifies all six databases, then lets the user restore convenience storage or continue in prompt mode.</li>
+          <li><strong>State Machine-Gated Crash Recovery (SEC-004):</strong>
+            Startup sequence routing is governed by a strict state table to distinguish setup crashes, credential issues, key/salts failures, and database-level corruption, preventing silent data destruction.
+            <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; border: 1px solid var(--border); background: var(--surface2);">
+              <thead>
+                <tr style="background: var(--surface); border-bottom: 2px solid var(--border); color: var(--accent);">
+                  <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">Trigger Condition</th>
+                  <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">State Classification</th>
+                  <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">UX &amp; Consent Action</th>
+                  <th style="padding: 10px; text-align: left; border: 1px solid var(--border);">UCL Event</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Not all DB files present AND no <code>onboarding.complete</code> marker AND no <code>install_sentinel</code> AND partial local artifacts exist in <code>databases/</code> (some DB files, <code>salts.dat</code>, or staging leftovers) — genuine interrupted-onboarding evidence. A durable-keychain-evidence state with <em>zero</em> local artifacts is row (f), never this row.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--orange); font-weight: bold;">(a) Mid-Onboarding Setup Crash</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Offer clean restart. <strong>Explicit user confirmation required</strong> before deleting: <em>"Onboarding was interrupted. Delete these [N] partial files and start over?"</em>. Move files to quarantine first: <code>databases/quarantine-&lt;timestamp&gt;/</code>.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.recovery.onboarding_crash</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">DB files present AND <code>salts.dat</code> is missing. <code>onboarding.complete</code> marker present.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--red); font-weight: bold;">Missing Key Material (Missing salts.dat)</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><strong>NEVER delete databases.</strong> Halt startup and show critical error screen: <em>"Vault key material (salts.dat) is missing. Recovery required. Place salts.dat in your database folder to recover access."</em></td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.recovery.missing_salts</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">DB files and <code>salts.dat</code> present, <code>onboarding.complete</code> present, BUT key verification fails (<code>PRAGMA key</code> fails).</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--red); font-weight: bold;">(b) Key Verification Failure / Wrong Passphrase or Salts</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><strong>NEVER delete databases.</strong> Assume key/credential problem. Direct user to salts/passphrase recovery path. Error screen: <em>"Key verification failed. Incorrect passphrase or mismatched salts."</em></td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.recovery.key_verification_fail</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">DB files and <code>salts.dat</code> present, keying succeeds, BUT <code>PRAGMA integrity_check</code> fails on 1+ specific databases.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--amber); font-weight: bold;">(c) Per-Database Structural Corruption</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><strong>No silent/all-six restore.</strong> Offer restore <strong>per-database</strong>. Present backup timestamp and data-loss interval. Move corrupt file to <code>quarantine-&lt;timestamp&gt;/</code> first. Wording: <em>"Restore [db_name] from backup (&lt;timestamp&gt;)? Approximately [X] hours of data will be lost."</em></td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.recovery.corruption_detected</code><br><code>error.recovery.quarantine_created</code><br><code>error.recovery.database_restored</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>rotation.journal</code> present with phase earlier than <code>commit</code> (§06). Checked before all other classifications.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--amber); font-weight: bold;">(d) Interrupted Passphrase Rotation — Pre-Commit</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><strong>Roll back deterministically.</strong> Delete the staging directory and journal; live databases and <code>salts.dat</code> were never touched. Inform user: <em>"A passphrase change didn't finish. Nothing was changed — your previous passphrase is still in effect."</em> Continue normal startup.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>security.rekey.rolled_back</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>rotation.journal</code> present with phase <code>commit</code> or later (§06). Checked before all other classifications (including missing-salts, since <code>salts.dat</code> may be mid-swap).</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--amber); font-weight: bold;">(e) Interrupted Passphrase Rotation — Post-Commit</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><strong>Roll forward deterministically. NEVER delete databases.</strong> Complete the remaining renames from the journal's per-file record, then prompt: <em>"A passphrase change was interrupted. Enter your NEW passphrase to finish."</em> Verify it opens all six databases; convenience mode then updates the keychain entry (final step, per §02); delete the journal and continue startup without re-prompting.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>security.rekey.resumed</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Durable keychain evidence present (<code>install_sentinel</code>, <code>security_tier</code>, or <code>master_passphrase</code> — keychain entries survive uninstall on all three platforms) AND <code>databases/</code> contains no files at all AND no <code>onboarding.complete</code> marker.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--amber); font-weight: bold;">(f) Reinstall Detected — Durable Keychain Evidence, No Local Data (SEC-023)</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Nothing was interrupted and there are no files to delete — row (a)'s copy is wrong for this state and must not be shown. Screen: <em>"It looks like Lilith was installed before on this account. Restore from a backup, or start fresh?"</em> <strong>Restore</strong> enters the restore-from-backup flow above. <strong>Start fresh</strong> runs onboarding; surviving keychain entries are overwritten at Step 8 (or deleted per §02's tier rules if prompt mode is chosen), and no backup set is ever touched by either choice.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;"><code>error.recovery.reinstall_detected</code></td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">All 6 DB files and <code>salts.dat</code> present, keying succeeds, and all integrity checks pass.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top; color: var(--green); font-weight: bold;">Normal Secure Startup</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">Unlock databases, load background systems/models, and proceed to main window.</td>
+                  <td style="padding: 10px; border: 1px solid var(--border); vertical-align: top;">N/A (Standard startup events)</td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+        </ul>
+      </li>
+      <li><strong>UCL events:</strong> <code>onboarding.start</code>, <code>onboarding.step.complete</code> (step_name), <code>onboarding.complete</code></li>
+    </ul>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s25">§25</a> · Touches: §02 Security, §03 SQLCipher, §19 Sync, §26 Frontend</div>
+    <div class="s-meta">Amendment added: 2026-07-03 · Touches: §02 Security, §06 Lifecycle, §29 Custodian Model</div>
+    <div class="s-meta">Amendment added: 2026-07-03 · Touches: §06 Lifecycle, §25 Onboarding, §16 UCL (State Machine &amp; Recovery)</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §25 Onboarding (passphrase creation verification UX, no-recovery warning, strength checks)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §25 Onboarding (Linux keychain-tier warning &amp; recorded default decision)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s24.html">← §24 Narrative Layer</a><a href="../index.html">▲ Overview</a><a href="s26.html">§26 Frontend Framework &amp; Application Shell →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §25 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

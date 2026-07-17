@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §19 Data Sync Pipeline</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§19 · Data Sync Pipeline — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-data">Data Layer</div>
+
+<details id="s19" open>
+  <summary><span class="s-num">19</span><span class="s-title">Data Sync Pipeline</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Google sync is read-only, local-first, and incremental: OAuth credentials live only in the OS keychain while Calendar and Contacts data land in encrypted SQLCipher databases.</strong></p>
+
+    <ul>
+      <li><strong>OAuth flow:</strong> Use <code>google-auth-oauthlib==1.4.0</code> with installed-app PKCE loopback via <code>InstalledAppFlow.run_local_server(host=&quot;127.0.0.1&quot;, port=0)</code>; open the system browser, never an embedded WebView.</li>
+      <li><strong>Client packages:</strong> Pin <code>google-api-python-client==2.198.0</code> and <code>google-auth==2.55.1</code>.</li>
+      <li><strong>Scopes:</strong> Request only <code>https://www.googleapis.com/auth/calendar.readonly</code> and <code>https://www.googleapis.com/auth/contacts.readonly</code>.</li>
+      <li><strong>Token storage:</strong> Store only the Google API offline refresh token under key <code>google_oauth_refresh_token</code> with service name <code>"com.squirrelthug.lilith"</code> (as defined in §02's canonical credentials table). The short-lived access token is cached in process memory only; never store OAuth tokens in DB, env vars, JSON config, or logs.</li>
+      <li><strong>Calendar sync:</strong> Store Google <code>nextSyncToken</code> in <code>calendar_db</code>; APScheduler interval every <code>15</code> minutes while the app is open; handle HTTP <code>410</code> by running a new full sync.</li>
+      <li><strong>Contacts sync:</strong> Use People API incremental <code>syncToken</code> plus contact <code>etag</code> values in <code>contacts_db</code>; APScheduler interval every <code>30</code> minutes while the app is open.</li>
+      <li><strong>First run:</strong> Immediately after OAuth succeeds, enqueue full Calendar and Contacts sync jobs before enabling periodic intervals.</li>
+      <li><strong>Read-only enforcement:</strong> No write-back methods are registered, no write scopes are requested, and tool definitions expose no Google mutation operations in v6 v1.</li>
+      <li><strong>Calendar/Address Context Processing:</strong> To prevent physical address details from being sent to cloud providers and to optimize token consumption, calendar events with location data are pre-processed. A local tool call (e.g., maps/routing API lookup) runs deterministically to translate raw destination addresses into relative plain-text context (e.g., <code>&quot;~45 min northeast of home, typical traffic; alternate route +20 min&quot;</code>) before CWM ingestion. This exemplifies the pipeline pattern: raw structured data → tool-processed plain-text context.</li>
+      <li><strong>Telemetry:</strong> Emit <code>sync.calendar.start</code>, <code>sync.calendar.complete</code> (items_synced, sync_token), <code>sync.contacts.start</code>, and <code>sync.contacts.complete</code> (items_synced).</li>
+    </ul>
+
+    <pre>Connect Google
+  -&gt; system browser PKCE loopback
+  -&gt; keyring: google_oauth_refresh_token (service: "com.squirrelthug.lilith")
+  -&gt; full calendar sync -&gt; calendar_db.nextSyncToken
+  -&gt; full contacts sync -&gt; contacts_db.syncToken + etags
+  -&gt; APScheduler intervals: calendar 15m, contacts 30m
+  -&gt; L1/L2 enhancement queue</pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s19">§19</a> · Touches: §02 Security, §17 Enhancement, §20 Contacts, §25 Onboarding</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §19 Sync (reconciled keychain service and keys, offline-only refresh token)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s18.html">← §18 Memory System</a><a href="../index.html">▲ Overview</a><a href="s20.html">§20 Contacts / People App →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §19 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>

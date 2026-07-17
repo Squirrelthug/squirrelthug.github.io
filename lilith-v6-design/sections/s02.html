@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6 — §02 Security & Credential Management</title>
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+
+<h1>Lilith v6 — Design Document</h1>
+<p class="doc-subtitle">§02 · Security &amp; Credential Management — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+
+<nav class="doc-nav">
+  <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
+  <a href="../full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a href="../checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
+  <a href="../standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
+  <a href="../systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
+  <a href="../amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
+  <a href="../BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+</nav>
+
+<div class="layer l-found">Foundation Layer</div>
+
+<details id="s2" open>
+  <summary><span class="s-num">02</span><span class="s-title">Security &amp; Credential Management</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <div class="s-body">
+    <p><strong>Credentials are managed through the OS keychain using python-keyring in convenience mode, or entered at launch in prompt mode, with strict startup safety checks that disable insecure fallbacks and a separate file for database salts to enable robust offline restores.</strong></p>
+
+    <ul>
+      <li><strong>Keychain Service Name:</strong> <code>"com.squirrelthug.lilith"</code> (the unique namespace string used for all OS keyring queries).</li>
+      <li><strong>OS-Specific Keyring Backends:</strong>
+        <ul>
+          <li><strong>Linux Desktop:</strong> <code>SecretServiceKeyring</code> (Freedesktop Secret Service API via D-Bus).</li>
+          <li><strong>macOS:</strong> <code>macOS Keychain</code> (Generic Password item class, <code>secGenericPassword</code>).</li>
+          <li><strong>Windows:</strong> <code>WinVaultKeyring</code> (Windows Credential Manager encrypted via DPAPI).</li>
+        </ul>
+      </li>
+      <li><strong>Keychain Security Verification:</strong> Startup checks verify that <code>keyring.get_keyring()</code> returns a secure backend. If an insecure plaintext fallback (like <code>keyrings.alt</code>) or a failed keyring (<code>FailKeyring</code>) is detected, the app refuses to boot and raises an unrecoverable security exception.</li>
+      <li><strong>Stored Credentials List &amp; Key Names (Canonical Table):</strong>
+        <p>All secrets are managed under the unified service namespace <code>"com.squirrelthug.lilith"</code>. In-memory access tokens are never persisted.</p>
+        <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; border: 1px solid var(--border); background: var(--surface2);">
+          <thead>
+            <tr style="background: var(--surface); border-bottom: 2px solid var(--border); color: var(--accent);">
+              <th style="padding: 8px; text-align: left; border: 1px solid var(--border);">Service Name</th>
+              <th style="padding: 8px; text-align: left; border: 1px solid var(--border);">Key Name</th>
+              <th style="padding: 8px; text-align: left; border: 1px solid var(--border);">Content / Description</th>
+              <th style="padding: 8px; text-align: left; border: 1px solid var(--border);">Written By</th>
+              <th style="padding: 8px; text-align: left; border: 1px solid var(--border);">Read By</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>master_passphrase</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Derived key input for SQLCipher DBs (convenience mode only).</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§25 (Step 3/4); passphrase-change flow only (§02 — keychain write is the final step of a completed database re-key)</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§06 (Phase 5/6), §25 (Startup)</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>install_sentinel</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Non-secret marker indicating onboarding completed.</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§25 (Step 8)</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§25 (Startup)</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>security_tier</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Non-secret preference (<code>"convenience"</code> or <code>"prompt"</code>).</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§25 (Step 8), Settings</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§06 (Phase 5), §25 (Startup)</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>anthropic_api_key</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Anthropic Cloud API key (BYOK).</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§25 (Step 6), Settings</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§12</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>openai_api_key</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Optional OpenAI/proxy API key.</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Settings</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§12</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>ollama_bearer_token</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Optional bearer token for a user-fronted Ollama reverse proxy (SEC-008/SEC-020). A secret, so it lives here, never in <code>config.json</code>; the non-secret Ollama base URL stays in <code>config.json</code> (§12).</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Settings</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§12</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>"com.squirrelthug.lilith"</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);"><code>google_oauth_refresh_token</code></td>
+              <td style="padding: 8px; border: 1px solid var(--border);">Google API offline refresh token. Access tokens are cached in-memory only.</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§19, §25 (Step 7)</td>
+              <td style="padding: 8px; border: 1px solid var(--border);">§19</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li><strong>Salt File:</strong> Stored at <code>APP_INTERNAL_DIR/databases/salts.dat</code>. Format is exactly 192 bytes binary, consisting of six contiguous 32-byte cryptographically secure random salts (one for each of the 6 databases: <code>ucl_db</code>, <code>calendar_db</code>, <code>contacts_db</code>, <code>finance_db</code>, <code>memory_db</code>, <code>conversation_db</code> in fixed index order). Loaded via <code>pathlib.Path.read_bytes()</code>. It has exactly three legitimate origins (SEC-025): it is generated via <code>os.urandom(192)</code> inside onboarding's clean-install path (§25 Step 5) and only when no database files exist — never eagerly during startup classification (§06 Phase 4), where premature generation would mask the §25 reinstall-detected state; it arrives as part of a restored backup set (§25 restore-from-backup flow); or it is regenerated by the passphrase-change flow (the Stage step of the Passphrase Change &amp; Key Rotation flow below / §03 Key Rotation Mechanics), where fresh salts are staged and swapped only as part of the §06 rotation journal's committed batch. The "only when no database files exist" rule scopes to startup/onboarding classification — it exists to protect the reinstall-detected state and does not forbid rotation's staged salt regeneration, which never generates salts outside a committed rotation batch. If databases exist but the salt file is missing, startup halts with a recovery error.</li>
+      <li><strong>Security Tier Setting (v6 v1):</strong> Lilith ships two unlock modes. <em>Convenience mode</em> is the default and stores <code>master_passphrase</code> in the OS keychain so startup can auto-unlock. <em>Prompt mode</em> is available during onboarding and in settings; it never persists <code>master_passphrase</code> in the keychain, requires the user to type the passphrase at each app launch, and keeps derived database keys in process memory only until explicit relock or app exit. Switching from convenience mode to prompt mode deletes the persisted <code>master_passphrase</code> keychain item after verifying the typed passphrase can open all six databases. The keychain may still contain non-secret state such as <code>install_sentinel</code> and <code>security_tier</code>; these values do not unlock data. <strong>Recorded decision — default tier (2026-07-12, accepted risk):</strong> Convenience mode remains the default on all three platforms, including Linux, where the Secret Service caveat in the threat model below means any same-user process can read <code>master_passphrase</code> over D-Bus. Hands-free voice startup is the product's identity, and the threat model already concedes the same-user adversary. A platform-aware default (prompt mode as the Linux default) was considered and declined for v6 v1. This acceptance is conditional on §25's tier-selection step displaying the static Linux keyring-exposure warning and presenting both tiers with equal discoverability (AC-OB-004 through AC-OB-007); revisit this decision if dogfooding or user reports show the warning is insufficient.</li>
+      <li><strong>Keyring Failure Recovery:</strong> If the keyring is unavailable or returns errors on startup, Lilith halts and displays a clear error screen: "OS secure keychain is unavailable. Please verify your system's keyring daemon is running."</li>
+      <li><strong>Data Hygiene (SEC-018, Normative):</strong> Raw database rows never leave the device. Before cloud dispatch, the §14 tokenizer replaces person names, email addresses, and phone numbers in the compiled context with anonymous tags <strong>on a best-effort basis</strong> (rule-based detection; recall is not guaranteed, particularly for unusual names, nicknames, possessives, and names inside quoted message text). All other L2/context content — including merchant names and monetary amounts, health and relationship details, free-text notes, and location text outside §19's deterministic calendar-address preprocessing — is <strong>not</strong> detected and is sent as-is to the user's own BYOK provider over TLS, and never to any Lilith-operated service. <strong>Privacy-copy ceiling rule (Normative):</strong> any onboarding, marketing, or privacy copy describing this behavior must be derived from this paragraph as amended — the design document is the ceiling for user-facing privacy claims, never the floor; copy may claim less than this paragraph states, never more. No keyring operations are logged to prevent timing/leak vulnerabilities.</li>
+      <li><strong>Directory &amp; File Permissions (POSIX/Windows):</strong> All directories in <code>APP_INTERNAL_DIR</code> are created with strict <code>0700</code> permissions (directories) and <code>0600</code> (files) on POSIX. On Windows, per-user profile ACLs are set via DPAPI and NTFS permissions. Startup checks verify and enforce these permissions.</li>
+      <li><strong>Threat Model &amp; Security Boundary:</strong> SQLCipher encryption at rest protects user data from offline/at-rest attackers (e.g., physical media theft, disk exfiltration, backup leakage, or copied database files without the passphrase). It does not protect against a compromised active user session, same-user local malware, debugger access, process memory compromise, or a malicious process that can drive the unlocked app. On Linux, the Freedesktop Secret Service API has no per-application ACL, so any process in the same user session may be able to request keychain items over D-Bus; macOS and Windows provide stronger app/user binding but same-user malware remains outside the encryption-at-rest boundary. Convenience mode therefore protects powered-off/stolen/copy-only scenarios, not an already-compromised login session. Prompt mode reduces persistent keychain exposure but still cannot protect data once the passphrase has been entered and Lilith is unlocked.</li>
+      <li><strong>Passphrase Change &amp; Key Rotation (SEC-009, Normative):</strong> The master passphrase is changed only through the guarded passphrase-change flow, a rare foreground operation available in Settings in both security tiers. It runs with a progress UI and may take minutes; data safety strictly dominates speed. The flow is, in order:
+        <ol>
+          <li><strong>Verify:</strong> The user types the <em>current</em> passphrase — required in both tiers; the keychain value is never accepted as proof of user intent. Keys are derived per §03 and verified against all six databases before anything else happens.</li>
+          <li><strong>Collect:</strong> The user types the <em>new</em> passphrase twice, subject to the same minimum-length, confirmation-match, and strength/blocklist rules as onboarding Step 3 (§25).</li>
+          <li><strong>Preflight:</strong> Free disk space of at least the combined size of all six databases plus a 20% margin is confirmed; scheduled jobs (including the §06 daily backup) are paused; a fresh integrity-checked backup set is taken under the current passphrase as the guaranteed restore point.</li>
+          <li><strong>Stage:</strong> Six new 32-byte salts are generated — salts are always regenerated on rotation — new per-database keys are derived per §03, and each database is exported via <code>sqlcipher_export()</code> into a staged copy under the new key and integrity-checked (see §03 Key Rotation Mechanics). The live files are untouched during staging.</li>
+          <li><strong>Commit:</strong> All database connections are closed and the staged databases plus the staged <code>salts.dat</code> replace the live files as one committed batch under the crash-resumable rotation journal defined in §06.</li>
+          <li><strong>Finalize:</strong> Databases are reopened and verified under the new keys through a freshly constructed <code>SessionKeyManager</code>; only then — and in convenience mode only — is the keychain <code>master_passphrase</code> entry updated. <strong>The keychain write is always the final step of a completed database re-key; there is no code path that updates the keychain entry without a completed re-key.</strong> A fresh post-rotation backup is then taken immediately.</li>
+        </ol>
+        Every step emits <code>security.rekey.*</code> UCL events (§06 lists the event set, §16 defines the namespace) whose payloads carry phase, database name, and durations only — never passphrases, salts, key material, or PRAGMA text (§03's keying exception boundary and §16's sanitizer gate apply). If the flow is interrupted at any point, the §06 rotation journal guarantees deterministic rollback or roll-forward at next startup.</li>
+      <li><strong>Master Passphrase Write Path (Normative):</strong> Settings has no direct write control over <code>master_passphrase</code>. The only writers of that keychain entry are onboarding (§25 Step 3/4) and the final step of the passphrase-change flow above. Implementations must not provide any settings field, API, or code path that updates the keychain <code>master_passphrase</code> entry independently of a completed database re-key — a keychain-only passphrase change guarantees lockout (keychain holds the new passphrase while the databases remain keyed under the old one).</li>
+      <li><strong>Credential Update &amp; Revocation (Settings):</strong> All non-master secrets in the canonical table (<code>anthropic_api_key</code>, <code>openai_api_key</code>, <code>ollama_bearer_token</code>, <code>google_oauth_refresh_token</code>) are plain keychain values with no database-key coupling. Settings updates them by direct overwrite (<code>keyring.set_password</code>, taking effect on next use) and revokes them by deletion (<code>keyring.delete_password</code> plus invalidation of any in-memory client holding the old value; Google revocation additionally calls the provider's token-revocation endpoint on a best-effort basis). These simple keychain writes are explicitly distinct from the master-passphrase path above, which is never a simple keychain write. Non-secret entries (<code>install_sentinel</code>, <code>security_tier</code>) follow their existing §25/§02 writers.</li>
+      <li><strong>Explicit Re-Lock (Normative):</strong> "Relock" means: all database connections are closed (WAL flushed), the <code>SessionKeyManager</code> and every derived key are dropped from process memory via <code>SessionKeyManager.relock()</code> (§03), scheduler jobs requiring database access are paused, voice capture stops, and the UI returns to a locked screen. A manual "Lock Lilith" action in Settings and the tray menu triggers relock in both tiers; relock and the subsequent unlock emit <code>security.relock</code> / <code>security.unlock</code> UCL events. Resuming from the locked screen: prompt mode requires the typed passphrase; convenience mode offers one-click unlock via the keychain (manual relock in convenience mode guards against casual physical access, not same-user malware — see Threat Model above). <strong>Recorded decision — idle-timeout auto-relock (2026-07-12):</strong> deferred beyond v6 v1. Lilith is a voice-first, always-listening assistant with scheduled background jobs (e.g. the 03:20 backup); an idle auto-relock would silently break wake-word response and scheduled work. It is recorded as a future opt-in for prompt mode, not a v1 requirement.</li>
+      <li><strong>What Rotation Does — and Does Not — Do:</strong> Rotating the passphrase re-keys the live store, protects all <em>future</em> backups, and revokes the forward usefulness of a leaked keychain value or captured passphrase. It does <em>not</em> re-protect data already exfiltrated: any backup set (databases + salts) copied off the device under the old passphrase remains decryptable with that old passphrase forever. After a suspected compromise, rotation limits future exposure; it cannot recall the past. The flow takes a fresh backup automatically at finalize; retained older sets are not re-keyed and age out under §06's 7-set retention policy (see §06 Backups Across Rotation).</li>
+    </ul>
+
+    <pre>
+OS KEYRING STARTUP SECURITY WRAPPER:
+┌────────────────────────┐
+│      App Startup       │
+└───────────┬────────────┘
+            │
+            ▼
+┌────────────────────────┐      No
+│ keyring.get_keyring()  ├───────────────┐
+│  is secure backend?    │               │
+└───────────┬────────────┘               ▼
+            │ Yes           ┌────────────────────────┐
+            ▼               │ Throw RuntimeError     │
+┌────────────────────────┐  │ "Insecure Keyring" &   │
+│ Load Salts from        │  │ exit app immediately.  │
+│ APP_INTERNAL_DIR/      │  └────────────────────────┘
+│ databases/salts.dat    │
+└────────────────────────┘
+    </pre>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s2">§02</a> · Touches: §03 SQLCipher, §12 LLM, §19 Sync, §25 Onboarding</div>
+    <div class="s-meta">Amendment added: 2026-07-03 · Touches: §03 SQLCipher, §04 Cross-Platform, §06 Lifecycle, §25 Onboarding, §29 Custodian Model</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §06 Lifecycle, §25 Onboarding</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
+    <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §12 LLM, §19 Sync, §25 Onboarding (keychain naming reconciliation)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §25 Onboarding (Linux keychain-tier warning &amp; recorded default decision)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §08 Testing, §14 CWM (PII claim reconciliation &amp; detector scope)</div>
+    <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §06 Lifecycle, §12 LLM, §22 Conversation App (consistency pass: bearer-token keychain row, lifecycle diagram redraw, locked-box reconciliation, endpoint-authz decision)</div>
+    <div class="s-meta">Amendment added: 2026-07-17 · Touches: §02 Security, §06 Lifecycle (round-3 security review SEC-025: salt-file origins reconciled with the rotation flow)</div>
+  </div>
+</details>
+
+<div class="page-nav"><a href="s01.html">← §01 Project Structure &amp; Conventions</a><a href="../index.html">▲ Overview</a><a href="s03.html">§03 Encryption at Rest — SQLCipher →</a></div>
+
+<hr>
+<p class="foot-stamp">
+  LILITH V6 DESIGN DOCUMENT · §02 of 29 · FROZEN 2026-06-29 · amendment history: <a href="../amendments.html">Amendment Ledger</a> · single-file copy: <a href="../full-document.html">Full Document</a>
+</p>
+</body>
+</html>
