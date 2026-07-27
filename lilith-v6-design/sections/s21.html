@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lilith v6 — §21 Finance App</title>
+<title>Lilith v6 — §21 Calendar App</title>
 <link rel="stylesheet" href="../assets/site.css">
 </head>
 <body>
 
 <h1>Lilith v6 — Design Document</h1>
-<p class="doc-subtitle">§21 · Finance App — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
+<p class="doc-subtitle">§21 · Calendar App — one section of the frozen design document. Content is law: verbatim from the frozen document, amended only through documented design sessions.</p>
 
 <nav class="doc-nav">
   <a href="../index.html"><span class="nav-icon">🏠</span> Overview</a>
@@ -24,70 +24,98 @@
 <div class="layer l-app">Application Layer</div>
 
 <details id="s21" open>
-  <summary><span class="s-num">21</span><span class="s-title">Finance App</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
+  <summary><span class="s-num">21</span><span class="s-title">Calendar App</span><span class="pill pill-complete">Complete</span><span class="s-chevron">▶</span></summary>
   <div class="s-body">
-    <p><strong>finance_db stores encrypted transaction and account data.</strong> Import is deterministic (no LLM parsing). Categorization is rules-based in v6 v1.</p>
+    <p><strong><code>calendar_db</code> holds two strictly separated event stores: a read-only, provenance-tagged mirror of the user's Google Calendar kept fresh by the §19 sync, and Lilith's own writable calendar — the system ingests the user's calendar and keeps its own calendar up to date; it can write to its own calendar, but the user's calendar is safe from this untested system.</strong> More telemetry is required before Lilith is ever granted the ability to manage the user's own calendar. The full working spec is <code>specs/calendar-app.spec.md</code>; this section is the law derived from it.</p>
 
-    <p><strong>Database schema (finance_db — SQLCipher encrypted):</strong></p>
-    <pre>accounts(
-  id          TEXT PRIMARY KEY,
-  name        TEXT NOT NULL,
-  institution TEXT,
-  type        TEXT CHECK(type IN ('checking','savings','credit','investment')),
-  currency    TEXT DEFAULT 'USD',
-  created_at  REAL NOT NULL
+    <p><strong>Database schema (calendar_db — SQLCipher encrypted):</strong></p>
+    <pre>synced_events(                            -- read-only mirror of the user's Google Calendar
+  id            TEXT PRIMARY KEY,         -- Google event id
+  ical_uid      TEXT,                     -- iCalendar UID as delivered by Google
+  calendar_id   TEXT NOT NULL,
+  summary       TEXT,
+  description   TEXT,
+  location      TEXT,
+  start_ts      REAL,
+  end_ts        REAL,
+  all_day       INTEGER DEFAULT 0,
+  status        TEXT,                     -- confirmed/tentative/cancelled, as synced
+  etag          TEXT,
+  synced_at     REAL NOT NULL,
+  provenance    TEXT NOT NULL DEFAULT 'google_sync',
+  echo_of_lilith_event_id TEXT REFERENCES lilith_events(id)  -- set only by the L1 echo job; NULL = genuine user event
 )
 
-transactions(
-  id              TEXT PRIMARY KEY,
-  account_id      TEXT REFERENCES accounts(id),
-  date            REAL NOT NULL,
-  amount          REAL NOT NULL,          -- positive = credit, negative = debit
-  merchant        TEXT,
-  category        TEXT,                   -- see category list below
-  description     TEXT,
-  import_source   TEXT,                   -- 'pdf', 'csv', 'manual'
-  import_batch_id TEXT,                   -- groups rows from one import run
-  raw_source_fingerprint TEXT,            -- stable hash of source row/page/statement identity
-  dedup_status   TEXT DEFAULT 'clear' CHECK(dedup_status IN ('clear','candidate','confirmed_duplicate','confirmed_distinct')),
-  dedup_group_id TEXT,                    -- groups ambiguous duplicate candidates for review
-  created_at      REAL NOT NULL
-)</pre>
+lilith_events(                            -- Lilith's own calendar: events she creates for the user
+  id          TEXT PRIMARY KEY,
+  ical_uid    TEXT NOT NULL UNIQUE,       -- RFC 5545 UID, stable for the event's lifetime
+  summary     TEXT NOT NULL,
+  description TEXT,
+  location    TEXT,
+  start_ts    REAL NOT NULL,
+  end_ts      REAL NOT NULL,
+  all_day     INTEGER DEFAULT 0,
+  status      TEXT NOT NULL DEFAULT 'confirmed' CHECK(status IN ('confirmed','tentative','cancelled')),
+  sequence    INTEGER NOT NULL DEFAULT 0, -- RFC 5545 SEQUENCE; incremented on every update/cancel
+  created_at  REAL NOT NULL,
+  updated_at  REAL NOT NULL
+)
+
+Google Calendar API (§19, read-only) -&gt; synced_events mirror ─┐
+                                                               ├─ L1: echo tag + conflict flag -&gt; L2 period agenda -&gt; artifact tools/CWM
+lilith_events (Lilith-owned, writable) ────────────────────────┘
+        └─&gt; ICS subscription feed (read-only, token path, Lilith events only)</pre>
 
     <ul>
-      <li><strong>Import — PDF:</strong> <code>pdfplumber</code> remains deterministic, but v6 v1 does not claim universal PDF adaptivity. PDF import is a named adapter pipeline per institution and statement family. Supported v6 v1 adapters are: Chime Checking statements, Chime Savings statements, Chime Credit Builder/Credit statements, Cash App Account statements, and Cash App Savings statements. Each adapter owns its institution detection, page/table extraction, sign convention, date parsing, multiline-description handling, and corpus fixtures. Additional banks are unsupported until real sample statements are collected and a bank-specific adapter is added.</li>
-      <li><strong>Import — CSV:</strong> header keyword matching for column mapping. Handles any export with date + amount + description columns.</li>
-      <li><strong>Auto-categorization:</strong> keyword rules applied to <code>merchant</code> field at import time. Nine categories: <code>Housing</code>, <code>Food</code>, <code>Transport</code>, <code>Healthcare</code>, <code>Entertainment</code>, <code>Shopping</code>, <code>Utilities</code>, <code>Income</code>, <code>Other</code>. Rules live in <code>data/finance/categories.yaml</code> — editable without code changes.</li>
-      <li><strong>Unsupported PDF behavior:</strong> When a dropped-in PDF does not match a supported adapter signature, Lilith rejects PDF import for that file with a clear unsupported-bank message, records no transaction rows from that PDF, and offers CSV/manual import or "add bank adapter" guidance. Unsupported PDFs are never silently parsed through a generic best-guess table mapper.</li>
-      <li><strong>L1:</strong> duplicate detection job — exact source fingerprints may be treated as already-imported rows, but same date + amount + merchant within a 24h window is only a duplicate candidate. Before flagging, the job checks stronger disambiguating signals when present: source transaction id/reference, timestamp precision beyond calendar date, posted/settled date pair, running balance/net amount continuity, statement line index/page identity, account id, import batch id, and normalized raw row fingerprint. If the available signals cannot prove the rows are the same source transaction, both rows are preserved and grouped with <code>dedup_status='candidate'</code> for user review. The job never silently discards an ambiguous finance transaction.</li>
-      <li><strong>L2:</strong> spending summaries by category and period. Produced by template (not LLM) in v6 v1. LLM reads this output only.</li>
-      <li><strong>Tools:</strong> <code>finance_summary(period: str, category: str | None) → str</code> — returns narrative spending summary. <code>spending_trend(periods: int) → str</code> — compares N periods against prior N. Both <code>artifact_only</code> mode.</li>
-      <li><strong>UCL events:</strong> <code>tool.call.start</code>, <code>tool.call.complete</code> (from §15). Import-specific: <code>sync.finance.import_complete</code> (batch_id, row_count, duplicate_candidate_count, auto_deduped_exact_count) and <code>sync.finance.unsupported_bank_pdf</code> (institution_hint, filename_hash, reason).</li>
+      <li><strong>Database:</strong> <code>calendar_db</code> uses SQLCipher with WAL and <code>busy_timeout=5000</code>; all event PII is encrypted at rest (§03).</li>
+      <li><strong>Google mapping (§19 sync, machinery unchanged):</strong> event <code>id</code> -&gt; <code>id</code>, <code>iCalUID</code> -&gt; <code>ical_uid</code>, <code>summary</code>/<code>description</code>/<code>location</code> -&gt; same-named columns, <code>start</code>/<code>end</code> -&gt; <code>start_ts</code>/<code>end_ts</code> (+<code>all_day</code>), <code>status</code> -&gt; <code>status</code>, <code>etag</code> -&gt; <code>etag</code>, sync time -&gt; <code>synced_at</code>. The mirror exists to be overwritten by the next sync — the user keeps changing their own calendar and Lilith always stays current.</li>
+      <li><strong>Mirror integrity:</strong> the §19 sync is the only writer of Google-sourced fields in <code>synced_events</code>; no tool, UI action, or L2 job mutates the mirror. The sole non-sync writer is the L1 echo-detection job, which sets only the local annotation column <code>echo_of_lilith_event_id</code>.</li>
+      <li><strong>Lilith's calendar:</strong> events Lilith creates for the user live in <code>lilith_events</code>, modeled as a standards-compliant calendar (iCalendar UID, SEQUENCE, STATUS semantics). Create sets a fresh UID and <code>sequence=0</code>; every update or cancel increments <code>sequence</code> so feed subscribers observe the change. Cancel, never hard-delete: <code>status='cancelled'</code>, row retained.</li>
+      <li><strong>Tools:</strong> reads <code>agenda(period: str) -&gt; str</code> and <code>event_lookup(query: str) -&gt; str</code> follow the §20 pattern — <code>artifact_only</code>, returning L2-style text, never raw rows. Writes <code>calendar_event_create</code>, <code>calendar_event_update</code>, <code>calendar_event_cancel</code> operate on <code>lilith_events</code> ONLY and refuse mirrored-event ids with an explicit message. All tools emit <code>tool.call.start</code>/<code>tool.call.complete</code> (§15).</li>
+      <li><strong>ICS subscription feed (the keystone):</strong> Lilith's calendar is published as a read-only ICS feed so the user can subscribe from their own calendar client if they choose. Most users will hopefully depend on Lilith to convey and organize their tasks throughout the day; some of those users also want a glance at the view they have always used — the information is identical either way, and the design services that user: Lilith knows what the user knows AND the user stays informed in the way they have always been informed. The feed contains ONLY Lilith-originated events (mirrored Google events are never republished); it is served locally (loopback by default, LAN opt-in) at an unguessable token path <code>/calendar/&lt;token&gt;/lilith.ics</code> (<code>secrets.token_urlsafe(32)</code>, stored inside <code>calendar_db</code>, never logged, regenerable — regeneration invalidates the old URL). GET only; wrong token → 404, non-GET → 405. Cancelled events are published with <code>STATUS:CANCELLED</code> and their incremented <code>SEQUENCE</code>.</li>
+      <li><strong>Honest limitation (LAN feed):</strong> device-polling clients on the same network (e.g., Apple Calendar) can subscribe in v6 v1. Google Calendar polls from Google's servers and cannot reach a LAN feed — remote feed publishing is deferred, consistent with §29's cloud deferral. The token path is capability-style security on the local network, <em>not</em> authentication: anyone on the LAN who learns the URL can read Lilith's calendar. User-facing copy states both limitations plainly; it may claim less than this paragraph, never more.</li>
+      <li><strong>L1 — echo detection (mandatory) + conflict flagging:</strong> if the user subscribes to Lilith's feed in a calendar that syncs back through §19, Lilith's events return as Google events. After each sync, the L1 job matches incoming synced events' iCal UIDs against <code>lilith_events.ical_uid</code> and tags matches as echoes (<code>echo_of_lilith_event_id</code>); echoes are excluded from agenda merging and conflict detection — each event appears exactly once and never conflicts with itself. Separately, a genuine (non-echo) user event overlapping an active Lilith event is flagged for user review — never auto-resolved, moved, or cancelled. The job is idempotent and re-run safe.</li>
+      <li><strong>L2 — merge at view/summary time only:</strong> no storage-layer merge of the two stores. The L2 job produces period agenda summaries by template (non-LLM, per §17's untrusted-domain rule), merging non-echo mirror events with active Lilith events at summary time; CWM reads L2 only. The calendar domain's <code>refresh_capability</code> remains <code>sync_and_enhance</code> (§17) — the refresh machinery needs no changes. §19's address-context preprocessing (raw location → relative plain-text) applies to both stores before CWM ingestion.</li>
+      <li><strong>Telemetry:</strong> existing events unchanged: <code>sync.calendar.*</code> (§19), <code>tool.call.start</code>/<code>tool.call.complete</code> (§15). New: <code>sync.calendar.echo_detected</code> (lilith_event_id, google_event_id), <code>calendar.conflict.flagged</code> (lilith_event_id, synced_event_id, overlap_minutes), <code>calendar.feed.served</code> (event_count, response_bytes) — payloads per §16 hygiene, never event content.</li>
     </ul>
-    <p><strong>EARS requirements — PDF import scope:</strong></p>
+
+    <p><strong>EARS requirements — store separation and write scope:</strong></p>
     <ul>
-      <li>Where PDF import is active, the finance importer shall route each PDF through an explicit supported-bank adapter selected by institution and statement-family signature.</li>
-      <li>When a Chime Checking, Chime Savings, Chime Credit Builder/Credit, Cash App Account, or Cash App Savings statement is imported, the matching adapter shall parse transaction rows using that statement family's mapped layout, sign convention, date fields, and multiline-description rules.</li>
-      <li>When a PDF does not match a supported adapter signature, the finance importer shall stop before row creation and show a clear unsupported-bank message.</li>
-      <li>When a new institution is added, the system shall require real sample statements and adapter-specific fixtures before the institution is listed as supported.</li>
+      <li>The calendar application shall maintain <code>synced_events</code> and <code>lilith_events</code> as two separate stores with no storage-layer merge.</li>
+      <li>When a §19 calendar sync runs, the sync pipeline shall be the only writer of Google-sourced fields in <code>synced_events</code>.</li>
+      <li>Where LLM-callable calendar write tools are active, the tools shall create, update, or cancel rows in <code>lilith_events</code> only.</li>
+      <li>When a write tool receives an event id that does not identify a <code>lilith_events</code> row — including any mirrored Google event id — the tool shall refuse the operation, modify no row, and return an explicit refusal message.</li>
+      <li>When <code>calendar_event_cancel</code> succeeds, the system shall set <code>status='cancelled'</code> and increment <code>sequence</code>, and shall never hard-delete the row.</li>
+      <li>When <code>calendar_event_update</code> succeeds, the system shall increment <code>sequence</code> so feed subscribers observe the change.</li>
+      <li>The system shall not register, request, or expose any Google Calendar write operation in v6 v1: no write scope is requested, no write-back method is registered, and no tool definition exposes a Google Calendar mutation — reaffirming §19's read-only enforcement.</li>
     </ul>
-    <p><strong>EARS requirements — duplicate handling:</strong></p>
+    <p><strong>EARS requirements — ICS feed:</strong></p>
     <ul>
-      <li>When an imported row has the same raw source fingerprint as an existing row for the same account, the deduplication job shall treat it as an exact previously imported source row.</li>
-      <li>When two rows share date, amount, and normalized merchant within 24 hours, the deduplication job shall compare stronger disambiguating signals before deciding whether the rows are the same transaction.</li>
-      <li>When stronger disambiguating signals prove two rows are different legitimate transactions, the deduplication job shall preserve both rows as clear transactions.</li>
-      <li>When stronger disambiguating signals are missing or inconclusive, the deduplication job shall preserve both rows and flag the pair or group for user review.</li>
-      <li>The deduplication job shall not discard a same-day, same-amount, same-merchant row solely because it resembles another row.</li>
+      <li>Where the ICS feed is enabled, the system shall serve Lilith-originated events only and shall never serialize mirrored Google events into the feed.</li>
+      <li>The feed server shall accept only HTTP GET at the token path, shall respond 404 to an unknown path or wrong token without disclosing valid paths, and shall respond 405 to any non-GET method.</li>
+      <li>The feed server shall bind to loopback by default and, where LAN serving is enabled, to the local network interface only.</li>
+      <li>When an event is updated or cancelled, the feed shall publish its current <code>SEQUENCE</code> and <code>STATUS</code> (including <code>STATUS:CANCELLED</code>).</li>
+      <li>The feed server shall serialize and respond within 2 seconds for calendars of up to 5,000 Lilith events.</li>
+    </ul>
+    <p><strong>EARS requirements — echo detection and conflicts:</strong></p>
+    <ul>
+      <li>When a calendar sync completes, the L1 job shall compare each incoming synced event's iCalendar UID against <code>lilith_events.ical_uid</code> and set <code>echo_of_lilith_event_id</code> on every match.</li>
+      <li>While a synced event carries <code>echo_of_lilith_event_id</code>, the L1 and L2 jobs shall exclude it from agenda merging and conflict detection, so each event appears exactly once and never conflicts with itself.</li>
+      <li>When a non-echo synced event overlaps in time with an active Lilith event, the L1 job shall flag the pair for user review and shall never auto-resolve, move, or cancel either event.</li>
     </ul>
     <p><strong>Acceptance criteria:</strong></p>
     <ul>
-      <li>Given a supported Chime or Cash App statement PDF, when the user imports it, then Lilith selects the matching bank adapter, parses the statement without LLM parsing, creates the expected transaction rows, and emits <code>sync.finance.import_complete</code>.</li>
-      <li>Given a PDF statement from an unlisted bank, when the user drops it into finance import, then Lilith shows an unsupported-bank message, creates no transaction rows from that PDF, and offers CSV/manual import or adapter-addition guidance.</li>
-      <li>Given a statement contains two same-day, same-amount, same-merchant purchases, when no timestamp, source id, running balance, or other stronger signal proves they are the same transaction, then Lilith preserves both rows and flags them for user review instead of discarding either row.</li>
+      <li>Given the user asks Lilith to schedule an event, when <code>calendar_event_create</code> completes, then a <code>lilith_events</code> row exists with a fresh UID and <code>sequence</code> 0, the ICS feed includes the event, no Google API write call was issued, and the user's Google Calendar is unchanged.</li>
+      <li>Given the user has subscribed to Lilith's feed in a calendar that syncs back through §19, when the next sync imports an echoed copy whose iCal UID matches a <code>lilith_events</code> row, then the L1 job tags it as an echo, emits <code>sync.calendar.echo_detected</code>, the agenda shows the event exactly once, and no conflict is flagged between the event and its echo.</li>
+      <li>Given a mirrored Google event id, when any calendar write tool is invoked with it, then the tool refuses with an explicit message and no row in either store is modified.</li>
+      <li>Given an active Lilith event with <code>sequence</code> N, when <code>calendar_event_cancel</code> runs, then the row remains with <code>status='cancelled'</code> and <code>sequence</code> N+1, and the feed publishes <code>STATUS:CANCELLED</code>.</li>
+      <li>Given a genuine (non-echo) user event overlapping an active Lilith event, when the L1 job runs, then the pair is flagged for review, <code>calendar.conflict.flagged</code> is emitted, and neither event is modified.</li>
+      <li>Given the v6 v1 tool registry and OAuth configuration, when audited, then no Google Calendar write scope is requested, no write-back method is registered, and no tool exposes a Google Calendar mutation.</li>
     </ul>
-    <p><strong>Future/conditional:</strong> Plaid-style bank linking is worth investigating after v6 v1 only if it is genuinely free or low-cost for a small independent developer and does not require a large-institution partnership. It is not a v6 v1 requirement and is excluded from the acceptance criteria above.</p>
-    <div class="s-meta">Checklist: <a href="../checklist.html#s21">§21</a> · Touches: §02 Security, §03 SQLCipher, §15 Tools, §17 Enhancement</div>
+    <p><strong>Future/conditional:</strong> Remote feed publishing (which would let Google Calendar's servers subscribe) is deferred, consistent with §29's cloud deferral. Additional ingest sources (ICS/CalDAV/Apple Calendar) are deferred — Google Calendar is the sole ingest source in v6 v1. Granting Lilith the ability to manage the user's own calendar is gated on accumulated telemetry demonstrating reliable behavior of Lilith's own calendar, and requires a future documented design session; it is excluded from the acceptance criteria above.</p>
+    <div class="s-meta">Checklist: <a href="../checklist.html#s21">§21</a> · Note: Read-only from Google Calendar. Lilith manages her own calendar. · Touches: §17 Enhancement, §19 Sync, §26 UI, §28 Screens</div>
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §21 Finance App (named PDF adapter scope, unsupported-bank handling, duplicate review queue)</div>
+    <div class="s-meta">Amendment added: 2026-07-27 · Touches: §21 Calendar App (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection), §14 CWM, §17 Enhancement, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md</div>
   </div>
 </details>
 

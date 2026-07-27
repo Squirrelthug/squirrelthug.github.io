@@ -63,7 +63,7 @@ The goal of Milestone 1 is to establish the smallest functional, end-to-end voic
 | **§18 Memory System** | **REQUIRED** | Implement the `conversation_db` schema (`turns`, `sessions`) and SQLite FTS5 index. Defer vector embeddings (`memory_db`). |
 | **§19 Data Sync Pipeline** | **EXCLUDED** | Calendar/Contacts OAuth sync is fully deferred. |
 | **§20 Contacts / People App** | **EXCLUDED** | People database, search tools, and UI screens are deferred. |
-| **§21 Finance App** | **EXCLUDED** | Bank statement parsing, transaction lists, and finance tools are deferred. |
+| **§21 Calendar App** | **EXCLUDED** | Calendar event stores, ICS subscription feed, echo detection, and calendar tools are deferred to Phase 6. |
 | **§22 Conversation / Chat App** | **REQUIRED** | A minimal PySide6 visual window showing conversational bubbles, tool panels, and a typed text input box. |
 | **§23 Personality & System Prompt** | **REQUIRED** | Parse static `EDICTS.md` and `VOICE.md` templates into the prompt. Defer local PERS-2 model. |
 | **§24 Narrative Layer** | **REQUIRED** | Tool narratives for `recall_memory` in its `tool.yaml` (acknowledge, handoff template, and failure). |
@@ -159,7 +159,7 @@ Once Milestone 1 is validated and de-risked, the remaining features must be sequ
  Phase 5: Custodian App Suite (Google Contacts/Calendar Sync, Contacts UI)
                      │
                      ▼
- Phase 6: Finance App Integration (CSV Parsing, Duplicate Flagging, PDF Parser)
+ Phase 6: Calendar App Integration (Lilith Calendar Stores, ICS Feed, Echo Detection)
                      │
                      ▼
  Phase 7: Onboarding, Extension & Final Freeze (UI Flow, Skills Manifests)
@@ -198,15 +198,15 @@ Integrates the first set of external data sources.
   - Implement the Chat screen deep-link navigation and element highlighting rules (§28).
 * **Validation:** Sign into a test Google account; verify that contacts and calendar events sync successfully, and that naming a contact in a query triggers context block injection (§14).
 
-### Phase 6: Finance App Integration
-Integrates financial statements with data-loss guards.
+### Phase 6: Calendar App Integration
+Builds Lilith's own calendar on top of the Phase 5 sync mirror (§21 Calendar App, amended 2026-07-27).
 * **Deliverables:**
-  - Set up finance database tables (`finance_db`) and CSV importer (§21).
-  - Priority build: CSV statement parser.
-  - Secondary build: PDF statement parser using `pdfplumber` with adaptivity tests.
-  - Implement the transaction deduplication rule: duplicate candidates within 24h are flagged for user review rather than silently discarded (ref: **Task 13**).
-  - Code the `finance_summary` and `spending_trend` tools (§21).
-* **Validation:** Import a CSV containing duplicate purchases; verify that both appear in the database but are flagged as duplicates in the UI.
+  - Set up the two `calendar_db` event stores (§21): the read-only `synced_events` mirror (populated by the §19 sync wired in Phase 5, plus the `echo_of_lilith_event_id` annotation column) and Lilith-owned `lilith_events` with iCalendar UID/SEQUENCE/STATUS semantics.
+  - Implement the L1 echo-detection + conflict-flagging job (echoes excluded from agenda merging and conflict detection; genuine overlaps flagged for user review, never auto-resolved) and the template L2 period agenda summaries (§21).
+  - Code the scoped tools: `agenda` / `event_lookup` (`artifact_only`, L2 text) and `calendar_event_create` / `calendar_event_update` / `calendar_event_cancel` (`lilith_events` only, mirrored-id refusal, cancel-never-delete with sequence increment) (§21).
+  - Serve the local read-only ICS subscription feed: Lilith-originated events only, unguessable token path, loopback default / LAN opt-in (§21).
+  - Implement the `"calendar"` screen (§26/§28).
+* **Validation:** Subscribe a device calendar client on the same network (e.g., Apple Calendar) to the feed; verify Lilith's events appear and a cancellation propagates (`STATUS:CANCELLED`, incremented `SEQUENCE`). Simulate the echo loop — sync a copy of a feed event back through §19 — and verify it is tagged as an echo, appears exactly once in the agenda, and flags no self-conflict. Audit that no Google Calendar write scope is requested and no tool mutates the mirror.
 
 ### Phase 7: Onboarding, Extension, & Final Freeze
 Completes the UI shell and locks the app for public release.
@@ -224,6 +224,6 @@ The following items are deferred to post-v1 or future design-document sprints to
 
 1. **Zero-Clearance Kitchen Speaker Endpoint:** Defer the `kitchen_speaker` hardware abstraction, WebSocket streaming to secondary endpoints, and local voice authentication (ref: **Task 06**).
 2. **Google Drive / iCloud Storage Backup Sync:** Defer cloud sync subscription modules and remote database replication. Lilith v6 v1 backups are manifest-carrying encrypted folder sets written to internal storage and the user-chosen `EXTERNAL_BACKUP_DIR` — which may itself be a folder the user's own cloud service syncs — but Lilith itself operates no cloud sync or remote replication (ref: §04/§29; wording updated 2026-07-17 per SEC-029 — the parked item, no Lilith-operated cloud sync in v1, is unchanged).
-3. **Advanced PDF Adaptivity:** Defer automatic learning of novel PDF layouts. The pdfplumber parser will support only a fixed, pre-approved list of bank layouts in v1 (ref: **Task 13**).
+3. **Finance App (shelved 2026-07-27; formerly §21):** The Finance App is parked in full until deterministic financial infrastructure exists — AI automation is for speed; system intelligence comes from tools the developer builds for agents to call, and no such deterministic finance toolchain exists yet. Parked spec summary (full text in the amendment ledger's history): `finance_db` with `accounts`/`transactions` tables; deterministic import only, no LLM parsing — a named per-institution PDF adapter pipeline (Chime Checking/Savings/Credit Builder, Cash App Account/Savings; unsupported PDFs rejected with a clear message, never best-guess parsed) plus CSV import via header keyword matching; rules-based nine-category auto-categorization from `data/finance/categories.yaml`; L1 duplicate detection that preserves ambiguous candidates for user review (`dedup_status='candidate'`, never silent discard); template L2 spending summaries; `finance_summary` and `spending_trend` `artifact_only` tools; telemetry `sync.finance.import_complete` / `sync.finance.unsupported_bank_pdf`. Advanced/adaptive PDF layout learning remains deferred inside the parked spec (ref: **Task 13**). `finance_db` stays provisioned and dormant in §02/§03/§04/§29 (salt file unchanged: exactly 192 bytes, six 32-byte salts in fixed index order) so the app can return without key-material migration. It returns via a documented design session when deterministic finance infrastructure exists.
 4. **Cross-Device UI State Continuity:** Defer real-time UI state synchronization between the desktop app and mobile devices.
 5. **Interactive Skills Library:** Defer any GUI-based skill discovery, browsing, or simple activation toggles. All skill modifications require CLI commands and SHA-256 hash entries (ref: **Task 04**).
