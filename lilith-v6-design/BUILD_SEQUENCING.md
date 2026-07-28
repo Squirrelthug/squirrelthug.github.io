@@ -60,7 +60,7 @@ The goal of Milestone 1 is to establish the smallest functional, end-to-end voic
 | **§15 Tool System** | **REQUIRED** | Core runner wrapper executing **exactly one** tool: `recall_memory`. |
 | **§16 UCL Telemetry** | **EXCLUDED** | Defer the `ucl_db` database. Log telemetry events to standard python logs (`APP_INTERNAL_DIR/logs/dev.log`) for debug. |
 | **§17 Enhancement Layers (L1/L2)** | **EXCLUDED** | Defer L1/L2 aggregations. CWM queries conversation history raw or via simple FTS5 search. |
-| **§18 Memory System** | **REQUIRED** | Implement the `conversation_db` schema (`turns`, `sessions`) and SQLite FTS5 index. Defer vector embeddings (`memory_db`). |
+| **§18 Memory System** | **REQUIRED** | Implement the `conversation_db` schema (`turns`, `sessions`) and SQLite FTS5 index. Defer vector embeddings (`memory_db`) — staged per the §18 Recall Roadmap; promotion gated by Experiment 3. |
 | **§19 Data Sync Pipeline** | **EXCLUDED** | Calendar/Contacts OAuth sync is fully deferred. |
 | **§20 Contacts / People App** | **EXCLUDED** | People database, search tools, and UI screens are deferred. |
 | **§21 Calendar App** | **EXCLUDED** | Calendar event stores, ICS subscription feed, echo detection, and calendar tools are deferred to Phase 6. |
@@ -77,7 +77,7 @@ The goal of Milestone 1 is to establish the smallest functional, end-to-end voic
 
 ## 3. Milestone 1 Validation: High-Risk De-risking Experiments
 
-Before any subsequent design sections are hardened or built, the Milestone 1 codebase must pass two critical de-risking experiments. These tests address the most fragile assumptions highlighted in the design reviews:
+Before any subsequent design sections are hardened or built, the Milestone 1 codebase must pass two critical de-risking experiments (Experiments 1–2). These tests address the most fragile assumptions highlighted in the design reviews. A third experiment (Experiment 3) lives in this section because it follows the same validation discipline, but it gates the §18 Recall Roadmap promotion — **not** Milestone 1 — and may run at any point before hybrid recall is adopted:
 
 ### Experiment 1: Walking-Skeleton Latency Benchmark
 
@@ -136,6 +136,24 @@ Before any subsequent design sections are hardened or built, the Milestone 1 cod
   3. The go/no-go consequence:
      - **Below both thresholds:** the two-mode hypotheses are confirmed for v1; the stream-and-cut fork closes for v1; proceed to tune the numeric working hypotheses (≤3 s / ≤50 tokens / ≤1200 context) through daily dogfooding.
      - **Above either threshold:** schedule the **stream-and-cut single-path design session** (the fallback architecture named in §13) **before** hardening persona or CWM behavior on top of the router. The round-1 within-two-mode remedies (a local 1B classification model, or a fast cloud classification call at +300 ms latency budget) remain available only if that session re-affirms the two-mode fork.
+
+### Experiment 3: Encrypted Vector Feasibility (§18 Recall Roadmap promotion gate — added 2026-07-27)
+
+*This experiment gates the §18 Recall Roadmap's hybrid-retrieval promotion, not Milestone 1. It may run at any point before any embedding dependency, vector extension, or `memory_embeddings` sidecar table is added to the codebase; until it passes, §18's v1 recall (recency + FTS5) remains the only recall and no vector-related dependency ships.*
+
+* **Assumptions Tested — two, deliberately separated:**
+  1. A version-pinned `sqlite-vec`-class loadable extension actually loads and operates inside **this project's SQLCipher build** (`sqlcipher3-wheels`, §03). Upstream co-existence claims (other projects shipping SQLCipher + sqlite-vec together) were not independently verified during the 2026-07-27 research review and are treated as unproven for this build until demonstrated here. The extension is pre-v1 software with an explicit breaking-change warning from its maintainer, so the pinned version is part of what is being validated.
+  2. Brute-force KNN at the §18-bounded dimensions (256–384, Matryoshka-truncated) meets conversational-lane latency on target hardware without ANN infrastructure.
+* **Procedure:**
+  1. Build/obtain the pinned extension and load it into a SQLCipher-encrypted database opened through the §03 `SessionKeyManager` PRAGMA sequence. Verify keyed reads/writes of vector tables and that WAL mode, `busy_timeout`, and the §03 connection sequence are unaffected.
+  2. Populate `memory_embeddings`-shaped test tables at three scales — 10K, 100K, and 500K rows — with vectors at 256 and 384 dims from the candidate on-device embedding model (≤500M params, quantized).
+  3. Measure, on the target MASTER hardware, p50/p90 for the full recall step the conversational lane would pay: query embedding (cold and warm model) + brute-force KNN (k=20) + RRF merge with a concurrent FTS5 query. Measure the artifact-lane variant separately (larger k, warm+cold tiers).
+  4. Record embedding-model RAM residency (quantized) alongside the §05 hardware-tier assumptions.
+* **Pass Criteria:** (a) Extension loads and operates correctly inside the SQLCipher build with no key-handling or WAL regressions; (b) conversational-lane recall step p90 fits the §14 conversational staleness-refresh budget (`STALE_REFRESH_BUDGET_CONV_MS = 1000`) with ≥50% margin at the 100K scale; (c) results are recorded in a report artifact with hardware spec, pinned versions, and per-scale timings.
+* **Consequences:**
+  - **Pass:** the §18 Recall Roadmap's artifact-lane adoption may proceed; conversational-lane adoption additionally requires criterion (b) at the scale matching actual dogfooded memory volume.
+  - **Fail on (1) — extension/SQLCipher incompatibility:** hybrid recall falls back to a sidecar-index design session (encrypted index file or in-memory index rebuilt at unlock from SQLCipher-stored vectors) — a documented design session, not an improvised workaround.
+  - **Fail on (2) — latency:** artifact-lane-only adoption is still permitted (its budget is 10 s); the conversational lane keeps recency + FTS5 and the dimension/model choices are revisited before any second attempt.
 
 ---
 

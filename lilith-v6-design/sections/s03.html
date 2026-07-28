@@ -36,7 +36,7 @@
           <li><code>calendar_db</code>: Google Calendar read-caches and local calendar events.</li>
           <li><code>contacts_db</code>: Google Contacts read-caches and local people roster.</li>
           <li><code>finance_db</code>: Accounts, transactions, and category YAML paths.</li>
-          <li><code>memory_db</code>: Memory graphs, vector indexes, and personal truths.</li>
+          <li><code>memory_db</code>: Memory entries, FTS5 keyword index, and personal truths; a model-versioned embeddings sidecar table is reserved by the §18 Recall Roadmap (not in v6 v1).</li>
           <li><code>conversation_db</code>: Chat sessions, message turns, and token metrics.</li>
         </ul>
       </li>
@@ -71,6 +71,7 @@ conn.execute("SELECT count(*) FROM sqlite_master;") # Lazy eval verify</pre>
     <div class="s-meta">Checklist: <a href="../checklist.html#s3">§03</a> · Touches: §02 Security, §16 UCL, §18 Memory, §20–22 Apps</div>
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §04 Cross-Platform, §16 UCL (Key Hygiene)</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
+    <div class="s-meta">Amendment added: 2026-07-27 · Touches: §03 SQLCipher, §18 Memory, BUILD_SEQUENCING.md (memory_db inventory wording reconciled with the §18 Recall Roadmap — resolves the §03 "vector indexes" / §18 deferral inconsistency)</div>
   </div>
 </details>
 
