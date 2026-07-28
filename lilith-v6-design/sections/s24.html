@@ -41,19 +41,20 @@ query → classify (artifact) → acknowledge spoken (&lt;200ms from classify)
       <li><strong>Handoff:</strong> spoken when task completes. Template fill from tool result in v6 v1 — <code>narratives.handoff</code> contains a string with <code>{result}</code> placeholder. PERS-2 narration is design-only, feature-flagged off (<code>FEATURE_PERS2 = False</code>).</li>
       <li><strong>Failure:</strong> spoken if task errors. Defined in <code>narratives.failure</code> YAML key.</li>
       <li><strong>Tool YAML example:</strong>
-        <pre>name: finance_summary
+        <pre>name: agenda
 mode: artifact_only
 narratives:
-  acknowledge: "Let me check your finances."
+  acknowledge: "Let me check your calendar."
   bridge:
     - "Still pulling that together…"
     - "Almost ready…"
-  handoff: "Here's your summary: {result}"
+  handoff: "Here's your agenda: {result}"
   failure: "I couldn't retrieve that right now."</pre>
       </li>
       <li><strong>UCL events:</strong> <code>narrative.ack</code> (tool_name, latency_ms), <code>narrative.bridge</code> (tool_name, bridge_count), <code>narrative.handoff</code> (tool_name, total_duration_ms)</li>
     </ul>
     <div class="s-meta">Checklist: <a href="../checklist.html#s24">§24</a> · Touches: §13 Router, §15 Tools, §11 TTS</div>
+    <div class="s-meta">Amendment added: 2026-07-27 · Touches: §14 CWM, §17 Enhancement, §21 Calendar App, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection)</div>
   </div>
 </details>
 

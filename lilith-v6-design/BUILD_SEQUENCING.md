@@ -60,10 +60,10 @@ The goal of Milestone 1 is to establish the smallest functional, end-to-end voic
 | **§15 Tool System** | **REQUIRED** | Core runner wrapper executing **exactly one** tool: `recall_memory`. |
 | **§16 UCL Telemetry** | **EXCLUDED** | Defer the `ucl_db` database. Log telemetry events to standard python logs (`APP_INTERNAL_DIR/logs/dev.log`) for debug. |
 | **§17 Enhancement Layers (L1/L2)** | **EXCLUDED** | Defer L1/L2 aggregations. CWM queries conversation history raw or via simple FTS5 search. |
-| **§18 Memory System** | **REQUIRED** | Implement the `conversation_db` schema (`turns`, `sessions`) and SQLite FTS5 index. Defer vector embeddings (`memory_db`). |
+| **§18 Memory System** | **REQUIRED** | Implement the `conversation_db` schema (`turns`, `sessions`) and SQLite FTS5 index. Defer vector embeddings (`memory_db`) — staged per the §18 Recall Roadmap; promotion gated by Experiment 3. |
 | **§19 Data Sync Pipeline** | **EXCLUDED** | Calendar/Contacts OAuth sync is fully deferred. |
 | **§20 Contacts / People App** | **EXCLUDED** | People database, search tools, and UI screens are deferred. |
-| **§21 Finance App** | **EXCLUDED** | Bank statement parsing, transaction lists, and finance tools are deferred. |
+| **§21 Calendar App** | **EXCLUDED** | Calendar event stores, ICS subscription feed, echo detection, and calendar tools are deferred to Phase 6. |
 | **§22 Conversation / Chat App** | **REQUIRED** | A minimal PySide6 visual window showing conversational bubbles, tool panels, and a typed text input box. |
 | **§23 Personality & System Prompt** | **REQUIRED** | Parse static `EDICTS.md` and `VOICE.md` templates into the prompt. Defer local PERS-2 model. |
 | **§24 Narrative Layer** | **REQUIRED** | Tool narratives for `recall_memory` in its `tool.yaml` (acknowledge, handoff template, and failure). |
@@ -77,7 +77,7 @@ The goal of Milestone 1 is to establish the smallest functional, end-to-end voic
 
 ## 3. Milestone 1 Validation: High-Risk De-risking Experiments
 
-Before any subsequent design sections are hardened or built, the Milestone 1 codebase must pass two critical de-risking experiments. These tests address the most fragile assumptions highlighted in the design reviews:
+Before any subsequent design sections are hardened or built, the Milestone 1 codebase must pass two critical de-risking experiments (Experiments 1–2). These tests address the most fragile assumptions highlighted in the design reviews. A third experiment (Experiment 3) lives in this section because it follows the same validation discipline, but it gates the §18 Recall Roadmap promotion — **not** Milestone 1 — and may run at any point before hybrid recall is adopted:
 
 ### Experiment 1: Walking-Skeleton Latency Benchmark
 
@@ -137,6 +137,24 @@ Before any subsequent design sections are hardened or built, the Milestone 1 cod
      - **Below both thresholds:** the two-mode hypotheses are confirmed for v1; the stream-and-cut fork closes for v1; proceed to tune the numeric working hypotheses (≤3 s / ≤50 tokens / ≤1200 context) through daily dogfooding.
      - **Above either threshold:** schedule the **stream-and-cut single-path design session** (the fallback architecture named in §13) **before** hardening persona or CWM behavior on top of the router. The round-1 within-two-mode remedies (a local 1B classification model, or a fast cloud classification call at +300 ms latency budget) remain available only if that session re-affirms the two-mode fork.
 
+### Experiment 3: Encrypted Vector Feasibility (§18 Recall Roadmap promotion gate — added 2026-07-27)
+
+*This experiment gates the §18 Recall Roadmap's hybrid-retrieval promotion, not Milestone 1. It may run at any point before any embedding dependency, vector extension, or `memory_embeddings` sidecar table is added to the codebase; until it passes, §18's v1 recall (recency + FTS5) remains the only recall and no vector-related dependency ships.*
+
+* **Assumptions Tested — two, deliberately separated:**
+  1. A version-pinned `sqlite-vec`-class loadable extension actually loads and operates inside **this project's SQLCipher build** (`sqlcipher3-wheels`, §03). Upstream co-existence claims (other projects shipping SQLCipher + sqlite-vec together) were not independently verified during the 2026-07-27 research review and are treated as unproven for this build until demonstrated here. The extension is pre-v1 software with an explicit breaking-change warning from its maintainer, so the pinned version is part of what is being validated.
+  2. Brute-force KNN at the §18-bounded dimensions (256–384, Matryoshka-truncated) meets conversational-lane latency on target hardware without ANN infrastructure.
+* **Procedure:**
+  1. Build/obtain the pinned extension and load it into a SQLCipher-encrypted database opened through the §03 `SessionKeyManager` PRAGMA sequence. Verify keyed reads/writes of vector tables and that WAL mode, `busy_timeout`, and the §03 connection sequence are unaffected.
+  2. Populate `memory_embeddings`-shaped test tables at three scales — 10K, 100K, and 500K rows — with vectors at 256 and 384 dims from the candidate on-device embedding model (≤500M params, quantized).
+  3. Measure, on the target MASTER hardware, p50/p90 for the full recall step the conversational lane would pay: query embedding (cold and warm model) + brute-force KNN (k=20) + RRF merge with a concurrent FTS5 query. Measure the artifact-lane variant separately (larger k, warm+cold tiers).
+  4. Record embedding-model RAM residency (quantized) alongside the §05 hardware-tier assumptions.
+* **Pass Criteria:** (a) Extension loads and operates correctly inside the SQLCipher build with no key-handling or WAL regressions; (b) conversational-lane recall step p90 fits the §14 conversational staleness-refresh budget (`STALE_REFRESH_BUDGET_CONV_MS = 1000`) with ≥50% margin at the 100K scale; (c) results are recorded in a report artifact with hardware spec, pinned versions, and per-scale timings.
+* **Consequences:**
+  - **Pass:** the §18 Recall Roadmap's artifact-lane adoption may proceed; conversational-lane adoption additionally requires criterion (b) at the scale matching actual dogfooded memory volume.
+  - **Fail on (1) — extension/SQLCipher incompatibility:** hybrid recall falls back to a sidecar-index design session (encrypted index file or in-memory index rebuilt at unlock from SQLCipher-stored vectors) — a documented design session, not an improvised workaround.
+  - **Fail on (2) — latency:** artifact-lane-only adoption is still permitted (its budget is 10 s); the conversational lane keeps recency + FTS5 and the dimension/model choices are revisited before any second attempt.
+
 ---
 
 ## 4. Build Sequencing Phases (Phases 2 – 7)
@@ -159,7 +177,7 @@ Once Milestone 1 is validated and de-risked, the remaining features must be sequ
  Phase 5: Custodian App Suite (Google Contacts/Calendar Sync, Contacts UI)
                      │
                      ▼
- Phase 6: Finance App Integration (CSV Parsing, Duplicate Flagging, PDF Parser)
+ Phase 6: Calendar App Integration (Lilith Calendar Stores, ICS Feed, Echo Detection)
                      │
                      ▼
  Phase 7: Onboarding, Extension & Final Freeze (UI Flow, Skills Manifests)
@@ -198,15 +216,15 @@ Integrates the first set of external data sources.
   - Implement the Chat screen deep-link navigation and element highlighting rules (§28).
 * **Validation:** Sign into a test Google account; verify that contacts and calendar events sync successfully, and that naming a contact in a query triggers context block injection (§14).
 
-### Phase 6: Finance App Integration
-Integrates financial statements with data-loss guards.
+### Phase 6: Calendar App Integration
+Builds Lilith's own calendar on top of the Phase 5 sync mirror (§21 Calendar App, amended 2026-07-27).
 * **Deliverables:**
-  - Set up finance database tables (`finance_db`) and CSV importer (§21).
-  - Priority build: CSV statement parser.
-  - Secondary build: PDF statement parser using `pdfplumber` with adaptivity tests.
-  - Implement the transaction deduplication rule: duplicate candidates within 24h are flagged for user review rather than silently discarded (ref: **Task 13**).
-  - Code the `finance_summary` and `spending_trend` tools (§21).
-* **Validation:** Import a CSV containing duplicate purchases; verify that both appear in the database but are flagged as duplicates in the UI.
+  - Set up the two `calendar_db` event stores (§21): the read-only `synced_events` mirror (populated by the §19 sync wired in Phase 5, plus the `echo_of_lilith_event_id` annotation column) and Lilith-owned `lilith_events` with iCalendar UID/SEQUENCE/STATUS semantics.
+  - Implement the L1 echo-detection + conflict-flagging job (echoes excluded from agenda merging and conflict detection; genuine overlaps flagged for user review, never auto-resolved) and the template L2 period agenda summaries (§21).
+  - Code the scoped tools: `agenda` / `event_lookup` (`artifact_only`, L2 text) and `calendar_event_create` / `calendar_event_update` / `calendar_event_cancel` (`lilith_events` only, mirrored-id refusal, cancel-never-delete with sequence increment) (§21).
+  - Serve the local read-only ICS subscription feed: Lilith-originated events only, unguessable token path, loopback default / LAN opt-in (§21).
+  - Implement the `"calendar"` screen (§26/§28).
+* **Validation:** Subscribe a device calendar client on the same network (e.g., Apple Calendar) to the feed; verify Lilith's events appear and a cancellation propagates (`STATUS:CANCELLED`, incremented `SEQUENCE`). Simulate the echo loop — sync a copy of a feed event back through §19 — and verify it is tagged as an echo, appears exactly once in the agenda, and flags no self-conflict. Audit that no Google Calendar write scope is requested and no tool mutates the mirror.
 
 ### Phase 7: Onboarding, Extension, & Final Freeze
 Completes the UI shell and locks the app for public release.
@@ -224,6 +242,6 @@ The following items are deferred to post-v1 or future design-document sprints to
 
 1. **Zero-Clearance Kitchen Speaker Endpoint:** Defer the `kitchen_speaker` hardware abstraction, WebSocket streaming to secondary endpoints, and local voice authentication (ref: **Task 06**).
 2. **Google Drive / iCloud Storage Backup Sync:** Defer cloud sync subscription modules and remote database replication. Lilith v6 v1 backups are manifest-carrying encrypted folder sets written to internal storage and the user-chosen `EXTERNAL_BACKUP_DIR` — which may itself be a folder the user's own cloud service syncs — but Lilith itself operates no cloud sync or remote replication (ref: §04/§29; wording updated 2026-07-17 per SEC-029 — the parked item, no Lilith-operated cloud sync in v1, is unchanged).
-3. **Advanced PDF Adaptivity:** Defer automatic learning of novel PDF layouts. The pdfplumber parser will support only a fixed, pre-approved list of bank layouts in v1 (ref: **Task 13**).
+3. **Finance App (shelved 2026-07-27; formerly §21):** The Finance App is parked in full until deterministic financial infrastructure exists — AI automation is for speed; system intelligence comes from tools the developer builds for agents to call, and no such deterministic finance toolchain exists yet. Parked spec summary (full text in the amendment ledger's history): `finance_db` with `accounts`/`transactions` tables; deterministic import only, no LLM parsing — a named per-institution PDF adapter pipeline (Chime Checking/Savings/Credit Builder, Cash App Account/Savings; unsupported PDFs rejected with a clear message, never best-guess parsed) plus CSV import via header keyword matching; rules-based nine-category auto-categorization from `data/finance/categories.yaml`; L1 duplicate detection that preserves ambiguous candidates for user review (`dedup_status='candidate'`, never silent discard); template L2 spending summaries; `finance_summary` and `spending_trend` `artifact_only` tools; telemetry `sync.finance.import_complete` / `sync.finance.unsupported_bank_pdf`. Advanced/adaptive PDF layout learning remains deferred inside the parked spec (ref: **Task 13**). `finance_db` stays provisioned and dormant in §02/§03/§04/§29 (salt file unchanged: exactly 192 bytes, six 32-byte salts in fixed index order) so the app can return without key-material migration. It returns via a documented design session when deterministic finance infrastructure exists.
 4. **Cross-Device UI State Continuity:** Defer real-time UI state synchronization between the desktop app and mobile devices.
 5. **Interactive Skills Library:** Defer any GUI-based skill discovery, browsing, or simple activation toggles. All skill modifications require CLI commands and SHA-256 hash entries (ref: **Task 04**).
