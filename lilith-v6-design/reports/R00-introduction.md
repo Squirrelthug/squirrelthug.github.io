@@ -1,0 +1,71 @@
+# Report 00 — Introduction: How We Got Here, and What We're Actually Building
+
+*This is the first of eight build reports. The other seven each cover a stretch of the build (two or three chapters from `../sprints/BUILD_GUIDE.md`) and tell the story of how we'll work through that stretch and what we'll be thinking about while we do. This one covers no chapters. It exists so that anyone — an agent picking up a sprint task, a reader of the blog, or the developer himself two years from now — understands what this project is, where it came from, and what kind of thing v6 is supposed to be.*
+
+---
+
+## The name
+
+Lilith is written L.I.L.I.T.H., and the letters stand for something:
+
+**Logarithmic, Intuitive, Language Interfacing, Teleologic Hivemind.**
+
+Every word in that expansion is a design commitment, so it's worth unpacking once, here, plainly:
+
+- **Logarithmic** — the value curve this system is built for. Small, steady inputs from the user should compound into outsized capability over time. You don't feed Lilith effort linearly and get results linearly; the system's whole shape — memory, telemetry, enhancement layers — exists so that what you put in keeps paying out long after you put it in.
+- **Intuitive** — no manual, no query language, no cluttered screens. If using her requires expertise, the design has failed. This is the thread that runs all the way back to the first blog post: the frustration of watching capable tools sit out of reach behind technical barriers.
+- **Language Interfacing** — voice-first, and natural language as the *actual* interface, not a skin over menus. Speech in, speech out, with text as the secondary surface. This is why the walking skeleton in Milestone 1 is a voice loop and not a chat box.
+- **Teleologic** — purpose-driven. Lilith acts *toward the user's ends*. She is not a general chatbot that happens to know you; she is pointed at your goals, your schedule, your data, your life, and everything she does is in service of that aim.
+- **Hivemind** — one word, and the most important one. Lilith is not a single model. She is a harness that gathers many models, tools, and capabilities — local and cloud, fast and slow, conversational and long-running — into one coherent entity with one voice. The user talks to *her*; she wrangles the hive.
+
+## The story so far
+
+This project did not start in a classroom or a company. It started, as the June 2025 genesis post on the blog lays out, from two convictions: that no large system — corporate or governmental — can be trusted as custodian of an individual's data, patterns, and life; and that the only way to be on the front lines of a technological wave is to build the tools yourself. The developer watched the Llama leak set the world on fire while his M1 MacBook sat unsupported. He watched the crypto and NFT booms reward people who could code while he couldn't yet. The lesson stuck: *learn to build, or keep missing boats.*
+
+The first ideas were creative but unfocused — a podcast visualizer that mapped conversational tangents in colorful forking lines. Then the idea grew up: a system that connects to the back-end tools of a digital life and gives its user direct access without the cluttered screens — a "poor man's JARVIS," a digital butler. The strategy was equally clear-eyed: don't compete with the giants; leverage them. Run a small private model locally for personal queries, reach out to frontier cloud models through APIs when a task demands it, and send only sanitized, necessary data when you do. Cheaper than a subscription, infinitely more private.
+
+Then came the architecture education, in public, on the blog:
+
+- **The "Triforce" era** — three core components in a peer-to-peer relationship. It collapsed on contact with implementation: peers that can each modify state are a recipe for chaos.
+- **"Dumb Modules, Smart Core" (June 2025)** — the pivot to hub-and-spoke. Every module becomes a simple, single-purpose tool; complexity and decision-making concentrate in one orchestrator. This era also produced an idea that outlived everything else around it: **Universal Conversation Logging** — the realization that API calls, internal state changes, and system reports are all *turns in one system-wide conversation*, and should be logged as one immutable, auditable trail. Total transparency for a power user. Remember this; it becomes v6's nervous system.
+- **The microservices era, and its funeral ("Why I Started Over — Again," February 2026)** — four separate repos, each a standalone service. It looked like something a real company would ship. It was thrown away entirely, because the developer is not a company; he's one person who works construction by day and codes at night, and four log streams per bug is real, daily friction. The replacement — a **modular monolith**, one process with strict internal boundaries — is the shape v5 and v6 both inherit. The construction metaphor from that post is the project's motto for sequencing: *you don't frame walls before the foundation cures.*
+- **"Reliable First, Clever Later" (June 2026)** — the humbling realization that the order of collaboration was backwards. The plan had always been that Lilith and the developer would build her together. It turns out **she has to be reliable before she can help.** This post is also where telemetry stopped being an idea and became practice — wired in to catch silent errors that were growing in the dark.
+- **"I Was Solving the Wrong Problem" (June 2026)** — the wall that triggered v6. The local model (mistral-nemo 12B on an RTX 3060) was silently truncating a 12,000-token prompt to its 8K context window and answering *confidently* from the fragment. Fixing the window ballooned response time to 47 seconds. The diagnosis, after four years and many rewrites: the problem was never hardware. It was the assumption that one pipeline should serve both a quick spoken answer and a heavy data task. That insight — split the two, protect the conversation's latency at all costs, move heavy work into a separate lane — became the **two-mode architecture** at the heart of v6.
+
+And then there is v5 itself: 507 commits of a working-but-hacked-together system. The AL sprint arc built real things — an orb, a calendar interpreter, delivery routing, a data vault, Discord integration, voice barge-in — and the `docs/history/` folder of that private repo reads like a field journal of a system growing faster than its foundations. v5 *worked*. The developer ran it daily. That is precisely what made the next decision meaningful: on 2026-07-02 the v5 codebase was archived and removed from disk. Obliterate and rebuild — not because v5 failed, but because it had taught everything it could teach, and its lessons deserved a foundation designed rather than accreted.
+
+**v6 is the second version that works — but the first version that defines the future.** That sentence is the frame for everything below.
+
+The v6 design phase then did something none of the earlier eras did: it finished before building started. Fifteen research reports (licensing, packaging, every audio and crypto library choice), a dozen planning documents, a 29-section design document written one section at a time by agents working from a sprint spec, three rounds of adversarial review, a signed amendment ledger, and a freeze: design locked 2026-06-29, cleared for build 2026-07-17. The design document — the 29 section pages — is *the law*. Nothing gets built that isn't written there, and nothing written there gets changed outside a documented design session. The build itself is sequenced in `../BUILD_SEQUENCING.md` and mapped chapter-by-chapter in `../sprints/BUILD_GUIDE.md`, with a kanban board tracking all fifteen chapters. These reports sit alongside that machinery as its plain-English narration.
+
+## What Lilith actually is
+
+Strip away the architecture and Lilith is a bet about *service*. The design of how she interacts with a user draws on a simple study of what has always made human assistants — the good ones, across history and industries — worth having, and what their clients actually expect of them. The specifics of that research stay with the developer, deliberately, for the design work that comes after v6 runs. But the operating principle is committed now, and it shapes everything:
+
+**The 80% principle.** A great assistant does not hand you homework. She hands you a draft that is 80% done and asks only for the decisions that are genuinely yours. She does 80% of the legwork on the vacation you could have planned yourself, and presents three well-thought-out options you can simply choose between — dates held, prices compared, tradeoffs already weighed. The client's job is judgment; the assistant's job is everything before judgment. What drives a good assistant is anticipation, reliability, and discretion; what clients expect is exactly that — to be *relieved of process* and left with choice. Every system in v6 should be read as infrastructure for that promise: memory so she knows your context, telemetry so she knows her own, the artifact lane so long work happens without you waiting on it, narratives so the work comes back to you as a story with options rather than a data dump.
+
+**A harness, honestly presented.** Underneath the persona, Lilith is a harness — a way for a non-technical user to wrangle many of the latest AI tools and models without the expertise those tools normally demand. Today the frontier is genuinely open: models leak, weights publish, APIs proliferate — and almost all of it remains locked behind command lines and configuration files. Lilith's job is to stand between the user and that chaos, one voice in front of the hive. The long-term aim goes further: she should eventually *teach* — empowering her user to do these things themselves, with her help, rather than keeping them dependent. For now, in v6, she is a humble assistant. And she is **honest about what she is**: the artifact layer — the documents, reports, and results her background work produces — is a well-defined, separate thing, distinct from Lilith herself. She refers to it truthfully. She doesn't pretend the work happens by magic; she narrates the handoff. This honesty isn't a personality quirk; it's an architectural fact surfaced in her voice.
+
+**Nothing is a blind spot.** Everything in this system is code, and every piece of code that does something carries telemetry — that's the UCL philosophy carried to term. On top of that raw record, v6's design builds processing layers that turn telemetry into *narrative*: first-person stories about what she did, what worked, what failed, and what it cost. When the user asks Lilith about herself, she answers from that record — genuine introspection, grounded in data, not confabulated. A constant self-check that also serves the user directly: an assistant who knows her own state can keep a busy user on task, honestly report what she's finished and what's still running, and never claim knowledge she doesn't have.
+
+**Local by default, cloud by choice.** The genesis conviction — your data is yours, and outbound data is sanitized and minimal — matures in v6 into a compute philosophy. Conversation is fast and light. Artifacts — the heavy tasks — can take real time, and that's fine: a local model grinding overnight on your own hardware costs nothing and leaks nothing. The direction this points (and this part is *direction*, marked for post-v1 design sessions, not v1 law): local execution becomes the default path users are shown, with cloud processing something you deliberately push a task toward — always seeing the running dollar amount of cloud spending and exactly what each push would add to it, in a plain document of Lilith's own keeping, sitting in a folder on your desktop. No invisible meters. In v1, the law delivers the foundations of this: bring-your-own-key cloud with prompt caching, local model tiers with automatic fallback, PII tokenization before anything leaves the machine, and telemetry recording every call. The spending ledger and the local-first default posture come later, through the amendment process, once the machinery they need exists.
+
+## How the build will run
+
+The build is fifteen chapters on a kanban board, worked strictly in order, with no dates — each chapter done whenever it's done, which is how a solo developer with a day job actually ships things. Chapters CH-01 through CH-06 assemble Milestone 1: the walking skeleton, a complete voice loop with one encrypted database and one tool, usable for daily note-taking from day one. Chapters CH-07 and CH-08 are gates — pre-committed experiments that can *falsify* the architecture's two biggest bets, with named fallback plans if they do. Chapters CH-09 through CH-14 then harden, secure, localize, connect, and finish the system, ending in onboarding and a v1 freeze. One experiment (EXP-3) floats outside the sequence, guarding the memory system's future against an unproven dependency.
+
+Every chapter gets a sprint document when — and only when — the previous chapter closes, so plans are always written against the codebase as it is, not as it was imagined. Every agent working a task reads the law for that task, the standards floor, and the task itself. And every stretch of chapters gets one of these reports: the story of what we're doing and why, in plain English, before the tickets and the diffs take over.
+
+The reports that follow:
+
+| Report | Chapters | The story |
+|:--|:--|:--|
+| R01 | CH-01, CH-02 | Foundation and a voice — a trustworthy skeleton that hears and speaks |
+| R02 | CH-03, CH-04 | A mind and a memory — routing, privacy, personality, and recall |
+| R03 | CH-05, CH-06 | A face and first breath — the GUI, the orb, and the day dogfooding begins |
+| R04 | CH-07, CH-08, EXP-3 | Proving the bets — the experiments that could send us back to the drawing board |
+| R05 | CH-09, CH-10 | Hardening and trust — telemetry, crash recovery, and the security promises kept |
+| R06 | CH-11, CH-12 | Independence and first real data — local models, and Lilith learns your world |
+| R07 | CH-13, CH-14 | A calendar of her own, and a front door — the last apps, onboarding, and v1 |
+
+v6 is where four years of lessons stop being lessons and start being a foundation. Let's pour it properly.
