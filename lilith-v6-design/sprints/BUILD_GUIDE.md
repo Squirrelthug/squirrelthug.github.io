@@ -29,7 +29,10 @@ Every chapter runs the same cycle:
 ```
 ┌─► Author the sprint document for the next chapter
 │     sprints/SPRINT-B<NN>-<slug>.md — from this guide + BUILD_SEQUENCING.md
-│     + the chapter's design sections. Task format per §7.
+│     + the chapter's design sections. Task format per §7. Every task
+│     gets an explicit Docs: field naming its exact documentation
+│     contributions (standards page, Documentation Standards) — a task
+│     is not done until its named docs contribution has landed.
 │
 ├─► Work the sprint task by task
 │     Each agent session receives: (a) ../standards.html,
@@ -356,12 +359,19 @@ Each chapter's sprint file (`SPRINT-B<NN>-<slug>.md`) follows the format proven 
 function signatures, thresholds — drawn from the section text.
 Nothing the section doesn't say.
 
+**Docs:** the task's exact documentation contributions — which
+docs/ pages it creates or updates and what they must contain
+(minimum: its changelog entry). Named here so there is no guesswork
+and documentation stays consistent across isolated agents. Part of
+the task's acceptance: code merged without the named docs
+contribution is not done.
+
 **Acceptance criteria:** the observable condition under which this
 task is done. Tests named. A reviewer can check it without asking
 questions.
 ```
 
-Sprint tasks end with a chapter-closing `[AUDIT]` task that walks this guide's Definition of Done checklist for the chapter and updates the §4 status table.
+Sprint tasks end with a chapter-closing `[AUDIT]` task that walks this guide's Definition of Done checklist for the chapter, verifies every task's **Docs:** contribution landed, sweeps the `docs/architecture/` status lines to match built reality, and updates the §4 status table.
 
 ---
 

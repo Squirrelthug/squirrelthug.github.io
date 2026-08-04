@@ -22,6 +22,8 @@ Each task below is worked by its own isolated agent. An agent receives, at minim
 
 **Ground rules (from `BUILD_GUIDE.md` §2):** only what is written gets built; excluded means absent — no stubs-with-logic or "while I'm here" implementations of any section outside this sprint's law; standards are the floor.
 
+**Documentation is part of done (never broken):** the build repo carries a version-controlled `docs/` tree — the lens map is `docs/README.md` (architecture maps, data flows, developer guide, user guide, runbook, ADRs, changelog). Every task below has a **Docs:** field naming its exact contributions; the task is not done until they land in the same PR. Minimum for any task: its `docs/CHANGELOG.md` entry under the CH-01 heading. If your implementation (within the law) differs from what an existing diagram or guide page shows, fixing that page is part of your task. `docs/` is committed and pushed like code — only generated renders (`docs/_rendered/`) stay out of git.
+
 ### The build repository
 
 - **The v6 repo is the existing private repo `Squirrelthug/LILITH`** — reset to a clean slate on 2026-08-03 (tracked files: `.gitignore`, `CLAUDE.md`, `bin/lilith` only; read `CLAUDE.md` first, it carries the repo's standing rules). v5 is archived at `Squirrelthug/lilith-v5` and at tag `v5-final` in this repo's history — reference only, **no v5 code crosses**. Do not create a new repository.
@@ -91,7 +93,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - `tests/unit/` and `tests/integration/` mirroring the source layout (§08), with one trivial passing test each so the timeout conventions (`timeout 60 pytest tests/unit/`, `timeout 180 pytest`) are exercised from day one.
 - `.gitignore`: `.env` (never committed, §02/standards), `__pycache__`, virtualenvs. `README.md` stub pointing at the design site and `docs/SETUP.md` (B01-08).
 
-**Acceptance criteria:** Fresh clone + `pip install -r requirements.txt` succeeds on Linux; both pytest sweeps pass inside their timeouts; `import-linter` passes; the tree matches the §01 layout byte-for-name; no `os.path` anywhere; first PR merged with `[scope]:`-prefixed commits.
+**Docs:** `docs/CHANGELOG.md` entry (CH-01 section). Verify `docs/DEVELOPER.md` §3 against what you actually configured — exact linter names, install and sweep commands — and correct any drift.
+
+**Acceptance criteria:** Fresh clone + `pip install -r requirements.txt` succeeds on Linux; both pytest sweeps pass inside their timeouts; `import-linter` passes; the tree matches the §01 layout byte-for-name; no `os.path` anywhere; first PR merged with `[scope]:`-prefixed commits; Docs contributions landed.
 
 ---
 
@@ -106,7 +110,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - Platform detection **once** via `sys.platform` → `IS_LINUX, IS_MAC, IS_WINDOWS` flags in `lilith.platform` (§04). No ad-hoc environment checks in feature code.
 - `config.py`: loads/creates `config.json` in `APP_INTERNAL_DIR`, with a programmatic schema-migration hook run at startup (§01). Keep v1 schema minimal (config schema version + `backup.external_destination`); later chapters add keys.
 
-**Acceptance criteria:** Unit tests (monkeypatched home dir) assert all Linux paths and the derived children; permission bits asserted 0700/0600 after creation and after tighten-on-startup; an `EXTERNAL_BACKUP_DIR` override inside `APP_INTERNAL_DIR` is rejected; a repo-wide grep shows no path construction outside `paths.py`; config round-trips and migrates a deliberately old schema version.
+**Docs:** `docs/CHANGELOG.md` entry. Update `docs/architecture/01-containers.md` if any module/path name in the diagram differs from what you built (the diagram must name real modules).
+
+**Acceptance criteria:** Unit tests (monkeypatched home dir) assert all Linux paths and the derived children; permission bits asserted 0700/0600 after creation and after tighten-on-startup; an `EXTERNAL_BACKUP_DIR` override inside `APP_INTERNAL_DIR` is rejected; a repo-wide grep shows no path construction outside `paths.py`; config round-trips and migrates a deliberately old schema version; Docs contributions landed.
 
 ---
 
@@ -120,7 +126,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - **Startup security verification (§02):** check `keyring.get_keyring()` returns a secure backend; if an insecure plaintext fallback (`keyrings.alt`-class) or a fail backend is detected, raise an unrecoverable security exception — the app refuses to boot. Keyring *unavailable/error* is a distinct halt with the §02 recovery message: `"OS secure keychain is unavailable. Please verify your system's keyring daemon is running."`
 - **No keyring operations are logged** (§02) — no `log_event`, no debug lines, nothing, to prevent timing/leak vulnerabilities.
 
-**Acceptance criteria:** Unit tests with substituted backends: a secure backend passes verification; a `keyrings.alt`-style backend and a fail-backend each cause boot refusal with the correct exception type and message; get/set/delete round-trip against the test backend; a log-capture fixture proves zero log emissions from any keyring code path.
+**Docs:** `docs/CHANGELOG.md` entry. Verify the keychain reflexes in `docs/DEVELOPER.md` §4 match implemented behavior (service name, refusal semantics) and correct any drift.
+
+**Acceptance criteria:** Unit tests with substituted backends: a secure backend passes verification; a `keyrings.alt`-style backend and a fail-backend each cause boot refusal with the correct exception type and message; get/set/delete round-trip against the test backend; a log-capture fixture proves zero log emissions from any keyring code path; Docs contributions landed.
 
 ---
 
@@ -134,7 +142,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - Argon2id derivation via `argon2-cffi`: `time_cost=3, memory_cost=65536, parallelism=2`, 32-byte raw output per database from (master passphrase, that database's salt) (§03).
 - `SessionKeyManager` (§03): derives all keys **once per unlocked session**, holds them privately; `apply_sqlcipher_key(conn, db_name)` executes `PRAGMA key = "x'<64 hex>'"` in a narrow internal scope; **any** exception while applying/verifying raises generic `DatabaseKeyingFailed` carrying database identity and recovery category only — no key material, PRAGMA text, locals, raw driver text, or tracebacks in message or `__cause__`. `__repr__`/`__str__` return a constant redacted value (`<SessionKeyManager redacted>`). `relock()` closes registered connections and drops key material; post-relock keying requests raise `DatabaseKeyingFailed` until a new unlock.
 
-**Acceptance criteria:** Known-vector test: same passphrase+salt reproduces the same 64-char hex across runs; wrong-size salt files (191, 193, 0 bytes) rejected with a recovery-category error; `repr`/`str` leak nothing under direct call and inside f-strings/tracebacks; a forced keying failure's exception chain is scanned by the test for absence of hex/PRAGMA/passphrase substrings; `relock()` behavior verified.
+**Docs:** `docs/CHANGELOG.md` entry. Update `docs/architecture/data-flows/key-derivation.md`: name the actual modules/classes you built in the diagram and prose, and correct any within-the-law detail that differs from the seeded version.
+
+**Acceptance criteria:** Known-vector test: same passphrase+salt reproduces the same 64-char hex across runs; wrong-size salt files (191, 193, 0 bytes) rejected with a recovery-category error; `repr`/`str` leak nothing under direct call and inside f-strings/tracebacks; a forced keying failure's exception chain is scanned by the test for absence of hex/PRAGMA/passphrase substrings; `relock()` behavior verified; Docs contributions landed.
 
 ---
 
@@ -160,7 +170,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - Custom migration manager (§03): numbered SQL scripts (`0001_init.sql`, …) run sequentially at startup, idempotent, inside a transaction, tracked in a `schema_version` (or equivalent meta) table. M1 mounts **exactly one** database: `conversation_db`. Its `0001_init.sql` creates only the migration-tracking meta table — the `turns`/`sessions` schema is CH-04 scope (§18) and must not appear here.
 - `log_event()` M1 shim in `data/ucl.py` (permanent signature `log_event(event_type: str, payload: dict)`): JSON lines to `LOG_DIR / "dev.log"`; catches its own exceptions (telemetry never crashes the main path — standards); payload discipline per the plaintext-logs boundary.
 
-**Acceptance criteria:** Real-SQLCipher tests (no mocks, §08): create → key → open → verify succeeds; wrong passphrase surfaces as `DatabaseKeyingFailed` (and the file is untouched); `PRAGMA journal_mode` returns WAL; migration runner applied twice is a no-op the second time; a cross-thread connection-sharing attempt is caught by the discipline (factory API makes it structurally awkward and tests document the rule); `log_event` writes valid JSON lines and survives an unwritable log dir without raising.
+**Docs:** `docs/CHANGELOG.md` entry. Update the connection-sequence portion of `docs/architecture/data-flows/key-derivation.md` and the `data/` layer names in `docs/architecture/01-containers.md` to match the real modules.
+
+**Acceptance criteria:** Real-SQLCipher tests (no mocks, §08): create → key → open → verify succeeds; wrong passphrase surfaces as `DatabaseKeyingFailed` (and the file is untouched); `PRAGMA journal_mode` returns WAL; migration runner applied twice is a no-op the second time; a cross-thread connection-sharing attempt is caught by the discipline (factory API makes it structurally awkward and tests document the rule); `log_event` writes valid JSON lines and survives an unwritable log dir without raising; Docs contributions landed.
 
 ---
 
@@ -175,7 +187,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - **Stale-lock handling (§06):** lockfile exists with a dead PID → assume crash, clean the lock, proceed; emit `error.crash_recovery` via `log_event`. (Full state-machine gating and quarantine are CH-09 scope.)
 - **Graceful shutdown** (§06 order, M1 subset): stop audio streams (stub) → scheduler shutdown (stub) → abort in-flight LLM calls (stub) → close all DB connections flushing WAL → release and delete `lilith.lock` → exit 0. Wired to SIGTERM and SIGINT.
 
-**Acceptance criteria:** Scripted end-to-end on Linux: bootstrap → start → phase log shows the ordered sequence → SIGTERM → exit code 0, lock removed, WAL flushed; second concurrent start refused with the exact §06 message while the first keeps running; kill -9 then restart cleans the stale lock and logs `error.crash_recovery`; bootstrap refuses when a database exists; salts-missing-with-databases halts with the §06 recovery message; startup with no salts and no databases points to the bootstrap CLI and touches nothing.
+**Docs:** `docs/CHANGELOG.md` entry. Update the status line of `docs/architecture/data-flows/startup-sequence.md` (built-subset state). Write the first three runbook procedures in `docs/runbook/` per its writing rule (numbered steps, exact commands, expected outcomes, telemetry events emitted): *bootstrap a fresh machine*, *start / stop / verify*, *second-instance & stale-lock behavior*.
+
+**Acceptance criteria:** Scripted end-to-end on Linux: bootstrap → start → phase log shows the ordered sequence → SIGTERM → exit code 0, lock removed, WAL flushed; second concurrent start refused with the exact §06 message while the first keeps running; kill -9 then restart cleans the stale lock and logs `error.crash_recovery`; bootstrap refuses when a database exists; salts-missing-with-databases halts with the §06 recovery message; startup with no salts and no databases points to the bootstrap CLI and touches nothing; Docs contributions landed.
 
 ---
 
@@ -190,7 +204,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 - **Seam tests** (the places the happy path hides bugs): full lifecycle round-trip (bootstrap → start → write a meta row → clean shutdown → restart → row still present, key still works); double-instance refusal; keyring-unavailable and insecure-backend boot refusals; permission verify-and-tighten after deliberately loosening a directory; wrong-passphrase mount failure leaving files untouched.
 - Wire a coverage run and record the number: the §01 done-criteria floor is **80%+ excluding hardware/audio I/O** (audio is placeholder-only this sprint, so exclusion lists stay tiny).
 
-**Acceptance criteria:** `timeout 60 pytest tests/unit/` and `timeout 180 pytest` both green; every write path introduced in B01-02…06 has a test asserting its `log_event` emission (standards); coverage ≥80% on the shipped modules; the fixtures are documented in `tests/README.md` so later sprints reuse rather than reinvent.
+**Docs:** `docs/CHANGELOG.md` entry. `tests/README.md` documenting the fixtures (this task's core doc deliverable). Verify `docs/DEVELOPER.md` §3's testing bullets against the harness as built and correct any drift.
+
+**Acceptance criteria:** `timeout 60 pytest tests/unit/` and `timeout 180 pytest` both green; every write path introduced in B01-02…06 has a test asserting its `log_event` emission (standards); coverage ≥80% on the shipped modules; the fixtures are documented in `tests/README.md` so later sprints reuse rather than reinvent; Docs contributions landed.
 
 ---
 
@@ -201,7 +217,9 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 
 **What to build:** `docs/SETUP.md` in the build repo: prerequisites (Python 3.12, Linux keyring daemon), fresh-clone install (`pip install -r requirements.txt`), bootstrap CLI walkthrough, starting and stopping the app, where everything lives on disk (`APP_INTERNAL_DIR` map from §04), how to run the test sweeps and lint/import-linter, and the contribution conventions (branch naming, mandatory PRs, `[scope]:` commit prefixes, the done-criteria checklist from §01). One page, plain language, current — this document satisfies the CH-01 DoD's "documented setup steps" line and gets maintained every sprint after.
 
-**Acceptance criteria:** A fresh clone on the MASTER machine, following *only* this document, reaches a running, cleanly-stopping app — performed literally, not assumed.
+**Docs:** this task *is* documentation: `docs/SETUP.md` plus a `docs/CHANGELOG.md` entry. Additionally: verify the three B01-06 runbook procedures by literally following them (fix any step that doesn't survive contact), and update the SETUP row of the lens table in `docs/README.md` from *(lands with task B01-08)* to a live link.
+
+**Acceptance criteria:** A fresh clone on the MASTER machine, following *only* this document, reaches a running, cleanly-stopping app — performed literally, not assumed; runbook procedures verified; Docs contributions landed.
 
 ---
 
@@ -213,10 +231,11 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 **What to do:**
 1. Walk every CH-01 DoD checkbox with concrete evidence (command outputs, test run logs), recorded in a short `docs/audits/CH-01.md` in the build repo.
 2. **Scope audit:** verify by inventory that nothing from an EXCLUDED section exists — no `ucl.db` mount, no second database file, no sync/contacts/calendar/onboarding/vault code, no vector or embedding dependency in `requirements.txt`, `logic/` and `ui/` still placeholder-only. Verify the tree still matches §01 exactly.
-3. Tick the Definition-of-Done checkboxes on [issue #1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1) (`gh issue edit 1` on the body's checklist), move the project card to **Done** (`gh project item-edit`), and update `BUILD_GUIDE.md` §4 in the design-site repo: CH-01 → **Done** (commit via the site's normal flow).
-4. Report completion to the developer — authoring `SPRINT-B02-voice-io.md` is the developer-triggered next step, not this agent's.
+3. **Docs sweep (Documentation Standards):** verify every task's **Docs:** contribution landed; update the status lines on `docs/architecture/00-system-context.md`, `01-containers.md`, and the data-flow pages plus the table in `data-flows/README.md` to reflect what CH-01 actually built; confirm the CH-01 section of `docs/CHANGELOG.md` is complete. Record the sweep's outcome in the audit file.
+4. Tick the Definition-of-Done checkboxes on [issue #1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1) (`gh issue edit 1` on the body's checklist), move the project card to **Done** (`gh project item-edit`), and update `BUILD_GUIDE.md` §4 in the design-site repo: CH-01 → **Done** (commit via the site's normal flow).
+5. Report completion to the developer — authoring `SPRINT-B02-voice-io.md` is the developer-triggered next step, not this agent's.
 
-**Acceptance criteria:** Audit file merged; issue #1 shows all boxes ticked and the card sits in Done; the guide's status table reflects CH-01 complete; the report to the developer lists any observations worth carrying into the B02 sprint authoring (tuning notes, friction, law ambiguities encountered and how they were resolved or reported).
+**Acceptance criteria:** Audit file merged (including the docs-sweep outcome); issue #1 shows all boxes ticked and the card sits in Done; the guide's status table reflects CH-01 complete; every architecture/data-flow status line matches built reality; the report to the developer lists any observations worth carrying into the B02 sprint authoring (tuning notes, friction, law ambiguities encountered and how they were resolved or reported).
 
 ---
 

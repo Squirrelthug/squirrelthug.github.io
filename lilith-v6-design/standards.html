@@ -219,8 +219,15 @@
 
   <div class="std">
     <div class="std-title">Every feature has a wiki page</div>
-    <div class="std-rule"><strong>Rule:</strong> Every new feature, module, or significant function gets a wiki page in the locally-hosted HTML documentation. The wiki page must exist before the feature is marked complete. It contains: purpose, logic summary, inputs/outputs, which systems it touches, known constraints, and developer notes. No code pasted — just links to the source location.</div>
+    <div class="std-rule"><strong>Rule:</strong> Every new feature, module, or significant function gets a wiki page. The wiki page must exist before the feature is marked complete. It contains: purpose, logic summary, inputs/outputs, which systems it touches, known constraints, and developer notes. No code pasted — just links to the source location. <em>Updated 2026-08-03:</em> the wiki is the build repo's version-controlled <code>docs/</code> tree (lens map in <code>docs/README.md</code>: architecture maps, data flows, developer guide, user guide, runbook, build ADRs, changelog) — committed and pushed like code, readable from any clone; only generated renders (<code>docs/_rendered/</code>) stay out of git.</div>
     <div class="std-why">Why: Documentation written after the fact is documentation that doesn't get written. Building it into the done-criteria means it always exists.</div>
+  </div>
+
+  <div class="std">
+    <div class="std-title">Documentation contributions are specified per task — no guesswork</div>
+    <div class="std-rule"><strong>Rule (added 2026-08-03, operationalizing §01's done-criteria):</strong> Every sprint task carries an explicit <strong>Docs:</strong> field naming its exact documentation contributions — which <code>docs/</code> pages it creates or updates and what they must contain. A task whose code is merged but whose named docs contribution has not landed is <strong>not done</strong>. Sprint authors write the Docs field when authoring the sprint; the chapter-closing audit verifies every task's contribution landed and sweeps the architecture/data-flow status lines to match built reality.</div>
+    <div class="std-why">Why: "Update the docs" as a vague norm produces inconsistent, drifting documentation; naming the exact contribution in the task makes docs part of the work, keeps them consistent across isolated agents, and means no reviewer ever has to guess whether documentation debt is accumulating.</div>
+    <div class="std-exception"><strong>No exceptions.</strong> A task with genuinely nothing to document still writes its changelog entry.</div>
   </div>
 
   <div class="std">
