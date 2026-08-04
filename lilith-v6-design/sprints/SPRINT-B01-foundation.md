@@ -24,7 +24,8 @@ Each task below is worked by its own isolated agent. An agent receives, at minim
 
 ### The build repository
 
-- **Location:** `~/projects/lilith/` on the Linux MASTER machine (per the design-phase record). GitHub: a new **private** repo (suggested name `lilith`; repo name is a developer choice, not law).
+- **The v6 repo is the existing private repo `Squirrelthug/LILITH`** — reset to a clean slate on 2026-08-03 (tracked files: `.gitignore`, `CLAUDE.md`, `bin/lilith` only; read `CLAUDE.md` first, it carries the repo's standing rules). v5 is archived at `Squirrelthug/lilith-v5` and at tag `v5-final` in this repo's history — reference only, **no v5 code crosses**. Do not create a new repository.
+- **Working clone:** `~/projects/lilith/` on the Linux MASTER machine (clone `Squirrelthug/LILITH` there if absent).
 - **Workflow (§01, law):** `feature/*` or `bugfix/*` branches, **mandatory PRs** to `main`, commit messages prefixed `[scope]:` (e.g. `[data]: add migration manager`). CI does not exist until CH-09 (§07 is excluded from Milestone 1), so M1 PRs are merged after the developer's review and a green local `timeout 180 pytest`.
 - **Root package layout (§01, law — build it exactly):**
 
@@ -82,7 +83,7 @@ When a task completes: tick nothing on the board (task tracking lives in this fi
 **Depends on:** —
 
 **What to build:**
-- Initialize the repo at `~/projects/lilith/` (git init, private GitHub remote, `main` branch). First commit lands via PR per the §01 workflow — practice starts at commit one.
+- Clone `Squirrelthug/LILITH` (the v6 clean slate — see the build-repository note in this sprint's header) to `~/projects/lilith/`. All work lands via PR per the §01 workflow — practice starts at commit one. Keep the existing `.gitignore`, `CLAUDE.md`, and `bin/lilith`; extend `.gitignore` as needed rather than replacing it.
 - `.python-version` → `3.12`. `pyproject.toml` declaring the project, Python `>=3.12`, and dependencies as they're introduced by later tasks (start minimal: `pytest`, `import-linter`; add `sqlcipher3-wheels`, `argon2-cffi`, `keyring`, `psutil` in their tasks). `requirements.txt` generated from `pyproject.toml`; document the regeneration command in the file header.
 - The §01 package layout exactly as shown in this sprint's header. Modules whose content belongs to later chapters are **docstring-only placeholders** stating which chapter fills them (e.g. `logic/router.py` → "CH-03, §13") — no speculative logic.
 - `import-linter` configured with the layered contract `ui → logic → data → platform`; add a `lint` section to the README describing how to run it (it joins CI in CH-09).
