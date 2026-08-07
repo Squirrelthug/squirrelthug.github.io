@@ -2,9 +2,22 @@
 
 **Sprint ID:** BUILD-01
 **Chapter:** CH-01 (see `BUILD_GUIDE.md` §5) · **Kanban:** [Issue #1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1) on [Project 46 — Lilith v6 Build](https://github.com/users/Squirrelthug/projects/46)
-**Status:** Ready
+**Status:** Blocked on four open decisions (see below) — Ready once they are made
 **Law for this sprint:** §01, §02, §03, §04, §06, §08 — https://squirrelthug.github.io/lilith-v6-design/sections/s01.html (…s02, s03, s04, s06, s08)
 **Prerequisites:** none — this is the first code of v6.
+
+## Open decisions blocking this sprint (added 2026-08-06)
+
+Four choices below are assumed by tasks in this sprint but are **not made by the frozen law**. Each has a researched decision brief in `docs/decisions/` on the build repo and a kanban sub-issue on [#1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1). Until a brief is resolved, the task that depends on it must not be started — an agent hitting the gap will either guess or stop and report, and both cost more than deciding first.
+
+| Brief | Decision | Blocks | Kanban |
+|:--|:--|:--|:--|
+| BD-001 | Lint, format & type-check toolchain | B01-01, all later tasks | [#16](https://github.com/Squirrelthug/squirrelthug.github.io/issues/16) |
+| BD-002 | Dependency pinning & `requirements.txt` regeneration | B01-01, CH-09 CI gate | [#17](https://github.com/Squirrelthug/squirrelthug.github.io/issues/17) |
+| BD-003 | Exception hierarchy & error taxonomy | B01-04, B01-05, B01-06 | [#18](https://github.com/Squirrelthug/squirrelthug.github.io/issues/18) |
+| BD-004 | Migration manager shape across six databases | B01-05 (+ CH-04/09/12/13) | [#19](https://github.com/Squirrelthug/squirrelthug.github.io/issues/19) |
+
+When a decision is made, its build ADR is written **and the affected task text below is edited to state the decision as instruction** — so no later agent re-derives it. That edit is part of the decision, not a follow-up.
 
 ---
 
@@ -69,9 +82,16 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 - **No §16 `ucl_db`.** `log_event(event_type: str, payload: dict)` ships now with its permanent signature, but writes JSON lines to `APP_INTERNAL_DIR/logs/dev.log`. The §16 event-payload hygiene and the plaintext-logs boundary apply *by discipline* now (the enforcement sanitizer machinery is CH-09 scope): payloads carry compact operational facts and non-secret identifiers only.
 - **The 10-phase §06 startup sequence is built as its M1 subset:** Phase 1 (hardware) is a stub returning a placeholder tier until CH-02; Phases 8–9 (scheduler, voice) are no-ops until their chapters; Phase 10 renders no window until CH-05 — "active" means the process is up and idle. The *ordering and structure* of the sequence is law and is built now.
 
-### Kanban protocol
+### Kanban protocol (revised 2026-08-06)
 
-When a task completes: tick nothing on the board (task tracking lives in this file / PRs). When the **sprint** completes (B01-09), the closing agent ticks the Definition-of-Done checkboxes on issue #1, moves the card to **Done**, and updates `BUILD_GUIDE.md` §4 (CH-01 → Done). The card sits in **In Progress** for the duration of this sprint.
+**One board carries the whole development cycle.** [Project 46](https://github.com/users/Squirrelthug/projects/46) holds the 15 chapter/gate cards *and* the finer-grained work beneath them, using GitHub sub-issues so each chapter card shows its own progress (e.g. `3/13`).
+
+- **Decision briefs** (BD-NNN) and **sprint tasks** (B01-NN) are each their own issue in `Squirrelthug/squirrelthug.github.io`, added to Project 46 and registered as **sub-issues of the chapter card** they belong to — for this sprint, issue [#1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1).
+- **Working a task:** move its card to **In Progress** when you start, **Done** when its acceptance criteria *and* its `Docs:` contribution have both landed. The task issue is the unit an agent is pointed at.
+- **The chapter card** sits in **In Progress** for the duration of the sprint and shows sub-issue progress automatically.
+- **Sprint close (B01-09):** the closing agent ticks the Definition-of-Done checkboxes on issue #1, confirms every sub-issue is closed, moves the chapter card to **Done**, and updates `BUILD_GUIDE.md` §4 (CH-01 → Done).
+
+*This supersedes the original protocol ("tick nothing on the board; task tracking lives in this file / PRs"), which kept task-level progress invisible. The sprint document remains the authoritative task **specification**; the board is the authoritative task **status**.*
 
 ---
 
