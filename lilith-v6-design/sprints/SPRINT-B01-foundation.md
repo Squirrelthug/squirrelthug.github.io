@@ -10,12 +10,12 @@
 
 Four choices below are assumed by tasks in this sprint but are **not made by the frozen law**. Each has a researched decision brief in `docs/decisions/` on the build repo and a kanban sub-issue on [#1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1). Until a brief is resolved, the task that depends on it must not be started — an agent hitting the gap will either guess or stop and report, and both cost more than deciding first.
 
-| Brief | Decision | Blocks | Kanban |
-|:--|:--|:--|:--|
-| BD-001 | Lint, format & type-check toolchain | B01-01, all later tasks | [#16](https://github.com/Squirrelthug/squirrelthug.github.io/issues/16) |
-| BD-002 | Dependency pinning & `requirements.txt` regeneration | B01-01, CH-09 CI gate | [#17](https://github.com/Squirrelthug/squirrelthug.github.io/issues/17) |
-| BD-003 | Exception hierarchy & error taxonomy | B01-04, B01-05, B01-06 | [#18](https://github.com/Squirrelthug/squirrelthug.github.io/issues/18) |
-| BD-004 | Migration manager shape across six databases | B01-05 (+ CH-04/09/12/13) | [#19](https://github.com/Squirrelthug/squirrelthug.github.io/issues/19) |
+| Brief | Decision | Blocks | Kanban | Status |
+|:--|:--|:--|:--|:--|
+| BD-001 | Lint, format & type-check toolchain | B01-01, all later tasks | [#16](https://github.com/Squirrelthug/squirrelthug.github.io/issues/16) | **DECIDED 2026-08-06 — ADR `B-001`; B01-01 text below is now instruction** |
+| BD-002 | Dependency pinning & `requirements.txt` regeneration | B01-01, CH-09 CI gate | [#17](https://github.com/Squirrelthug/squirrelthug.github.io/issues/17) | OPEN — note BD-001 introduced `.pre-commit-config.yaml` as a second version-pinning location |
+| BD-003 | Exception hierarchy & error taxonomy | B01-04, B01-05, B01-06 | [#18](https://github.com/Squirrelthug/squirrelthug.github.io/issues/18) | OPEN |
+| BD-004 | Migration manager shape across six databases | B01-05 (+ CH-04/09/12/13) | [#19](https://github.com/Squirrelthug/squirrelthug.github.io/issues/19) | OPEN |
 
 When a decision is made, its build ADR is written **and the affected task text below is edited to state the decision as instruction** — so no later agent re-derives it. That edit is part of the decision, not a follow-up.
 
@@ -106,16 +106,22 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 
 **What to build:**
 - Clone `Squirrelthug/LILITH` (the v6 clean slate — see the build-repository note in this sprint's header) to `~/projects/lilith/`. All work lands via PR per the §01 workflow — practice starts at commit one. Keep the existing `.gitignore`, `CLAUDE.md`, and `bin/lilith`; extend `.gitignore` as needed rather than replacing it.
-- `.python-version` → `3.12`. `pyproject.toml` declaring the project, Python `>=3.12`, and dependencies as they're introduced by later tasks (start minimal: `pytest`, `import-linter`; add `sqlcipher3-wheels`, `argon2-cffi`, `keyring`, `psutil` in their tasks). `requirements.txt` generated from `pyproject.toml`; document the regeneration command in the file header.
+- `.python-version` → `3.12`. `pyproject.toml` declaring the project, Python `>=3.12`, and dependencies as they're introduced by later tasks (start minimal: `pytest`, `ruff`, `basedpyright`, `import-linter`, `pre-commit`; add `sqlcipher3-wheels`, `argon2-cffi`, `keyring`, `psutil` in their tasks). `requirements.txt` generated from `pyproject.toml`; document the regeneration command in the file header.
 - The §01 package layout exactly as shown in this sprint's header. Modules whose content belongs to later chapters are **docstring-only placeholders** stating which chapter fills them (e.g. `logic/router.py` → "CH-03, §13") — no speculative logic.
-- `import-linter` configured with the layered contract `ui → logic → data → platform`; add a `lint` section to the README describing how to run it (it joins CI in CH-09).
-- Pathlib lint rule: configure the linter (ruff — dev tooling choice, not law) to flag `os.path` usage; `pathlib.Path` is the only path API.
+- **Toolchain — decided in BD-001, see ADR `B-001`. Configure exactly this; do not substitute tools or re-derive the choice.** All tool config lives in `pyproject.toml` (§01's agreed home), never in a scatter of dotfiles — the sole exception is `.pre-commit-config.yaml`, which the framework requires at the repo root.
+  - **`ruff`** for both lint and format — it replaces black, isort, pyupgrade and most flake8 plugins; do not add those. In `[tool.ruff.lint]` set `select = ["E", "F", "I", "N", "B", "UP", "PTH"]`. `PTH` (flake8-use-pathlib) is the mechanism that enforces the standards page's pathlib mandate: it flags every `os.path` call and names the `pathlib` replacement. `pathlib.Path` is the only path API — **`PTH` is not optional and is never globally disabled.** Commands: `ruff check .` and `ruff format .`.
+  - **`basedpyright`** for static type checking — `[tool.basedpyright]` with `typeCheckingMode = "basic"` and `include = ["lilith"]`. Basic (non-strict) is deliberate: annotate function signatures, dataclasses and the interfaces between layers; the checker reports genuine contradictions, not missing annotations. Use `basedpyright`, **not** `pyright` — it is the same engine redistributed as a pure-Python package, so it installs via pip into `requirements.txt` and keeps Node out of the build environment. Strictness is scheduled for review at CH-06; **do not raise it early.** Command: `basedpyright`.
+  - **`import-linter`** configured with the layered contract `ui → logic → data → platform` (§01, law). Command: `lint-imports`.
+  - **`gitleaks`** as a local pre-commit hook (`zricethezav/gitleaks`), decided in BD-001. This is commit-time secret scanning only — it is **not** §07's CI job, which stays CH-09 scope along with bandit, semgrep and pip-audit. Do not add those three here.
+  - **`pre-commit`** ties all four together in `.pre-commit-config.yaml` so they run on `git commit` against changed files. This is the enforcement mechanism until §07's CI arrives at CH-09, and the same config CI will then invoke — there is never a second definition of "clean". B01-01 must run `pre-commit install` and document it. Full-repo sweep: `pre-commit run --all-files`.
+  - Add a `lint` section to the `README.md` covering the install (`pre-commit install`), the per-tool commands above, and the full sweep — noting these join CI in CH-09.
+  - **If a tool rule ever conflicts with a section of the law: tune the rule, never the law.** Suppress or reconfigure narrowly, with a written justification at the suppression site. No blanket global ignores.
 - `tests/unit/` and `tests/integration/` mirroring the source layout (§08), with one trivial passing test each so the timeout conventions (`timeout 60 pytest tests/unit/`, `timeout 180 pytest`) are exercised from day one.
 - `.gitignore`: `.env` (never committed, §02/standards), `__pycache__`, virtualenvs. `README.md` stub pointing at the design site and `docs/SETUP.md` (B01-08).
 
 **Docs:** `docs/CHANGELOG.md` entry (CH-01 section). Verify `docs/DEVELOPER.md` §3 against what you actually configured — exact linter names, install and sweep commands — and correct any drift.
 
-**Acceptance criteria:** Fresh clone + `pip install -r requirements.txt` succeeds on Linux; both pytest sweeps pass inside their timeouts; `import-linter` passes; the tree matches the §01 layout byte-for-name; no `os.path` anywhere; first PR merged with `[scope]:`-prefixed commits; Docs contributions landed.
+**Acceptance criteria:** Fresh clone + `pip install -r requirements.txt` succeeds on Linux; both pytest sweeps pass inside their timeouts; `pre-commit run --all-files` passes clean (ruff check, ruff format, basedpyright, lint-imports, gitleaks); `pre-commit install` has been run and the hook fires on a test commit; the tree matches the §01 layout byte-for-name; no `os.path` anywhere — verified by `PTH` being enabled and passing, not by grep alone; first PR merged with `[scope]:`-prefixed commits; Docs contributions landed.
 
 ---
 
