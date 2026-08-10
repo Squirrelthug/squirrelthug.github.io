@@ -2,7 +2,7 @@
 
 **Sprint ID:** BUILD-01
 **Chapter:** CH-01 (see `BUILD_GUIDE.md` §5) · **Kanban:** [Issue #1](https://github.com/Squirrelthug/squirrelthug.github.io/issues/1) on [Project 46 — Lilith v6 Build](https://github.com/users/Squirrelthug/projects/46)
-**Status:** Blocked on four open decisions (see below) — Ready once they are made
+**Status:** Blocked on one open decision, BD-004 (see below) — B01-01 through B01-03 are unblocked and ready; B01-05 waits on BD-004
 **Law for this sprint:** §01, §02, §03, §04, §06, §08 — https://squirrelthug.github.io/lilith-v6-design/sections/s01.html (…s02, s03, s04, s06, s08)
 **Prerequisites:** none — this is the first code of v6.
 
@@ -14,7 +14,7 @@ Four choices below are assumed by tasks in this sprint but are **not made by the
 |:--|:--|:--|:--|:--|
 | BD-001 | Lint, format & type-check toolchain | B01-01, all later tasks | [#16](https://github.com/Squirrelthug/squirrelthug.github.io/issues/16) | **DECIDED 2026-08-06 — ADR `B-001`; B01-01 text below is now instruction** |
 | BD-002 | Dependency pinning & `requirements.txt` regeneration | B01-01, CH-09 CI gate | [#17](https://github.com/Squirrelthug/squirrelthug.github.io/issues/17) | **DECIDED 2026-08-07 — ADR `B-002`; B01-01 text below is now instruction.** Closes BD-001's second pinning location: the three Python tools become `repo: local` hooks driven by `requirements.txt` |
-| BD-003 | Exception hierarchy & error taxonomy | B01-04, B01-05, B01-06 | [#18](https://github.com/Squirrelthug/squirrelthug.github.io/issues/18) | OPEN |
+| BD-003 | Exception hierarchy & error taxonomy | B01-01 … B01-06 | [#18](https://github.com/Squirrelthug/squirrelthug.github.io/issues/18) | **DECIDED 2026-08-09 — ADR `B-003`; B01-01/03/04/05/06 text below is now instruction.** Reach was wider than the brief assumed: `lilith/errors.py` + `lilith/telemetry.py` move into **B01-01**, because B01-02 and B01-03 also raise |
 | BD-004 | Migration manager shape across six databases | B01-05 (+ CH-04/09/12/13) | [#19](https://github.com/Squirrelthug/squirrelthug.github.io/issues/19) | OPEN |
 
 When a decision is made, its build ADR is written **and the affected task text below is edited to state the decision as instruction** — so no later agent re-derives it. That edit is part of the decision, not a follow-up.
@@ -48,6 +48,8 @@ Each task below is worked by its own isolated agent. An agent receives, at minim
 lilith/                    (root package)
 ├── app.py                 # Application entrypoint & Qt initialization
 ├── config.py              # Config loader/migrator & global constants
+├── errors.py              # Exception hierarchy & RecoveryCategory (BD-003 / ADR B-003)
+├── telemetry.py           # §16's sanitize_exception() seam + root-handler filter (ADR B-003)
 ├── platform/              # OS Abstractions
 │   ├── paths.py           # OS-specific base directories
 │   ├── keyring.py         # Wrapper for OS-level secure keyring
@@ -60,7 +62,9 @@ lilith/                    (root package)
 └── ui/                    # Presentation Layer (placeholders until CH-05: bus.py, screens/, widgets/, shaders/)
 ```
 
-Dependency direction (law, enforced with import-linter): `ui → logic → data → platform`, downwards only.
+Dependency direction (law, enforced with import-linter): `ui → logic → data → platform`, downwards only — extended by ADR `B-003` with two lower layers, giving the full contract `ui → logic → data → platform → telemetry → errors`. `errors.py` imports nothing from `lilith`, so every layer may import it.
+
+**`errors.py` and `telemetry.py` are additions to the §01 tree, and are sanctioned — do not report them as drift.** §01's diagram does not show them, but §16 names `lilith.telemetry.sanitize_exception()` outright, so the law itself requires a root module the diagram omits; the diagram is the layered skeleton, not an exhaustive inventory. ADR `B-003` records this reading. B01-01's "byte-for-name" criterion means *the tree in this header*, these two modules included.
 
 ### Locked decisions inherited by every task (from the law — do not re-litigate)
 
@@ -79,7 +83,8 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 ### Milestone-1 stand-ins (explicit, sanctioned by the M1 table in `BUILD_SEQUENCING.md` §2.1)
 
 - **No §25 onboarding UI.** Setup (passphrase entry, salt generation, first database creation) happens via a **local dev CLI command** (task B01-06). It must follow §02/§06's salt-origin rules exactly: `salts.dat` is generated via `os.urandom(192)` *only when no database files exist*; if databases exist but salts are missing, startup halts with the recovery error — never regenerate.
-- **No §16 `ucl_db`.** `log_event(event_type: str, payload: dict)` ships now with its permanent signature, but writes JSON lines to `APP_INTERNAL_DIR/logs/dev.log`. The §16 event-payload hygiene and the plaintext-logs boundary apply *by discipline* now (the enforcement sanitizer machinery is CH-09 scope): payloads carry compact operational facts and non-secret identifiers only.
+- **No §16 `ucl_db`.** `log_event(event_type: str, payload: dict)` ships now with its permanent signature, but writes JSON lines to `APP_INTERNAL_DIR/logs/dev.log`. Payloads carry compact operational facts and non-secret identifiers only.
+- **The §16 sanitizer: seam now, intelligence at CH-09** (revised by ADR `B-003`; supersedes the earlier note that *all* sanitizer machinery is CH-09 scope). §16 names `lilith.telemetry.sanitize_exception()` and §01 requires it on dev and startup logs — both of which exist in this sprint — so CH-01 builds the function, the root-handler filter and the excepthooks, with a deliberately simple fail-closed implementation. CH-09 replaces this module's internals with §16's real pattern-based sanitizer; no raise site changes when it does. The module docstring must name CH-09 as its owner.
 - **The 10-phase §06 startup sequence is built as its M1 subset:** Phase 1 (hardware) is a stub returning a placeholder tier until CH-02; Phases 8–9 (scheduler, voice) are no-ops until their chapters; Phase 10 renders no window until CH-05 — "active" means the process is up and idle. The *ordering and structure* of the sequence is law and is built now.
 
 ### Kanban protocol (revised 2026-08-06)
@@ -125,7 +130,23 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 - **Toolchain — decided in BD-001, see ADR `B-001`. Configure exactly this; do not substitute tools or re-derive the choice.** All tool config lives in `pyproject.toml` (§01's agreed home), never in a scatter of dotfiles — the sole exception is `.pre-commit-config.yaml`, which the framework requires at the repo root.
   - **`ruff`** for both lint and format — it replaces black, isort, pyupgrade and most flake8 plugins; do not add those. In `[tool.ruff.lint]` set `select = ["E", "F", "I", "N", "B", "UP", "PTH"]`. `PTH` (flake8-use-pathlib) is the mechanism that enforces the standards page's pathlib mandate: it flags every `os.path` call and names the `pathlib` replacement. `pathlib.Path` is the only path API — **`PTH` is not optional and is never globally disabled.** Commands: `ruff check .` and `ruff format .`.
   - **`basedpyright`** for static type checking — `[tool.basedpyright]` with `typeCheckingMode = "basic"` and `include = ["lilith"]`. Basic (non-strict) is deliberate: annotate function signatures, dataclasses and the interfaces between layers; the checker reports genuine contradictions, not missing annotations. Use `basedpyright`, **not** `pyright` — it is the same engine redistributed as a pure-Python package, so it installs via pip into `requirements.txt` and keeps Node out of the build environment. Strictness is scheduled for review at CH-06; **do not raise it early.** Command: `basedpyright`.
-  - **`import-linter`** configured with the layered contract `ui → logic → data → platform` (§01, law). Command: `lint-imports`.
+  - **`import-linter`** configured with the layered contract `ui → logic → data → platform` (§01, law), extended downwards by ADR `B-003` so the errors module cannot import anything above it. Write exactly:
+
+    ```toml
+    [[tool.importlinter.contracts]]
+    name = "Layers"
+    type = "layers"
+    layers = [
+        "lilith.ui",
+        "lilith.logic",
+        "lilith.data",
+        "lilith.platform",
+        "lilith.telemetry",
+        "lilith.errors",
+    ]
+    ```
+
+    Command: `lint-imports`.
   - **`gitleaks`** as a local pre-commit hook (`zricethezav/gitleaks`), decided in BD-001. This is commit-time secret scanning only — it is **not** §07's CI job, which stays CH-09 scope along with bandit, semgrep and pip-audit. Do not add those three here.
   - **`pre-commit`** ties all four together in `.pre-commit-config.yaml` so they run on `git commit` against changed files. This is the enforcement mechanism until §07's CI arrives at CH-09, and the same config CI will then invoke — there is never a second definition of "clean". B01-01 must run `pre-commit install` and document it. Full-repo sweep: `pre-commit run --all-files`.
   - **Hook version pinning — decided in BD-002, see ADR `B-002`.** `ruff`, `basedpyright` and `import-linter` are configured as **`repo: local` hooks with `language: system`**, invoking whatever `requirements.txt` installed into the active environment. Do **not** give them remote `rev:`-pinned `repo:` entries — that would pin each tool a second time, in a file that can drift from `requirements.txt` with nothing reporting the mismatch. With local hooks there is exactly one pinned version of each tool, and drift is structurally impossible rather than merely monitored. Shape:
@@ -150,12 +171,44 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
     **`gitleaks` is the deliberate exception**: it is a Go binary and is not distributed on PyPI, so it cannot live in `requirements.txt` under any arrangement. It keeps a remote `rev:` pin, which B-002 records as *accepted duplication* rather than unnoticed drift — bumping it is a step in the monthly dependency procedure. Pin a real released tag (`v8.30.1` was current at B-002; verify before writing it).
   - Add a `lint` section to the `README.md` covering the install (`pre-commit install`), the per-tool commands above, and the full sweep — noting these join CI in CH-09.
   - **If a tool rule ever conflicts with a section of the law: tune the rule, never the law.** Suppress or reconfigure narrowly, with a written justification at the suppression site. No blanket global ignores.
+- **Exception hierarchy & sanitizer seam — decided in BD-003, see ADR `B-003`. Build exactly this; every later task raises through it.** This is the one part of B01-01 that is not a placeholder, and it is here rather than in B01-04 because B01-02 and B01-03 already raise.
+
+  **`lilith/errors.py`:**
+
+  ```python
+  class RecoveryCategory(Enum):
+      ALREADY_RUNNING = "already_running"          # §06 lock acquisition
+      PERMISSIONS_INVALID = "permissions_invalid"  # §04 verify-and-tighten
+      KEYRING_UNAVAILABLE = "keyring_unavailable"  # §02 daemon not running
+      KEYRING_INSECURE = "keyring_insecure"        # §02 keyrings.alt / FailKeyring
+      SALTS_MISSING = "salts_missing"              # §06 Phase 4
+      CREDENTIAL_MISSING = "credential_missing"    # §06 Phase 5
+      CREDENTIAL_INVALID = "credential_invalid"    # §06 Phase 6 · §25 row (b)
+      DATABASE_CORRUPT = "database_corrupt"        # §06 (c) · §25
+  ```
+
+  These eight are the closed CH-01 set. **Do not add a member** — a new one needs a §06/§25 recovery state and its message, which is a decision, not an implementation detail. (`DATABASE_LOCKED` was considered and rejected: `busy_timeout = 5000` makes contention retryable, not a recovery-screen state.)
+
+  `LilithError(Exception)` is the root, with exactly two children, `RecoverableError` and `UnrecoverableError`, and concrete errors below them — **three levels, no deeper.** Recoverable = caught at a module boundary, logged, surfaced, app continues; unrecoverable = recovery screen or hard exit, so `except UnrecoverableError` at the top of the process is a complete routing decision.
+
+  - **No Lilith exception has a free-text message field.** Each concrete class declares three class-level constants — `message` (the §06/§25 string verbatim where the law gives one), `recovery_category`, `component` — and `__str__` returns `message`, so `f"{err}"` is safe. Instance state is **non-secret identifiers only** (`db_name`, event id), declared as keyword-only `__init__` parameters. There is deliberately no `detail=`, `context=` or `reason=` parameter; do not add one.
+  - **`to_payload() -> dict[str, str]` on `LilithError`** returns exactly §16's declared `error.*` field set: `exception_type`, `message`, `recovery_category`, `component`, plus the instance's identifiers. Call sites write `log_event("error.…", err.to_payload())` and **never** assemble an error payload by hand — that is what keeps §08's payload schema review to one function.
+
+  **`lilith/telemetry.py`** — `sanitize_exception(exc) -> str` (this name is fixed by §16, do not rename), a `SanitizingFilter`, `install_sanitizer()`, and `add_handler()`.
+
+  - **Fail closed.** A `LilithError` returns its fixed `message`; **anything else** returns `<TypeName redacted>`. Never pass a non-Lilith exception's text through. The filter additionally strips long hex runs, `PRAGMA key = …`, `sk-ant-…` and `Bearer …` from record text.
+  - **Install the filter on the root logger's `handlers`, never on the root logger itself.** A filter attached to a *logger* is consulted only for records logged through that logger directly — records propagating from child loggers skip it, which is every third-party library and therefore the entire point. Verified during the decision session; a logger-level filter passes its own unit test and protects nothing.
+  - **The filter must collapse `record.getMessage()` and clear `record.args` before sanitizing.** A secret passed lazily (`log.info("key: %s", secret)`) is not in `record.msg` at all and is interpolated downstream of the filter. Sanitizing `record.msg` alone leaks it — this was an actual bug in the session's first prototype.
+  - `install_sanitizer()` also sets `sys.excepthook` and `threading.excepthook` to route through `sanitize_exception()`, so an unhandled exception cannot print a raw traceback. It is called **once, before §06 Phase 1** (B01-06 wires it as the first statement of startup, ahead of the phase sequence — it is process setup, not an eleventh phase).
+  - Any handler added later goes through `telemetry.add_handler()`. A handler attached directly to the root logger is a silent hole; the test below exists to catch it.
+  - The module docstring names **CH-09 (§16)** as the owner that replaces these internals.
+- `tests/unit/test_errors.py` — the tests that make the convention self-enforcing as chapters accumulate. Cheap to write, and they are why this lands at B01-01: (a) walk every `LilithError` subclass and assert no `__init__` parameter is named `message`/`msg`/`detail`/`details`/`context`/`reason`/`text`/`error`; (b) assert every concrete (leaf) class defines all three class constants and that `str(instance)` equals the class `message` regardless of instance state; (c) assert `to_payload()` emits only the declared keys; (d) assert every root-logger handler carries the `SanitizingFilter`; (e) assert `sanitize_exception()` on a non-Lilith exception carrying a 64-char hex string returns neither the hex nor the type's text.
 - `tests/unit/` and `tests/integration/` mirroring the source layout (§08), with one trivial passing test each so the timeout conventions (`timeout 60 pytest tests/unit/`, `timeout 180 pytest`) are exercised from day one.
 - `.gitignore`: `.env` (never committed, §02/standards), `__pycache__`, virtualenvs. `README.md` stub pointing at the design site and `docs/SETUP.md` (B01-08).
 
-**Docs:** `docs/CHANGELOG.md` entry (CH-01 section). Verify `docs/DEVELOPER.md` §3 against what you actually configured — exact linter names, install and sweep commands, and the dependency-regeneration command — and correct any drift.
+**Docs:** `docs/CHANGELOG.md` entry (CH-01 section). Verify `docs/DEVELOPER.md` §3 against what you actually configured — exact linter names, install and sweep commands, and the dependency-regeneration command — and §4 ("Raising errors") against the hierarchy as built; correct any drift.
 
-**Acceptance criteria:** Fresh clone + `pip install --require-hashes --prefer-binary -r requirements.txt` succeeds on Linux — `--require-hashes` is what proves the hash set is complete, so use it here even though the everyday command omits it; `requirements.txt` carries uv's autogenerated header naming the regeneration command; every platform-specific binary-wheel package (`sqlcipher3-wheels` and friends) shows **many** `--hash=` lines, not one; both pytest sweeps pass inside their timeouts; `pre-commit run --all-files` passes clean (ruff check, ruff format, basedpyright, lint-imports, gitleaks); `pre-commit install` has been run and the hook fires on a test commit; the tree matches the §01 layout byte-for-name; no `os.path` anywhere — verified by `PTH` being enabled and passing, not by grep alone; first PR merged with `[scope]:`-prefixed commits; Docs contributions landed.
+**Acceptance criteria:** Fresh clone + `pip install --require-hashes --prefer-binary -r requirements.txt` succeeds on Linux — `--require-hashes` is what proves the hash set is complete, so use it here even though the everyday command omits it; `requirements.txt` carries uv's autogenerated header naming the regeneration command; every platform-specific binary-wheel package (`sqlcipher3-wheels` and friends) shows **many** `--hash=` lines, not one; both pytest sweeps pass inside their timeouts; `pre-commit run --all-files` passes clean (ruff check, ruff format, basedpyright, lint-imports, gitleaks); `pre-commit install` has been run and the hook fires on a test commit; the tree matches this sprint header's layout byte-for-name — which includes `errors.py` and `telemetry.py`, sanctioned by ADR `B-003` and not to be reported as drift; `lint-imports` passes the six-layer contract; the five `test_errors.py` assertions pass; no `os.path` anywhere — verified by `PTH` being enabled and passing, not by grep alone; first PR merged with `[scope]:`-prefixed commits; Docs contributions landed.
 
 ---
 
@@ -169,6 +222,7 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 - Directory creation helper: creates the `APP_INTERNAL_DIR` tree with 0700 (dirs) / 0600 (files) on POSIX; a verify-and-tighten function for startup (§02/§04).
 - Platform detection **once** via `sys.platform` → `IS_LINUX, IS_MAC, IS_WINDOWS` flags in `lilith.platform` (§04). No ad-hoc environment checks in feature code.
 - `config.py`: loads/creates `config.json` in `APP_INTERNAL_DIR`, with a programmatic schema-migration hook run at startup (§01). Keep v1 schema minimal (config schema version + `backup.external_destination`); later chapters add keys.
+- **Errors, per ADR `B-003`:** the verify-and-tighten helper raises `PermissionsInvalid` (an `UnrecoverableError`, `recovery_category = RecoveryCategory.PERMISSIONS_INVALID`, `component = "platform.paths"`, identifier `path: str`) — B01-06 catches it at Phase 2. A rejected `EXTERNAL_BACKUP_DIR` override is a **`RecoverableError`**, not a halt: it is a config-value problem the user can correct, so it surfaces and the app continues on the §04 default. Neither carries a free-text field; do not invent a third exception here.
 
 **Docs:** `docs/CHANGELOG.md` entry. Update `docs/architecture/01-containers.md` if any module/path name in the diagram differs from what you built (the diagram must name real modules).
 
@@ -184,11 +238,15 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 **What to build:**
 - `platform/keyring.py` wrapping `python-keyring` under the canonical service namespace `"com.squirrelthug.lilith"`. Expose typed get/set/delete for the §02 canonical key names as constants: `master_passphrase`, `install_sentinel`, `security_tier`, `anthropic_api_key` (the others in the §02 table are later-chapter writers, but the constants exist now so no string literals ever appear at call sites).
 - **Startup security verification (§02):** check `keyring.get_keyring()` returns a secure backend; if an insecure plaintext fallback (`keyrings.alt`-class) or a fail backend is detected, raise an unrecoverable security exception — the app refuses to boot. Keyring *unavailable/error* is a distinct halt with the §02 recovery message: `"OS secure keychain is unavailable. Please verify your system's keyring daemon is running."`
+- **The two exceptions, per ADR `B-003`** — both `UnrecoverableError` subclasses in `lilith/errors.py`, `component = "platform.keyring"`, no free-text field:
+  - `KeyringInsecure` — `recovery_category = RecoveryCategory.KEYRING_INSECURE`. These are two categories rather than one precisely because §02 treats them as distinct halts with different user guidance, and this task's acceptance criteria already test them separately.
+  - `KeyringUnavailable` — `recovery_category = RecoveryCategory.KEYRING_UNAVAILABLE`, `message` set to the §02 string above **verbatim**.
+  - Wrapping a backend error uses `raise KeyringUnavailable() from None` — a bare `raise` inside `except` leaks the caught exception's text through `__context__`.
 - **No keyring operations are logged** (§02) — no `log_event`, no debug lines, nothing, to prevent timing/leak vulnerabilities.
 
 **Docs:** `docs/CHANGELOG.md` entry. Verify the keychain reflexes in `docs/DEVELOPER.md` §4 match implemented behavior (service name, refusal semantics) and correct any drift.
 
-**Acceptance criteria:** Unit tests with substituted backends: a secure backend passes verification; a `keyrings.alt`-style backend and a fail-backend each cause boot refusal with the correct exception type and message; get/set/delete round-trip against the test backend; a log-capture fixture proves zero log emissions from any keyring code path; Docs contributions landed.
+**Acceptance criteria:** Unit tests with substituted backends: a secure backend passes verification; a `keyrings.alt`-style backend and a fail-backend each cause boot refusal with the correct exception type and message; get/set/delete round-trip against the test backend; a log-capture fixture proves zero log emissions from any keyring code path — **including the error paths**, which raise and let the caller log (§02 admits no exception for failures); the rendered exception chain from a wrapped backend error contains none of the driver's text; Docs contributions landed.
 
 ---
 
@@ -201,10 +259,14 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 - Salt file I/O (§02): read `DB_DIR / "salts.dat"` via `Path.read_bytes()`; validate **exactly 192 bytes**; slice into six 32-byte salts under the fixed index order `ucl_db=0, calendar_db=1, contacts_db=2, finance_db=3, memory_db=4, conversation_db=5` (a module-level constant). Reading is this task; *generation* belongs only to the B01-06 bootstrap CLI (§02's three-origins rule — never generate here).
 - Argon2id derivation via `argon2-cffi`: `time_cost=3, memory_cost=65536, parallelism=2`, 32-byte raw output per database from (master passphrase, that database's salt) (§03).
 - `SessionKeyManager` (§03): derives all keys **once per unlocked session**, holds them privately; `apply_sqlcipher_key(conn, db_name)` executes `PRAGMA key = "x'<64 hex>'"` in a narrow internal scope; **any** exception while applying/verifying raises generic `DatabaseKeyingFailed` carrying database identity and recovery category only — no key material, PRAGMA text, locals, raw driver text, or tracebacks in message or `__cause__`. `__repr__`/`__str__` return a constant redacted value (`<SessionKeyManager redacted>`). `relock()` closes registered connections and drops key material; post-relock keying requests raise `DatabaseKeyingFailed` until a new unlock.
+- **The exceptions this task adds, per ADR `B-003`** — `DatabaseKeyingFailed` and `SaltsInvalid`, both `UnrecoverableError` subclasses with no free-text field:
+  - `DatabaseKeyingFailed`: `message = "Key verification failed. Incorrect passphrase or mismatched salts."` (§25 verbatim), `recovery_category = RecoveryCategory.CREDENTIAL_INVALID`, `component = "data.db"`, and exactly one identifier — `db_name: str`, keyword-only. That is the whole of §03's "database identity and recovery category only".
+  - `SaltsInvalid` for a salt file of the wrong size: `recovery_category = RecoveryCategory.SALTS_MISSING`, `message` set to the §06 string `"Salts missing — restore salts.dat from backup to recover access"`. **Do not put the observed byte count in the message** — it is a `log_event` payload field, not exception text. (B01-06 adds a sibling `SaltsMissing` for the *absent-file* case, sharing this category — two conditions, one recovery path, same user-facing message. Do not merge them, and do not add a third.)
+  - **Every raise inside an `except` block uses `from None`.** `raise DatabaseKeyingFailed(db_name=db_name) from None`. This is the line the leak-scanning test below is actually checking: `from e` leaks the driver text via `__cause__`, and a *bare* `raise` leaks it via implicit `__context__` — measured, both fail; only `from None` passes.
 
 **Docs:** `docs/CHANGELOG.md` entry. Update `docs/architecture/data-flows/key-derivation.md`: name the actual modules/classes you built in the diagram and prose, and correct any within-the-law detail that differs from the seeded version.
 
-**Acceptance criteria:** Known-vector test: same passphrase+salt reproduces the same 64-char hex across runs; wrong-size salt files (191, 193, 0 bytes) rejected with a recovery-category error; `repr`/`str` leak nothing under direct call and inside f-strings/tracebacks; a forced keying failure's exception chain is scanned by the test for absence of hex/PRAGMA/passphrase substrings; `relock()` behavior verified; Docs contributions landed.
+**Acceptance criteria:** Known-vector test: same passphrase+salt reproduces the same 64-char hex across runs; wrong-size salt files (191, 193, 0 bytes) rejected with a recovery-category error; `repr`/`str` leak nothing under direct call and inside f-strings/tracebacks; a forced keying failure's exception chain is scanned by the test for absence of hex/PRAGMA/passphrase substrings — **scan the fully rendered chain** (`traceback.format_exception(...)`), not `str(err)`, since `__context__` is where the leak actually appears and `str(err)` is safe by construction; the same scan is applied to `err.to_payload()`; `relock()` behavior verified; Docs contributions landed.
 
 ---
 
@@ -229,10 +291,15 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
   Connection-per-thread discipline (§03): the factory hands each thread/job its own connection; no sharing across threads. Registration with the `SessionKeyManager` so `relock()` can close them.
 - Custom migration manager (§03): numbered SQL scripts (`0001_init.sql`, …) run sequentially at startup, idempotent, inside a transaction, tracked in a `schema_version` (or equivalent meta) table. M1 mounts **exactly one** database: `conversation_db`. Its `0001_init.sql` creates only the migration-tracking meta table — the `turns`/`sessions` schema is CH-04 scope (§18) and must not appear here.
 - `log_event()` M1 shim in `data/ucl.py` (permanent signature `log_event(event_type: str, payload: dict)`): JSON lines to `LOG_DIR / "dev.log"`; catches its own exceptions (telemetry never crashes the main path — standards); payload discipline per the plaintext-logs boundary.
+- **Error handling, per ADR `B-003` — the conventions are decided; implement, do not re-derive.**
+  - Every `error.*` payload comes from `err.to_payload()`. Do not build one by hand, and do not add fields to it at the call site; a fact worth logging that is not in the declared set belongs in a non-`error.*` event.
+  - `data/db.py` raises `DatabaseKeyingFailed(db_name=…) from None` (B01-04's class) — this task does not define a second keying exception.
+  - Migration failure raises a new `MigrationFailed(UnrecoverableError)`: `recovery_category = RecoveryCategory.DATABASE_CORRUPT`, `component = "data.db"`, identifiers `db_name` and `migration: str` (the script *name*, e.g. `"0001_init.sql"` — a non-secret identifier; **never** the failing SQL, which §16 forbids outright). Raised `from None` inside the transaction's `except`, after rollback.
+  - `log_event()`'s own failure handler writes `sanitize_exception(exc)` to stderr — never the raw exception. This is the standards' "logged to stderr and counted, but never propagates", made §16-compliant.
 
 **Docs:** `docs/CHANGELOG.md` entry. Update the connection-sequence portion of `docs/architecture/data-flows/key-derivation.md` and the `data/` layer names in `docs/architecture/01-containers.md` to match the real modules.
 
-**Acceptance criteria:** Real-SQLCipher tests (no mocks, §08): create → key → open → verify succeeds; wrong passphrase surfaces as `DatabaseKeyingFailed` (and the file is untouched); `PRAGMA journal_mode` returns WAL; migration runner applied twice is a no-op the second time; a cross-thread connection-sharing attempt is caught by the discipline (factory API makes it structurally awkward and tests document the rule); `log_event` writes valid JSON lines and survives an unwritable log dir without raising; Docs contributions landed.
+**Acceptance criteria:** Real-SQLCipher tests (no mocks, §08): create → key → open → verify succeeds; wrong passphrase surfaces as `DatabaseKeyingFailed` (and the file is untouched); `PRAGMA journal_mode` returns WAL; migration runner applied twice is a no-op the second time; a deliberately broken migration script rolls back and raises `MigrationFailed` whose rendered chain and payload contain no SQL; a cross-thread connection-sharing attempt is caught by the discipline (factory API makes it structurally awkward and tests document the rule); `log_event` writes valid JSON lines and survives an unwritable log dir without raising *and without writing a raw exception to stderr*; Docs contributions landed.
 
 ---
 
@@ -246,10 +313,26 @@ Dependency direction (law, enforced with import-linter): `ui → logic → data 
 - **Startup sequence** in `app.py`, as the §06 10-phase structure with M1 stubs: 1 hardware-profile stub → 2 acquire `APP_INTERNAL_DIR/lilith.lock` via `fcntl.flock` exclusive lock, write PID, verify 0700/0600 permissions → 3 keyring verification (B01-03) → 4 load `salts.dat` (halt with `"Salts missing — restore salts.dat from backup to recover access"` if databases exist without it; if neither exists, direct the user to the bootstrap CLI — the M1 analogue of §25 classification) → 5 unlock resolution (convenience: read `master_passphrase` from keychain; missing passphrase with existing databases is credential recovery, not first-run) → 6 mount `conversation_db` (keying failure: halt and prompt guidance, never delete) → 7 run migrations → 8–9 no-op stubs → 10 process active (idle loop; no window until CH-05). Lock-acquisition failure: print/dialog `"Lilith is already running"` and exit immediately — the flock result alone gates the refusal; the stored PID is read via `psutil` only to enrich the message (§06).
 - **Stale-lock handling (§06):** lockfile exists with a dead PID → assume crash, clean the lock, proceed; emit `error.crash_recovery` via `log_event`. (Full state-machine gating and quarantine are CH-09 scope.)
 - **Graceful shutdown** (§06 order, M1 subset): stop audio streams (stub) → scheduler shutdown (stub) → abort in-flight LLM calls (stub) → close all DB connections flushing WAL → release and delete `lilith.lock` → exit 0. Wired to SIGTERM and SIGINT.
+- **Error handling & the recovery vocabulary, per ADR `B-003` — this is the task that consumes the enum.**
+  - **`telemetry.install_sanitizer()` is the first statement of startup**, before Phase 1. It is process setup, not an eleventh phase: nothing may log before the root handlers carry the filter. Add log handlers only via `telemetry.add_handler()`.
+  - **The top-level handler is `except UnrecoverableError`** — that is what the two-child split exists for. Its branch prints/dialogs `err.message`, emits `log_event("error.recovery.<state>", err.to_payload())`, and exits non-zero. There is no lookup table mapping exception types to severity, and no `except Exception` catch-all above it; an unhandled non-Lilith exception is the excepthook's job and is redacted there.
+  - **The halts this task raises**, all `UnrecoverableError`, all with the §06/§25 message verbatim as the class `message`, all raised `from None`:
+
+    | Condition | Class | `recovery_category` |
+    |:--|:--|:--|
+    | Lock held by a live process | `AlreadyRunning` | `ALREADY_RUNNING` |
+    | Phase 2 permission verify fails | `PermissionsInvalid` | `PERMISSIONS_INVALID` |
+    | Databases exist, `salts.dat` absent | `SaltsMissing` | `SALTS_MISSING` |
+    | Databases exist, no `master_passphrase` | `CredentialMissing` | `CREDENTIAL_MISSING` |
+
+    `KeyringUnavailable` / `KeyringInsecure` (B01-03) and `DatabaseKeyingFailed` / `MigrationFailed` (B01-04/05) propagate to the same handler unchanged — do not re-wrap them.
+  - **`AlreadyRunning` carries the `psutil`-derived PID as an identifier, not in the message.** §06 fixes the user-facing string as `"Lilith is already running"`; the PID enriches the *payload*. The flock result alone gates the refusal.
+  - **The bootstrap CLI's refusal when databases exist is not an exception** — it is a normal CLI exit with guidance. Exceptions are for the startup path; do not manufacture a recovery category for a deliberate user-facing refusal.
+  - Startup with neither salts nor databases is **not** an error either: it is the §25 classification pointing at the bootstrap CLI, and it touches nothing.
 
 **Docs:** `docs/CHANGELOG.md` entry. Update the status line of `docs/architecture/data-flows/startup-sequence.md` (built-subset state). Write the first three runbook procedures in `docs/runbook/` per its writing rule (numbered steps, exact commands, expected outcomes, telemetry events emitted): *bootstrap a fresh machine*, *start / stop / verify*, *second-instance & stale-lock behavior*.
 
-**Acceptance criteria:** Scripted end-to-end on Linux: bootstrap → start → phase log shows the ordered sequence → SIGTERM → exit code 0, lock removed, WAL flushed; second concurrent start refused with the exact §06 message while the first keeps running; kill -9 then restart cleans the stale lock and logs `error.crash_recovery`; bootstrap refuses when a database exists; salts-missing-with-databases halts with the §06 recovery message; startup with no salts and no databases points to the bootstrap CLI and touches nothing; Docs contributions landed.
+**Acceptance criteria:** Scripted end-to-end on Linux: bootstrap → start → phase log shows the ordered sequence → SIGTERM → exit code 0, lock removed, WAL flushed; second concurrent start refused with the exact §06 message while the first keeps running; kill -9 then restart cleans the stale lock and logs `error.crash_recovery`; bootstrap refuses when a database exists; salts-missing-with-databases halts with the §06 recovery message; startup with no salts and no databases points to the bootstrap CLI and touches nothing; every root-logger handler carries the `SanitizingFilter` after startup (assert it, since a directly-attached handler is a silent hole); an exception deliberately raised past the top-level handler produces a redacted excepthook line and no traceback in `dev.log`; Docs contributions landed.
 
 ---
 
