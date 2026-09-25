@@ -55,6 +55,34 @@ The governing idea (recorded 2026-08-03): **Lilith is the kind of harness that i
 **The seam:** §29's custodian model is already pointer-based rather than copy-based — indexing files where they live is exactly the primitive a locality registry generalises. §17's `refresh_capability` field, with its `manual_source` value and the §14 absence-disclosure path (`status=source_unsupported`, "unavailable this turn; do not guess"), is already the honest-about-unreachable-data machinery a remote location would reuse unchanged. §05's hardware detection is the seam for reading disk state; §16's telemetry and §17's L1/L2 job machinery are where a pressure monitor would live; §15's tool catalog is how an offload would be executed under user consent.
 **Session prerequisites:** FDS-2 (autonomy) should resolve first or alongside — a storage-pressure monitor that only *notices* is a small feature, while one that *proposes and acts* inherits every question FDS-2 exists to answer about initiative, urgency, and nagging. Also needs the §29 cloud-integration deferral lifted, since facilitating an offload to a third-party service is precisely what v1 excludes. Real dogfooding data on how much Lilith actually accumulates, so the pressure thresholds are measured rather than guessed.
 
+## FDS-8 · Multi-Device Lilith: One Hub, Many Endpoints — added 2026-09-24
+
+**Vision:** Lilith reaches the user on every device they own, as one Lilith rather than several. A single **hub** machine holds the databases, the keychain, the context window and the local models. The user's other devices are **endpoints** that talk to it: a laptop, a phone away from home, and eventually a kitchen speaker. Endpoints and hub reach each other over a private overlay network (Tailscale-class, or self-hosted Headscale when no third-party coordination server is acceptable), so a phone on cellular behaves as if it were on the home LAN. The hub can also hand background work to other machines on that network, for example a GPU box running local models, so the hub's own window stays responsive. The user leaves a voice note from the phone, and the hub transcribes it, files it and answers on the lane it came from.
+**Not in v1 because:** v6 v1 is a single-process desktop app on one machine (§01, `00-system-context`). §22 defines only the `desktop` endpoint for v1; `mobile` is marked future and `kitchen_speaker` deferred. BUILD_SEQUENCING §5 explicitly parks WebSocket streaming to secondary endpoints (item 1) and cross-device UI state continuity (item 4), and v1 operates no remote database replication. Opening any listener beyond loopback also moves the §02 threat model past its same-user boundary. That needs its own reviewed design, not a config flag.
+**The seam:** §22 has already done most of the conceptual work.
+- Endpoint types carry capability profiles, and the router checks `endpoint.capabilities` before generating.
+- Every session and turn is bound to one `endpoint_id`, and lanes are isolated, so there's no shared active-context bleed.
+- Artifacts are "deferred to desktop hub", which already names the hub model.
+- The Identity-Bound and Zero-Clearance authorization tiers already classify endpoints by how far they can be trusted.
+- ADR-013's binding migration trigger already says the endpoint-authorization policy must move into an encrypted, UCL-audited SQLCipher database before any identity-bound endpoint ships.
+
+On the network side, §21's ICS feed (token URL, loopback by default) is the precedent for a deliberately exposed read-only surface. §06's startup sequence is where a listener would come up. §12's Ollama endpoint posture, including port-hijack detection, is the precedent for trusting a model endpoint on another machine.
+**Session prerequisites:**
+- **Milestone 1 dogfooded on one machine first.** Multi-device multiplies every single-machine bug.
+- **The ADR-013 migration landed**, since it's a hard prerequisite for any identity-bound endpoint.
+- **A research step (res-NN style)** covering: the overlay network's security posture (coordination-server trust, device identity via tailnet peer lookup, ACLs, key expiry, what happens when a device is lost); the phone client stack (a thin web client served by the hub vs. a native app); and the transport for streamed voice and text.
+
+The session must settle these questions:
+- Hub and endpoints only, never peer-to-peer database sync. Recorded as the working assumption 2026-09-24: encrypted SQLite replication and conflict resolution are out of proportion for a solo developer.
+- Which interfaces the hub binds to. The working assumption is the overlay interface only, never `0.0.0.0`.
+- How the hub authenticates a device and the person holding it.
+- Which clearance tier a phone gets.
+- How a lost or stolen device is revoked.
+- How this relates to the Discord identity-bound endpoint. Discord reaches the phone with no overlay network, but routes content through a third-party cloud.
+- Whether offloading work to other machines belongs here or with FDS-3.
+
+Developer's stated priority (2026-09-24): this is the first design session wanted once the initial build is working.
+
 ---
 
 *Add new entries only with a dated line and the same four fields. When a session convenes and its outcome amends the law, move the entry to a "Resolved" section at the bottom with a pointer to the amendment ledger entry.*
