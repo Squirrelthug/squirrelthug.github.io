@@ -6,7 +6,9 @@ voice-first personal AI assistant. It is both a human-readable website (open
 design or build work on this project.
 
 **Status:** design FROZEN 2026-06-29 · three adversarial review rounds passed ·
-CLEARED FOR BUILD 2026-07-17 · build phase not yet started.
+CLEARED FOR BUILD 2026-07-17 · **build phase active** — CH-01 Foundation & Skeleton
+(`SPRINT-B01`) is the open chapter. Live build state is tracked in the build repo's
+`HANDOFF.md`, and progress on the [kanban](https://github.com/users/Squirrelthug/projects/46).
 
 ## What is law
 
@@ -39,6 +41,11 @@ Priority order when reading:
 | `systems.html` | Visual system architecture map (June 2026 companion; the document wins on conflict) |
 | `amendments.html` | Canonical amendment ledger, verbatim, one entry per design session |
 | `BUILD_SEQUENCING.md` | Build milestone plan + Experiments 1–2 specs + parked post-v1 scope |
+| `sprints/BUILD_GUIDE.md` | The 14 chapters, their design sections, and each one's Definition of Done |
+| `sprints/SPRINT-*.md` | Sprint documents — task blocks for the chapter in progress, authored just in time |
+| `sprints/FUTURE_DESIGN_SESSIONS.md` | Parked design questions (FDS-*) awaiting a documented session |
+| `reports/R00…R07*.md` | Narrative chapter reports — the reasoning behind each stretch of the build |
+| `specs/*.spec.md` | Subsystem specs an amendment produced (currently the calendar app) |
 | `assets/site.css` | Shared styles + nav (presentation only) |
 | `tools/build_fulldoc.py` | Regenerates `full-document.html` from `sections/` + `amendments.html` |
 
@@ -63,10 +70,21 @@ stream-and-cut single-path as the named fallback; PII recall gates ≥95% names 
 
 ## History / provenance
 
-The design phase's inputs and working records live outside this site in
-`~/Desktop/lilith-v6-preliminary/`: the research reports and planning tree
-(`research/`), all three review rounds' prompts, reports, ADRs, and session
-logs (`archive/`), the design-phase sprint spec (`SPRINT_DESIGN_PHASE.md`),
-and the byte-exact pre-split snapshot of the original single-file document
-(`index-original-2026-07-17.html`). Lilith v6 supersedes a working-but-
-hardcoded v5; the research folder documents why v6 was redesigned from scratch.
+The design phase's inputs and working records are archived on the **`design-history`**
+orphan branch of the build repo (`Squirrelthug/LILITH`), which shares no history with
+`main` — read it without checking it out:
+
+```
+git fetch origin design-history
+git show design-history:README.md      # index of everything archived
+```
+
+It holds the fifteen research reports and the planning tree (`research/`), the
+design-session ADRs and spec notes (`design-sessions/`), the design-phase sprint spec
+(`SPRINT_DESIGN_PHASE.md`), and a mid-design snapshot. Some material still exists only
+on the Linux MASTER at `~/Desktop/lilith-v6-preliminary/` — the three adversarial review
+rounds' prompts, reports and session logs, and the byte-exact pre-split snapshot of the
+frozen document — and is pending append to that branch (see its README).
+
+Lilith v6 supersedes a working-but-hardcoded v5; the research folder documents why v6 was
+redesigned from scratch.

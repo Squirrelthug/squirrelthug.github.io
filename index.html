@@ -381,6 +381,7 @@
         I design and build ambient, voice-first AI systems with a focus on privacy, modularity, and
         long-term architectural integrity. The work documented here is serious, ongoing, and
         grounded in a specific philosophy: the foundation has to carry the full weight of the final vision.
+        The current generation — v6 — was designed in full, frozen, and is now in build.
       </p>
     </div>
 
@@ -391,42 +392,68 @@
       <figure style="margin: 2rem 0; text-align: center;">
         <img src="assets/lilith-demo.gif" alt="Lilith App Interface showing the voice orb and chat" style="max-width: 100%; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5);" />
         <figcaption style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-dim); font-family: IBM Plex Mono, monospace;">
-          The Lilith application serves as the primary interface, wrapping complex ambient workflows in a clean, unified mobile-style OS.
+          The v5 application in daily use before the rebuild — the voice orb and chat surface that
+          established what the interface had to be. v6 rebuilds this shell in PySide6; it arrives in
+          Milestone 1's fifth chapter.
         </figcaption>
       </figure>
     </section>
 
     <!-- ─── ARCHITECTURE ────────────────────────────────────────── -->
     <section id="architecture">
-      <p class="section-label">Current Architecture</p>
+      <p class="section-label">Current Architecture · v6, in build</p>
       <h2>L.I.L.I.T.H. — Core System</h2>
       <p>
-        An App-first, locally-hosted personal OS built as a modular monolith. The app is the new face, featuring a voice orb interface with an optional chat page, while the CLI remains the primary tool for development. A single Python process with a clean internal event bus routes input to reasoning, reasoning to personality, and personality to output — invisibly, with sub-second latency on local hardware. All complexity is hidden behind a modern mobile OS-like application whose primary intention is to organize all your personal data, while an ambient autonomy engine handles background tasks.
+        v6 is a clean-slate rebuild, and it was designed in full before a line of it was written: a
+        twenty-nine section specification, frozen after three adversarial review rounds, implemented
+        exactly as written. It runs as a single PySide6 desktop application — not a service, not a
+        browser tab. Speech arrives through a VAD-gated faster-whisper pipeline. A two-mode router
+        decides whether a request is <em>conversational</em>, which owes the user audio in under three
+        seconds, or an <em>artifact</em>, which is acknowledged immediately and handed to a background
+        worker that reports back when it has something real to say. A Context Window Manager assembles
+        exactly the context that request needs and nothing more. Every event and every mutation is
+        logged. All six databases are SQLCipher-encrypted from the very first migration, so there is
+        no moment in this project's history when a plaintext database exists.
       </p>
 
       <div class="diagram-wrap">
         <div class="mermaid">
 graph TD
-    A((Input Channels)) --> B(Event Bus)
-    B -->|User Turn| C(Cognitive Core)
-    C -->|Local Reasoning| D(Personality Engine)
-    C -->|Complex Task| E(Cloud Router)
-    D -->|Styled Response| F((Output Channels))
-    E -->|Async Result| D
-    C -->|Tool Request| G(Airlock)
-    G -->|Validated Execution| H[(Tool Registry)]
-    H -->|Result| B
-    C -->|Write| I[(Tiered Memory)]
-    I -->|Recall| C
-    J(Autonomy Engine) -->|Background Jobs| I
+    MIC((Voice · Text)) --> STT[STT · faster-whisper<br/>VAD-gated]
+    STT --> RT{Two-Mode Router}
+    RT -->|Conversational · under 3s to audio| CWM[Context Window Manager]
+    RT -->|Artifact · acknowledge first| BG[Background worker<br/>bridge then handoff]
+    BG --> CWM
+    CWM --> RSN(Reasoning<br/>cloud · or local by hardware tier)
+    RSN --> TTS[TTS · kokoro-onnx]
+    TTS --> OUT((Voice Orb · Chat))
+    RSN -->|scoped tool calls| TOOLS[Tools]
+    TOOLS --> DB[(Six SQLCipher databases)]
+    CWM -->|recall| DB
+    KEY[SessionKeyManager<br/>Argon2id · OS keyring] -.->|derives keys| DB
+    RSN --> UCL[(UCL · every event and mutation)]
         </div>
       </div>
 
       <p>
-        The Personality Engine sits between all reasoning and all output — ensuring a consistent
-        voice and identity regardless of which model is actually doing the work. The Airlock pattern
-        sandboxes every tool execution. The Cloud Router escalates only what local hardware cannot
-        handle. The result is a system that feels singular, even when it isn't.
+        Internally the shape is a strict one-way dependency, and CI fails the build when it is violated:
+      </p>
+
+      <div class="diagram-wrap">
+        <div class="mermaid">
+graph LR
+    UI[ui<br/>PySide6 · orb · screens] --> LOGIC[logic<br/>router · STT · TTS · CWM]
+    LOGIC --> DATA[data<br/>SQLCipher · UCL · queries]
+    DATA --> PLAT[platform<br/>paths · keyring · audio]
+        </div>
+      </div>
+
+      <p>
+        The UI never calls the backend. Every screen mutation arrives through a command bus that the
+        backend drives, which is what allows one program to be voice-first and touch-first at the same
+        time. And nothing that matters is mocked in the test suite — it runs against real SQLCipher
+        databases, because the previous generation's mocked-database tests hid precisely the bugs that
+        were most expensive to find later.
       </p>
     </section>
 
@@ -448,7 +475,7 @@ graph TD
         <div class="principle">
           <span class="principle-num">02</span>
           <h3>The foundation carries full weight</h3>
-          <p>No shortcuts that close off future phases. The modular monolith, the event bus, the hot/cold domain separation — these don't change. The models and interfaces that plug into them do.</p>
+          <p>No shortcuts that close off future phases. The one-way layer boundary, a data layer encrypted from its first migration, and the command bus between backend and UI — these don't change. The models and interfaces that plug into them do.</p>
         </div>
         <div class="principle">
           <span class="principle-num">03</span>
@@ -478,57 +505,109 @@ graph TD
       <p class="section-label">Development Roadmap</p>
       <h2>Where This Is Going</h2>
       <p>
-        The project builds in phases, each one delivering a working, daily-use system before
-        the next layer is added. What follows is the shape of the plan — not the full detail of it.
+        v6 builds as fourteen sequential chapters. The order is not a feature wishlist — it is a
+        dependency and risk ordering, arranged so the least certain assumptions get measured before
+        anything expensive is built on top of them.
       </p>
 
       <div class="roadmap">
+        <div class="phase">
+          <p class="phase-tag">v5 · Archived</p>
+          <h3>The Previous Generation</h3>
+          <p>
+            A working system, in real daily use, and the lessons that justified starting over anyway:
+            security retrofitted too late to be structural, mocked databases hiding the bugs that
+            mattered, and a foundation that had accreted rather than been designed. Archived in August
+            2026 so that v6 could begin from an empty directory. No v5 code crosses into v6 — only the
+            understanding does.
+          </p>
+        </div>
+
         <div class="phase active">
-          <p class="phase-tag">Phase 1 · Complete</p>
-          <h3>Alpha — The Foundation</h3>
+          <p class="phase-tag">Milestone 1 · In Progress</p>
+          <h3>The Walking Skeleton</h3>
           <p>
-            Voice loop, local LLM, personality, conversation persistence, cloud escalation, and basic tools.
-          </p>
-        </div>
-
-        <div class="phase active">
-          <p class="phase-tag">Phase 2 · In Progress</p>
-          <h3>Beta — Pair Programmer Capability</h3>
-          <p>
-            Tool execution engine, Terminal management, GitHub CLI integration, Token/Rate-limit tracking, and Research pipelines.
-          </p>
-        </div>
-
-        <div class="phase">
-          <p class="phase-tag">Phase 3</p>
-          <h3>Sandboxed Execution</h3>
-          <p>
-            Sandboxed tool execution (subprocess / Docker), medium and high-risk tool categories.
-          </p>
-        </div>
-
-        <div class="phase">
-          <p class="phase-tag">Phase 4</p>
-          <h3>Proactive Autonomy</h3>
-          <p>
-            Proactive awareness, semantic memory expansion, user state tracking.
-          </p>
-        </div>
-
-        <div class="phase">
-          <p class="phase-tag">Phase 5</p>
-          <h3>Web & Companion Apps</h3>
-          <p>
-            Web interface, mobile companion (Pocket LILITH), and Cloud Gateway Service.
+            The smallest end-to-end voice loop worth using every day: microphone through VAD, speech
+            recognition, reasoning, speech synthesis, speaker — with exactly one database and exactly
+            one tool, a full-text recall over past conversation. In practice that is a voice memory
+            journal: dictate a note, then ask about it days later and get a spoken answer. Six chapters
+            carry it — foundation, voice I/O, the intelligence core, memory and the first tool, the
+            frontend shell, then integration and daily dogfooding. Foundation &amp; Skeleton is the
+            chapter open now.
           </p>
         </div>
 
         <div class="phase future">
-          <p class="phase-tag">Phase 6 · Future</p>
-          <h3>Three-Dimensional World Interface</h3>
+          <p class="phase-tag">Gates · Before Anything Builds On It</p>
+          <h3>Two Measured Bets</h3>
           <p>
-            A spatial environment for interacting with information that has no natural physical form.
-            Built on a WebSocket event bus completely decoupled from the Python backend.
+            Milestone 1 ends at quantitative gates rather than a judgement call: a latency benchmark
+            against the sub-three-second conversational budget, and a router dry-run against a
+            hash-frozen hundred-utterance set with a committed misroute ceiling. A third floating gate
+            tests encrypted-vector feasibility before anything is allowed to depend on vectors. Failing
+            a gate changes the design — that is what they are for.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 2</p>
+          <h3>Foundation Hardening &amp; Telemetry</h3>
+          <p>
+            A real telemetry database, a logging sanitizer with a strict no-plaintext boundary, crash
+            recovery that quarantines a corrupt database and offers a restore instead of silently
+            deleting it, and CI green on Linux, macOS and Windows in parallel.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 3</p>
+          <h3>Security &amp; Key Management</h3>
+          <p>
+            The rest of the credential lifecycle — passphrase rotation, database relocking — and a
+            merge-blocking gate on personal-information recall that will not let a build ship below
+            95% on names and 100% on emails and phone numbers.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 4</p>
+          <h3>Local Intelligence &amp; Fallbacks</h3>
+          <p>
+            Local inference on machines that can carry it, through an Ollama adapter with GPU
+            detection — and a visible indicator of which provider is actually answering, so the system
+            never quietly pretends to be local.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 5</p>
+          <h3>The Custodian App Suite</h3>
+          <p>
+            First external data: Google OAuth through the system browser, contact and calendar sync
+            mirrors, the people tools, and deep links that let a spoken answer navigate you to the
+            record it came from. Read-only by audit — no write scope is ever requested from Google.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 6</p>
+          <h3>Calendar</h3>
+          <p>
+            Lilith's own calendar on top of the sync mirror: two event stores, echo detection so a
+            synced copy of her own event is never mistaken for a conflict, agenda summaries, a
+            read-only feed real calendar clients can subscribe to, and a cancel that cancels rather
+            than deletes.
+          </p>
+        </div>
+
+        <div class="phase future">
+          <p class="phase-tag">Phase 7</p>
+          <h3>Onboarding, Extension &amp; Final Freeze</h3>
+          <p>
+            A guided first run, a skills directory with deliberate enrollment friction — hash
+            manifests, and an injection cap that rejects oversized input rather than quietly
+            truncating it — the complete orb state machine, and then the freeze that makes v6 a
+            finished thing instead of a permanent construction site.
           </p>
         </div>
       </div>
