@@ -2,7 +2,7 @@
 
 **Sprint ID:** BUILD-02
 **Chapter:** CH-02 (see `BUILD_GUIDE.md` §5) · **Kanban:** [Issue #2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) on [Project 46 — Lilith v6 Build](https://github.com/users/Squirrelthug/projects/46)
-**Status:** Draft — blocked on four open decision briefs (`BD-005`…`BD-008`) below and developer review of this sprint PR on the design site. Nothing of CH-02 is built until those decisions are resolved and the PR merges.
+**Status:** Approved 2026-10-19. The developer resolved `BD-005`…`BD-008` (see **Resolved decisions** below). Each decision becomes a build ADR (`B-005`…`B-008`) in the task that first needs it. Where a task's text or a brief's option list differs from **Resolved decisions**, the resolved decision wins.
 **Law for this sprint:** §05, §09, §10, §11 (+ §06 Phase 1 / Phase 9 / Shutdown step 1, §08 testing conventions, §01/§04/§16 foundations) — https://squirrelthug.github.io/lilith-v6-design/sections/s05.html (…s09, s10, s11, s06, s08, s01, s04, s16)
 **Prerequisites:** CH-01 (`SPRINT-B01-foundation.md`) built and audited (`docs/audits/CH-01.md` on `feature/b01-08-setup`). Until CH-01's POSIX test run and MASTER fresh-clone walkthrough close `B01-09` steps 4–5 and merge the CH-01 PR chain to `main`, CH-02 task branches stack on `feature/b01-08-setup`.
 
@@ -12,12 +12,42 @@ Four groups of choices below are required by tasks in this sprint but are **not 
 
 | Brief | Decision | Blocks | Kanban | Status |
 |:--|:--|:--|:--|:--|
-| BD-005 | `CapabilityProfile` dataclass schema, `lilith.platform.session_state` module/attribute placement, GB/GiB threshold boundaries, and macOS Apple Silicon (`ctranslate2` CPU-only) execution mapping | B02-01, B02-05, B02-06 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **OPEN** |
-| BD-006 | Audio queue bounds (`audio_q`, `playback_q`, `transcription_q` / `utterance_q`), full-queue policy, `44.1`/`48 kHz` resampling blocksize, hot-plug retry limits, and audio error/telemetry classes | B02-02, B02-03, B02-04, B02-06 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **OPEN** |
-| BD-007 | Silero VAD runtime distribution (no-`torch` ONNX vs package), `480`-frame (`30ms`) chunk framing vs `512`-sample Silero v5/v6 window, Whisper language/beam defaults, and `voice.stt.start` payload schema | B02-04, B02-05 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **OPEN** |
-| BD-008 | `MODELS_DIR` (`APP_INTERNAL_DIR/models/`) layout & model-weight provisioning, Kokoro `135` WPM → `speed` multiplier mapping, and sentence/clause chunker delimiters | B02-04, B02-05, B02-06 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **OPEN** |
+| BD-005 | `CapabilityProfile` dataclass schema, `lilith.platform.session_state` module/attribute placement, GB/GiB threshold boundaries, and macOS Apple Silicon (`ctranslate2` CPU-only) execution mapping | B02-01, B02-05, B02-06 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **RESOLVED 2026-10-19** (see below) |
+| BD-006 | Audio queue bounds (`audio_q`, `playback_q`, `transcription_q` / `utterance_q`), full-queue policy, `44.1`/`48 kHz` resampling blocksize, hot-plug retry limits, and audio error/telemetry classes | B02-02, B02-03, B02-04, B02-06 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **RESOLVED 2026-10-19** (see below) |
+| BD-007 | Silero VAD runtime distribution (no-`torch` ONNX vs package), `480`-frame (`30ms`) chunk framing vs `512`-sample Silero v5/v6 window, Whisper language/beam defaults, and `voice.stt.start` payload schema | B02-04, B02-05 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **RESOLVED 2026-10-19** (see below) |
+| BD-008 | `MODELS_DIR` (`APP_INTERNAL_DIR/models/`) layout & model-weight provisioning, Kokoro `135` WPM → `speed` multiplier mapping, and sentence/clause chunker delimiters | B02-04, B02-05, B02-06 | sub-issue of [#2](https://github.com/Squirrelthug/squirrelthug.github.io/issues/2) | **RESOLVED 2026-10-19** (see below) |
 
-### Details & allowed options for each open decision
+### Resolved decisions (developer, 2026-10-19)
+
+- **BD-005 → ADR `B-005` (written in B02-01):**
+  - **Placement:** a new module `lilith/platform/session_state.py`, re-exported from `lilith/platform/__init__.py`.
+  - **VRAM thresholds:** `nvidia-smi` values in MB use marketed-card floors: `>= 7900` is 8 GB, `>= 19500` is 20 GB. With several GPUs, take `max(...)` over the lines.
+  - **Byte values:** `sysctl hw.memsize` and `psutil` byte values compare in binary GiB (`16 * 1024**3`).
+  - **Low system RAM:** `< 16 GiB` gates only CH-11 local LLM and keeps the VRAM tier's Whisper choice.
+  - **Apple Silicon:** detected by `IS_MAC` and `platform.machine() == "arm64"`. On Tier 1/2 it runs Whisper `small` with `device="cpu", compute_type="int8"`.
+- **BD-006 → ADR `B-006` (written in B02-02):**
+  - **`audio_q`:** `maxsize=100` (3 s). On `queue.Full` the callback drops the oldest chunk.
+  - **`transcription_q`:** `maxsize=8`. `s10.html`'s name is canonical.
+  - **`playback_q`:** `maxsize=64`, with a blocking `put` from the TTS worker.
+  - **Resampling fallback:** the stream's blocksize scales to 30 ms (`1323` frames at 44.1 kHz, `1440` at 48 kHz), so each chunk resamples straight to `480` frames.
+  - **Hot-plug recovery:** at most 5 restart attempts, with exponential backoff from 0.5 s to 8 s.
+  - **Error class:** one new `RecoverableError` subclass, `AudioDeviceUnavailable` (ADR `B-003` rules).
+  - **Event reporting:** `platform/audio.py` reports events only through callbacks that `app.py` injects. It never imports `lilith.data`.
+- **BD-007 → ADR `B-007` (written in B02-04):**
+  - **VAD runtime:** Silero VAD v6 ONNX on `onnxruntime==1.23.2`, with no `torch`.
+  - **Windowing:** a rolling `512`-sample window, fed by `480`-frame chunks.
+  - **Timing:** 600 ms of silence is 20 chunks. The 250 ms padding is `4000` samples.
+  - **Unverified claim to check first:** that `faster-whisper==1.2.1` bundles the v6 model. Check this before B02-04 starts. If it doesn't, stop and report.
+  - **Whisper settings:** `language="en"`, `beam_size=5`, `vad_filter=False`.
+  - **`voice.stt.start` payload:** `{}`.
+  - **Empty transcripts:** an empty or whitespace-only transcript still emits `voice.stt.complete` with `word_count=0` and is not dispatched.
+- **BD-008 → ADR `B-008` (written in B02-05):**
+  - **Model paths:** `MODELS_DIR/whisper/` and `MODELS_DIR/kokoro/{kokoro-v1.0.onnx, voices-v1.0.bin}`.
+  - **Model downloads:** an explicit setup command, documented in `docs/SETUP.md`, fetches the files. Phase 9 never downloads; a missing file raises a clear, actionable error.
+  - **Kokoro settings:** `speed=1.0`, `lang="en-us"`. 135 WPM is confirmed on the developer's hardware run (B02-07).
+  - **Chunker:** splits after `. ! ? ; : —` and newline, and merges pieces under 20 characters into the next one. Commas don't split.
+
+### Details & allowed options for each open decision (historical — superseded by Resolved decisions)
 
 1. **BD-005 — Hardware profile schema, placement, boundary arithmetic & macOS Whisper mode (`sections/s05.html`, `sections/s10.html`, `sections/s01.html`):**
    - **What the law fixes:**
