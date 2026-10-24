@@ -1,7 +1,7 @@
 # SPRINT-B08 — GATE: Router Dry-Run (Counterfactual)
 
 **Sprint ID:** BUILD-08  
-**Chapter:** CH-08. **Status:** DRAFT 2026-10-23 for coordinator review. BD-033 was decided 2026-10-23 as AD-039 by the manager under the developer's standing autonomous-decisions directive (`docs/decisions/AUTONOMOUS-DECISIONS.md` in the build repo).  
+**Chapter:** CH-08. **Status:** DRAFT 2026-10-23 for coordinator review. BD-033 was decided 2026-10-23 as AD-041 by the manager under the developer's standing autonomous-decisions directive (`docs/decisions/AUTONOMOUS-DECISIONS.md` in the build repo).  
 **Prerequisites:** CH-06; CH-07 may run in either order (`BUILD_GUIDE.md` §4). **Law:** `BUILD_SEQUENCING.md` §3, “Experiment 2: Router Dry-Run (Counterfactual Instrumentation)”; `BUILD_GUIDE.md` §2–§3 and §5 CH-08; `s08.html`, `s13.html`, `s14.html`, `s15.html`, `s16.html`; `standards.html`.
 
 ## Open decisions
