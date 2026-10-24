@@ -1,7 +1,7 @@
 # SPRINT-B06 — Milestone 1 Integration & Dogfood
 
 **Sprint ID:** BUILD-06  
-**Chapter:** CH-06, `BUILD_GUIDE.md` §5. **Status:** DRAFT 2026-10-23 for coordinator review. BD-031 was decided 2026-10-23 as AD-037 by the manager under the developer's standing autonomous-decisions directive (`docs/decisions/AUTONOMOUS-DECISIONS.md` in the build repo).  
+**Chapter:** CH-06, `BUILD_GUIDE.md` §5. **Status:** DRAFT 2026-10-23 for coordinator review. BD-031 was decided 2026-10-23 as AD-039 by the manager under the developer's standing autonomous-decisions directive (`docs/decisions/AUTONOMOUS-DECISIONS.md` in the build repo).  
 **Prerequisites:** CH-01 through CH-05 are built and audited. CH-05 leaves the real microphone/speaker, real display/GL, real BYOK, and POSIX runs as `pending developer run` (`docs/audits/CH-05.md` §8).  
 **Law for this sprint:** `BUILD_GUIDE.md` §2–§3 and §5 CH-06; `BUILD_SEQUENCING.md` §2–§2.1; §§04–06, §§08–15, §18, §§22–24, §§26–28; `standards.html`.
 
