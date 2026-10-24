@@ -1,7 +1,7 @@
 # SPRINT-B07 — GATE: Walking-Skeleton Latency Benchmark
 
 **Sprint ID:** BUILD-07  
-**Chapter:** CH-07. **Status:** DRAFT 2026-10-23 for coordinator review. BD-032 was decided 2026-10-23 as AD-038 by the manager under the developer's standing autonomous-decisions directive (`docs/decisions/AUTONOMOUS-DECISIONS.md` in the build repo).  
+**Chapter:** CH-07. **Status:** DRAFT 2026-10-23 for coordinator review. BD-032 was decided 2026-10-23 as AD-040 by the manager under the developer's standing autonomous-decisions directive (`docs/decisions/AUTONOMOUS-DECISIONS.md` in the build repo).  
 **Prerequisites:** CH-06 closed or its developer batch explicitly pending. **Law:** `BUILD_SEQUENCING.md` §3, “Experiment 1: Walking-Skeleton Latency Benchmark”; `BUILD_GUIDE.md` §2–§3 and §5 CH-07; `s05.html`, `s08.html`, `s11.html`, `s13.html`, `s14.html`, `s16.html`; `standards.html`.
 
 ## Open decisions
