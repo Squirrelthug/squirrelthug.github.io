@@ -44,10 +44,12 @@
       <li><strong>Prompt caching:</strong> EDICTS + VOICE are stable documents — they are the Anthropic <code>cache_control</code> prefix. The cache break point sits between VOICE and personal_truths so the stable prefix gets maximum cache hits.</li>
       <li><strong>PERS-2 personality model:</strong> Hardware-gated at Tier 1+ (RTX 3060 12GB or equivalent). 3–7B local model. Artifact mode only. Takes raw artifact content + VOICE.md → produces Lilith's spoken handoff in her voice. <strong>Design-only in v6 v1</strong> — not implemented. Gated behind <code>FEATURE_PERS2 = False</code> flag in <code>config.py</code>.</li>
       <li><strong>v6 EDICTS + VOICE are new documents.</strong> v5 files are reference material for the principles that carry forward — core identity, honesty, ambient attentiveness, warmth without softness. The v6 versions are written clean at the start of the build sprint.</li>
+      <li><strong>Voice-lane prompt line:</strong> Voice turns are spoken aloud: answer in plain spoken prose: no lists, headings, Markdown or symbols. (DS-01 / AD-056; §11 <code>speakable()</code> remains the defensive filter.)</li>
     </ul>
     <div class="s-meta">Checklist: <a href="../checklist.html#s23">§23</a> · Touches: §14 CWM, §18 Memory, §12 LLM Provider</div>
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §14 CWM, §17 Enhancement, §23 EDICTS (staleness-gate refresh, absence disclosure &amp; anti-fabrication)</div>
+    <div class="s-meta">Amendment added: 2026-10-25 · Touches: §13 Router, §23 System Prompt, BUILD_SEQUENCING §3</div>
   </div>
 </details>
 
