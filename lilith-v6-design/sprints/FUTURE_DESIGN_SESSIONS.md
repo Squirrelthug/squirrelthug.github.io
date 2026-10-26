@@ -83,6 +83,28 @@ The session must settle these questions:
 
 Developer's stated priority (2026-09-24): this is the first design session wanted once the initial build is working.
 
+## FDS-9 · Telemetry Lifecycle, Diagnostics & Precise-Data Artifacts — added 2026-10-25
+
+**Vision:** Lilith sees everything that happens inside her, and so can the developer and the agents building her. No LLM ever pays for that in raw tokens. The full-fidelity record is kept as space allows. A background process turns it into short narratives backed by data tables, and that is all the conversational path ever reads. When the user, or Lilith on the user's behalf, needs the precise numbers, the request becomes an **artifact**: generated in the slow lane and served as tables and a report when ready, never computed on the conversational path. v1 leaves three things undefined:
+- **A retention protocol for `ucl_events`.** §16 logs every mutation and never says when a row may go. The intent is "store as space permits", tiered like memory (§18 warm/cold). A row becomes evictable only **after** L1 has aggregated it past its watermark, so the stats and narratives outlive the raw rows. Eviction pressure comes from local storage (the FDS-7 monitor), with explicit floors for `error.*` and `security.*`.
+- **Diagnostics tooling over the ledger,** developer-facing first. The v5 lesson was that collaborating with coding agents needs exact knowledge of what happened, which forced telemetry into every corner of v5 by hand. v6 builds it in (§16's write rule). What is missing is the tool that reads it: queries over `ucl_events` / `ucl_events_fts`, per-stage latency breakdowns, run comparisons, and a "what happened between T1 and T2" timeline. These serve the developer and agents, not Lilith's context.
+- **Precise telemetry as an artifact.** A user question such as "why was that reply slow?" or "how much did I spend this week?" routes to the artifact lane. A tool reads L1 tables, and raw rows only where L1 lacks the grain. It renders tables for the UI and gives the LLM at most an L1/L2-level summary to narrate. The §16 LLM boundary is unchanged: no model reads `ucl_events` directly.
+
+The M1 dev-log stand-in has already shown the value. On 2026-10-25, joining `voice.stt.complete`, `llm.call.start`, `voice.tts.start` and `voice.tts.first_chunk` explained Experiment 1's 4.37 s p90 by stage in minutes, with no new instrumentation (developer inbox 2026-10-25-03). The gap it showed was the opposite one: code *outside* the app (the experiment harnesses) had no telemetry, so a 0%-CPU hang stayed invisible until stack dumps were taken by hand.
+**Not in v1 because:** §16 defines the ledger and its write rule but no retention or eviction. §17 defines L1/L2 but not a telemetry-specific L1 schema or diagnostics outputs. No §15 tool reads telemetry. Deleting telemetry also touches §08's telemetry-hygiene tests and the never-delete posture of §06 quarantine, so it needs its own guarantees.
+**The seam:**
+- §16: `ucl_events` and `ucl_events_fts` (developer and debug search is already law), and the payload content boundary (compact operational facts, so volume stays small and bounded).
+- §17: the job machinery, priority queue and L1 watermark (eviction can key off the watermark), and the `enhance_only` refresh capability for telemetry-derived tool context.
+- §15's tool catalog and the §13 artifact lane, with §24 narration while a report builds.
+- FDS-7's storage-pressure monitor, as the eviction trigger.
+- FDS-4's cost ledger, as one of the first precise-data artifacts ("what did I spend").
+
+**Session prerequisites:**
+- **CH-09 landed:** the real `ucl_db` mounted and events migrated off the dev log.
+- **The L1/L2 machinery in place.**
+- **Measured telemetry volume** from dogfooding on both the floor machine (8 GiB MacBook) and the desktop, so retention thresholds are measured rather than guessed.
+- FDS-7 can be held alongside; the two share the storage-pressure trigger.
+
 ---
 
 *Add new entries only with a dated line and the same four fields. When a session convenes and its outcome amends the law, move the entry to a "Resolved" section at the bottom with a pointer to the amendment ledger entry.*
