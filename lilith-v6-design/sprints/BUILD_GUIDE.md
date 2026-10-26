@@ -60,13 +60,13 @@ If build work exposes a genuine gap or contradiction in the design, the agent **
 | # | Chapter | Covers | Status |
 |:--|:--|:--|:--|
 | CH-01 | Foundation & Skeleton | §01 §02 §03 §04 §06 §08 | Not started |
-| CH-02 | Voice I/O Pipeline | §05 §09 §10 §11 | Not started |
-| CH-03 | Intelligence Core | §12 §23 §14 §13 | Not started |
-| CH-04 | Memory & the First Tool | §18 §15 §24 | Not started |
-| CH-05 | Frontend Shell | §26 §22 §27 §28 | Not started |
-| CH-06 | Milestone 1 Integration & Dogfood | all M1 sections, end-to-end | Not started |
-| CH-07 | GATE — Experiment 1: Latency Benchmark | BUILD_SEQUENCING §3, Exp 1 | Not started |
-| CH-08 | GATE — Experiment 2: Router Dry-Run | BUILD_SEQUENCING §3, Exp 2 | Not started |
+| CH-02 | Voice I/O Pipeline | §05 §09 §10 §11 | Done — built and audited 2026-10-20 (`docs/audits/CH-02.md`) |
+| CH-03 | Intelligence Core | §12 §23 §14 §13 | Done — built and audited 2026-10-20 (`docs/audits/CH-03.md`) |
+| CH-04 | Memory & the First Tool | §18 §15 §24 | Done — built and audited 2026-10-21 (`docs/audits/CH-04.md`) |
+| CH-05 | Frontend Shell | §26 §22 §27 §28 | Done — built and audited 2026-10-21 (`docs/audits/CH-05.md`) |
+| CH-06 | Milestone 1 Integration & Dogfood | all M1 sections, end-to-end | Done — built and audited 2026-10-23 (`docs/audits/CH-06.md`) |
+| CH-07 | GATE — Experiment 1: Latency Benchmark | BUILD_SEQUENCING §3, Exp 1 | Done — gate passed 2026-10-25 at fallback rung 1 (`docs/audits/CH-07.md`) |
+| CH-08 | GATE — Experiment 2: Router Dry-Run | BUILD_SEQUENCING §3, Exp 2 | Done — gate run 2026-10-25, threshold crossed; stream-and-cut design session DS-01 held 2026-10-25 (`docs/audits/CH-08.md`) |
 | CH-09 | Phase 2 — Foundation Hardening & Telemetry | §16 §06 §07 | Not started |
 | CH-10 | Phase 3 — Security & Key Management | §02 §03 §14 §08 | Not started |
 | CH-11 | Phase 4 — Local Intelligence & Fallbacks | §12 §05 | Not started |
