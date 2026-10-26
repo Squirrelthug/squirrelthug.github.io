@@ -85,7 +85,7 @@ Before any subsequent design sections are hardened or built, the Milestone 1 cod
 
 * **Assumption Tested:** Under-3-second response latency on Tier 0 hardware (CPU VAD/STT/TTS + Cloud LLM), **including the §14 cloud PII tokenization and reverse-substitution passes** that §13 names as budgeted steps on the conversational path.
 * **Procedure:** Run a test script executing 50 typical voice queries on the developer's laptop with a simulated average network connection. Measure the total time elapsed from voice offset (VAD trigger) to the output stream playing the first synthesized audio chunk. **Run the full 50-query set twice: once with the §14 tokenization pipeline enabled (the shipping configuration) and once with it disabled.** Record per-query timings for both runs and report `tokenization_delta_p50` and `tokenization_delta_p90` — the added cost of the substitution pass, the reverse-substitution stream filter, and any partial-tag holds. The query set must include utterances whose context contains detectable names, emails, and phone numbers, and whose expected responses echo tags back (so reverse substitution and the hold rule are actually exercised, not idled).
-* **Pass Criteria:** p90 latency must remain under 3.5 seconds **with tokenization enabled**. The on/off delta has no independent pass bar in v1 — it is recorded so the §13 working-hypothesis numbers are adjusted against measured reality, and it feeds the fallback decision below if the enabled run fails.
+* **Pass Criteria:** p90 latency must remain under 3.5 seconds **with tokenization enabled**. The on/off delta has no independent pass bar in v1 — it is recorded so the §13 working-hypothesis numbers are adjusted against measured reality, and it feeds the fallback decision below if the enabled run fails. **Floor-machine hypothesis (DS-01):** each run also reports the Tier 1 floor machine (8 GiB Apple Silicon, Whisper small on CPU) against a < 3.5 s p90 working target. Reported, not a gate, until the hybrid path lands. Real runs must record actual `tags_held`, `tags_reversed` and chunk counts (AD-058).
 * **Architectural Fallback:** If p90 (tokenization enabled) exceeds 3.5 seconds, the developer must:
   1. First check the recorded delta: if the tokenization on/off delta accounts for the overrun, optimize the §14 detector/scanner (both are required to stay single-pass O(context length)) before touching the architecture.
   2. Replace the pre-classification blocking flow with a *stream-and-cut* pattern (initiating cloud stream immediately and shunting to artifact only if a tool keyword is generated).
@@ -136,6 +136,14 @@ Before any subsequent design sections are hardened or built, the Milestone 1 cod
   3. The go/no-go consequence:
      - **Below both thresholds:** the two-mode hypotheses are confirmed for v1; the stream-and-cut fork closes for v1; proceed to tune the numeric working hypotheses (≤3 s / ≤50 tokens / ≤1200 context) through daily dogfooding.
      - **Above either threshold:** schedule the **stream-and-cut single-path design session** (the fallback architecture named in §13) **before** hardening persona or CWM behavior on top of the router. The round-1 within-two-mode remedies (a local 1B classification model, or a fast cloud classification call at +300 ms latency budget) remain available only if that session re-affirms the two-mode fork.
+
+### Experiment 2b: Hybrid Router Validation
+
+* **Assumption tested:** the hybrid (rule pre-lane + stream-and-cut single path) removes Experiment 2's misses without frequent audible false starts.
+* **Set:** 120 utterances (100 newly worded, stratified as in Experiment 2; 20 written by the developer) and a separate 25-line small-talk set, all frozen with SHA-256 recorded **before** any rule, tool-description or prompt change. Experiment 2's set is not reused.
+* **Procedure:** each utterance runs through the shipping hybrid path (rule pre-lane, then the streamed single path with tools offered and the §23 plain-prose line). Record the lane, the rule if any, promotion and its cause (tool / budget), whether TTS had begun at promotion (false start), output tokens, and tool calls. Mechanical verdicts as in Experiment 2.
+* **Pass criteria (pre-committed 2026-10-25):** total misroute ≤ 10%, misroute-to-conversational ≤ 5%, audible false starts ≤ 5% of all turns, and ≤ 1 `recall_memory` call on the small-talk set. ≤ 5 `error` verdicts for a valid run.
+* **Gate:** must pass before CH-10. A failure returns the design to a session; re-runs cannot cancel it.
 
 ### Experiment 3: Encrypted Vector Feasibility (§18 Recall Roadmap promotion gate — added 2026-07-27)
 
