@@ -105,6 +105,29 @@ The M1 dev-log stand-in has already shown the value. On 2026-10-25, joining `voi
 - **Measured telemetry volume** from dogfooding on both the floor machine (8 GiB MacBook) and the desktop, so retention thresholds are measured rather than guessed.
 - FDS-7 can be held alongside; the two share the storage-pressure trigger.
 
+## FDS-10 · Synthetic Conscious Loop: Event-Driven Introspection & the Memory Box — added 2026-10-27
+
+**Vision:** Lilith has an internal sense of her own condition, built from telemetry and reacting to system events rather than running on a fixed loop. Events can act alone or add up. Like a body under strain, pressure in parts that have nothing to do with reasoning (storage full, quota near empty, a failing tool, a backlog of unread artifacts) subtly lowers how much she takes on, and alignment (resources healthy, work flowing) makes things easier. A machine would normally be pushed to stay optimal; the point here is human-like behaviour: people give humans more room for mistakes than they give machines, and a system that can say what is happening inside it in its own narrative earns trust that a master/servant tool does not. The aim is a user/system pair built on trust.
+- **Researchers.** The loop is a set of narrowly scoped "researchers", each with one job (resource health, tool outcomes, the user's day, wellbeing nudges). Each keeps a running report. Wellbeing checks are context-aware: if the water bottle was left at home, the hydration nudge stops instead of repeating every 30 minutes.
+- **The memory box.** A place a higher-level reviewer visits on a review cycle. Code, not tokens, does most of the work: triggers route events into the box programmatically. Researchers (as agents) may also *promote* an item for the next cycle. Certain conditions flag a research task to be pushed to the next available cycle. Nothing is processed just because time passed.
+- **Layers of resolution.** Raw telemetry is always collected and stored (FDS-9). Processed layers sit above it at several levels of zoom, like map tiles that load only the region and detail needed. Over time, unused or redundant levels are pruned to a few. Lilith reads the narrative layer, never raw data, so her context stays small.
+- **A cost dial the user owns.** Off or low priority: the data is still kept, but only temporally relevant data is processed on demand, so Lilith stays helpful and assistive at no standing cost. Raised to a standing background process: costs stream in continuously and Lilith gains a dynamic dial that steers her behaviour subtly; each run shifts the parameters a little, which is what makes her closer to a personality than a task runner. Never at the expense of the user's cost limits.
+- **Honest framing.** Lilith is explicit that she is personality and conversation; most of what she can do is reaching a large library of tools and organising their artifacts the way a professional assistant would for an employer. Her duty to the user includes looking for better ways to help, and self-directed attention exists only when the user has enabled it. Collaboration on command is always the default.
+- **Same pattern as zsz_nexus.** The researcher → report → reviewer structure mirrors the Nexus department/manager model (`zsz_nexus/docs/ideas/2026-10-27-departments-and-narrators.md`): compartments that keep a narrative, managers that read reports, pointers instead of copies. The two should share their vocabulary when either is designed.
+
+**Not in v1 because:** v1 Lilith is reactive and speaks only when spoken to (FDS-2). Telemetry has no retention or interpretive layer yet (FDS-9). A behavioural state that changes how Lilith responds is a large, subtle surface. It needs its own reviewed design so it never becomes nagging, unpredictable, or a hidden cost.
+**The seam:**
+- §16 UCL telemetry (`ucl_events`) as the only input. The §16 LLM boundary is unchanged: researchers read processed layers, never raw rows.
+- §17 L1/L2 job machinery, priority queue and watermarks as the processing layers and the review cycle.
+- §24 narrative layer for how Lilith voices her internal state.
+- FDS-2 (proactive engine) for wellbeing nudges; FDS-4 (cost ledger) for the user's cost dial; FDS-9 (telemetry lifecycle) for the raw layer and its retention.
+
+**Session prerequisites:**
+- FDS-9 designed (retention and L1 telemetry schema), and FDS-2 at least scoped, since this entry builds on both.
+- Several weeks of dogfooding telemetry, so triggers and pressure signals come from observed behaviour, not guesses.
+- A research step (res-NN style) on prior art: global workspace and blackboard architectures, affective/homeostatic agent models, interoception, and trust research on systems that explain their own state.
+- The cost of a standing background layer measured on the floor machine.
+
 ---
 
 *Add new entries only with a dated line and the same four fields. When a session convenes and its outcome amends the law, move the entry to a "Resolved" section at the bottom with a pointer to the amendment ledger entry.*
