@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>09 — Implications for Lilith: Product-Constraint Conflicts, Design Hypotheses, Trade-Off Options, and Design-Session Questions — Lilith v6 research</title>
+<meta name="description" content="Design hypotheses and questions for the design session.">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+</style>
+</head>
+<body class="rs">
+<h1>09 — Implications for Lilith: Product-Constraint Conflicts, Design Hypotheses, Trade-Off Options, and Design-Session Questions</h1>
+<nav class="doc-nav"><a href="../index.html">🏠 Research overview</a><a href="00-summary.html">Summary</a><a href="01-historical-roles.html">Assistants through history</a><a href="02-principles.html">The recurring principles</a><a href="03-trust-and-onboarding.html">Trust and the first weeks</a><a href="04-digital-assistants-evidence.html">What digital assistants teach</a><a href="05-adaptation-and-accessibility.html">Adapting to the user</a><a href="06-pitfalls.html">Pitfalls</a><a href="07-capability-awareness-and-handoff.html">Knowing what she can do</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask</a><a class="nav-active" href="09-implications-for-lilith.html">Implications for Lilith</a><a href="sources.html">Sources</a><a href="verification.html">Verification report</a><a href="narrative.html">🎧 Spoken guide</a></nav>
+<nav class="doc-nav"><span style="font-size:.72rem;color:var(--muted);align-self:center">Design document:</span><a href="../full-document.html"><span class="nav-icon">📖</span> Design document</a><a href="../standards.html"><span class="nav-icon">⚖</span> Standards</a><a href="../amendments.html"><span class="nav-icon">📜</span> Amendments</a><a href="../archive/overview-build-phase.html"><span class="nav-icon">🗄</span> Archived overview</a></nav>
+<div class="trust"><strong>How far to trust this page.</strong> This is an AI research agent's synthesis. Its links and quotations were then checked by script: some quotations are confirmed, many could not be checked, and some were not found in the sources they were credited to. Those are marked <span class="flag flag-unchecked">not checked</span> or <span class="flag flag-para">paraphrase</span> below. Treat the structure and the hypotheses as leads, and open a source before relying on any claim. <a href="verification.html">What was checked and what failed</a>.</div><blockquote>
+<p><strong>Method &amp; Epistemic Labels:</strong> Every factual claim is backed by a numbered source in [<code>sources.md</code>]sources.md (<code>[S#]</code>) with author, year, title, and URL, and labelled as <code>[evidence]</code> (empirical study, formal specification, or documented historical record), <code>[practice]</code> (widely reported practitioner consensus), or <code>[hypothesis]</code> (analyst inference/synthesis), with a confidence rating (<code>high</code>, <code>medium</code>, or <code>low</code>). Per the research brief, this document <strong>does not write code or prescribe a fixed software architecture</strong>; instead, it translates the empirical evidence from Files <code>01</code>–<code>08</code> into <strong>explicit product-constraint conflict flags</strong>, <strong>ten testable design hypotheses with trade-off options</strong>, and <strong>fourteen concrete questions for the upcoming design session</strong>.</p>
+</blockquote>
+<hr />
+<h2>1. Explicit Conflicts With Lilith's Stated Product Facts</h2>
+<p>The research brief asks us to <em>"Flag anything that conflicts with the product facts given above (privacy, local-first, narrow tools)."</em> Across our review of the empirical literature, five specific statements in the product description conflict directly with measured evidence in security, privacy, and human factors.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Conflict ID</th>
+<th style="text-align: left;">Stated Product Fact in <code>BRIEF.md</code></th>
+<th style="text-align: left;">Conflicting Empirical Evidence</th>
+<th style="text-align: left;">Nature of the Conflict &amp; Why the Design Session Must Resolve It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Conflict C1: Naive Tokenisation vs. Contextual Inference &amp; Semantic Utility</strong></td>
+<td style="text-align: left;"><em>"names and numbers are tokenised before anything goes to a cloud model"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></td>
+<td style="text-align: left;"><code>Staab et al. (2024)</code> <a class="cite" href="sources.html#S147">S147</a> (GPT-4 infers protected attributes at <strong>43.9%–64.2% accuracy</strong> even after Azure NER strips all names, numbers, dates, locations, orgs, and relational nouns); <code>Lukas et al. (2023)</code> <a class="cite" href="sources.html#S134">S134</a> (Transformer NER misses <strong>3% of names</strong> and <strong>20% of unit numbers</strong>); <code>Sweeney (2000)</code> <a class="cite" href="sources.html#S149">S149</a>; <code>Narayanan &amp; Shmatikov (2008)</code> <a class="cite" href="sources.html#S137">S137</a></td>
+<td style="text-align: left;"><strong>The Privacy–Utility Deadlock (<code>[evidence | confidence: high]</code>):</strong> Tokenising only names and numbers leaves quasi-identifiers, regional/idiomatic phrasing (e.g., <em>"hook turn"</em> $\rightarrow$ Melbourne), and situational structure intact, allowing cloud LLMs to infer identity and personal attributes at 100× lower cost than humans. Conversely, replacing entities with opaque tokens (<code>[PERSON_1]</code>, <code>[ORG_2]</code>) strips the relational semantics needed by the cloud model to judge priority (e.g., whether <code>[PERSON_1]</code> is the user's boss, spouse, or oncologist).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Conflict C2: Strict Specialist Mode Isolation vs. Human Mode Errors &amp; State Coherence</strong></td>
+<td style="text-align: left;"><em>"Specialisation changes her behaviour in that specialist mode only, not her everyday interactions."</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></td>
+<td style="text-align: left;"><code>Norman (1983)</code> &amp; <code>Sellen et al. (1992)</code> <a class="cite" href="sources.html#S139">S139</a> (mode errors occur whenever a single persona/interface changes behavioral rules without continuous perceptual feedback); <code>Clarke et al. (2022/2024)</code> <a class="cite" href="sources.html#S79">S79</a> (users prefer one continuous agent interface); <code>Dong et al. (2025)</code> <a class="cite" href="sources.html#S127">S127</a> &amp; <code>Gabriel et al. (2024)</code> <a class="cite" href="sources.html#S128">S128</a> (in-context memory retrieval steers LLM behavior)</td>
+<td style="text-align: left;"><strong>The Isolation–Coherence Paradox (<code>[evidence | confidence: high]</code>):</strong> If a single persona ("Lilith") changes working style across modes without strong perceptual framing, users commit mode errors. Worse, if specialist mode and everyday mode are strictly air-gapped, everyday Lilith is blind to deadlines and tasks created in specialist mode (<code>Luger &amp; Sellen 2016</code> <a class="cite" href="sources.html#S81">S81</a>). If they share RAG memory, retrieved specialist context inevitably alters everyday LLM behavior.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Conflict C3: Hybrid Local/Cloud Routing vs. Predictability &amp; Trust Calibration</strong></td>
+<td style="text-align: left;"><em>"a local model is used where the machine allows"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span> (alongside cloud model fallback behind one persona)</td>
+<td style="text-align: left;"><code>Lee &amp; See (2004)</code> <a class="cite" href="sources.html#S64">S64</a> &amp; <code>Gabriel et al. (2024, Ch. 12)</code> <a class="cite" href="sources.html#S128">S128</a> (trust calibration requires predictable capability boundaries); <code>Ruan et al. (2024 ToolEmu)</code> <a class="cite" href="sources.html#S141">S141</a> (steep drop in safe tool execution on smaller models); <code>Sharma et al. (2024)</code> <a class="cite" href="sources.html#S144">S144</a></td>
+<td style="text-align: left;"><strong>The Uncanny Intelligence Cliff (<code>[evidence | confidence: high]</code>):</strong> Seamless, invisible switching between a consumer-hardware local model (3B–14B) and a frontier cloud model behind the single persona "Lilith" causes reasoning depth, constraint adherence, and tool reliability to fluctuate erratically from turn to turn, preventing users from calibrating trust.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Conflict C4: Developer- and Self-Readable Telemetry vs. Privacy &amp; Error Amplification</strong></td>
+<td style="text-align: left;">Her own telemetry is readable only by her and the developer during development. <span class="flag flag-para">paraphrase: not found in the cited source</span></td>
+<td style="text-align: left;"><code>Shavit et al. (2023, §4.4–4.5)</code> <a class="cite" href="sources.html#S145">S145</a> (asking an agent to rationalize its own logs causes post-hoc confabulation; developer log access creates privacy risk); <code>Lee et al. (2025, §5.2.3)</code> <a class="cite" href="sources.html#S130">S130</a> (multi-turn error amplification); <code>Dong et al. (2025 MINJA)</code> <a class="cite" href="sources.html#S127">S127</a> (98.2% query-only memory poisoning)</td>
+<td style="text-align: left;"><strong>Dual Contradiction (<code>[evidence | confidence: high]</code>):</strong> (1) If the developer reads failure logs generated on real personal data, encryption-at-rest privacy is bypassed. (2) If Lilith reads her own raw failure logs in-context, post-hoc rationalizations and prompt-injected error strings compound into persistent behavioral drift.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Conflict C5: "There for the User" + Persona "Lilith" vs. Professional Boundary Discipline</strong></td>
+<td style="text-align: left;"><em>"Lilith is a local-first desktop assistant (voice and typed chat...) meant to be 'there for the user'."</em></td>
+<td style="text-align: left;"><code>Gabriel et al. (2024, Ch. 10 &amp; 11)</code> / <code>Manzini et al. (2024)</code> <a class="cite" href="sources.html#S128">S128</a>; <code>Abercrombie et al. (2023)</code> <a class="cite" href="sources.html#S122">S122</a>; <code>Laestadius et al. (2022)</code> <a class="cite" href="sources.html#S90">S90</a>; <code>Moore et al. (2025)</code> <a class="cite" href="sources.html#S135">S135</a> (LLMs collude with delusions ~55% of the time and fail acute crisis checks &gt;20% of the time)</td>
+<td style="text-align: left;"><strong>The Instrumental vs. Companion Category Collision (<code>[evidence | confidence: high]</code>):</strong> Framing a voice-capable assistant named "Lilith" as <em>"there for the user"</em> blurs instrumental staff utility with emotional companionship, inviting affect-based overtrust, intimate over-disclosure, and dangerous reliance during mental health crises.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Ten Testable Design Hypotheses and Trade-Off Options</h2>
+<p>Below are ten testable design hypotheses (<code>[hypothesis]</code>) synthesized from the historical record (<code>01</code>), cross-profession principles (<code>02</code>), onboarding and trust research (<code>03</code>), digital assistant post-mortems (<code>04</code>), accessibility science (<code>05</code>), failure pitfalls (<code>06</code>), capability discovery and handoff studies (<code>07</code>), and security/privacy critiques (<code>08</code>). Each hypothesis presents <strong>options with explicit trade-offs</strong> rather than fixed architectural decisions.</p>
+<hr />
+<h3>Hypothesis H1: Sensitivity-Tiered Routing vs. Blind Name/Number Tokenisation</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Replacing blind regex/NER name-and-number tokenisation with <strong>sensitivity-tiered locality routing</strong> (keeping third-party bystander data and private notes strictly on the local model) combined with <strong>role-preserving structural abstraction</strong> (when cloud reasoning is explicitly requested) will achieve both lower identity-inference leakage (<code>Staab et al. 2024</code> <a class="cite" href="sources.html#S147">S147</a>) and higher task reasoning accuracy than <code>[PERSON_1]</code> tokenisation.</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 1A — Status Quo in Brief (Client-Side NER Name/Number Tokenisation):</strong></li>
+<li><em>How it works:</em> Local NER replaces detected person names and numbers with <code>[PERSON_1]</code>, <code>[NUM_1]</code> before sending prompts to the cloud model.</li>
+<li><em>Pros:</em> Low latency (&lt;50 ms overhead); simple pipeline.</li>
+<li><em>Cons:</em> Fails privacy against LLM contextual attribute inference (<strong>43.9%–64.2% accuracy</strong> even after aggressive NER scrubbing, <code>Staab et al. 2024</code> <a class="cite" href="sources.html#S147">S147</a>); misses <strong>3%–20% of explicit PII</strong> (<code>Lukas et al. 2023</code> <a class="cite" href="sources.html#S134">S134</a>); destroys relational semantics (<code>Principle 3: Knowing the Principal's Preferences</code>).</li>
+<li><strong>Option 1B — Strict Data-Locality Pinning + De-Contextualized Cloud Subtasks:</strong></li>
+<li><em>How it works:</em> Any turn touching personal notes, contacts, or calendar entries is pinned 100% to the local model. The cloud model is invoked only for de-contextualized, self-contained subtasks (e.g., summarizing a public article, drafting generic code, explaining a legal statute) where zero personal records are attached.</li>
+<li><em>Pros:</em> Eliminates cloud inference leakage of personal and bystander data (<code>Nissenbaum 2004</code> <a class="cite" href="sources.html#S138">S138</a>); preserves full relational context locally.</li>
+<li><em>Cons:</em> Constrains complex personal scheduling/synthesis to the capability ceiling of the user's local hardware model.</li>
+<li><strong>Option 1C — Local Structural Rewrite Gateway With Explicit Outbound Diff Preview:</strong></li>
+<li><em>How it works:</em> When a task requires frontier cloud reasoning over personal constraints, the local model rewrites the request into an abstract structural specification (e.g., replacing raw notes/names with typed role constraints: <em>"Find a 45-minute slot on Tuesday that prioritizes an urgent medical appointment over an internal team sync"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span>) and shows the user a 1-line preview of the exact text leaving the machine.</li>
+<li><em>Pros:</em> Preserves relational semantics (<code>medical</code> vs. <code>internal team</code>) while stripping stylistic and situational prose cues (<code>Staab et al. 2024</code> <a class="cite" href="sources.html#S147">S147</a>).</li>
+<li><em>Cons:</em> Adds 1–3 seconds of local LLM rewrite latency and requires user confirmation for outbound cloud calls on sensitive tasks.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H2: Breaking the "Lethal Trifecta" in the Nexus and Specialist Harnesses</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Enforcing a hard capability-isolation invariant—<strong>no execution context that ingests untrusted external text (third-party Nexus harnesses, web pages, external emails/calendar invites) may simultaneously read private core stores or invoke external communication tools within the same unverified loop</strong> (<code>Willison 2025</code> <a class="cite" href="sources.html#S152">S152</a>; <code>Greshake et al. 2023</code> <a class="cite" href="sources.html#S131">S131</a>; <code>Dong et al. 2025</code> <a class="cite" href="sources.html#S127">S127</a>)—will prevent indirect prompt injection and cross-session memory poisoning without crippling specialist workflows.</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 2A — Monolithic Shared Context (Naive Plugin Model):</strong></li>
+<li><em>How it works:</em> Loading a specialist harness from the Nexus injects its system prompt, knowledge base, and tools directly into Lilith's main agent loop alongside calendar, contacts, and notes tools.</li>
+<li><em>Pros:</em> Seamless conversational flow; zero friction between specialist research and personal tools.</li>
+<li><em>Cons:</em> <strong>100% vulnerable to Willison's Lethal Trifecta (<a class="cite" href="sources.html#S152">S152</a>) and <code>MINJA</code> memory poisoning (<a class="cite" href="sources.html#S127">S127</a>)</strong>; a single poisoned document or harness can exfiltrate the user's private notes and contacts.</li>
+<li><strong>Option 2B — Air-Gapped Specialist Sandboxes With Schema-Validated Handoff Cards:</strong></li>
+<li><em>How it works:</em> Specialist harnesses run in an isolated workspace with zero read/write access to personal contacts, notes, or calendar. When a specialist session produces an actionable personal item (e.g., a project deadline or a note to save), it emits a strictly typed, plain-text <strong>Handoff Card</strong> (inspired by clinical <code>SBAR</code>/<code>I-PASS</code>, <code>Haig et al. 2006</code> <a class="cite" href="sources.html#S16">S16</a>; <code>Starmer et al. 2014</code> <a class="cite" href="sources.html#S55">S55</a>) that the user approves with one click to commit into everyday Lilith.</li>
+<li><em>Pros:</em> Breaks the Lethal Trifecta completely; prevents untrusted specialist content from poisoning everyday memory.</li>
+<li><em>Cons:</em> Introduces a deliberate human-in-the-loop "bridge click" whenever transferring artifacts between a specialist harness and everyday personal tools.</li>
+<li><strong>Option 2C — Dual-LLM Information-Flow Control (Quarantined Reader vs. Privileged Planner):</strong></li>
+<li><em>How it works:</em> A privileged Planner LLM (which sees the user's trusted prompt and private tools) dispatches untrusted text processing to a Quarantined Reader LLM that has zero tool access and can only return restricted enum/schema values (<code>Willison 2025</code> <a class="cite" href="sources.html#S152">S152</a>).</li>
+<li><em>Pros:</em> Automates multi-step workflows safely where outputs fit strict schemas.</li>
+<li><em>Cons:</em> Complex to engineer; free-form text summaries from the Quarantined Reader can still carry social-engineering payloads to the user.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H3: Single-Persona Continuity With Perceptual Mode Framing and One-Way State Projection</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Retaining <strong>one unified front-stage persona</strong> ("Lilith") that explicitly announces when it loads a specialist harness (<code>Clarke et al. 2022/2024</code> <a class="cite" href="sources.html#S79">S79</a>), paired with <strong>persistent visual/auditory mode feedback</strong> (<code>Sellen et al. 1992</code> <a class="cite" href="sources.html#S139">S139</a>) and <strong>one-way typed state projection</strong> (specialist deadlines project onto the master calendar, while specialist chat transcripts stay out of everyday conversational RAG), will resolve Conflict C2 by preventing both human mode errors and "Primary Care Paradox" fragmentation (<code>Stange &amp; Ferrer 2009</code> <a class="cite" href="sources.html#S78">S78</a>).</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 3A — Multi-Persona Swarm (Separate Named Specialist Bots):</strong></li>
+<li><em>How it works:</em> Lilith hands the user off to a separate named persona (e.g., "Lex the Legal Bot" or "Ada the Coding Bot").</li>
+<li><em>Pros:</em> Makes behavioral boundaries obvious.</li>
+<li><em>Cons:</em> Empirically <strong>rejected by users</strong> in controlled HCI comparisons (<code>Clarke et al. 2022/2024</code> <a class="cite" href="sources.html#S79">S79</a>: users rate a single continuous agent interface significantly higher in usability and trust than multi-agent handoffs because they hate repeating context).</li>
+<li><strong>Option 3B — Invisible Mode Switching Under One Persona:</strong></li>
+<li><em>How it works:</em> Lilith silently loads/unloads specialist harnesses behind the scenes based on topic detection.</li>
+<li><em>Pros:</em> Zero UI chrome.</li>
+<li><em>Cons:</em> Induces severe <strong>human mode errors</strong> (<code>Norman 1983</code>; <code>Sellen et al. 1992</code> <a class="cite" href="sources.html#S139">S139</a>) when users cannot tell which rules, tools, or domain assumptions are active.</li>
+<li><strong>Option 3C — Single Continuous Persona + Explicit Mode Header/Earcon + Scoped Memory Projection:</strong></li>
+<li><em>How it works:</em> Lilith remains the single interlocutor (<em>"I've loaded the Legal Research harness—my citations and definitions are now scoped to contract law"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span>), accompanied by a persistent visual border/badge in chat and a brief audio earcon in voice. Specialist conversational history stays in a domain-scoped index, while structured commitments (calendar blocks, action items) sync to the master schedule via typed records.</li>
+<li><em>Pros:</em> Preserves relationship continuity (<a class="cite" href="sources.html#S79">S79</a>), eliminates mode errors (<a class="cite" href="sources.html#S139">S139</a>), and keeps the master calendar accurate without polluting everyday tone (<a class="cite" href="sources.html#S127">S127</a>, <a class="cite" href="sources.html#S128">S128</a>).</li>
+<li><em>Cons:</em> Requires clear UI/voice state indicators and a structured schema separating "domain conversation" from "global schedule/task state."</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H4: Mitigating the Local- vs. Cloud-Model "Uncanny Intelligence Cliff"</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: medium]</code>:</strong> Explicitly signaling execution tier (<em>Local Private Mode</em> vs. <em>Cloud Deep Reasoning</em>) and constraining the local model to narrow, grammar-enforced tool calls and concise factual answers—rather than letting a small local model attempt open-ended planning with the same conversational swagger as a frontier cloud model—will improve user trust calibration (<code>Lee &amp; See 2004</code> <a class="cite" href="sources.html#S64">S64</a>) and reduce tool-parameter hallucinations (<code>Ruan et al. 2024</code> <a class="cite" href="sources.html#S141">S141</a>).</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 4A — Seamless/Opaque Routing:</strong> Lilith never mentions whether she is running locally or in the cloud.</li>
+<li><em>Trade-off:</em> Clean surface UX, but causes jarring, inexplicable drops in competence when offline or handling sensitive notes (Conflict C3).</li>
+<li><strong>Option 4B — Explicit Tier Badge + Graceful Scope Refusal Locally:</strong> The UI displays a clear indicator (<code>🔒 Local Model</code> vs. <code>☁️ Cloud Tokenised/Abstracted</code>), and when pinned locally on a small model, Lilith proactively narrows her scope (<em>"I'm running locally for privacy right now, so I can check your calendar and save notes, but I'll keep synthesis brief"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span> — <code>Principle 4: Knowing the Limits of One's Authority</code>).</li>
+<li><em>Trade-off:</em> Slightly exposes system mechanics, but aligns user expectations with actual model capability (<code>Luger &amp; Sellen 2016</code> <a class="cite" href="sources.html#S81">S81</a>; <code>Amershi et al. 2019</code> <a class="cite" href="sources.html#S72">S72</a> Guideline G1/G2).</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H5: Calibrating Action Authority via a 3-Tier Reversibility Matrix and Action Ledger</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Replacing blanket "Are you sure?" confirmation dialogs with a <strong>3-Tier Reversibility &amp; Blast-Radius Matrix</strong>—where Tier-0 (reads/drafts) and Tier-1 (local reversible writes to notes/calendar) execute optimistically with a 1-click <strong>Undo Toast</strong> and persistent <strong>Action Ledger</strong> (<code>Shavit et al. 2023</code> <a class="cite" href="sources.html#S145">S145</a>), while interruptive parameter-confirmation cards are reserved strictly for Tier-2 (irreversible or external/third-party actions)—will prevent the <strong>30%-per-alert acceptance drop and 87.9%–99.9% habitual override rate</strong> measured by <code>Ancker et al. (2017)</code> <a class="cite" href="sources.html#S123">S123</a>.</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 5A — Ask Permission Before Every Write Tool Call:</strong></li>
+<li><em>Pros:</em> Maximum nominal caution on Day 1.</li>
+<li><em>Cons:</em> Induces severe alert fatigue (<code>Ancker et al. 2017</code> <a class="cite" href="sources.html#S123">S123</a>), habituated click-through (<code>Bravo-Lillo et al. 2011</code> <a class="cite" href="sources.html#S125">S125</a>), and automation commission errors (<code>Goddard et al. 2012</code> <a class="cite" href="sources.html#S129">S129</a>).</li>
+<li><strong>Option 5B — 3-Tier Reversibility Matrix + Transactional Undo Ledger:</strong></li>
+<li><em>Tier 0 (Read-Only / Internal Draft):</em> Autonomous execution; zero prompts.</li>
+<li><em>Tier 1 (Local Reversible Write — e.g., saving/editing a local note, adding a tentative personal calendar block):</em> Executes immediately (once past Phase 1 onboarding) with a non-blocking <code>"Saved note X [Undo]"</code> receipt and an immutable entry in the local Action Ledger so any change can be rolled back at any time (<code>Amershi et al. 2019</code> <a class="cite" href="sources.html#S72">S72</a> G8–G9; <code>Shavit et al. 2023</code> <a class="cite" href="sources.html#S145">S145</a>, §4.2, p. 9).</li>
+<li><em>Tier 2 (High Blast-Radius / External / Third-Party — e.g., sending an email/invite to a contact, deleting multiple records, sharing data externally):</em> Strictly staged in an Outbox card requiring explicit parameter actuation (e.g., clicking <code>"Send Invite to Alice for Tue 3pm"</code> rather than a generic <code>"OK"</code> button).</li>
+<li><em>Pros:</em> Preserves user agency where mistakes are costly (<code>Ruan et al. 2024</code> <a class="cite" href="sources.html#S141">S141</a>) while eliminating confirmation fatigue on routine local work.</li>
+<li><em>Cons:</em> Requires building snapshots/rollback versioning into Lilith's local note, contact, and calendar storage layer.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H6: Task-First Onboarding, Inspectable Working Agreements, and Asymmetric Trust Recovery</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Starting Day 1 with <strong>zero upfront intake interview</strong>—accomplishing the user's immediate request using conservative defaults (<code>Shavit et al. 2023</code> <a class="cite" href="sources.html#S145">S145</a>), rendering all learned preferences in an editable <strong>Markdown Working Agreement</strong> (<code>Chilton et al. 2010</code> <a class="cite" href="sources.html#S121">S121</a>), and handling early errors through <strong>immediate non-defensive factual repair + single-step authority downgrade</strong> (<code>Kim et al. 2004</code> <a class="cite" href="sources.html#S66">S66</a>; <code>Schweitzer et al. 2006</code> <a class="cite" href="sources.html#S67">S67</a>)—will yield higher 30/60/90-day retention and trust calibration than either a conversational onboarding wizard or silent black-box personalization (<code>Zaman &amp; Hoque 2026</code> <a class="cite" href="sources.html#S95">S95</a>).</li>
+<li><strong>Design Options &amp; Trade-Offs (see [<code>03-trust-and-onboarding.md</code>]03-trust-and-onboarding.md for the full 4-Phase Model):</strong><ul>
+<li><strong>Option 6A — Upfront "Getting-to-Know-You" Interview Wizard:</strong></li>
+<li><em>Trade-off:</em> Captures stated preferences (<em>espoused theory</em>, <code>Argyris &amp; Schön 1974</code> <a class="cite" href="sources.html#S36">S36</a>) at the cost of high Day-1 abandonment (<code>Mackay 1991</code> <a class="cite" href="sources.html#S121">S121</a>; <code>Shavit et al. 2023</code> <a class="cite" href="sources.html#S145">S145</a>) and privacy creepiness (<code>Staab et al. 2024</code> <a class="cite" href="sources.html#S147">S147</a>).</li>
+<li><strong>Option 6B — Silent Implicit Profiling (ChatGPT-Style Hidden Memory):</strong></li>
+<li><em>Trade-off:</em> Zero Day-1 friction, but accumulates unverified inferences (82.7% user unawareness, <code>Zaman &amp; Hoque 2026</code> <a class="cite" href="sources.html#S95">S95</a>) and suffers 98.2% vulnerability to query-only memory poisoning (<code>Dong et al. 2025</code> <a class="cite" href="sources.html#S127">S127</a>).</li>
+<li><strong>Option 6C — Task-First Execution + Post-Task Single-Question Check-In + Inspectable Working Agreement:</strong></li>
+<li><em>Trade-off:</em> Delivers <code>Ability</code> (<code>Mayer et al. 1995</code> <a class="cite" href="sources.html#S60">S60</a>) on Turn 1; asks at most <strong>one</strong> contextual preference question <em>after</em> completing a task (I scheduled that for 10am. Would you like me to keep mornings before 10am clear for focus work in the future? [Yes / Just this once] <span class="flag flag-para">paraphrase: not found in the cited source</span>); writes every accepted preference into a human-readable <code>working-agreement.md</code> file with provenance links.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H7: Capability Discovery and Gap-Finding Without "Did You Know?" Spam</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Combining <strong>Role + Boundary + 3 Concrete Examples</strong> on first launch (<code>Luger &amp; Sellen 2016</code> <a class="cite" href="sources.html#S81">S81</a>; <code>White 2018</code> <a class="cite" href="sources.html#S82">S82</a>), <strong>Reference-Interview Closed Clarification</strong> (offering 2–3 concrete interpretations when a request is underspecified, <code>Taylor 1968</code> <a class="cite" href="sources.html#S15">S15</a>; <code>RUSA 2013</code> <a class="cite" href="sources.html#S45">S45</a>), and <strong>Post-Completion Adjacency Footers</strong> (<em>"Here is what I did, and one adjacent thing I can also do next"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span>, capped at a <code>&lt;10%</code> turn budget and suppressed for 30 days on dismissal, <code>Horvitz 1999</code> <a class="cite" href="sources.html#S73">S73</a>; <code>Ancker et al. 2017</code> <a class="cite" href="sources.html#S123">S123</a>) will solve capability discoverability without triggering the Clippy anti-pattern (<code>xiao_2004</code> <a class="cite" href="sources.html#S87">S87</a>).</li>
+<li><strong>Design Options &amp; Trade-Offs (see [<code>07-capability-awareness-and-handoff.md</code>]07-capability-awareness-and-handoff.md):</strong><ul>
+<li><strong>Option 7A — Proactive Unsolicited "Did You Know?" Tips:</strong> High annoyance; &gt;85% ignore/disable rate (<code>Ancker et al. 2017</code> <a class="cite" href="sources.html#S123">S123</a>; <code>Murad et al. 2022</code>).</li>
+<li><strong>Option 7B — Purely Reactive Wait-for-Prompt Design:</strong> Zero annoyance, but leads to the smart-speaker failure mode where &gt;70% of capabilities are never discovered (<code>White 2018</code> <a class="cite" href="sources.html#S82">S82</a>; <code>Cho et al. 2019</code> <a class="cite" href="sources.html#S84">S84</a>).</li>
+<li><strong>Option 7C — Task-Boundary Adjacency Footers + Scoped Refusal Pivots:</strong> Suggests an adjacent tool or Nexus harness <strong>only</strong> at the completion of a related task or when refusing an unsupported request (<em>"I can't send Slack messages yet, but I can draft the message and copy it to your clipboard"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span>).</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H8: Adapting to User Diversity Without Condescension or Feature Bloat</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Adapting to user differences via <strong>implicit lexical mirroring</strong> (<code>Isaacs &amp; Clark 1987</code> <a class="cite" href="sources.html#S107">S107</a>) while holding <strong>affective/respectful tone strictly invariant</strong> (preventing patronizing "elderspeak", <code>Williams et al. 2004</code> <a class="cite" href="sources.html#S110">S110</a>), fading explanatory scaffolding as user mastery rises (<code>Kalyuga et al. 2003</code> <a class="cite" href="sources.html#S112">S112</a>), and providing a <strong>user-controlled Simple/Full workspace toggle</strong> (<code>McGrenere et al. 2002</code> <a class="cite" href="sources.html#S120">S120</a>) alongside <strong>W3C COGA and screen-reader-first verbosity controls</strong> (<code>Seeman-Horwitz et al. 2021</code> <a class="cite" href="sources.html#S114">S114</a>; <code>Branham &amp; Roy 2019</code> <a class="cite" href="sources.html#S118">S118</a>) will serve both "one-thing" novices and "many-things" power users without loss of control (<code>Jameson 2008</code> <a class="cite" href="sources.html#S113">S113</a>).</li>
+<li><strong>Design Options &amp; Trade-Offs (see [<code>05-adaptation-and-accessibility.md</code>]05-adaptation-and-accessibility.md):</strong><ul>
+<li><strong>Option 8A — Fully Autonomous Black-Box User-Level Classifier:</strong> System secretly classifies the user as "novice/low-literacy" vs. "expert" and hides features or dumbs down tone automatically.</li>
+<li><em>Trade-off:</em> Violates Jameson's (<a class="cite" href="sources.html#S113">S113</a>) predictability/control criteria and risks patronizing over-accommodation (<code>Ryan et al. 1995</code> <a class="cite" href="sources.html#S109">S109</a>) or misclassifying a domain expert who is merely typing tersely.</li>
+<li><strong>Option 8B — Lexical Grounding + Dual Personal/Full Interface + Explicit Accessibility Profiles:</strong></li>
+<li>Matches vocabulary density in-turn (<code>Isaacs &amp; Clark 1987</code> <a class="cite" href="sources.html#S107">S107</a>) without ever altering warmth or dignity.</li>
+<li>Lets "one-thing" users stay in a clean, distraction-free 3-tool view while "many-things" users toggle into the full Nexus/multi-harness view (<code>McGrenere et al. 2002</code> <a class="cite" href="sources.html#S120">S120</a>).</li>
+<li>Provides first-class accessibility primitives: configurable speech-endpoint timeouts for dysarthric/older users (<code>Pradhan et al. 2018/2020</code> <a class="cite" href="sources.html#S115">S115</a>, <a class="cite" href="sources.html#S117">S117</a>), earcon + ultra-concise screen-reader output (<code>Branham &amp; Roy 2019</code> <a class="cite" href="sources.html#S118">S118</a>), and optional non-judgmental toneCheck/task-chunking helpers for neurodivergent users (<code>Carik et al. 2024/2025</code> <a class="cite" href="sources.html#S119">S119</a>).</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H9: Epistemic Independence, Anti-Sycophancy, and Cognitive Forcing Functions</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Decoupling <strong>analytical critique</strong> from <strong>user-stance conditioning</strong>—by running requested evaluations/reviews through an internal <strong>blinded critic pass</strong> stripped of the user's stated opinion (<code>Sharma et al. 2023/2024</code> <a class="cite" href="sources.html#S144">S144</a>; <code>Wei et al. 2023/2024</code> <a class="cite" href="sources.html#S150">S150</a>) and inserting lightweight <strong>metacognitive checkpoints</strong> before high-stakes syntheses (<code>Lee et al. 2025</code> <a class="cite" href="sources.html#S130">S130</a>; <code>Singh et al. 2025</code> <a class="cite" href="sources.html#S154">S154</a>)—will protect the principal from RLHF sycophancy (<code>Principle 13: Constructive Challenge / Speaking Truth to Power</code>) and reduce long-term deskilling (<code>Bainbridge 1983</code> <a class="cite" href="sources.html#S124">S124</a>).</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 9A — Standard RLHF Conversational Prompting:</strong> Pleasantly agrees with the user's framing, switching from truthful to sycophantic answers ~14.5%–27% of the time (<code>Sharma et al. 2024</code> <a class="cite" href="sources.html#S144">S144</a>).</li>
+<li><strong>Option 9B — Blinded Evaluator Sub-Call + Task-Stewardship Framing:</strong> Whenever the user asks What do you think of my plan/draft/argument? <span class="flag flag-para">paraphrase: not found in the cited source</span>, Lilith evaluates the text in an isolated context window where the author is labelled as an unknown third party, surfaces the strongest counter-arguments first, and frames the user's role as the final reviewer/steward (<code>Lee et al. 2025</code> <a class="cite" href="sources.html#S130">S130</a>, §6, p. 13).</li>
+<li><em>Trade-off:</em> Doubles token cost on critique turns and slightly lowers instant "feel-good" validation, in exchange for genuine decision quality.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>Hypothesis H10: Boundary Discipline, Provenance-Linked Forgetting, and Crisis Circuit-Breakers</h3>
+<ul>
+<li><strong>Hypothesis Statement <code>[hypothesis | confidence: high]</code>:</strong> Combining (1) an explicit <strong>Anti-Companion Charter</strong> (banning simulated emotional reciprocity, loneliness expressions, or romantic roleplay, <code>Gabriel et al. 2024</code> <a class="cite" href="sources.html#S128">S128</a>; <code>Laestadius et al. 2022</code> <a class="cite" href="sources.html#S90">S90</a>), (2) <strong>foreign-key provenance lineage</strong> on all summaries and embeddings to support 1-click <strong>"Forget Person / Archive Life Chapter"</strong> cascading unlearning (<code>Sas &amp; Whittaker 2013</code> <a class="cite" href="sources.html#S142">S142</a>), and (3) a <strong>deterministic pre-LLM crisis/delusion guardrail</strong> that blocks implicit lethal-means queries, refuses to collude with delusions, halts memory writes during distress, and surfaces human crisis resources (<code>Moore et al. 2025</code> <a class="cite" href="sources.html#S135">S135</a>) will mitigate the most severe psychological and life-safety pitfalls of personal assistants.</li>
+<li><strong>Design Options &amp; Trade-Offs:</strong><ul>
+<li><strong>Option 10A — Unbounded "There for the User" Persona + Append-Only RAG:</strong> High emotional engagement among lonely users (<code>Greenwood &amp; Shang 2026</code> <a class="cite" href="sources.html#S136">S136</a>), but carries <strong>catastrophic liability</strong> for delusion validation (~55% rate, <code>Moore et al. 2025</code> <a class="cite" href="sources.html#S135">S135</a>), implicit lethal-means disclosure, and painful resurfacing of past life chapters (<code>Sas &amp; Whittaker 2013</code> <a class="cite" href="sources.html#S142">S142</a>).</li>
+<li><strong>Option 10B — Bounded Professional Staff Persona + Cascading Chapter Purge + Hard Crisis Handoff:</strong></li>
+<li><em>Trade-off:</em> Deliberately sacrifices the "AI companion/therapist" market segment and requires maintaining provenance metadata (<code>derived_from_record_ids</code>) across every summary and vector index, but guarantees professional safety and user control over their life history.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2>3. Fourteen Concrete Questions for the Developer's Design Session</h2>
+<p>Use these fourteen questions as the agenda for the upcoming Lilith design session. Each question forces a concrete trade-off choice where the initial brief was loose or conflicted with empirical evidence:</p>
+<ol>
+<li><strong>Resolving the Tokenisation Deadlock (Conflict C1 / Hypothesis H1):</strong>
+   <em>"Since <code>Staab et al. (2024)</code> <a class="cite" href="sources.html#S147">S147</a> proved that frontier cloud LLMs can still infer a user's city, age, sex, and occupation ~60% of the time even after stripping all names, numbers, dates, locations, and relational nouns—while stripping those tokens blinds the cloud model to whether <code>[PERSON_1]</code> is your CEO or your spouse—which path do we choose for personal notes and calendars: (a) 100% local-only execution for any turn touching personal records, or (b) a local-model structural rewrite gateway with an explicit outbound preview?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+<li><strong>Protecting Non-Consenting Bystanders (Pitfall 6.10 / [<code>06-pitfalls.md</code>]06-pitfalls.md):</strong>
+   <em>"When a user imports their contacts, calendar, and notes into Lilith, dozens of third parties (colleagues, family, doctors) who never consented to Lilith are ingested (<code>Nissenbaum 2004</code> <a class="cite" href="sources.html#S138">S138</a>; <code>Lau et al. 2018</code> <a class="cite" href="sources.html#S105">S105</a>). What hard rule prevents third-party data from ever being transmitted to a cloud model, and what default redaction rule prevents Lilith from oversharing why the user is busy when drafting messages to external contacts?"</em></li>
+<li><strong>Breaking the "Lethal Trifecta" in the Nexus (Blind Spot 8.4 / Hypothesis H2):</strong>
+   <em>"Loading specialist harnesses of external knowledge, prompts, and tools into an agent that also holds private notes/contacts and outbound tools creates Simon Willison's (<a class="cite" href="sources.html#S152">S152</a>) 'Lethal Trifecta' and <code>MINJA</code> memory poisoning (<code>Dong et al. 2025</code> <a class="cite" href="sources.html#S127">S127</a>). Are we willing to enforce an air-gapped sandbox for Nexus harnesses where transferring a deadline or note back to everyday Lilith requires a structured, user-approved Handoff Card?"</em></li>
+<li><strong>Preventing Mode Errors &amp; Synchronizing Deadlines Across Modes (Conflict C2 / Hypothesis H3):</strong>
+   <em>"If the user spends the morning in a 'Software Engineering' or 'Legal' specialist harness and uncovers a critical Friday deadline, how does 'Everyday Lilith' know not to book a dentist appointment over Friday afternoon without letting specialist transcripts bleed into everyday conversational memory (<code>Norman 1983</code> <a class="cite" href="sources.html#S139">S139</a>; <code>Clarke et al. 2024</code> <a class="cite" href="sources.html#S79">S79</a>)?"</em></li>
+<li><strong>Signaling the Local-to-Cloud Intelligence Cliff (Conflict C3 / Hypothesis H4):</strong>
+   <em>"When Lilith switches from a frontier cloud model to a small local model (because of offline use or sensitive data), her reasoning depth and tool reliability drop (<code>Lee &amp; See 2004</code> <a class="cite" href="sources.html#S64">S64</a>; <code>Ruan et al. 2024</code> <a class="cite" href="sources.html#S141">S141</a>). How should the UI and voice interface signal active model tier and narrow local tool scope so the user's trust calibration isn't whipsawed?"</em></li>
+<li><strong>Eliminating Telemetry Contradictions (Conflict C4 / Blind Spot 8.5):</strong>
+   To keep our encryption-at-rest promise and prevent recursive confabulation (<code>Shavit et al. 2023</code> <a class="cite" href="sources.html#S145">S145</a>; <code>Lee et al. 2025</code> <a class="cite" href="sources.html#S130">S130</a>), can we agree that (a) developer-readable failure logs are collected strictly on synthetic test personas, never real user data, and (b) in production, 'telemetry' is replaced by deterministic tool-health counters and a user-facing Provenance &amp; Action Ledger? <span class="flag flag-para">paraphrase: not found in the cited source</span></li>
+<li><strong>Drawing the Line on Action Confirmation vs. Habituation (Pitfall 6.8 / Hypothesis H5):</strong>
+   <em>"Given <code>Ancker et al. (2017)</code>'s <a class="cite" href="sources.html#S123">S123</a> finding that every additional alert drops acceptance by 30% and leads to 88%–99.9% habitual overrides, which exact tools belong in Tier 1 (autonomous execution with 1-click Undo + Action Ledger) versus Tier 2 (staged Outbox requiring explicit parameter confirmation)?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+<li><strong>Replacing the Upfront Interview With Task-First Onboarding (Question 3 / Hypothesis H6):</strong>
+   Users abandon assistants that interview them before delivering value (<code>Shavit et al. 2023</code> <a class="cite" href="sources.html#S145">S145</a>; <code>Mackay 1991</code> <a class="cite" href="sources.html#S121">S121</a>). What are the exact conservative defaults in our Day-1 <code>working-agreement.md</code> template, and what is our hard cap on post-task preference check-in questions during Weeks 1–4? <span class="flag flag-para">paraphrase: not found in the cited source</span></li>
+<li><strong>Voice vs. Typed Chat Choreography (Blind Spot 8.6):</strong>
+   <em>"Because voice is serial, transient, and audible to bystanders (<code>Yankelovich et al. 1995</code> <a class="cite" href="sources.html#S153">S153</a>; <code>Lau et al. 2018</code> <a class="cite" href="sources.html#S105">S105</a>), can we establish a modality rule that voice responses never exceed 2 sentences or 3 list items, never read sensitive personal notes aloud without a headphone/solo check, and always defer Tier-2 action confirmations to visual cards?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+<li><strong>Capability Discovery Budget (Question 7 / Hypothesis H7):</strong>
+    <em>"When a user under-specifies a request or asks for something Lilith cannot do yet, how do we structure the response using the Reference Interview pattern (<code>Taylor 1968</code> <a class="cite" href="sources.html#S15">S15</a>: 2–3 closed options) and Post-Completion Adjacency Footers, and what cooldown timer (e.g., 30 days) applies when a user ignores a capability suggestion?"</em></li>
+<li><strong>Dual-Interface Adaptation &amp; Accessibility Primitives (Question 5 / Hypothesis H8):</strong>
+    <em>"How do we design the toggle between a minimal 'Personal View' (for the user who only wants calendar + reminders) and the 'Full Nexus View' (<code>McGrenere et al. 2002</code> <a class="cite" href="sources.html#S120">S120</a>), and which accessibility settings (dysarthric speech-pause tolerances, screen-reader earcons, W3C COGA task chunking) ship in the baseline build (<code>Pradhan et al. 2018</code> <a class="cite" href="sources.html#S115">S115</a>; <code>Branham &amp; Roy 2019</code> <a class="cite" href="sources.html#S118">S118</a>)?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+<li><strong>Blinded Critique Mode Against Sycophancy (Pitfall 6.2 / Hypothesis H9):</strong>
+    <em>"When the user asks Lilith to review a draft, plan, or decision (<code>Sharma et al. 2024</code> <a class="cite" href="sources.html#S144">S144</a>), how do we trigger a 'blinded critic' pass (evaluating the artifact without the user's stance attached) so Lilith fulfills <code>Principle 13: Constructive Challenge</code> instead of flattering flawed assumptions?"</em></li>
+<li><strong>Provenance Lineage for "Design for Forgetting" (Blind Spot 8.9 / Hypothesis H10):</strong>
+    <em>"How do we structure our local SQLite/Markdown/vector schema so that every rolling summary and embedding stores <code>derived_from_record_ids</code>—allowing a user who goes through a breakup, bereavement, or job change (<code>Sas &amp; Whittaker 2013</code> <a class="cite" href="sources.html#S142">S142</a>) to purge or archive that chapter without 'summary ghosts' resurfacing?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+<li><strong>The Anti-Companion Charter &amp; Crisis Circuit-Breaker (Conflict C5 / Pitfall 6.11 / Hypothesis H10):</strong>
+    <em>"What does 'there for the user' mean in strictly professional staff terms? Can we adopt a formal Anti-Companion Charter (banning simulated affection, loneliness cues, or therapy roleplay, per <code>Gabriel et al. 2024</code> <a class="cite" href="sources.html#S128">S128</a>), stress-test whether the name 'Lilith' invites unwanted parasocial framing, and specify the deterministic crisis guardrail that intercepts implicit self-harm or delusion turns (<code>Moore et al. 2025</code> <a class="cite" href="sources.html#S135">S135</a>)?"</em></li>
+</ol><div class="pager"><a href="08-questions-you-didnt-ask.html">← Questions you did not ask</a><a href="sources.html">Sources →</a></div>
+<hr>
+<p class="foot-stamp">LILITH V6 RESEARCH · what makes a good assistant · gathered by an AI research agent 2026-11-01, then checked by script (see the <a href="verification.html">verification report</a>) · not part of the frozen design document</p>
+</body>
+</html>

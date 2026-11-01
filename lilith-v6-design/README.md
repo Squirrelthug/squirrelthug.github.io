@@ -31,7 +31,9 @@ Priority order when reading:
 
 | File / dir | What it is |
 |---|---|
-| `index.html` | Overview home: status, locked decisions, progress, section directory |
+| `index.html` | Overview home (since 2026-11-01): the assistant research, plus the 29-section directory and links to the law |
+| `archive/overview-build-phase.html` | The previous Overview (status, locked decisions, progress, section directory), kept intact |
+| `research/` | Research on what makes a good assistant (AI-gathered, checked by script; **not law**): ten finding pages, sources, verification report, and a spoken-style guide with a copy button |
 | `sections/s01.html` … `s29.html` | **The law.** One page per section, verbatim, grouped by layer |
 | `full-document.html` | All 29 sections in one page — *generated*, do not edit directly |
 | `checklist.html` | Design checklist mirror — every item resolved, backlinks per section |

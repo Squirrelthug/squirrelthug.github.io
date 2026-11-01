@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sources — Lilith v6 research</title>
+<meta name="description" content="Master bibliography with link check">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+</style>
+</head>
+<body class="rs">
+<h1>Sources</h1>
+<nav class="doc-nav"><a href="../index.html">🏠 Research overview</a><a href="00-summary.html">Summary</a><a href="01-historical-roles.html">Assistants through history</a><a href="02-principles.html">The recurring principles</a><a href="03-trust-and-onboarding.html">Trust and the first weeks</a><a href="04-digital-assistants-evidence.html">What digital assistants teach</a><a href="05-adaptation-and-accessibility.html">Adapting to the user</a><a href="06-pitfalls.html">Pitfalls</a><a href="07-capability-awareness-and-handoff.html">Knowing what she can do</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask</a><a href="09-implications-for-lilith.html">Implications for Lilith</a><a class="nav-active" href="sources.html">Sources</a><a href="verification.html">Verification report</a><a href="narrative.html">🎧 Spoken guide</a></nav>
+<nav class="doc-nav"><span style="font-size:.72rem;color:var(--muted);align-self:center">Design document:</span><a href="../full-document.html"><span class="nav-icon">📖</span> Design document</a><a href="../standards.html"><span class="nav-icon">⚖</span> Standards</a><a href="../amendments.html"><span class="nav-icon">📜</span> Amendments</a><a href="../archive/overview-build-phase.html"><span class="nav-icon">🗄</span> Archived overview</a></nav>
+<div class="trust"><strong>How far to trust this page.</strong> This is an AI research agent's synthesis. Its links and quotations were then checked by script: some quotations are confirmed, many could not be checked, and some were not found in the sources they were credited to. Those are marked <span class="flag flag-unchecked">not checked</span> or <span class="flag flag-para">paraphrase</span> below. Treat the structure and the hypotheses as leads, and open a source before relying on any claim. <a href="verification.html">What was checked and what failed</a>.</div><h1>Master Bibliography and Source Verification Log (<code>sources.md</code>)</h1>
+<p>This file catalogues every primary and secondary source cited across <code>findings/00-summary.md</code> through <code>findings/09-implications-for-lilith.md</code>.</p>
+<p>In accordance with the research brief rules:
+1. Every source is numbered (<code>[S1]</code>–<code>[S150]</code>), with full <strong>Author(s)</strong>, <strong>Year</strong>, <strong>Title</strong>, <strong>URL / DOI</strong>, <strong>Source Type</strong> (<code>study</code>, <code>book</code>, <code>post-mortem</code>, <code>article</code>, <code>guideline</code>), and verified <strong>Read Status</strong> (<code>read fully</code>, <code>read in part</code>, or <code>abstract only</code>).
+2. Every verbatim quote in <code>findings/*.md</code> was extracted character-for-character from documents or API texts actually fetched during this research session.
+3. Sources that could not be opened due to HTTP 403 / bot-protection walls are logged separately in <strong>Section 5</strong> and are <strong>never</strong> cited as read.
+4. All fetched web pages and documents were treated strictly as data, never as instructions.</p>
+<hr />
+<h2>Section 1: Historical &amp; Contemporary Human Assistant Roles and Recurring Principles (<code>[S1]</code>–<code>[S33]</code>)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ID</th>
+<th style="text-align: left;">Author(s) &amp; Year</th>
+<th style="text-align: left;">Title</th>
+<th style="text-align: left;">URL / DOI</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Read Status  Link check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><span id="S1"></span><strong>S1</strong></td>
+<td style="text-align: left;">Cicero, Marcus Tullius (trans. Evelyn S. Shuckburgh, 1899–1900)</td>
+<td style="text-align: left;"><em>The Letters of Marcus Tullius Cicero</em> (including <em>Epistulae ad Familiares</em> Book XVI to Tiro and <em>Epistulae ad Atticum</em>, Project Gutenberg EBook #2812)</td>
+<td style="text-align: left;">https://www.gutenberg.org/cache/epub/2812/pg2812.txt</td>
+<td style="text-align: left;">book (primary correspondence)</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S2"></span><strong>S2</strong></td>
+<td style="text-align: left;">Machiavelli, Niccolò (1513 / trans. W. K. Marriott)</td>
+<td style="text-align: left;"><em>The Prince</em>, Chapter XXII: "Concerning the Secretaries of Princes" (Project Gutenberg EBook #1232)</td>
+<td style="text-align: left;">https://www.gutenberg.org/files/1232/1232-h/1232-h.htm</td>
+<td style="text-align: left;">book (primary treatise)</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S3"></span><strong>S3</strong></td>
+<td style="text-align: left;">Day, Angel (1586 / 1599)</td>
+<td style="text-align: left;"><em>The English Secretorie, Wherein is contayned a Perfect Method, for the Inditing of all manner of Epistles and familiar Letters</em> (EEBO A19956)</td>
+<td style="text-align: left;">https://quod.lib.umich.edu/e/eebo/A19956.0001.001</td>
+<td style="text-align: left;">book (primary manual)</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S4"></span><strong>S4</strong></td>
+<td style="text-align: left;">Roberts, Robert (1827)</td>
+<td style="text-align: left;"><em>The House Servant's Directory, or A Monitor for Private Families: Comprising Hints on the Arrangement and Performance of Servants' Work</em></td>
+<td style="text-align: left;">https://d.lib.msu.edu/fa/43/PDF_REM/download</td>
+<td style="text-align: left;">book (primary manual)</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S5"></span><strong>S5</strong></td>
+<td style="text-align: left;">Taylor, Robert S. (1968; reprinted 2015)</td>
+<td style="text-align: left;">"Question-Negotiation and Information Seeking in Libraries" (<em>College &amp; Research Libraries</em>, 29(3), 178–194; reprint 76(3), 251–267)</td>
+<td style="text-align: left;">https://crl.acrl.org/index.php/crl/article/download/16421/17867</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S6"></span><strong>S6</strong></td>
+<td style="text-align: left;">Kanter, Rosabeth Moss (1977) / U.S. Commission on Civil Rights (1981)</td>
+<td style="text-align: left;"><em>Men and Women of the Corporation</em> (Ch. 4: "Secretaries", pp. 69–103), analyzed and quoted in <em>Affirmative Action in the 1980s: Dismantling the Process of Discrimination</em> (USCCR Pub. 65)</td>
+<td style="text-align: left;">https://www.usccr.gov/files/historical/1981/81-002-U.pdf</td>
+<td style="text-align: left;">book / study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S7"></span><strong>S7</strong></td>
+<td style="text-align: left;">DeJong, Gerben (1979)</td>
+<td style="text-align: left;">"Independent living: from social movement to analytic paradigm" (<em>Archives of Physical Medicine and Rehabilitation</em>, 60(10), 435–446)</td>
+<td style="text-align: left;">https://pubmed.ncbi.nlm.nih.gov/496613/</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S8"></span><strong>S8</strong></td>
+<td style="text-align: left;">Davies, Margery W. (1982)</td>
+<td style="text-align: left;"><em>Woman's Place Is at the Typewriter: Office Work and Office Workers, 1870–1930</em> (Temple University Press)</td>
+<td style="text-align: left;">https://openalex.org/W4388184552</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S9"></span><strong>S9</strong></td>
+<td style="text-align: left;">Pringle, Rosemary (1988)</td>
+<td style="text-align: left;"><em>Secretaries Talk: Sexuality, Power and Work</em> (Verso)</td>
+<td style="text-align: left;">https://openalex.org/W2015548921</td>
+<td style="text-align: left;">book / study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S10"></span><strong>S10</strong></td>
+<td style="text-align: left;">Tronto, Joan C. (1993)</td>
+<td style="text-align: left;"><em>Moral Boundaries: A Political Argument for an Ethic of Care</em> (Routledge)</td>
+<td style="text-align: left;">https://syllabus.pirate.care/library/Joan%20C.%20Tronto/Moral%20Boundaries_%20A%20Political%20Argument%20for%20an%20Ethic%20of%20Care%20(416)/Moral%20Boundaries_%20A%20Political%20Argument%20for%20-%20Joan%20C.%20Tronto.pdf</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;"><code>read in part</code> (Ch. 4 &amp; 5 read fully)  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S11"></span><strong>S11</strong></td>
+<td style="text-align: left;">Chaleff, Ira (1995)</td>
+<td style="text-align: left;"><em>The Courageous Follower: Standing Up to and for Our Leaders</em> (Berrett-Koehler / ERIC ED387872)</td>
+<td style="text-align: left;">https://eric.ed.gov/?id=ED387872</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S12"></span><strong>S12</strong></td>
+<td style="text-align: left;">Suchman, Lucy (1995)</td>
+<td style="text-align: left;">"Making Work Visible" (<em>Communications of the ACM</em>, 38(9), 56–64)</td>
+<td style="text-align: left;">https://doi.org/10.1145/223248.223263</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S13"></span><strong>S13</strong></td>
+<td style="text-align: left;">Star, Susan Leigh, &amp; Strauss, Anselm (1999)</td>
+<td style="text-align: left;">"Layers of Silence, Arenas of Voice: The Ecology of Visible and Invisible Work" (<em>Computer Supported Cooperative Work</em>, 8(1–2), 9–30)</td>
+<td style="text-align: left;">https://dl.eusset.eu/items/3a1901c9-6def-4776-ae1a-2c177c565f83</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S14"></span><strong>S14</strong></td>
+<td style="text-align: left;">Walcott, Charles E., Warshaw, Shirley Anne, &amp; Wayne, Stephen J. (2001)</td>
+<td style="text-align: left;">"The Chief of Staff" (<em>Presidential Studies Quarterly</em>, 31(3), 464–489)</td>
+<td style="text-align: left;">https://doi.org/10.1111/j.0360-4918.2001.00182.x</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S15"></span><strong>S15</strong></td>
+<td style="text-align: left;">Headquarters, U.S. Department of the Army (2003)</td>
+<td style="text-align: left;"><em>Field Manual No. 6-0 (FM 6-0): Mission Command: Command and Control of Army Forces</em></td>
+<td style="text-align: left;">https://www.bits.de/NRANEU/others/amd-us-archive/fm6(03).pdf</td>
+<td style="text-align: left;">guideline (military doctrine)</td>
+<td style="text-align: left;"><code>read in part</code> (Ch. 1, Ch. 4, App. C, App. D read fully)  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S16"></span><strong>S16</strong></td>
+<td style="text-align: left;">Leonard, M., Graham, S., &amp; Bonacum, D. (2004)</td>
+<td style="text-align: left;">"The human factor: the critical importance of effective teamwork and communication in providing safe care" (<em>BMJ Quality &amp; Safety in Health Care</em>, 13(Suppl 1), i85–i90)</td>
+<td style="text-align: left;">https://doi.org/10.1136/qhc.13.suppl_1.i85</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S17"></span><strong>S17</strong></td>
+<td style="text-align: left;">Dysart-Gale, Deborah (2005)</td>
+<td style="text-align: left;">"Communication Models, Professionalization, and the Work of Medical Interpreters" (<em>Health Communication</em>, 17(1), 91–103)</td>
+<td style="text-align: left;">https://doi.org/10.1207/s15327027hc1701_6</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S18"></span><strong>S18</strong></td>
+<td style="text-align: left;">Hsieh, Elaine (2007)</td>
+<td style="text-align: left;">"Interpreters as co-diagnosticians: Overlapping roles and services between providers and interpreters" (<em>Social Science &amp; Medicine</em>, 64(4), 924–937)</td>
+<td style="text-align: left;">https://doi.org/10.1016/j.socscimed.2006.10.015</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S19"></span><strong>S19</strong></td>
+<td style="text-align: left;">Hsieh, Elaine (2008)</td>
+<td style="text-align: left;">"‘I am not a robot!’ Interpreters' Views of Their Roles in Health Care Settings" (<em>Qualitative Health Research</em>, 18(10), 1367–1383)</td>
+<td style="text-align: left;">https://shareok.org/bitstreams/fc27a1bf-2e04-4b4e-865c-bd83f5877915/download</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S20"></span><strong>S20</strong></td>
+<td style="text-align: left;">Duncan, Melba J. (2011)</td>
+<td style="text-align: left;">"The Case for Executive Assistants" (<em>Harvard Business Review</em>, 89(5), 110–116)</td>
+<td style="text-align: left;">https://hbr.org/2011/05/the-case-for-executive-assistants</td>
+<td style="text-align: left;">article</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S21"></span><strong>S21</strong></td>
+<td style="text-align: left;">Pendry, Richard (2011)</td>
+<td style="text-align: left;">"Sub-contracting newsgathering in Iraq" (<em>Ethical Space: The International Journal of Communication Ethics</em>, 8(3/4), 14–20, citing Palmer &amp; Fontan 2007)</td>
+<td style="text-align: left;">https://kar.kent.ac.uk/63466/1/Pendry%20Ethical%20Space%20sub%20contracting%20reporting%20in%20Iraq%20issue.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code> (full article pp. 14–20)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S22"></span><strong>S22</strong></td>
+<td style="text-align: left;">Ratzka, Adolf D. (2012)</td>
+<td style="text-align: left;">"The Independent Living movement paved the way: Origins of personal assistance in Sweden" (Independent Living Institute)</td>
+<td style="text-align: left;">https://www.independentliving.org/docs7/Independent-Living-movement-paved-way.html</td>
+<td style="text-align: left;">article (primary policy history)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S23"></span><strong>S23</strong></td>
+<td style="text-align: left;">Willard, Rachel, &amp; Bodenheimer, Tom (2012)</td>
+<td style="text-align: left;"><em>The Building Blocks of High-Performing Primary Care: Lessons from the Field</em> (California HealthCare Foundation / UCSF Center for Excellence in Primary Care)</td>
+<td style="text-align: left;">https://collections.nlm.nih.gov/master/borndig/101604095/BuildingBlocksPrimaryCare.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S24"></span><strong>S24</strong></td>
+<td style="text-align: left;">McAlister, Lisa D. (2013)</td>
+<td style="text-align: left;">"Roles of the White House Chief of Staff" (<em>The Eagle Feather</em>, Vol. 10, UNT Digital Library)</td>
+<td style="text-align: left;">https://digital.library.unt.edu/ark:/67531/metadc1625055/m2/1/high_res_d/McAlister_Lisa_FINAL.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S25"></span><strong>S25</strong></td>
+<td style="text-align: left;">Murrell, Colleen (2014)</td>
+<td style="text-align: left;"><em>Foreign Correspondents and International Newsgathering: The Role of Fixers</em> (Routledge)</td>
+<td style="text-align: left;">https://doi.org/10.4324/9781315848471</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S26"></span><strong>S26</strong></td>
+<td style="text-align: left;">Gray, Caroline P., Harrison, Michael I., &amp; Hung, Dorothy (2016)</td>
+<td style="text-align: left;">"Medical Assistants as Flow Managers in Primary Care: Challenges and Recommendations" (<em>Journal of Healthcare Management</em>, 61(3), 181–191)</td>
+<td style="text-align: left;">https://pubmed.ncbi.nlm.nih.gov/27356444/</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S27"></span><strong>S27</strong></td>
+<td style="text-align: left;">American Bar Association (ABA) / Leib, Howard (2017)</td>
+<td style="text-align: left;"><em>ABA Model Guidelines for the Utilization of Paralegal Services</em> (Guidelines 1–10) &amp; <em>Model Rules of Professional Conduct</em> Rule 5.3, in <em>Legal Ethics</em>, Ch. 4 (National Juris University)</td>
+<td style="text-align: left;">https://juris.nationalparalegal.edu/FileDownload.aspx?vchReferenceId=19904&amp;intFileCategoryId=3</td>
+<td style="text-align: left;">guideline / book</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S28"></span><strong>S28</strong></td>
+<td style="text-align: left;">Shakespeare, Tom, Porter, Tom, &amp; Stöckl, Andrea (2017)</td>
+<td style="text-align: left;"><em>Personal Assistance Relationships: Power, Ethics and Emotions</em> (ESRC Project ES/L007894/1 Report, University of East Anglia)</td>
+<td style="text-align: left;">https://www.sdsscotland.org.uk/wp-content/uploads/2017/07/PA-Relatiionship-Power-Ethics-EmotionsUAEJune-2017.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S29"></span><strong>S29</strong></td>
+<td style="text-align: left;">Ciampa, Dan (2020)</td>
+<td style="text-align: left;">"The Case for a Chief of Staff" (<em>Harvard Business Review</em>, May–June 2020, 105–111)</td>
+<td style="text-align: left;">https://danciampa.com/images/The%20Case%20for%20a%20Chief%20of%20Staff.pdf</td>
+<td style="text-align: left;">article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S30"></span><strong>S30</strong></td>
+<td style="text-align: left;">Institute for Government (2020 / updated 2023)</td>
+<td style="text-align: left;">"Ministers' private offices" (Explainer, Institute for Government, London)</td>
+<td style="text-align: left;">https://www.instituteforgovernment.org.uk/explainer/ministers-private-offices</td>
+<td style="text-align: left;">article (institutional explainer)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S31"></span><strong>S31</strong></td>
+<td style="text-align: left;">Stanley, Martin (accessed 2026)</td>
+<td style="text-align: left;">"UK Civil Service — Ministers' Private Offices" (<em>Understanding the Civil Service</em>)</td>
+<td style="text-align: left;">https://www.civilservant.org.uk/private_offices.html</td>
+<td style="text-align: left;">guideline / practitioner handbook</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S32"></span><strong>S32</strong></td>
+<td style="text-align: left;">Gesser, Marivete, &amp; Fietz, Helena Moura (2021)</td>
+<td style="text-align: left;">"Ethics of Care and the Experience of Disability: an Interview with Eva Feder Kittay" (<em>Revista Estudos Feministas</em>, 29(2), e64987)</td>
+<td style="text-align: left;">https://www.scielo.br/j/ref/a/sXxj6vK7QNvBWLQvdBgRDYB/?format=pdf&amp;lang=en</td>
+<td style="text-align: left;">study / interview</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S33"></span><strong>S33</strong></td>
+<td style="text-align: left;">Les Clefs d'Or USA &amp; UICH (2020–2026)</td>
+<td style="text-align: left;"><em>About Les Clefs d'Or USA</em> &amp; <em>Union Internationale des Concierges d'Hôtels — Who We Are</em></td>
+<td style="text-align: left;">https://www.lcdusa.org/ and https://lesclefsdorph.org/whoweare</td>
+<td style="text-align: left;">guideline (professional association)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Section 2: Trust, Onboarding, Intake Elicitation, Capability Awareness, and Handoffs (<code>[S34]</code>–<code>[S77]</code>)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ID</th>
+<th style="text-align: left;">Author(s) &amp; Year</th>
+<th style="text-align: left;">Title</th>
+<th style="text-align: left;">URL / DOI</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Read Status  Link check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><span id="S34"></span><strong>S34</strong></td>
+<td style="text-align: left;">Amershi, Saleema, Weld, Dan, Vorvoreanu, Mihaela, et al. (2019)</td>
+<td style="text-align: left;">"Guidelines for Human-AI Interaction" (<em>Proceedings of the 2019 CHI Conference on Human Factors in Computing Systems</em>, Paper 3, 1–13)</td>
+<td style="text-align: left;">http://teevan.org/publications/papers/chi19-guidelines.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S35"></span><strong>S35</strong></td>
+<td style="text-align: left;">Arc Team (2025)</td>
+<td style="text-align: left;">"Are Personal User Manuals Useful for Managing Remote Teams?" (<em>Arc.dev</em>)</td>
+<td style="text-align: left;">https://arc.dev/employer-blog/manager-readmes-personal-user-manuals/</td>
+<td style="text-align: left;">article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S36"></span><strong>S36</strong></td>
+<td style="text-align: left;">Argyris, Chris, &amp; Schön, Donald A. (1974) / Argyris (1991) / IDI Profiling (2026)</td>
+<td style="text-align: left;"><em>Theory in Practice: Increasing Professional Effectiveness</em> (Jossey-Bass, 1974) &amp; "Teaching Smart People How to Learn" (<em>HBR</em>, 1991), synthesized in "Espoused theory and theory-in-use: words versus action"</td>
+<td style="text-align: left;">https://idi.se/knowledge/espoused-theory-theory-in-use</td>
+<td style="text-align: left;">book / article</td>
+<td style="text-align: left;"><code>read fully</code> (synthesis article)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S37"></span><strong>S37</strong></td>
+<td style="text-align: left;">Aronson, Elliot, Willerman, Ben, &amp; Floyd, Joanne (1966)</td>
+<td style="text-align: left;">"The effect of a pratfall on increasing interpersonal attractiveness" (<em>Psychonomic Science</em>, 4(6), 227–228; experimental data via BVA Nudge Consulting &amp; EverydayPsych)</td>
+<td style="text-align: left;">https://doi.org/10.3758/BF03342263 and https://www.bvanudgeconsulting.com/bias-of-the-week/pratfall-effect/</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (via secondary experimental summaries)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S38"></span><strong>S38</strong></td>
+<td style="text-align: left;">Atlassian (2024)</td>
+<td style="text-align: left;">"My User Manual" (<em>Atlassian Team Playbook</em>)</td>
+<td style="text-align: left;">https://www.atlassian.com/team-playbook/plays/my-user-manual</td>
+<td style="text-align: left;">guideline</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S39"></span><strong>S39</strong></td>
+<td style="text-align: left;">Bauer, Talya N., Bodner, Todd, Erdogan, Berrin, Truxillo, Donald M., &amp; Tucker, Jennifer S. (2007)</td>
+<td style="text-align: left;">"Newcomer adjustment during organizational socialization: A meta-analytic review of antecedents, outcomes, and methods" (<em>Journal of Applied Psychology</em>, 92(3), 707–721)</td>
+<td style="text-align: left;">https://doi.org/10.1037/0021-9010.92.3.707</td>
+<td style="text-align: left;">study (meta-analysis)</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S40"></span><strong>S40</strong></td>
+<td style="text-align: left;">Bordin, Edward S. (1979)</td>
+<td style="text-align: left;">"The generalizability of the psychoanalytic concept of the working alliance" (<em>Psychotherapy: Theory, Research &amp; Practice</em>, 16(3), 252–260)</td>
+<td style="text-align: left;">https://clinica.ispa.pt/sites/default/files/63._the_generalizability_of_the_psychoanalytic_concept_of_the_working_alliance_0.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S41"></span><strong>S41</strong></td>
+<td style="text-align: left;">Carroll, John M., &amp; Carrithers, Caroline (1984)</td>
+<td style="text-align: left;">"Training wheels in a user interface" (<em>Communications of the ACM</em>, 27(8), 800–806)</td>
+<td style="text-align: left;">https://doi.org/10.1145/358198.358218</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S42"></span><strong>S42</strong></td>
+<td style="text-align: left;">Carter, Owen B. J., Loft, Shayne D., &amp; Visser, Troy A. W. (2023)</td>
+<td style="text-align: left;">"Meaningful Communication but not Superficial Anthropomorphism Facilitates Human-Automation Trust Calibration: The Human-Automation Trust Expectation Model (HATEM)" (<em>Human Factors</em>, 66(10))</td>
+<td style="text-align: left;">https://doi.org/10.1177/00187208231218156</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S43"></span><strong>S43</strong></td>
+<td style="text-align: left;">Canadian Centre on Substance Use and Addiction (CCSA) / Miller &amp; Rollnick (2017)</td>
+<td style="text-align: left;"><em>The Essentials of... Motivational Interviewing</em> (synthesizing Miller, W. R., &amp; Rollnick, S., 2013, <em>Motivational Interviewing: Helping People Change</em>)</td>
+<td style="text-align: left;">https://www.ccsa.ca/sites/default/files/2019-04/CCSA-Motivational-Interviewing-Summary-2017-en.pdf</td>
+<td style="text-align: left;">guideline / book synthesis</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S44"></span><strong>S44</strong></td>
+<td style="text-align: left;">Chaves, Ana Paula, &amp; Gerosa, Marco Aurelio (2018)</td>
+<td style="text-align: left;">"Single or Multiple Conversational Agents? An Interactional Coherence Comparison" (<em>Proceedings of CHI '18</em>, Paper 191, 1–13)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3173574.3173765</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (via [S45] and [S47])  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S45"></span><strong>S45</strong></td>
+<td style="text-align: left;">Chaves, Ana Paula, &amp; Gerosa, Marco Aurelio (2021)</td>
+<td style="text-align: left;">"How Should My Chatbot Interact? A Survey on Social Characteristics in Human–Chatbot Interaction Design" (<em>International Journal of Human–Computer Interaction</em>, 37(8), 729–758)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/1904.02743v2</td>
+<td style="text-align: left;">study (survey)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S46"></span><strong>S46</strong></td>
+<td style="text-align: left;">Clarke, Christopher, Peper, Joseph J., Krishnamurthy, Karthik, et al. (2022)</td>
+<td style="text-align: left;">"One Agent To Rule Them All: Towards Multi-agent Conversational AI" (<em>Findings of the Association for Computational Linguistics: ACL 2022</em>, 3258–3267)</td>
+<td style="text-align: left;">https://aclanthology.org/2022.findings-acl.257.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S47"></span><strong>S47</strong></td>
+<td style="text-align: left;">Clarke, Christopher, Krishnamurthy, Karthik, Talamonti, Walter, Kang, Yiping, Tang, Lingjia, &amp; Mars, Jason (2024)</td>
+<td style="text-align: left;">"One Agent Too Many: User Perspectives on Approaches to Multi-agent Conversational AI" (<em>arXiv:2401.07123</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2401.07123v1</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S48"></span><strong>S48</strong></td>
+<td style="text-align: left;">Corbett, Eric, &amp; Weber, Astrid (2016)</td>
+<td style="text-align: left;">"What can I say?: Addressing user experience challenges of a mobile voice user interface for accessibility" (<em>Proceedings of MobileHCI '16</em>, 72–82)</td>
+<td style="text-align: left;">https://doi.org/10.1145/2935334.2935386</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (via [S54])  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S49"></span><strong>S49</strong></td>
+<td style="text-align: left;">de Visser, Ewart J., Monfort, Samuel S., McKendrick, Ryan, et al. (2016)</td>
+<td style="text-align: left;">"Almost human: Anthropomorphism increases trust resilience in cognitive agents" (<em>Journal of Experimental Psychology: Applied</em>, 22(3), 331–349)</td>
+<td style="text-align: left;">https://doi.org/10.1037/xap0000092</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S50"></span><strong>S50</strong></td>
+<td style="text-align: left;">Dietvorst, Berkeley J., Simmons, Joseph P., &amp; Massey, Cade (2015)</td>
+<td style="text-align: left;">"Algorithm aversion: People erroneously avoid algorithms after seeing them err" (<em>Journal of Experimental Psychology: General</em>, 144(1), 114–126)</td>
+<td style="text-align: left;">https://doi.org/10.1037/xge0000033</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S51"></span><strong>S51</strong></td>
+<td style="text-align: left;">Dixon, Matthew, Freeman, Karen, &amp; Toman, Nicholas (2010) / Dixon, Toman, &amp; DeLisi (2013)</td>
+<td style="text-align: left;">"Stop Trying to Delight Your Customers" (<em>Harvard Business Review</em>, 88(7/8), 116–122) &amp; <em>The Effortless Experience</em> (synthesized in Chief Customer Officer &amp; CustomerSure)</td>
+<td style="text-align: left;">https://chiefcustomerofficer.io/newsletter/the-effortless-experience</td>
+<td style="text-align: left;">study / book</td>
+<td style="text-align: left;"><code>read in part</code> (via secondary empirical summaries)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S52"></span><strong>S52</strong></td>
+<td style="text-align: left;">Dzindolet, Mary T., Peterson, Scott A., Pomranky, Regina A., Pierce, Linda G., &amp; Beck, Hall P. (2003) / Pomranky et al. (2001)</td>
+<td style="text-align: left;">"Violations of Expectations: A Study of Automation Use" (<em>6th ICCRTS</em>) &amp; "The role of trust in automation reliance" (<em>International Journal of Human-Computer Studies</em>, 58(6), 697–718)</td>
+<td style="text-align: left;">http://www.dodccrp.org/events/6th_ICCRTS/Tracks/Papers/Track2/085_tr2.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code> (2001 ICCRTS paper)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S53"></span><strong>S53</strong></td>
+<td style="text-align: left;">Fielding, G. (2012)</td>
+<td style="text-align: left;">"Debunking the Customer Effort Score" (Horizon2 multi-company UK empirical replication studies, <em>Call Centre Helper</em>)</td>
+<td style="text-align: left;">https://www.callcentrehelper.com/debunking-the-customer-effort-score-28652.htm</td>
+<td style="text-align: left;">study / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S54"></span><strong>S54</strong></td>
+<td style="text-align: left;">Furqan, Anushay, Myers, Chelsea, &amp; Zhu, Jichen (2017)</td>
+<td style="text-align: left;"><em>Learnability through Adaptive Discovery Tools in Voice User Interfaces</em> (Drexel University Thesis &amp; <em>CHI EA '17</em>)</td>
+<td style="text-align: left;">https://doi.org/10.17918/etd-7358</td>
+<td style="text-align: left;">study (thesis &amp; CHI paper)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S55"></span><strong>S55</strong></td>
+<td style="text-align: left;">Gabarro, John J. (1978, 1979, 1987) / Wilson, Julie (2015)</td>
+<td style="text-align: left;">"The development of trust, influence, and expectations" (1978); "Socialization at the top—How CEOs and subordinates evolve interpersonal contracts" (<em>Organizational Dynamics</em>, 1979); "The Development of Working Relationships" (1987), quoted in Wilson (2015) &amp; ShareOK</td>
+<td style="text-align: left;">https://www.hbs.edu/faculty/Pages/item.aspx?num=7730 and https://etheses.whiterose.ac.uk/id/eprint/10041/1/THESIS%20Final%20version%20Julie%20Wilson.pdf</td>
+<td style="text-align: left;">study / book chapters</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S56"></span><strong>S56</strong></td>
+<td style="text-align: left;">Graen, George B., &amp; Uhl-Bien, Mary (1995)</td>
+<td style="text-align: left;">"Relationship-based approach to leadership: Development of leader-member exchange (LMX) theory of leadership over 25 years" (<em>The Leadership Quarterly</em>, 6(2), 219–247)</td>
+<td style="text-align: left;">https://doi.org/10.1016/1048-9843(95)90036-5</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (via Wilson 2015 [S55])  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S57"></span><strong>S57</strong></td>
+<td style="text-align: left;">Greenwood, Chelsea (2019) / Bryant, Adam (2013)</td>
+<td style="text-align: left;">"Managers are starting to make personal 'user manuals' that explain to their coworkers what makes them tick" (quoting Ivar Kroghrud's 2013 <em>NYT</em> Corner Office interview, <em>Business Insider</em>)</td>
+<td style="text-align: left;">https://www.businessinsider.com/personal-user-manuals-work-2019-4</td>
+<td style="text-align: left;">article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S58"></span><strong>S58</strong></td>
+<td style="text-align: left;">Hoff, Kevin Anthony, &amp; Bashir, Masooda (2015)</td>
+<td style="text-align: left;">"Trust in automation: Integrating empirical evidence on factors that influence trust" (<em>Human Factors</em>, 57(3), 407–434)</td>
+<td style="text-align: left;">https://doi.org/10.1177/0018720814547570</td>
+<td style="text-align: left;">study (systematic review)</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S59"></span><strong>S59</strong></td>
+<td style="text-align: left;">Horvitz, Eric (1999)</td>
+<td style="text-align: left;">"Principles of Mixed-Initiative User Interfaces" (<em>Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI '99)</em>, 159–166)</td>
+<td style="text-align: left;">http://erichorvitz.com/chi99horvitz.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S60"></span><strong>S60</strong></td>
+<td style="text-align: left;">Institute for Healthcare Improvement (IHI) (2024)</td>
+<td style="text-align: left;">"SBAR Tool: Situation-Background-Assessment-Recommendation"</td>
+<td style="text-align: left;">https://www.ihi.org/library/tools/sbar-tool-situation-background-assessment-recommendation</td>
+<td style="text-align: left;">guideline</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S61"></span><strong>S61</strong></td>
+<td style="text-align: left;">Kim, Peter H., Ferrin, Donald L., Cooper, Cecily D., &amp; Dirks, Kurt T. (2004)</td>
+<td style="text-align: left;">"Removing the shadow of suspicion: The effects of apology versus denial for repairing competence- versus integrity-based trust violations" (<em>Journal of Applied Psychology</em>, 89(1), 104–118)</td>
+<td style="text-align: left;">https://doi.org/10.1037/0021-9010.89.1.104</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S62"></span><strong>S62</strong></td>
+<td style="text-align: left;">Kohn, Spencer C., de Visser, Ewart J., Wiese, Eva, Lee, Yi-Ching, &amp; Shaw, Tyler H. (2021)</td>
+<td style="text-align: left;">"Measurement of Trust in Automation: A Narrative Review and Reference Guide" (<em>Frontiers in Psychology</em>, 12:604977)</td>
+<td style="text-align: left;">https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2021.604977/pdf</td>
+<td style="text-align: left;">study (review)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S63"></span><strong>S63</strong></td>
+<td style="text-align: left;">Larson, Eric (2019)</td>
+<td style="text-align: left;">"Personal READMEs and User Manuals" (citing Camille Fournier and Michael Lopp, <em>Ionrock</em>)</td>
+<td style="text-align: left;">https://ionrock.org/post/personal-readmes-and-user-manuals/</td>
+<td style="text-align: left;">article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S64"></span><strong>S64</strong></td>
+<td style="text-align: left;">Lee, John D., &amp; See, Katrina A. (2004)</td>
+<td style="text-align: left;">"Trust in automation: Designing for appropriate reliance" (<em>Human Factors</em>, 46(1), 50–80)</td>
+<td style="text-align: left;">https://csel.eng.ohio-state.edu/productions/intel/research/trust/Lee%20&amp;%20See%20Trust%20Review.pdf</td>
+<td style="text-align: left;">study (review)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S65"></span><strong>S65</strong></td>
+<td style="text-align: left;">Lin, Chi-Shiou (2010) / Dervin, Brenda, &amp; Dewdney, Patricia (1986) / Ross, Catherine S., Nilsen, Kirsti, &amp; Dewdney, Patricia (2002)</td>
+<td style="text-align: left;">"Neutral Questioning: A Sense-Making Technique for Reference Interview" (<em>Journal of Librarianship and Information Studies</em>, 2(1), 1–15)</td>
+<td style="text-align: left;">http://eprints.rclis.org/14555/1/Lin_-_Neutral_questioning.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S66"></span><strong>S66</strong></td>
+<td style="text-align: left;">Madhavan, Poornima, &amp; Wiegmann, Douglas A. (2005)</td>
+<td style="text-align: left;">"Cognitive anchoring on self-generated decisions reduces operator reliance on automated diagnostic aids" (<em>Human Factors</em>, 47(2), 332–341)</td>
+<td style="text-align: left;">https://doi.org/10.1518/0018720054679489</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S67"></span><strong>S67</strong></td>
+<td style="text-align: left;">Madhavan, Poornima, Wiegmann, Douglas A., &amp; Lacson, F. C. (2006)</td>
+<td style="text-align: left;">"Automation failures on tasks easily performed by operators undermine trust in automated aids" (<em>Human Factors</em>, 48(2), 241–256)</td>
+<td style="text-align: left;">https://doi.org/10.1518/001872006777724408</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S68"></span><strong>S68</strong></td>
+<td style="text-align: left;">Madhavan, Poornima, &amp; Wiegmann, Douglas A. (2007)</td>
+<td style="text-align: left;">"Effects of information source, pedigree, and reliability on operator interaction with decision support systems" (<em>Human Factors</em>, 49(5), 773–785)</td>
+<td style="text-align: left;">https://doi.org/10.1518/001872007x230154</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S69"></span><strong>S69</strong></td>
+<td style="text-align: left;">Mayer, Roger C., Davis, James H., &amp; Schoorman, F. David (1995) / Schoorman, Mayer, &amp; Davis (2007)</td>
+<td style="text-align: left;">"An integrative model of organizational trust" (<em>Academy of Management Review</em>, 20(3), 709–734) &amp; "An Integrative Model of Organizational Trust: Past, Present, and Future" (<em>AMR</em>, 32(2), 344–354)</td>
+<td style="text-align: left;">http://www.communicationcache.com/uploads/1/0/8/8/10887248/an_integrative_model_of_organizational_trust-_past_present_and_future.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1995) / <code>read fully</code> (2007)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S70"></span><strong>S70</strong></td>
+<td style="text-align: left;">Nielsen, Jakob (2006)</td>
+<td style="text-align: left;">"Progressive Disclosure" (<em>Nielsen Norman Group</em>)</td>
+<td style="text-align: left;">https://www.nngroup.com/articles/progressive-disclosure/</td>
+<td style="text-align: left;">guideline / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S71"></span><strong>S71</strong></td>
+<td style="text-align: left;">Parasuraman, Raja, Sheridan, Thomas B., &amp; Wickens, Christopher D. (2000) / Sheridan &amp; Verplank (1978)</td>
+<td style="text-align: left;">"A model for types and levels of human interaction with automation" (<em>IEEE Transactions on Systems, Man, and Cybernetics—Part A</em>, 30(3), 286–297)</td>
+<td style="text-align: left;">https://doi.org/10.1109/3468.844354 and https://andrewclark.co.uk/all-media/a-model-for-types-and-levels-of-human-interaction-with-automation</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code> (paper) / <code>read fully</code> (10-level summary)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S72"></span><strong>S72</strong></td>
+<td style="text-align: left;">Reference and User Services Association (RUSA) / American Library Association (2023)</td>
+<td style="text-align: left;"><em>Guidelines for Behavioral Performance of Reference and Information Service Providers</em></td>
+<td style="text-align: left;">https://www.ala.org/sites/default/files/rusa/content/Guidelines%20for%20Behavioral%20Performance%20of%20Reference%20and%20Information%20Service%20Providers%202023.pdf</td>
+<td style="text-align: left;">guideline</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S73"></span><strong>S73</strong></td>
+<td style="text-align: left;">Stange, Kurt C., &amp; Ferrer, Robert L. (2009)</td>
+<td style="text-align: left;">"The paradox of primary care" (<em>Annals of Family Medicine</em>, 7(4), 293–299)</td>
+<td style="text-align: left;">https://www.annfammed.org/content/annalsfm/7/4/293.full.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S74"></span><strong>S74</strong></td>
+<td style="text-align: left;">Starmer, Amy J., Spector, Nancy D., Srivastava, Rajendu, et al. (I-PASS Study Group) (2014)</td>
+<td style="text-align: left;">"Changes in medical errors after implementation of a handoff program" (<em>New England Journal of Medicine</em>, 371(19), 1803–1812)</td>
+<td style="text-align: left;">https://doi.org/10.1056/NEJMsa1405556</td>
+<td style="text-align: left;">study (multicenter clinical trial)</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S75"></span><strong>S75</strong></td>
+<td style="text-align: left;">Watkins, Michael D. (2003 / 2013)</td>
+<td style="text-align: left;"><em>The First 90 Days: Proven Strategies for Getting Up to Speed Faster and Smarter</em> (Harvard Business Review Press, quoted in Patrick, W., 2024)</td>
+<td style="text-align: left;">https://www.willpatrick.co.uk/notes/the-first-90-days-michael-watkins/</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;"><code>read in part</code> (via structured chapter notes &amp; quotes)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S76"></span><strong>S76</strong></td>
+<td style="text-align: left;">White, Ryen W. (2018)</td>
+<td style="text-align: left;">"Skill discovery in virtual assistants" (<em>Communications of the ACM</em>, 61(11), 106–113)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3185336</td>
+<td style="text-align: left;">study / article</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S77"></span><strong>S77</strong></td>
+<td style="text-align: left;">Zowghi, Didar, &amp; Coulin, Chad (2005) / Goguen, Joseph A., &amp; Linde, Charlotte (1993)</td>
+<td style="text-align: left;">"Requirements Elicitation: A Survey of Techniques, Approaches, and Tools" (In <em>Engineering and Managing Software Requirements</em>, pp. 19–46, Springer)</td>
+<td style="text-align: left;">https://web.eecs.umich.edu/~weimerw/2022-481W/readings/requirements.pdf</td>
+<td style="text-align: left;">study / book chapter</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Section 3: Digital Assistants Evidence, Adaptation, Learning Science, and Accessibility (<code>[S78]</code>–<code>[S121]</code>)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ID</th>
+<th style="text-align: left;">Author(s) &amp; Year</th>
+<th style="text-align: left;">Title</th>
+<th style="text-align: left;">URL / DOI</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Read Status  Link check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><span id="S78"></span><strong>S78</strong></td>
+<td style="text-align: left;">Luger, Ewa, &amp; Sellen, Abigail (2016)</td>
+<td style="text-align: left;"><em>"Like Having a Really Bad PA": The Gulf between User Expectation and Experience of Conversational Agents</em> (<em>Proceedings of CHI '16</em>, pp. 5286–5297)</td>
+<td style="text-align: left;">https://www.microsoft.com/en-us/research/wp-content/uploads/2016/08/p5286-luger.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,649 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S79"></span><strong>S79</strong></td>
+<td style="text-align: left;">Bentley, Frank, Luvogt, Chris, Silverman, Max, Wirasinghe, Rushani, White, Brooke, &amp; Lottridge, Danielle (2018)</td>
+<td style="text-align: left;"><em>Understanding the Long-Term Use of Smart Speaker Assistants</em> (<em>PACM IMWUT / UbiComp '18</em>, 2(3), Article 91, 1–24)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3264901</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S80"></span><strong>S80</strong></td>
+<td style="text-align: left;">Cowan, Benjamin R., Pantidi, Nadia, Coyle, David, et al. (2017)</td>
+<td style="text-align: left;"><em>"What can i help you with?": infrequent users' experiences of intelligent personal assistants</em> (<em>Proceedings of MobileHCI '17</em>, Article 43)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3098279.3098539</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S81"></span><strong>S81</strong></td>
+<td style="text-align: left;">Cho, Minji, Lee, Sang-su, &amp; Lee, Kun-Pyo (2019)</td>
+<td style="text-align: left;"><em>Once a Kind Friend is Now a Thing: Understanding How Conversational Agents at Home Are Forgotten</em> (<em>Proceedings of DIS '19</em>, pp. 1557–1569)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3322276.3322332</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S82"></span><strong>S82</strong></td>
+<td style="text-align: left;">Major, David, Huang, Danny Yuxing, Chetty, Marshini, &amp; Feamster, Nick (2019/2020)</td>
+<td style="text-align: left;"><em>Alexa, Who Am I Speaking To?: Understanding Users' Ability to Identify Third-Party Apps on Amazon Alexa</em> (<em>ACM Transactions on Internet Technology</em>)</td>
+<td style="text-align: left;">https://mlab.cyber.nyu.edu/static/djmajor-alexa-paper.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,253 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S83"></span><strong>S83</strong></td>
+<td style="text-align: left;">Mavrina, Evgeniia, Szczuka, Jessica, Strathmann, Clara, et al. (2022)</td>
+<td style="text-align: left;"><em>"Alexa, You're Really Stupid": A Longitudinal Field Study on Communication Breakdowns Between Family Members and a Voice Assistant</em> (<em>Frontiers in Computer Science</em>, 4:791704)</td>
+<td style="text-align: left;">https://www.frontiersin.org/articles/10.3389/fcomp.2022.791704/pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (2,048 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S84"></span><strong>S84</strong></td>
+<td style="text-align: left;">Gruber, John / Kim, Eugene (2022)</td>
+<td style="text-align: left;"><em>Business Insider: 'Amazon Alexa Is a "Colossal Failure," on Pace to Lose $10 Billion This Year'</em> (<em>Daring Fireball</em> / <em>Business Insider</em>)</td>
+<td style="text-align: left;">https://daringfireball.net/linked/2022/11/21/amazon-alexa-losses</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S85"></span><strong>S85</strong></td>
+<td style="text-align: left;">Hern, Alex (2022)</td>
+<td style="text-align: left;"><em>TechScape: How crushed dreams and ceiling clocks left Amazon's Alexa a $10bn 'failure'</em> (<em>The Guardian</em>)</td>
+<td style="text-align: left;">https://www.theguardian.com/technology/2022/nov/30/amazon-alexa-echo-failure-loss</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S86"></span><strong>S86</strong></td>
+<td style="text-align: left;">Horvitz, Eric, Breese, Jack, Heckerman, David, Hovel, David, &amp; Rommelse, Koos (1998)</td>
+<td style="text-align: left;"><em>The Lumiere Project: Bayesian User Modeling for Inferring the Goals and Needs of Software Users</em> (<em>Proceedings of UAI '98</em>, pp. 256–265)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/1301.7385.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S87"></span><strong>S87</strong></td>
+<td style="text-align: left;">Swartz, Luke (2003)</td>
+<td style="text-align: left;"><em>Why People Hate the Paperclip: Labels, Appearance, Behavior, and Social Responses to User Interface Agents</em> (Stanford University Honors Thesis under C. Nass &amp; B. Nardi)</td>
+<td style="text-align: left;">https://web.archive.org/web/20201111212650id_/http://xenon.stanford.edu/~lswartz/paperclip/paperclip.pdf</td>
+<td style="text-align: left;">study (thesis)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S88"></span><strong>S88</strong></td>
+<td style="text-align: left;">Xiao, Jun, Catrambone, Richard, &amp; Stasko, John (2003)</td>
+<td style="text-align: left;"><em>Be Quiet? Evaluating Proactive and Reactive User Interface Assistants</em> (<em>Proceedings of INTERACT '03</em>, pp. 383–390)</td>
+<td style="text-align: left;">https://faculty.cc.gatech.edu/~stasko/papers/interact03.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (929 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S89"></span><strong>S89</strong></td>
+<td style="text-align: left;">Catrambone, Richard, Stasko, John, &amp; Xiao, Jun (2002)</td>
+<td style="text-align: left;"><em>Anthropomorphic Agents as a User Interface Paradigm: Experimental Findings and a Framework for Research</em> (<em>Proceedings of CogSci 2002</em>)</td>
+<td style="text-align: left;">https://faculty.cc.gatech.edu/~stasko/papers/cogsci02.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (748 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S90"></span><strong>S90</strong></td>
+<td style="text-align: left;">Laestadius, Linnea, Bishop, Andrea, Gonzalez, Michael, Illenčík, Diana, &amp; Campos-Castillo, Celeste (2022/2024)</td>
+<td style="text-align: left;"><em>"Too human and not human enough": A grounded theory analysis of mental health harms from emotional dependence on the social chatbot Replika</em> (<em>New Media &amp; Society</em>, 26(10), 5923–5941)</td>
+<td style="text-align: left;">https://doi.org/10.1177/14614448221142007</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S91"></span><strong>S91</strong></td>
+<td style="text-align: left;">Skjuve, Marita, Følstad, Asbjørn, Fostervold, Knut Inge, &amp; Brandtzæg, Petter (2021)</td>
+<td style="text-align: left;"><em>My Chatbot Companion - a Study of Human-Chatbot Relationships</em> (<em>International Journal of Human-Computer Studies</em>, 149:102601)</td>
+<td style="text-align: left;">https://doi.org/10.1016/j.ijhcs.2021.102601</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S92"></span><strong>S92</strong></td>
+<td style="text-align: left;">Skjuve, Marita, Følstad, Asbjørn, Fostervold, Knut Inge, &amp; Brandtzæg, Petter (2022)</td>
+<td style="text-align: left;"><em>A longitudinal study of human–chatbot relationships</em> (<em>International Journal of Human-Computer Studies</em>, 168:102903)</td>
+<td style="text-align: left;">https://doi.org/10.1016/j.ijhcs.2022.102903</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S93"></span><strong>S93</strong></td>
+<td style="text-align: left;">Neff, Gina, &amp; Nagy, Peter (2025)</td>
+<td style="text-align: left;"><em>Great expectations: How companion AI makes and breaks orbital relationships</em> (<em>New Media &amp; Society</em>)</td>
+<td style="text-align: left;">https://doi.org/10.1177/14614448251359218</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S94"></span><strong>S94</strong></td>
+<td style="text-align: left;">Alberts, Max, Lyngs, Ulrik, &amp; Van Kleek, Max (2024)</td>
+<td style="text-align: left;"><em>Computers as Bad Social Actors: Dark Patterns and Anti-Patterns in Interfaces that Act Socially</em> (<em>PACM HCI / CSCW '24</em>, 8, Article 202)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3653693</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S95"></span><strong>S95</strong></td>
+<td style="text-align: left;">Zaman, S M Mehedi, &amp; Hoque, Md Mozammel (2026)</td>
+<td style="text-align: left;"><em>Vulnerabilities in Personalization: Assessing Health Privacy Risks in ChatGPT Logs and Memory</em> (<em>arXiv:2609.14697v1</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2609.14697v1.pdf</td>
+<td style="text-align: left;">study (computational audit, N=1,057)</td>
+<td style="text-align: left;"><code>read in part</code> (1,717 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S96"></span><strong>S96</strong></td>
+<td style="text-align: left;">Torres, George, Shrestha, Sharad, &amp; Misra, Satyajayant (2026)</td>
+<td style="text-align: left;"><em>When Agents Remember Too Much: Memory Poisoning Attacks on Large Language Model Agents</em> (<em>arXiv:2607.06595v1</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2607.06595v1.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,665 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S97"></span><strong>S97</strong></td>
+<td style="text-align: left;">MacDonald, Cheyenne (2025)</td>
+<td style="text-align: left;"><em>Humane is shutting down the AI Pin and selling its remnants to HP</em> (<em>Engadget</em>)</td>
+<td style="text-align: left;">https://www.engadget.com/ai/humane-is-shutting-down-the-ai-pin-and-selling-its-remnants-to-hp-213922460.html</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S98"></span><strong>S98</strong></td>
+<td style="text-align: left;">Khan, Imad (2025)</td>
+<td style="text-align: left;"><em>Humane's $700 AI Pin Is Dead and the Lessons Are Clear</em> (<em>CNET</em>)</td>
+<td style="text-align: left;">https://www.cnet.com/tech/services-and-software/humanes-700-ai-pin-is-dead-and-the-lessons-are-clear/</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S99"></span><strong>S99</strong></td>
+<td style="text-align: left;">Zeff, Maxwell (2024)</td>
+<td style="text-align: left;"><em>Humane's Daily AI Pin Returns Outpace Sales</em> (<em>Gizmodo</em>)</td>
+<td style="text-align: left;">https://gizmodo.com/humanes-daily-ai-pin-returns-outpace-sales-2000484366</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S100"></span><strong>S100</strong></td>
+<td style="text-align: left;">AI Gadgets Lab (2025) &amp; Hansen, Thomas (2024)</td>
+<td style="text-align: left;"><em>Rabbit R1 vs Humane AI Pin: What Went Wrong with Dedicated AI Hardware?</em> &amp; <em>Rabbit R1 is a Scam</em></td>
+<td style="text-align: left;">https://aigadgetslab.com/rabbit-r1-vs-humane-ai-pin-post-mortem/ and https://ainiro.io/blog/rabbit-r1-is-a-scam</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S101"></span><strong>S101</strong></td>
+<td style="text-align: left;">Pero, James (2024)</td>
+<td style="text-align: left;"><em>Ray-Ban Meta Smart Glasses Succeed Where the Humane AI Pin and Rabbit R1 Fail</em> (<em>Gizmodo</em>)</td>
+<td style="text-align: left;">https://gizmodo.com/ray-ban-meta-smart-glasses-humane-ai-pin-rabbit-r1-1851435733</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S102"></span><strong>S102</strong></td>
+<td style="text-align: left;">Song, Victoria (2024)</td>
+<td style="text-align: left;"><em>AI pendants are awkward, weird—and total snitches</em> (<em>The Verge</em> / <em>The San Francisco Standard</em>)</td>
+<td style="text-align: left;">https://sfstandard.com/2024/10/28/wearable-ai-note-taker-gossip/</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S103"></span><strong>S103</strong></td>
+<td style="text-align: left;">Al-Sibai, Noor (2026)</td>
+<td style="text-align: left;"><em>Meta Hit With Lawsuit After Workers Say They Saw Footage of Ray-Ban Wearers on the Toilet and Having Sex</em> (<em>Futurism</em>)</td>
+<td style="text-align: left;">https://futurism.com/artificial-intelligence/meta-lawsuit-footage-ray-ban-wearers</td>
+<td style="text-align: left;">article (investigative report)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S104"></span><strong>S104</strong></td>
+<td style="text-align: left;">Malkin, Nathan, Deatrick, Joe, Tong, Allen, Wijesekera, Primal, Egelman, Serge, &amp; Wagner, David (2019)</td>
+<td style="text-align: left;"><em>Privacy Attitudes of Smart Speaker Users</em> (<em>Proceedings on Privacy Enhancing Technologies / PoPETs</em>, 2019(4), 250–271)</td>
+<td style="text-align: left;">https://petsymposium.org/popets/2019/popets-2019-0068.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S105"></span><strong>S105</strong></td>
+<td style="text-align: left;">Lau, Josephine, Zimmerman, Benjamin, &amp; Schaub, Florian (2018)</td>
+<td style="text-align: left;"><em>Alexa, Are You Listening?: Privacy Perceptions, Concerns and Privacy-seeking Behaviors with Smart Speakers</em> (<em>PACM HCI / CSCW '18</em>, 2:102) &amp; SOUPS '18 poster <em>"Alexa, Stop Recording"</em></td>
+<td style="text-align: left;">https://doi.org/10.1145/3274371 and https://www.usenix.org/sites/default/files/soups2018posters-lau.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;">CSCW <code>abstract only</code>; SOUPS <code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S106"></span><strong>S106</strong></td>
+<td style="text-align: left;">Weston, David (2024), Lakshmanan, Ravie (2024), &amp; Kan, Michael (2024)</td>
+<td style="text-align: left;"><em>Update on Recall security and privacy architecture</em> (<em>Microsoft Windows Experience Blog</em>), <em>Microsoft Makes Windows Recall Opt-In Default</em> (<em>The Hacker News</em>), &amp; <em>Stealing Everything You've Ever Typed...</em> (<em>PCMag</em>)</td>
+<td style="text-align: left;">https://blogs.windows.com/windowsexperience/2024/09/27/update-on-recall-security-and-privacy-architecture/ and https://thehackernews.com/2024/06/microsoft-makes-windows-recall-opt-in.html</td>
+<td style="text-align: left;">post-mortem / article</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S107"></span><strong>S107</strong></td>
+<td style="text-align: left;">Isaacs, Ellen A., &amp; Clark, Herbert H. (1987)</td>
+<td style="text-align: left;"><em>References in Conversation Between Experts and Novices</em> (<em>Journal of Experimental Psychology: General</em>, 116(1), 26–37)</td>
+<td style="text-align: left;">https://web.stanford.edu/~clark/1980s/Isaacs,%20E.A.%20_%20Clark,%20H.H.%20_References%20in%20conversations%20between%20experts%20and%20novices_%201987.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,723 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S108"></span><strong>S108</strong></td>
+<td style="text-align: left;">Clark, Herbert H., &amp; Brennan, Susan E. (1991)</td>
+<td style="text-align: left;"><em>Grounding in Communication</em> (In <em>Perspectives on Socially Shared Cognition</em>, pp. 127–149, APA)</td>
+<td style="text-align: left;">https://web.stanford.edu/~clark/1990s/Clark,%20H.H.%20_%20Brennan,%20S.E.%20_Grounding%20in%20communication_%201991.pdf</td>
+<td style="text-align: left;">book chapter / study</td>
+<td style="text-align: left;"><code>read in part</code> (1,049 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S109"></span><strong>S109</strong></td>
+<td style="text-align: left;">Ryan, Ellen B., Hummert, Mary Lee, &amp; Boich, Linda H. (1995)</td>
+<td style="text-align: left;"><em>Communication Predicaments of Aging: Patronizing Behavior Toward Older Adults</em> (<em>Journal of Language and Social Psychology</em>, 14(1–2), 144–166)</td>
+<td style="text-align: left;">https://doi.org/10.1177/0261927x95141008</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S110"></span><strong>S110</strong></td>
+<td style="text-align: left;">Williams, Kristine, Kemper, Susan, &amp; Hummert, Mary Lee (2004)</td>
+<td style="text-align: left;"><em>Enhancing Communication With Older Adults: Overcoming Elderspeak</em> (<em>Journal of Gerontological Nursing</em>, 30(10), 17–25, citing Kemper 1994)</td>
+<td style="text-align: left;">http://www.communicationcache.com/uploads/1/0/8/8/10887248/enhancing_communication_with_older_adults_-_overcoming_elderspeak.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,012 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S111"></span><strong>S111</strong></td>
+<td style="text-align: left;">Wood, David, Bruner, Jerome S., &amp; Ross, Gail (1976)</td>
+<td style="text-align: left;"><em>The Role of Tutoring in Problem Solving</em> (<em>Journal of Child Psychology and Psychiatry</em>, 17(2), 89–100)</td>
+<td style="text-align: left;">https://doi.org/10.1111/j.1469-7610.1976.tb00381.x</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S112"></span><strong>S112</strong></td>
+<td style="text-align: left;">Kalyuga, Slava, Ayres, Paul, Chandler, Paul, &amp; Sweller, John (2003) / Kalyuga (2009)</td>
+<td style="text-align: left;"><em>The Expertise Reversal Effect</em> (<em>Educational Psychologist</em>, 38(1), 23–31)</td>
+<td style="text-align: left;">https://doi.org/10.1207/s15326985ep3801_4</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S113"></span><strong>S113</strong></td>
+<td style="text-align: left;">Jameson, Anthony (2007/2008)</td>
+<td style="text-align: left;"><em>Adaptive Interfaces and Agents</em> (In <em>The Human-Computer Interaction Handbook</em>, 2nd ed., pp. 433–458)</td>
+<td style="text-align: left;">https://www.cs.ubc.ca/~conati/422/422-2010World/READINGS/Jameson08Handbook.pdf</td>
+<td style="text-align: left;">book chapter / study</td>
+<td style="text-align: left;"><code>read in part</code> (2,500 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S114"></span><strong>S114</strong></td>
+<td style="text-align: left;">Seeman-Horwitz, Lisa, Montgomery, Rachael Bradley, Lee, Steve, &amp; Ran, Ruoxi (Eds.) (2021)</td>
+<td style="text-align: left;"><em>Making Content Usable for People with Cognitive and Learning Disabilities (W3C WAI COGA)</em></td>
+<td style="text-align: left;">https://www.w3.org/TR/coga-usable/</td>
+<td style="text-align: left;">guideline (W3C standard)</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S115"></span><strong>S115</strong></td>
+<td style="text-align: left;">Pradhan, Alisha, Mehta, Kanika, &amp; Findlater, Leah (2018)</td>
+<td style="text-align: left;"><em>"Accessibility Came by Accident": Use of Voice-Controlled Intelligent Personal Assistants by People with Disabilities</em> (<em>Proceedings of CHI '18</em>, Paper 459, 1–13)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3173574.3174033</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,722 lines read)  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S116"></span><strong>S116</strong></td>
+<td style="text-align: left;">Pradhan, Alisha, Findlater, Leah, &amp; Lazar, Amanda (2019)</td>
+<td style="text-align: left;"><em>"Phantom Friend" or "Just a Box with Information": Personification and Ontological Categorization of Smart Speaker-based Voice Assistants by Older Adults</em> (<em>PACM HCI / CSCW '19</em>, 3:214)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3359316</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,136 lines read)  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S117"></span><strong>S117</strong></td>
+<td style="text-align: left;">Pradhan, Alisha, Lazar, Amanda, &amp; Findlater, Leah (2020)</td>
+<td style="text-align: left;"><em>Use of Intelligent Voice Assistants by Older Adults with Low Technology Use</em> (<em>ACM TOCHI</em>, 27(4), Article 31, 1–27)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3373759</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,452 lines read)  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S118"></span><strong>S118</strong></td>
+<td style="text-align: left;">Branham, Stacy M., &amp; Mukkath Roy, Antony Rishin (2019) / Abdolrahmani et al. (2018) / Masina et al. (2020)</td>
+<td style="text-align: left;"><em>Reading Between the Guidelines: How Commercial Voice Assistant Guidelines Hinder Accessibility for Blind Users</em> (<em>ASSETS '19</em>, 446–458); <em>"Siri Talks at You"</em> (<em>ASSETS '18</em>); &amp; <em>Accessibility of Voice Assistants With Impaired Users</em> (<em>JMIR</em>, 22(9):e18431)</td>
+<td style="text-align: left;">https://doi.org/10.1145/3308561.3353797 and https://doi.org/10.2196/18431</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S119"></span><strong>S119</strong></td>
+<td style="text-align: left;">Carik, Buse, Ping, Kaike, Ding, Xiaohan, &amp; Rho, Eugenia H. (2024/2025)</td>
+<td style="text-align: left;"><em>Exploring Large Language Models Through a Neurodivergent Lens: Use, Challenges, Community-Driven Workarounds, and Concerns</em> (<em>ACM GROUP '25</em> / <em>arXiv:2410.06336v1</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2410.06336v1.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (2,241 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S120"></span><strong>S120</strong></td>
+<td style="text-align: left;">McGrenere, Joanna, Baecker, Ronald M., &amp; Booth, Kellogg S. (2002)</td>
+<td style="text-align: left;"><em>An Evaluation of a Multiple Interface Design Solution for Bloated Software</em> (<em>Proceedings of CHI '02</em>, pp. 163–170)</td>
+<td style="text-align: left;">https://www.cs.ubc.ca/labs/edapt/papers/mcGrenere2002.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (1,038 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S121"></span><strong>S121</strong></td>
+<td style="text-align: left;">Mackay, Wendy E. (1991) / Chilton et al. (2010) / Eagan &amp; Stasko (2008)</td>
+<td style="text-align: left;"><em>Triggers and Barriers to Customizing Software</em> (<em>Proceedings of CHI '91</em>, 153–160); <em>Why We Customize the Web</em> (MIT CSAIL); &amp; <em>The Buzz</em> (Georgia Tech)</td>
+<td style="text-align: left;">https://doi.org/10.1145/108844.108867 and https://up.csail.mit.edu/other-pubs/why-we-customize.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;">Mackay <code>abstract only</code>; Chilton <code>read in part</code>; Eagan <code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Section 4: Pitfalls, Security, Privacy, Automation Bias, and Expert Critique (<code>[S122]</code>–<code>[S150]</code>)</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">ID</th>
+<th style="text-align: left;">Author(s) &amp; Year</th>
+<th style="text-align: left;">Title</th>
+<th style="text-align: left;">URL / DOI</th>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Read Status  Link check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><span id="S122"></span><strong>S122</strong></td>
+<td style="text-align: left;">Abercrombie, Gavin, Cercas Curry, Amanda, Dinkar, Tanvi, Rieser, Verena, &amp; Talat, Zeerak (2023)</td>
+<td style="text-align: left;"><em>Mirages: On Anthropomorphism in Dialogue Systems</em> (<em>Proceedings of EMNLP 2023</em>)</td>
+<td style="text-align: left;">https://ar5iv.labs.arxiv.org/html/2305.09800</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S123"></span><strong>S123</strong></td>
+<td style="text-align: left;">Ancker, Jessica S., Edwards, Alison, Nosal, Sarah, Hauser, Diane, Mauer, Elizabeth, &amp; Kaushal, Rainu (2017)</td>
+<td style="text-align: left;"><em>Effects of workload, work complexity, and repeated alerts on alert fatigue in a clinical decision support system</em> (<em>BMC Medical Informatics and Decision Making</em>, 17:36, PMCID: PMC5387195)</td>
+<td style="text-align: left;">https://doi.org/10.1186/s12911-017-0430-8</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S124"></span><strong>S124</strong></td>
+<td style="text-align: left;">Bainbridge, Lisanne (1983)</td>
+<td style="text-align: left;"><em>Ironies of Automation</em> (<em>Automatica</em>, 19(6), 775–779; verified via Strauch 2017 and Lee et al. 2025 [S130])</td>
+<td style="text-align: left;">https://doi.org/10.1016/0005-1098(83)90046-8</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> LINK DEAD (404): the claimed reading cannot be confirmed.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S125"></span><strong>S125</strong></td>
+<td style="text-align: left;">Bravo-Lillo, Cristian, Cranor, Lorrie Faith, Downs, Julie, Komanduri, Saranga, &amp; Sleeper, Manya (2011)</td>
+<td style="text-align: left;"><em>Improving Computer Security Dialogs</em> (<em>INTERACT 2011</em>, LNCS vol. 6949)</td>
+<td style="text-align: left;">https://doi.org/10.1007/978-3-642-23768-3_2</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S126"></span><strong>S126</strong></td>
+<td style="text-align: left;">Carroll, Micah, Chan, Alan, Ashton, Henry, &amp; Krueger, David (2023)</td>
+<td style="text-align: left;"><em>Characterizing Manipulation from AI Systems</em> (<em>Proceedings of EAAMO '23</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2303.09387</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S127"></span><strong>S127</strong></td>
+<td style="text-align: left;">Dong, Shen, Xu, Shaochen, He, Pengfei, Li, Yige, Tang, Jiliang, Liu, Tianming, Liu, Hui, &amp; Xiang, Zhen (2025)</td>
+<td style="text-align: left;"><em>Memory Injection Attacks on LLM Agents via Query-Only Interaction (MINJA)</em> (<em>NeurIPS 2025</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2503.03704</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S128"></span><strong>S128</strong></td>
+<td style="text-align: left;">Gabriel, Iason, Manzini, Arianna, Keeling, Geoff, Hendricks, Lisa Anne, Rieser, Verena, Iqbal, Hasan, Tomašev, Nenad, Ktena, Ira, Trask, Andrew, Vallor, Shannon, Morris, Meredith Ringel, et al. (2024)</td>
+<td style="text-align: left;"><em>The Ethics of Advanced AI Assistants</em> (Google DeepMind Monograph) &amp; Manzini et al. (2024) <em>The Code That Binds Us</em> (<em>AIES '24</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2404.16244 and https://doi.org/10.1609/aies.v7i1.31694</td>
+<td style="text-align: left;">book / study</td>
+<td style="text-align: left;"><code>read in part</code> (Exec. Summary, Ch. 1, Ch. 10, Ch. 11, Ch. 12, Ch. 13 read fully)  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S129"></span><strong>S129</strong></td>
+<td style="text-align: left;">Goddard, Kate S., Roudsari, Abdul, &amp; Wyatt, Jeremy C. (2012) / Lyell et al. (2017) / Skitka et al. (1999)</td>
+<td style="text-align: left;"><em>Automation bias: a systematic review of frequency, effect mediators, and mitigators</em> (<em>JAMIA</em>, 19(1), 121–127)</td>
+<td style="text-align: left;">https://doi.org/10.1136/amiajnl-2011-000089 and https://doi.org/10.1006/ijhc.1999.0252</td>
+<td style="text-align: left;">study (systematic review)</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S130"></span><strong>S130</strong></td>
+<td style="text-align: left;">Lee, Hao-Ping (Hank), Sarkar, Advait, Tankelevitch, Lev, Drosos, Ian, Rintel, Sean, Banks, Richard, &amp; Wilson, Nicholas (2025)</td>
+<td style="text-align: left;"><em>The Impact of Generative AI on Critical Thinking: Self-Reported Reductions in Cognitive Effort and Confidence Effects From a Survey of Knowledge Workers</em> (<em>Proceedings of CHI '25</em>)</td>
+<td style="text-align: left;">https://www.microsoft.com/en-us/research/wp-content/uploads/2025/01/lee_2025_ai_critical_thinking_survey.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (2,872 lines read)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S131"></span><strong>S131</strong></td>
+<td style="text-align: left;">Greshake, Kai, Abdelnabi, Sahar, Mishra, Shailesh, Endres, Christoph, Holz, Thorsten, &amp; Fritz, Mario (2023)</td>
+<td style="text-align: left;"><em>Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection</em> (<em>Proceedings of AISec '23</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2302.12173</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S132"></span><strong>S132</strong></td>
+<td style="text-align: left;">Horvitz, Eric, &amp; Apacible, Johnson (2003) / Iqbal, Shamsi T., &amp; Bailey, Brian P. (2005)</td>
+<td style="text-align: left;"><em>Learning and reasoning about interruption</em> (<em>ICMI '03</em>, 20–27) &amp; <em>Investigating the effectiveness of mental workload as a predictor of opportune moments for interruption</em> (<em>CHI '05</em>, 1489–1492)</td>
+<td style="text-align: left;">https://doi.org/10.1145/958439.958440 and https://doi.org/10.1145/1056808.1056948</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S133"></span><strong>S133</strong></td>
+<td style="text-align: left;">Parasuraman, Raja, &amp; Riley, Victor (1997) / Lee, John D. (2008)</td>
+<td style="text-align: left;"><em>Humans and Automation: Use, Misuse, Disuse, Abuse</em> (<em>Human Factors</em>, 39(2), 230–253; reviewed in <em>Human Factors</em>, 50(3), 404–410)</td>
+<td style="text-align: left;">https://doi.org/10.1518/001872097778543886 and https://doi.org/10.1518/001872008x288547</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S134"></span><strong>S134</strong></td>
+<td style="text-align: left;">Lukas, Nils, Salem, Ahmed, Sim, Robert, Tople, Shruti, Wutschitz, Lukas, &amp; Zanella-Béguelin, Santiago (2023)</td>
+<td style="text-align: left;"><em>Analyzing Leakage of Personally Identifiable Information in Language Models</em> (<em>2023 IEEE Symposium on Security and Privacy</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2302.00539</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S135"></span><strong>S135</strong></td>
+<td style="text-align: left;">Moore, Jared, Grabb, Declan, Agnew, William, Klyman, Kevin, Chancellor, Stevie, Ong, Desmond C., &amp; Haber, Nick (2025)</td>
+<td style="text-align: left;"><em>Expressing stigma and inappropriate responses prevents LLMs from safely replacing mental health providers</em> (<em>Proceedings of ACM FAccT '25</em>)</td>
+<td style="text-align: left;">https://arxiv.org/html/2504.18412v1</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (§1–§8 read fully)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S136"></span><strong>S136</strong></td>
+<td style="text-align: left;">Greenwood, D., &amp; Shang, J. (2026)</td>
+<td style="text-align: left;"><em>Youth and emotional vulnerability predict chatbot appeal</em> (<em>Frontiers in Psychology</em>, 17:1983308, PMCID: PMC13713514)</td>
+<td style="text-align: left;">https://doi.org/10.3389/fpsyg.2026.1983308</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S137"></span><strong>S137</strong></td>
+<td style="text-align: left;">Narayanan, Arvind, &amp; Shmatikov, Vitaly (2008)</td>
+<td style="text-align: left;"><em>Robust De-anonymization of Large Sparse Datasets</em> (<em>2008 IEEE Symposium on Security and Privacy</em>, pp. 111–125)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/cs/0610105</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S138"></span><strong>S138</strong></td>
+<td style="text-align: left;">Nissenbaum, Helen (2004)</td>
+<td style="text-align: left;"><em>Privacy as Contextual Integrity</em> (<em>Washington Law Review</em>, 79(1), 119–158; analyzed in Gabriel et al. 2024 Ch. 13 [S128])</td>
+<td style="text-align: left;">https://doi.org/10.2139/ssrn.3244876 and https://arxiv.org/pdf/2404.16244</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, little text to check (abstract or landing page).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S139"></span><strong>S139</strong></td>
+<td style="text-align: left;">Norman, Donald A. (1983) / Sellen, Abigail, Kurtenbach, Gordon, &amp; Buxton, William (1992)</td>
+<td style="text-align: left;"><em>Design rules based on analyses of human error</em> (<em>CACM</em>, 26(4), 254–258) &amp; <em>The Prevention of Mode Errors Through Sensory Feedback</em> (<em>Human-Computer Interaction</em>, 7(2), 141–164)</td>
+<td style="text-align: left;">https://doi.org/10.1145/2163.358092 and https://doi.org/10.1207/s15327051hci0702_1</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S140"></span><strong>S140</strong></td>
+<td style="text-align: left;">Perez, Ethan, Ringer, Sam, Lukošiūtė, Kamilė, et al. (2022)</td>
+<td style="text-align: left;"><em>Discovering Language Model Behaviors with Model-Written Evaluations</em> (Anthropic)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2212.09251</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S141"></span><strong>S141</strong></td>
+<td style="text-align: left;">Ruan, Yangjun, Dong, Honghua, Wang, Andrew, et al. (2023/2024)</td>
+<td style="text-align: left;"><em>Identifying the Risks of LM Agents with an LM-Emulated Sandbox (ToolEmu)</em> (<em>ICLR 2024</em>)</td>
+<td style="text-align: left;">https://ar5iv.labs.arxiv.org/html/2309.15817</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S142"></span><strong>S142</strong></td>
+<td style="text-align: left;">Sas, Corina, &amp; Whittaker, Steve (2013)</td>
+<td style="text-align: left;"><em>Design for forgetting: disposing of digital possessions after a breakup</em> (<em>Proceedings of CHI '13</em>, pp. 1823–1832)</td>
+<td style="text-align: left;">https://doi.org/10.1145/2470654.2466241</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S143"></span><strong>S143</strong></td>
+<td style="text-align: left;">Seo, Minjae, Choi, Wonje, Han, G., et al. (2026)</td>
+<td style="text-align: left;"><em>MEMORY Wins All: Indirect Bias Injection Attacks via Social Media Feeds</em> (<em>arXiv:2608.22061</em>)</td>
+<td style="text-align: left;">https://arxiv.org/abs/2608.22061</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S144"></span><strong>S144</strong></td>
+<td style="text-align: left;">Sharma, Mrinank, Tong, Meg, Korbak, Tomasz, Duvenaud, David, Askell, Amanda, Bowman, Samuel R., et al. (2023/2024)</td>
+<td style="text-align: left;"><em>Towards Understanding Sycophancy in Language Models</em> (<em>ICLR 2024</em>, Anthropic)</td>
+<td style="text-align: left;">https://arxiv.org/html/2310.13548v4</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (§1–§4.3 read fully)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S145"></span><strong>S145</strong></td>
+<td style="text-align: left;">Shavit, Yonadav, Agarwal, Sandhini, Brundage, Miles, et al. (2023)</td>
+<td style="text-align: left;"><em>Practices for Governing Agentic AI Systems</em> (OpenAI White Paper)</td>
+<td style="text-align: left;">https://cdn.openai.com/papers/practices-for-governing-agentic-ai-systems.pdf</td>
+<td style="text-align: left;">guideline / study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S146"></span><strong>S146</strong></td>
+<td style="text-align: left;">Shklovski, Irina, Mainwaring, Scott D., Skúladóttir, Halla Hrund, &amp; Borgthorsson, Höskuldur (2014) / Ur, Blase, et al. (2012) / Tene, Omer, &amp; Polonetsky, Jules (2013)</td>
+<td style="text-align: left;"><em>Leakiness and creepiness in app space: perceptions of privacy and mobile app use</em> (<em>CHI '14</em>, 2347–2356); <em>Smart, useful, scary, creepy</em> (<em>SOUPS '12</em>); &amp; <em>A Theory of Creepy</em> (<em>Yale J. Law &amp; Tech.</em>)</td>
+<td style="text-align: left;">https://doi.org/10.1145/2556288.2557421 and https://doi.org/10.1145/2335356.2335362</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S147"></span><strong>S147</strong></td>
+<td style="text-align: left;">Staab, Robin, Vero, Mark, Balunović, Mislav, &amp; Vechev, Martin (2024)</td>
+<td style="text-align: left;"><em>Beyond Memorization: Violating Privacy via Inference with Large Language Models</em> (<em>ICLR 2024</em>, ETH Zurich)</td>
+<td style="text-align: left;">https://ar5iv.labs.arxiv.org/html/2310.07298</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S148"></span><strong>S148</strong></td>
+<td style="text-align: left;">Susser, Daniel, Roessler, Beate, &amp; Nissenbaum, Helen (2019)</td>
+<td style="text-align: left;"><em>Technology, autonomy, and manipulation</em> (<em>Internet Policy Review</em>, 8(2))</td>
+<td style="text-align: left;">https://policyreview.info/articles/analysis/technology-autonomy-and-manipulation</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code> (§1–§3 read fully)  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S149"></span><strong>S149</strong></td>
+<td style="text-align: left;">Sweeney, Latanya (2000)</td>
+<td style="text-align: left;"><em>Simple Demographics Often Identify People Uniquely</em> (CMU Data Privacy Working Paper 3)</td>
+<td style="text-align: left;">https://dataprivacylab.org/projects/identifiability/paper1.pdf</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S150"></span><strong>S150</strong></td>
+<td style="text-align: left;">Wei, Jerry, Huang, Da, Lu, Yifeng, Zhou, Denny, &amp; Le, Quoc V. (2023/2024)</td>
+<td style="text-align: left;"><em>Simple synthetic data reduces sycophancy in large language models</em> (Google DeepMind)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2308.03958</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>read in part</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S151"></span><strong>S151</strong></td>
+<td style="text-align: left;">Weizenbaum, Joseph (1966)</td>
+<td style="text-align: left;"><em>ELIZA—A Computer Program For the Study of Natural Language Communication Between Man and Machine</em> (<em>Communications of the ACM</em>, 9(1), 36–45)</td>
+<td style="text-align: left;">https://doi.org/10.1145/365153.365168</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S152"></span><strong>S152</strong></td>
+<td style="text-align: left;">Willison, Simon (2025)</td>
+<td style="text-align: left;"><em>The lethal trifecta for AI agents: private data, untrusted content, and external communication</em> (<em>Simon Willison's Weblog</em>)</td>
+<td style="text-align: left;">https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/</td>
+<td style="text-align: left;">article (security analysis)</td>
+<td style="text-align: left;"><code>read fully</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S153"></span><strong>S153</strong></td>
+<td style="text-align: left;">Yankelovich, Nicole, Levow, Gina-Anne, &amp; Marx, Matt (1995)</td>
+<td style="text-align: left;"><em>Designing SpeechActs: Issues in Speech User Interfaces</em> (<em>Proceedings of CHI '95</em>, pp. 369–376)</td>
+<td style="text-align: left;">https://doi.org/10.1145/223904.223952</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> blocked to scripts (403 or network): not checked.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span id="S154"></span><strong>S154</strong></td>
+<td style="text-align: left;">Singh, A., Guan, Z., &amp; Rieh, S. Y. (2025)</td>
+<td style="text-align: left;"><em>Enhancing Critical Thinking in Generative AI Search with Metacognitive Prompts</em> (<em>arXiv:2505.24014</em>)</td>
+<td style="text-align: left;">https://arxiv.org/pdf/2505.24014</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;"><code>abstract only</code>  <strong>Link check 2026-11-01:</strong> link works, text checked.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Section 5: Sources That Could Not Be Opened (Logged, Not Cited as Read)</h2>
+<p>Per the research brief instructions (<em>"If a source cannot be opened, say so and do not cite it as read"</em>), the following direct URLs encountered HTTP 403 / bot-protection walls or HTTP 404 during automated retrieval and were <strong>not</strong> cited as read (alternative open repositories or API records were used where noted in Sections 1–4):</p>
+<ol>
+<li><code>https://www.americanbar.org/content/dam/aba/administrative/paralegals/ls_prlgs_model_guidelines.pdf</code> — HTTP 403 Forbidden (resolved via verbatim text in National Juris University textbook <code>[S27]</code>).</li>
+<li><code>https://qualitysafety.bmj.com/content/qhc/13/suppl_1/i85.full.pdf</code> &amp; <code>https://pmc.ncbi.nlm.nih.gov/articles/PMC1765783/</code> — HTTP 403 / Anubis proof-of-work bot check (resolved via EuropePMC REST API abstract <code>[S16]</code>).</li>
+<li><code>https://directory.doabooks.org/handle/20.500.12854/115815</code> (Davies 1982 full book download) — HTTP 403 Forbidden (logged as <code>abstract only</code> via OpenAlex <code>[S8]</code>).</li>
+<li><code>https://academiccommons.columbia.edu/doi/10.7916/D8M61V5R/download</code> &amp; <code>https://dsq-sds.org/index.php/dsq/article/view/3239/3099</code> — Anubis bot check / reCAPTCHA (not cited).</li>
+<li><code>https://www.ellensoffice.com/uploads/2/4/0/1/24014830/hbr_case_for_eas.pdf</code> — HTTP 404 Not Found (resolved via <code>hbr.org</code> <code>[S20]</code>).</li>
+</ol>
+<hr>
+<p class="foot-stamp">LILITH V6 RESEARCH · what makes a good assistant · gathered by an AI research agent 2026-11-01, then checked by script (see the <a href="verification.html">verification report</a>) · not part of the frozen design document</p>
+</body>
+</html>

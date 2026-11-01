@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lilith v6 — Design Document</title>
+<title>Lilith v6 — What makes a good assistant (research)</title>
 <link rel="stylesheet" href="assets/site.css">
-
 <style>
   /* ---- overview dashboard (presentation only; content law lives in sections/) ---- */
   .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 26px 0; }
@@ -43,93 +42,66 @@
   .dir-card:hover { border-color: var(--accent); }
   .dir-num { font-size: 0.7rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
   .dir-title { font-size: 0.84rem; font-weight: 600; color: var(--text); }
+
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+
+  .rs a.big-btn { color:#0a0a0f; } .rs a.big-btn.alt { color:var(--accent); }
+  .big-btn { display:inline-block; font-weight:700; color:#0a0a0f; background:var(--accent); border-radius:6px; padding:11px 20px; text-decoration:none; margin:6px 10px 6px 0; }
 </style>
 </head>
-<body>
-
-<h1>Lilith v6 — Design Document</h1>
-<p class="doc-subtitle">The guiding light. All architectural decisions are made here before a single line of v6 code is written.</p>
+<body class="rs">
+<h1>Lilith v6 — What makes a good assistant</h1>
+<p class="doc-subtitle">Research on professional assistants, trust, and digital assistants, gathered to shape how Lilith meets and serves a user.</p>
 
 <nav class="doc-nav">
-  <a class="nav-active" href="index.html"><span class="nav-icon">🏠</span> Overview</a>
-  <a href="full-document.html"><span class="nav-icon">📖</span> Full Document</a>
+  <a class="nav-active" href="index.html"><span class="nav-icon">🏠</span> Research overview</a>
+  <a href="research/narrative.html"><span class="nav-icon">🎧</span> Spoken guide</a>
+  <a href="full-document.html"><span class="nav-icon">📖</span> Design document</a>
   <a href="checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
   <a href="standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
   <a href="systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
   <a href="amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
-  <a href="BUILD_SEQUENCING.md"><span class="nav-icon">🧭</span> Build Sequencing</a>
+  <a href="archive/overview-build-phase.html"><span class="nav-icon">🗄</span> Archived overview</a>
 </nav>
 
 <div class="status-banner">
-  <div class="status-phase">🔒 FROZEN — Design complete. Build phase begins.</div>
-  <p style="margin: 8px 0; font-size: 0.88rem; color: var(--text);">
-    <strong>Build Sequencing Plan:</strong> To mitigate risk, see the new <a href="BUILD_SEQUENCING.md" style="color: var(--accent); text-decoration: underline; font-weight: bold;">BUILD_SEQUENCING.md</a> plan. Milestone 1 establishes a walking-skeleton voice loop prior to database and sync integration.
-  </p>
-  <div class="status-note">
-    All 29 sections are complete and reviewed. This document is now law.
-    No architectural decisions are made during the build phase without a documented design session.
-    Agents implement against this document exactly as written.
-    <br><br>
-    Sprint spec, design checklist, planning documents, and research reports are linked above and now live alongside this document in this same folder.
-  </div>
+  <div class="status-phase">Research · partly verified</div>
+  <p style="margin: 8px 0; font-size: 0.88rem;">The frozen design document is unchanged: all 29 sections, the standards and the amendment ledger are below and in the navigation above. The build-phase overview that used to live on this page has moved to the <a href="archive/overview-build-phase.html" style="color:var(--accent)">archive</a>. This page now leads with research that will feed the next design session. It is not law.</p>
+  <div class="status-note"><strong>Verification:</strong> 154 sources and 315 quotations were checked by script. 88 quotations were confirmed, 128 could not be checked because the source blocks scripts, and 53 were not found in the sources they were credited to. 14 links are dead. <a href="research/verification.html" style="color:var(--accent)">Read the report</a> before relying on any claim.</div>
 </div>
 
-<div class="stat-row">
-  <div class="stat-tile stat-good"><div class="stat-value">29 / 29</div><div class="stat-label">Sections complete</div><div class="stat-note">frozen 2026-06-29</div></div>
-  <div class="stat-tile stat-good"><div class="stat-value">3 / 3</div><div class="stat-label">Review rounds passed</div><div class="stat-note">cleared for build 2026-07-17</div></div>
-  <div class="stat-tile stat-good"><div class="stat-value">29</div><div class="stat-label">Security findings resolved</div><div class="stat-note">SEC-001..029, none open</div></div>
-  <div class="stat-tile"><div class="stat-value">23</div><div class="stat-label">Amendment entries</div><div class="stat-note"><a href="amendments.html" style="color: var(--accent); text-decoration: none;">view ledger →</a></div></div>
-  <div class="stat-tile"><div class="stat-value">0 / 7</div><div class="stat-label">Build milestones</div><div class="stat-note">build phase not started</div></div>
-</div>
+<h2 style="font-size: 1.1rem; color: var(--accent); margin: 28px 0 8px;">Start here</h2>
+<p style="margin-bottom:8px">
+  <a class="big-btn" href="research/narrative.html">🎧 Spoken guide (copy for text to speech)</a>
+  <a class="big-btn alt" href="research/00-summary.html" style="background:var(--surface);border:1px solid var(--accent)">The ten findings</a>
+</p>
+<p style="font-size:.88rem;color:var(--muted)">The brief behind this research: Lilith starts as a generic baseline assistant who knows what tools and specialist harnesses exist, helps the user find the gaps in what they ask for, adapts to each person, and moves from getting to know each other, to familiarity, to deeper work. The research asks what experts and history say about doing exactly that.</p>
 
-<div class="panel">
-  <div class="panel-title">Design phase — how this document became law</div>
-  <ul class="tl">
-    <li class="tl-item"><span class="tl-date">2026-06-29</span><span class="tl-body"><strong>Design frozen</strong> — 29/29 sections complete; document becomes law</span></li>
-    <li class="tl-item"><span class="tl-date">2026-07-02</span><span class="tl-body"><strong>Review round 1</strong> — Security (SEC-001..016) + Fool's review; Critical vault self-contradiction found → custodian pivot</span></li>
-    <li class="tl-item"><span class="tl-date">2026-07-03/04</span><span class="tl-body"><strong>Remediation 1</strong> — 13-task pass; custodian model, PII tokenization pipeline, skills integrity, logging hygiene</span></li>
-    <li class="tl-item"><span class="tl-date">2026-07-11</span><span class="tl-body"><strong>Review round 2</strong> — Remediations verified 14/16; SEC-017..024; two load-bearing gaps (staleness gate, PII overclaim)</span></li>
-    <li class="tl-item"><span class="tl-date">2026-07-12</span><span class="tl-body"><strong>Remediation 2</strong> — 11-task pass; rotation, external backups, three-class PII detector, staleness completion, CI security jobs</span></li>
-    <li class="tl-item"><span class="tl-date">2026-07-17</span><span class="tl-body"><strong>Review round 3 — final gate</strong> — Fool's: 0 load-bearing, confidence HIGH · Security: 9/9 resolved, risk Low · CLEARED FOR BUILD</span></li>
-    <li class="tl-item"><span class="tl-date">2026-07-17</span><span class="tl-body"><strong>Residual fixes</strong> — SEC-025..029 amended same day (salt-rule reconciliation, installer trust anchor, hold-rule enumeration)</span></li>
-  </ul>
-</div>
+<h2 style="font-size: 1.1rem; color: var(--accent); margin: 28px 0 4px;">The research</h2>
+<div class="dir-cards"><a class="dir-card" href="research/00-summary.html"><span class="dir-num">00</span><span class="dir-title">Summary<br><span style="color:var(--muted);font-size:.78rem">The ten findings that matter most for building Lilith.</span></span></a><a class="dir-card" href="research/01-historical-roles.html"><span class="dir-num">01</span><span class="dir-title">Assistants through history<br><span style="color:var(--muted);font-size:.78rem">Scribes to chiefs of staff: what separated excellent from adequate.</span></span></a><a class="dir-card" href="research/02-principles.html"><span class="dir-num">02</span><span class="dir-title">The recurring principles<br><span style="color:var(--muted);font-size:.78rem">What holds across professions, ranked by strength of evidence.</span></span></a><a class="dir-card" href="research/03-trust-and-onboarding.html"><span class="dir-num">03</span><span class="dir-title">Trust and the first weeks<br><span style="color:var(--muted);font-size:.78rem">A phase model of the relationship, and what should be explicit.</span></span></a><a class="dir-card" href="research/04-digital-assistants-evidence.html"><span class="dir-num">04</span><span class="dir-title">What digital assistants teach<br><span style="color:var(--muted);font-size:.78rem">Siri, Alexa, Clippy, companions, AI gadgets, LLM memory.</span></span></a><a class="dir-card" href="research/05-adaptation-and-accessibility.html"><span class="dir-num">05</span><span class="dir-title">Adapting to the user<br><span style="color:var(--muted);font-size:.78rem">Reading a person&#x27;s level without talking down to them.</span></span></a><a class="dir-card" href="research/06-pitfalls.html"><span class="dir-num">06</span><span class="dir-title">Pitfalls<br><span style="color:var(--muted);font-size:.78rem">How this goes wrong, how badly, and what practitioners do.</span></span></a><a class="dir-card" href="research/07-capability-awareness-and-handoff.html"><span class="dir-num">07</span><span class="dir-title">Knowing what she can do<br><span style="color:var(--muted);font-size:.78rem">Showing capability, and handing over to a specialist.</span></span></a><a class="dir-card" href="research/08-questions-you-didnt-ask.html"><span class="dir-num">08</span><span class="dir-title">Questions you did not ask<br><span style="color:var(--muted);font-size:.78rem">What an expert would raise that the brief missed.</span></span></a><a class="dir-card" href="research/09-implications-for-lilith.html"><span class="dir-num">09</span><span class="dir-title">Implications for Lilith<br><span style="color:var(--muted);font-size:.78rem">Design hypotheses and questions for the design session.</span></span></a><a class="dir-card" href="research/sources.html"><span class="dir-num">··</span><span class="dir-title">Sources<br><span style="color:var(--muted);font-size:.78rem">154 numbered sources with the link check.</span></span></a><a class="dir-card" href="research/verification.html"><span class="dir-num">··</span><span class="dir-title">Verification report<br><span style="color:var(--muted);font-size:.78rem">What was checked, how, and what failed.</span></span></a></div>
 
-<div class="panel">
-  <div class="panel-title">Build progress — Milestone 1 and Phases 2–7 (see <a href="BUILD_SEQUENCING.md" style="color: var(--accent);">BUILD_SEQUENCING.md</a>)</div>
-  <div class="progress-bar-wrap" style="margin: 6px 0 16px;">
-    <div class="progress-label"><span>Milestones complete</span><span class="count">0 / 7</span></div>
-    <div class="progress-bar"><div class="progress-fill" style="width: 0%;"></div></div>
-  </div>
-  <ul class="mile-list">
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Milestone 1</span><span class="mile-desc">Core voice-loop walking skeleton + Experiments 1–2 (latency benchmark, router dry-run)</span><span class="mile-status">pending</span></li>
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 2</span><span class="mile-desc">Foundation hardening & telemetry (UCL DB, logging sanitizer, CI/CD + security jobs)</span><span class="mile-status">pending</span></li>
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 3</span><span class="mile-desc">Security & key management (passphrase rotation, cloud PII tokenizer completion)</span><span class="mile-status">pending</span></li>
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 4</span><span class="mile-desc">Local intelligence & fallbacks (Ollama installer, local LLM tiers)</span><span class="mile-status">pending</span></li>
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 5</span><span class="mile-desc">Custodian app suite (Google Contacts/Calendar sync, Contacts UI)</span><span class="mile-status">pending</span></li>
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 6</span><span class="mile-desc">Calendar app integration (Lilith calendar stores, ICS subscription feed, echo detection)</span><span class="mile-status">pending</span></li>
-    <li class="mile mile-pending"><span class="mile-icon">○</span><span class="mile-name">Phase 7</span><span class="mile-desc">Onboarding, extension & final freeze (UI flow, skills manifests)</span><span class="mile-status">pending</span></li>
-  </ul>
-</div>
-
-<div class="decisions-box">
-  <h3>Architecture decisions already locked</h3>
-  <ul>
-    <li><span class="decision-marker">✓</span> <strong>Frontend framework:</strong> PySide6 6.11.1 (LGPL v3) + ModernGL 5.x (MIT) for the orb via QOpenGLWidget. Qt Quick 3D dropped (GPLv3-only, incompatible with closed-source distribution).</li>
-    <li><span class="decision-marker">✓</span> <strong>Voice is the default, non-negotiable at the Tier 0 minimum:</strong> STT (Whisper) + TTS (Kokoro) run on every supported machine. The desktop chat screen also accepts typed input at any time, with TTS available on demand per message rather than forced — see §13, §22.</li>
-    <li><span class="decision-marker">✓</span> <strong>All databases:</strong> SQLCipher from first migration. No plaintext SQLite anywhere.</li>
-    <li><span class="decision-marker">✓</span> <strong>All credentials:</strong> OS keychain via python-keyring. Never in .env, never in config files.</li>
-    <li><span class="decision-marker">✓</span> <strong>External APIs (v6 v1):</strong> Read-only. Lilith manages her own calendar and contact roster separately.</li>
-    <li><span class="decision-marker">✓</span> <strong>Two-mode router architecture:</strong> Conversational vs Artifact (acknowledge → background → handoff). The two-mode split itself is locked; its tuning numbers (≤50 output tokens, ≤3 s to audio, ≤1200 context tokens) are v6 v1 working hypotheses to be validated in Milestone 1, not immutable constants — see §13.</li>
-    <li><span class="decision-marker">✓</span> <strong>LLM access:</strong> L1/L2 enhanced data only. Raw DB rows never enter the context window.</li>
-    <li><span class="decision-marker">✓</span> <strong>BYOK:</strong> User-provided API keys. No managed cloud inference from Lilith.</li>
-    <li><span class="decision-marker">✓</span> <strong>Path handling:</strong> pathlib.Path everywhere. No string path concatenation, no hardcoded separators.</li>
-    <li><span class="decision-marker">✓</span> <strong>Distribution model:</strong> Lilith v6 is free, closed-source, no license key, no activation. Wide distribution is the goal. Revenue comes from a future cloud sync subscription (Obsidian model). v6 v1 has no paid features — users bring their own API keys and their own Google account. No piracy surface to protect against.</li>
-    <li><span class="decision-marker">✓</span> <strong>Memory recall (v6 v1):</strong> Recency-first + FTS5 keyword search. No local embeddings or vector search in v6 v1 — that is a future phase. See §18 for full spec.</li>
-    <li><span class="decision-marker">✓</span> <strong>Custodian Model:</strong> All internal data (SQLCipher databases, salts, config, logs, cache, models, and skills) lives in a single OS-standard application directory (<code>APP_INTERNAL_DIR</code>) with strict POSIX 0700/0600 permissions. The user's primary files, notes, and documents (including external Obsidian note vaults) are never copied to Lilith's storage; she acts as a custodian, maintaining paths/pointers and indexing summaries. Accumulated history (UCL, memory, conversation DBs) is portable via Lilith's backup/restore utility. See §04, §29.</li>
-  </ul>
-</div>
-
+<hr>
 <h2 style="font-size: 1.1rem; color: var(--accent); margin: 36px 0 4px;">The 29 Sections</h2>
 <p style="font-size: 0.84rem; color: var(--muted); margin-bottom: 6px;">Each section is its own page, verbatim from the frozen document. Sprints are generated per section; a section's sprints must guarantee that section is complete.</p>
 
@@ -208,22 +180,8 @@
     </div>
   </div>
 
-<hr>
-
-<div class="how">
-  <div class="how-title">How to use this document</div>
-  <ol>
-    <li>Cross-reference each section with <a href="checklist.html" style="color: var(--accent);">lilith-v6-design-checklist.html</a> to see what must be covered.</li>
-    <li>After the research sprint delivers reports, fill in each section using research + prior design sessions.</li>
-    <li>A section is "complete" when every checklist item is answered with a specific implementation decision — no vague language, no TBDs.</li>
-    <li>When all 29 are complete: freeze. Build begins. No architecture changes during build without a documented design session.</li>
-  </ol>
-</div>
-<p style="font-size: 0.78rem; color: var(--muted); margin-top: -18px;"><em>The box above is the original design-phase usage note, preserved as written. The design phase is complete; during build, agents read the relevant section page, the <a href="standards.html" style="color: var(--accent);">Non-Negotiable Standards</a>, and <a href="BUILD_SEQUENCING.md" style="color: var(--accent);">BUILD_SEQUENCING.md</a>. See <code>README.md</code> for how this site is organized.</em></p>
 
 <hr>
-<p class="foot-stamp">
-  LILITH V6 DESIGN DOCUMENT · 29/29 sections complete · FROZEN 2026-06-29 · CLEARED FOR BUILD 2026-07-17 · full amendment history: <a href="amendments.html">Amendment Ledger</a>
-</p>
+<p class="foot-stamp">LILITH V6 · design document FROZEN 2026-06-29 · CLEARED FOR BUILD 2026-07-17 · amendment history: <a href="amendments.html">Amendment Ledger</a> · research gathered 2026-11-01</p>
 </body>
 </html>
