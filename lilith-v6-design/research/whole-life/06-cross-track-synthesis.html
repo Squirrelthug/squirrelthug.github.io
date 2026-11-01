@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 - Cross-track synthesis — Lilith v6 whole-life research</title>
+<meta name="description" content="The combined picture and the conflicts.">
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+</style>
+</head>
+<body class="rs">
+<h1>06 - Cross-track synthesis</h1>
+<nav class="doc-nav"><a href="index.html">🏠 Whole-life overview</a><a href="00-summary.html">Summary</a><a href="01-whole-life-management.html">Running a whole life</a><a href="02-the-plumber-test.html">The plumber test</a><a href="03-cross-domain-synthesis-and-proactivity.html">Cross-domain synthesis</a><a href="04-the-conversational-lane.html">The conversational lane</a><a href="05-landscape-data-and-risk.html">Landscape, data and risk</a><a class="nav-active" href="06-cross-track-synthesis.html">Where the tracks agree and clash</a><a href="07-implications-for-lilith.html">Implications for Lilith</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask</a><a href="sources.html">Sources</a><a href="verification.html">Verification report</a><a href="narrative.html">🎧 Spoken guide</a></nav>
+<nav class="doc-nav"><span style="font-size:.72rem;color:var(--muted);align-self:center">Site:</span><a href="../../index.html"><span class="nav-icon">🔬</span> Research home</a><a href="../../full-document.html"><span class="nav-icon">📖</span> Design document</a><a href="../../standards.html"><span class="nav-icon">⚖</span> Standards</a><a href="../../amendments.html"><span class="nav-icon">📜</span> Amendments</a></nav>
+<div class="trust"><strong>How far to trust this page.</strong> This is AI research agents' synthesis, and most sources were read only as abstracts or summaries. No study was found comparing one integrated assistant with separate apps, so the value of joining everything up is a hypothesis. Quotations were checked by script: those marked <span class="flag flag-unchecked">not checked</span> could not be tested, and those marked <span class="flag flag-para">paraphrase</span> were not found in the source they were credited to. Treat the structure and hypotheses as leads and open a source before relying on any claim. <a href="verification.html">What was checked and what failed</a>.</div><p>This page reads the five tracks against each other. It adds no new sources: every claim points to a finding on pages 01 to 05 (written as "01 F3" for page 01, finding F3) and through it to <code>sources.md</code>. Where this page draws its own conclusion, it is labelled [synthesis], which carries the same weight as [hypothesis].</p>
+<h2>1. Evidence quality across the wave</h2>
+<ul>
+<li><strong>Reading depth.</strong> No track had full-text access. Most research sources were seen as abstracts, search summaries or model-made digests (see the note at the top of <code>sources.md</code>). Track C read nothing in full and put no quotes in its file. Directions are more reliable than numbers throughout.</li>
+<li><strong>Where the strong evidence sits.</strong> The best-founded findings are about <strong>model behaviour</strong> (length bias, sycophancy, multi-turn degradation, citation support: 04 F1, F7, F9, F11), <strong>interruption and timing</strong> (03 F2), <strong>single-domain finance nudges</strong> (03 F13), and the <strong>cognitive-labour framework</strong> (01 F3, 02 F3). The weakest are time-use numbers for manual and small-business workers (02 F5), anything about voice proactivity (03 F3), and legal conclusions (05 F16, F21).</li>
+<li><strong>The central absence.</strong> No track found a study comparing an integrated assistant with separate apps, or testing a cross-domain inference against a single-domain reminder (01 weak spot 1; 03 section 2.6 and weak spot 1). The product thesis rests on a hypothesis. Three tracks reached this conclusion independently, which makes the absence itself well established, even though each track's search was limited.</li>
+<li><strong>Population bias.</strong> Almost every population studied is in the US or UK, and the assistant evidence is dominated by office roles (02 section 2.11). The users the "plumber test" is about are the least studied.</li>
+</ul>
+<h2>2. Where the tracks agree</h2>
+<h3>2.1 The value is in noticing and monitoring, not in doing</h3>
+<p>Track A (01 F3, F4) and track B (02 F3, persona 2.7) both rest on Daminger's four stages (anticipate, identify options, decide, monitor) and both conclude that "decide" stays with the human. Track C reaches the same split from the other side: help with a commitment the user stated is service; steering toward a goal the assistant inferred is a nudge (03 F17, Q10). Track D's honesty findings add that when she disagrees, she says so once and then defers (04 F15, Q4).
+[synthesis] All four tracks converge on one role: <strong>she notices, offers options, monitors, and leaves the decision to the user.</strong> This is also wave 1's authority principle (<code>02-principles.md</code>).</p>
+<h3>2.2 Capture and ingestion are the first problem, not integration</h3>
+<p>Track A says ingestion cost is a first-order risk and that capture must start from photos, voice notes and one-liners (01 Q3, Q8). Track B finds capture away from a desk is a universal pain and recommends capture-first onboarding (02 table 3.1, Q11, design question 7). Track E finds that integrations are gated (OAuth review, 05 F20), that bank feeds are not a user right in the US (05 F19), and recommends file, CSV and ICS import first (05 DQ7, Q7).
+[synthesis] For different reasons (user reality, admin burden, legal and platform gating) all three tracks put <strong>manual and capture-based ingestion before live integrations.</strong></p>
+<h3>2.3 Adaptation belongs to the baseline</h3>
+<p>Track B (02 F4, persona 2.9) argues verbosity, reading level, modality and pace must be baseline properties, because the people who need them most are least able to find a "simple mode". Track D independently argues brevity must be explicit policy (04 F1, F2), that voice needs shorter, unmarked replies (04 F3), and that length preferences should stick once stated (04 Q2). The Be My AI study (B18) appears in both lines of argument: the same person wants different verbosity in different situations (02 Q3).</p>
+<h3>2.4 Usage and satisfaction are not endorsement</h3>
+<p>Three separate lines of evidence:
+- people keep using apps they find creepy (03 F8);
+- user thumbs-up pushed a vendor into shipping a sycophantic model (04 F11);
+- people use AI tools they distrust (05 F24).</p>
+<p>[synthesis] <strong>Retention, satisfaction and usage are all poor signals of whether Lilith is behaving well.</strong> The tracks propose the same replacements: dismissals, mutes, "why did you say that?" requests (03 F8, DQ7), and a rubric-scored eval set that rewards honest "can't" and abstention (04 Q1, F13).</p>
+<h3>2.5 Third parties are everywhere</h3>
+<p>Every track found other people inside the user's data: the partner and children (01 Q1; 02 persona 2.7), a parent's health (01 F7, Q6), customers' addresses and alarm codes (02 Q4), patients and employees (02 Q5), a friend's illness (03 Q3), and contacts under GDPR (05 F16, F17). Tracks B, C and E arrive at the same rule from different directions: <strong>use third-party data only for the purpose it was given for</strong>, with the most sensitive fields (alarm codes, health) under stricter handling (02 design question 5; 03 Q3; 05 Q2).</p>
+<h3>2.6 Forgetting must cut across all domains</h3>
+<p>Track A (01 Q7), track B (02 Q6) and track C (03 F23) all cite Sas and Whittaker, and all ask for one control that scopes, pauses or forgets a person or a life chapter <strong>across every domain at once</strong>. Track B adds archiving (a retired plumber's customers kept but not suggested).</p>
+<h3>2.7 Honest limits are a feature</h3>
+<p>Track A: say what she monitors and when she last checked (01 Q4, design question 7). Track C: tell the user what she does not watch for, because silent misses are the cheaper error (03 F21). Track D: the four-part "can't" (04 F16). Track E: tell the user honestly which hardware tier they have (05 DQ5). Track B: the "can't" line sits in different places per harness, because the cost of being wrong differs (02 Q8).
+[synthesis] The hard constraint "honest I can't do that yet" generalises into <strong>honest scope</strong>: what she watches, what she cannot do on this machine, and what no harness yet covers.</p>
+<h2>3. Where the tracks conflict</h2>
+<h3>3.1 Proactivity: the value case against the creepiness and harm case</h3>
+<ul>
+<li><strong>For proactivity.</strong> Track A locates the value of integration in <em>anticipation and monitoring</em> (01 F3, F12), which are proactive by nature: nobody asks "is my passport about to expire?". Track B's capable-assistant descriptions are full of unprompted warnings ("warns that a Thursday job collides with the child's school event and a tight month", persona 2.1). Track C's own best evidence for synthesis is a proactive payment reminder that would have been better if it had known the balance (03 F13).</li>
+<li><strong>Against.</strong> Track C recommends reactive by default, with proactivity only inside a narrow whitelist (03 section 1, DQ1). Money messages are the most likely to be avoided or resented (03 F15; 01 F10). Under financial stress proactivity should shrink, not grow (03 F10). Track D says that when stress is evident she should avoid unsolicited cross-domain commentary (04 Q8). Track E adds that anything she writes or says from untrusted content is an attack surface (05 F11).</li>
+<li><strong>The sharpest form.</strong> The users with the most to gain from joined-up warnings (irregular earners, people with weak time-based prospective memory: 02 F2; 01 F8; 03 F11) overlap heavily with the users for whom unprompted money messages carry the most risk (03 F10, F15).</li>
+</ul>
+<p>[synthesis] The tracks do not support "proactive" or "reactive" as a single setting. They support a split by <strong>content type and source</strong>:
+- <em>Low-regret, user-owned, arithmetic facts</em> (a clash between two entered events, a bill date against an entered balance, a birthday) carry the integration value and the lowest creepiness. Track C's whitelist (03 F9, section 2.6) and track A's "what is coming" view (01 F12 items 1-3) describe the same set.
+- <em>Inferences about the user's state</em> and <em>evaluative money messages</em> carry most of the risk and have no measured value.</p>
+<p>Timing is the other lever: wait for the next conversation, or deliver in a user-scheduled digest (03 F2, DQ3, Q8). A local-first desktop that may be switched off (03 Q6) weakens the case for real-time delivery anyway.</p>
+<h3>3.2 One database against the lethal trifecta</h3>
+<ul>
+<li><strong>The thesis.</strong> One store makes synthesis possible (01 F12); for the parent persona the database <em>is</em> the product (02 persona 2.7); the farm is one database in fact (02 persona 2.3).</li>
+<li><strong>The risk.</strong> One store plus untrusted content plus any outbound channel is Willison's lethal trifecta (05 F10). Lilith has the first leg by definition, and several baseline features proposed elsewhere supply the other two:<ul>
+<li>scam defence as baseline means reading incoming messages and calls (02 F6, design question 10): untrusted content;</li>
+<li>capturing job requests from voicemails and texts (02 persona 2.1): untrusted content written into the database, which is the memory-poisoning path (05 F11);</li>
+<li>drafting and chasing (02 section 3.2; 04 F17) lead naturally to "send it for me": an outbound channel;</li>
+<li>harnesses carrying third-party reference data such as price books and subsidy rules (02 Q7) are untrusted content with a supply chain (05 F9, DQ8);</li>
+<li>fetching current rules from official sources (02 design question 4) and any cloud model call (05 F23) are outbound channels.</li>
+</ul>
+</li>
+<li><strong>Scoping weakens the thesis.</strong> Track A (01 design question 5), track C (03 DQ5) and track E (05 DQ3) all raise per-domain walls, and all note that walls reduce synthesis.</li>
+</ul>
+<p>[synthesis] The tracks contain the beginnings of a reconciliation, but it is a design question, not a conclusion:
+- Track C's <strong>per-domain-pair permission matrix</strong> (03 F7, DQ5) is a scoping model built around contextual integrity rather than storage, so it limits <em>flows</em> without splitting the store.
+- Track E's middle path, <strong>synthesis locally, with only the minimal derived fact sent to a cloud model</strong> (05 DQ3), and its options to keep untrusted-origin content out of the write path or quarantined (05 DQ1) and to block outbound action in any turn that has ingested untrusted content (05 DQ2).
+- Track C's rule that proactive messages are built only from <strong>user-entered or user-confirmed facts</strong> (03 F9) also happens to keep untrusted content out of proactive output.</p>
+<p>Note that encryption at rest does not address the trifecta at all (05 F13, Q3).</p>
+<h3>3.3 The baseline-versus-harness boundary</h3>
+<ul>
+<li><strong>Track B</strong> draws the boundary by <em>content</em>: harnesses hold formats, dated rules, vocabulary, calculators, system-of-record integrations and working style; anything that helps about half of the personas is baseline (02 section 3.3). Harnesses should be keyed to tasks and situations as well as occupations, and several may be active (02 Q1).</li>
+<li><strong>Track D</strong> draws a boundary on <em>behaviour</em>: harnesses may add rules but must not remove honesty, provenance or the "can't" floor (04 Q10, design question 4). A harness's "working style" (which track B puts <em>inside</em> the harness) is exactly where an override could hide.</li>
+<li><strong>Track C</strong> pushes <em>richer proactivity</em> into harnesses and per-user configuration, keeping the baseline proactive set tiny (03 Q7). Track B pushes <em>scam defence</em> and <em>cash-flow awareness</em> into the baseline (02 persona 2.5, section 3.2). Both are defensible, but scam defence is itself a proactive behaviour that reads untrusted content (3.2 above).</li>
+<li><strong>Track E</strong> treats a harness as a <em>supply-chain and permissions</em> object: signing, review, a manifest of which domains it may read and write (05 Q10, DQ8). Track B agrees that a harness is mostly data and that its origin is a trust question (02 Q7).</li>
+<li><strong>Track A and track B</strong> both route regulated third-party data (a parent's health, patients) toward a separate, more protected harness or out of scope (01 design question 6; 02 Q5, design question 6). That conflicts with a loose reading of "single assistant for the whole life".</li>
+<li><strong>Wave 1</strong> warned that silent mode changes cause mode errors (wave 1 <code>00-summary.md</code> item 5), which track B uses to argue for task-triggered loading with a visible notice (02 section 3.5).</li>
+</ul>
+<p>[synthesis] Taken together the tracks describe a harness as <strong>content plus tools plus working style, inside a fixed behavioural envelope it cannot loosen, carrying a declared data scope, loaded visibly.</strong> Open conflicts remain: where scam defence sits; whether the baseline proactive set includes money at all; and whether regulated third-party data is ever in scope.</p>
+<h3>3.4 The cloud path and the plumber</h3>
+<p>Track E judges that most real users' machines (explicitly including plumbers' laptops and old PCs) will be below the local-model line, so the cloud-with-tokenisation path is the default for most users, not the exception (05 F23). Tokenisation is minimisation, not anonymisation (05 F15), and wave 1 found it weak (wave 1 <code>00-summary.md</code> item 2, cited by 02 design question 5 and 04 design question 5). Track B's capture-first onboarding needs reliable local transcription and OCR (02 design question 7).</p>
+<p>[synthesis] <strong>The privacy promise is weakest for exactly the user the "plumber test" is about.</strong> No track resolves this. Options on the table are hardware tiers told honestly (05 DQ5), local-only handling for high-sensitivity classes (05 DQ4), and a deterministic-first pipeline (05 F8).</p>
+<h3>3.5 Telemetry: the project's debugging rule against privacy</h3>
+<p>Track D recommends building the eval set from her real turns in the UCL and stored conversations (04 Q1). Track C notes that a log of proactive messages contains the very inferences it warns against (03 Q11). Track E notes that content-bearing telemetry reaching the developer takes processing outside the household exemption (05 F16, DQ9).
+[synthesis] Fine at dev time with the developer as the only user; a direct conflict once anyone else runs Lilith.</p>
+<h3>3.6 Single principal against household</h3>
+<p>Track A asks whether Lilith is single-principal or household and lists the abuse risk of shared tools (01 Q1, F13, Q9). Track B's parent persona assumes sharing "with a partner under explicit sharing rules" (02 persona 2.7), and the retiree persona keeps "a family contact in the loop only with consent" (02 persona 2.5). Track E's legal analysis assumes a single user in a household activity (05 F16). No track resolves who the principal is when a life is shared, and the coercion risk (01 F13) pulls against the sharing that two personas assume.</p>
+<h2>4. What the combined picture says the conversational lane should be</h2>
+<p>These are [synthesis] statements built from the agreements above. They are hypotheses for the design session, not decisions.</p>
+<ol>
+<li><strong>Brief by default, in the user's register, situation-aware.</strong> Short unless asked; shorter and unmarked in voice; verbosity set per situation, not per user; stated preferences stick and can be inspected (04 F1-F4, Q2; 02 F4, Q3).</li>
+<li><strong>Grounded in her own data, with visible status.</strong> Look before asking; say where a personal fact came from; distinguish retrieved, derived and unknown; never fill a personal gap from general knowledge; make "the tool failed" read differently from "nothing there" (04 F6, F9, F10, Q3).</li>
+<li><strong>Assume-and-say for cheap reversible things; ask for consequential ones.</strong> Stated assumptions for reading and drafting; questions for actions with side effects or money (04 F6; design question 2).</li>
+<li><strong>Honest once, then defer.</strong> State a discrepancy with the user's picture of their own life once, kindly, with inputs shown, and leave the decision with the user (04 F15; 03 F17, F19, Q2).</li>
+<li><strong>Mostly reactive; proactive only on owned facts and at boundaries.</strong> Cross-domain observations come from user-entered facts and arithmetic, ideally when the user next speaks, and never as an inference about their state (03 F2, F9, section 2.6). Gap-finding is done against her own data more than by probing (04 F8).</li>
+<li><strong>Money talk is its own register.</strong> Facts over verdicts; show the calculation rather than steering (the "boost"); retreat when the topic is avoided; respect "freedom to enjoy life" as part of financial well-being (03 F14-F17).</li>
+<li><strong>Honest scope as part of every answer where it matters.</strong> What she can't do and what she can instead; what she watches and when she last looked; what this machine and this harness can't do (04 F16; 01 Q4; 03 F21; 05 DQ5).</li>
+<li><strong>Drafts in the user's voice.</strong> Writing help keeps the user's position, shows its changes, and does not insert opinions; summaries of third-party messages are not assumed faithful (04 F17).</li>
+<li><strong>Repairs briefly and re-reads the whole request.</strong> Own a mistake in one clause; after a correction rebuild from the whole corrected request; restate the working understanding in long threads (04 F7, F18, F19).</li>
+<li><strong>Measured by "less carried", not "more done"</strong>, and evaluated on separate axes that do not reward guessing or agreement (01 Q2; 04 Q1, F11, F13).</li>
+</ol>
+<h2>5. Gaps no track covered</h2>
+<ul>
+<li><strong>Integrated versus separate tools.</strong> No study, from any track (01, 03). The thesis needs its own evidence; track C's staged experiment (03 DQ8) is the only proposal for producing it.</li>
+<li><strong>Voice proactivity.</strong> Whether speaking unprompted is more intrusive than a notification, and whether the user is even present, is untested (03 F3, weak spot 3).</li>
+<li><strong>Machine-off reliability.</strong> What a proactive or monitoring promise means on a desktop that is often switched off (03 Q6). Track A's value case (monitoring) assumes continuity that local-first may not provide.</li>
+<li><strong>Capture accuracy.</strong> How well voice notes and receipt photos turn into correct records for non-office users (02 Q11; flagged by B and passed to E, which did not cover it).</li>
+<li><strong>Low-literacy and non-native users with LLM assistants.</strong> Track B argues adaptation is baseline but has one n=11 study; no track looked at LLM assistants with low-literacy adults or in languages other than English.</li>
+<li><strong>Non-US/UK lives.</strong> Almost all evidence is American or British. Rules, money habits and family structures differ elsewhere.</li>
+<li><strong>Children and dependents as data subjects and as users.</strong> Flagged as the most sensitive category (02 persona 2.7) but not researched.</li>
+<li><strong>Death, incapacity and estate access.</strong> Track E found nothing (05 Q9).</li>
+<li><strong>Key management for non-technical users.</strong> Raised (05 DQ6) but no evidence on how ordinary users cope with passphrases and backups for a whole-life store.</li>
+<li><strong>The EU AI Act.</strong> Essentially unresearched (05 F21).</li>
+<li><strong>Translation and summary faithfulness for personal messages; apology style; register matching to emotion.</strong> Searched for and not found (04 sources note).</li>
+<li><strong>How users perceive "what I watch" disclosures, provenance tags and per-domain consent.</strong> Proposed by A, C, D and E; no evidence on whether people read or understand them (04 Q11; 05 Q8).</li>
+<li><strong>Cost to the user.</strong> No track looked at what a cloud model path costs the user, or how that interacts with the low-end-hardware default (05 F23).</li>
+<li><strong>Multi-device and sync.</strong> Ink &amp; Switch names collaboration as a major challenge of local-first (05 F22), but no track asked how a plumber's phone (where capture happens, 02 section 1) relates to a desktop database.</li>
+</ul><div class="pager"><a href="05-landscape-data-and-risk.html">← Landscape, data and risk</a><a href="07-implications-for-lilith.html">Implications for Lilith →</a></div>
+<hr>
+<p class="foot-stamp">LILITH V6 RESEARCH, WAVE 2 · the whole-life assistant · gathered by AI research agents 2026-11-01, then checked by script (see the <a href="verification.html">verification report</a>) · builds on the <a href="../../index.html">assistant research</a> (wave 1) · not part of the frozen design document</p>
+</body>
+</html>

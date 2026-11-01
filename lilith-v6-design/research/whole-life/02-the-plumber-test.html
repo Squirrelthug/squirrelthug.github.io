@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02 - The plumber test (from track B) — Lilith v6 whole-life research</title>
+<meta name="description" content="Eleven very different users, five shared pains, and the baseline-versus-harness line.">
+<link rel="stylesheet" href="../../assets/site.css">
+<style>
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+</style>
+</head>
+<body class="rs">
+<h1>02 - The plumber test (from track B)</h1>
+<nav class="doc-nav"><a href="index.html">🏠 Whole-life overview</a><a href="00-summary.html">Summary</a><a href="01-whole-life-management.html">Running a whole life</a><a class="nav-active" href="02-the-plumber-test.html">The plumber test</a><a href="03-cross-domain-synthesis-and-proactivity.html">Cross-domain synthesis</a><a href="04-the-conversational-lane.html">The conversational lane</a><a href="05-landscape-data-and-risk.html">Landscape, data and risk</a><a href="06-cross-track-synthesis.html">Where the tracks agree and clash</a><a href="07-implications-for-lilith.html">Implications for Lilith</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask</a><a href="sources.html">Sources</a><a href="verification.html">Verification report</a><a href="narrative.html">🎧 Spoken guide</a></nav>
+<nav class="doc-nav"><span style="font-size:.72rem;color:var(--muted);align-self:center">Site:</span><a href="../../index.html"><span class="nav-icon">🔬</span> Research home</a><a href="../../full-document.html"><span class="nav-icon">📖</span> Design document</a><a href="../../standards.html"><span class="nav-icon">⚖</span> Standards</a><a href="../../amendments.html"><span class="nav-icon">📜</span> Amendments</a></nav>
+<div class="trust"><strong>How far to trust this page.</strong> This is AI research agents' synthesis, and most sources were read only as abstracts or summaries. No study was found comparing one integrated assistant with separate apps, so the value of joining everything up is a hypothesis. Quotations were checked by script: those marked <span class="flag flag-unchecked">not checked</span> could not be tested, and those marked <span class="flag flag-para">paraphrase</span> were not found in the source they were credited to. Treat the structure and hypotheses as leads and open a source before relying on any claim. <a href="verification.html">What was checked and what failed</a>.</div><p>Eleven very different users: what eats their time and money, what a capable assistant would do for each, and where the line between the general baseline and a specialist harness falls.</p>
+<h2>How to read this page</h2>
+<ul>
+<li><strong>Evidence quality, up front.</strong> The ground here is thinner than the brief hopes. Most time-use numbers for trades, freelancers and small shops come from <strong>vendor-run surveys</strong> with small samples. Peer-reviewed and official sources exist for clinicians, researchers, parents, older adults and low-skill adults. Each finding says which kind it is. Several searches returned only secondary coverage; where the primary document could not be opened, <code>sources.md</code> says so.</li>
+<li><strong>Labels.</strong> <code>[evidence]</code> = measured or documented; <code>[practice]</code> = reported practitioner or vendor consensus; <code>[hypothesis]</code> = the track author's inference. Confidence is given in brackets.</li>
+<li><strong>Wave 1</strong> files are cited by name and treated as leads only (B23). No wave 1 quotation was relied on: the wave 1 files carry inline markers such as "<span class="flag flag-unchecked">not checked: source could not be opened</span>" which show some of their quotes are unverified.</li>
+<li>Source ids (B1, B2, ...) refer to <code>sources.md</code>.</li>
+</ul>
+<h2>1. The answer in one paragraph</h2>
+<p>Across eleven very different people the pain is strikingly similar, and it is mostly <strong>not</strong> domain knowledge. It is:
+- (a) after-hours administrative residue (quotes, invoices, forms, rotas, deadlines);
+- (b) fragmented, unreliable <em>capture</em> (things said on a phone call, on a ward, in a field or in a lecture that never become a record);
+- (c) irregular money, and chasing money owed;
+- (d) carrying other people's logistics (children, parents, staff, clients) in your head;
+- (e) interruption.</p>
+<p>Those five are <strong>general</strong>, and they are exactly what a whole-life database plus a good conversational lane covers: capture, recall, scheduling, drafting, money-in and money-out awareness, and cross-domain "what collides with what". What differs by person is a thin layer of <strong>vocabulary, documents, rules and regulated procedures</strong> (a plumber's job costing and gas-safety paperwork, a nurse's handover format, a farmer's subsidy and animal-movement records, a researcher's grant reporting). That layer is what a harness should hold, and it is mostly <em>templates, checklists, calculators, rules with sources, and jargon</em>, not "intelligence".</p>
+<p>The bigger risk to the "plumber's Jarvis" is not missing specialist content. It is that the baseline fails the plumber <em>before</em> any harness loads: the phone is in a pocket, the hands are wet, the first question is "what do I owe the tax office", and the person may not read the reply for six hours.</p>
+<p>The developer's framing ("generic baseline plus loadable specialists") is basically right, but incomplete in four ways (section 5): capture happens away from the desk; the plumber's <em>customers</em> are the main third-party data subjects; the user's <em>context</em>, not just their profession, is what should trigger specialist mode; and a harness is mostly data, which makes its origin a trust and security question.</p>
+<h2>2. The eleven personas</h2>
+<p>For each: what eats time and money; what a capable assistant would do; general (baseline) versus specialist (harness); evidence quality.</p>
+<h3>2.1 Self-employed tradesperson (plumber)</h3>
+<p><strong>What eats time and money.</strong>
+- <strong>Admin outside working hours.</strong> A UK survey of 167 small-business owner-operators (HeyBRB, 2026; vendor, an AI automation consultancy; trades were about 13% of respondents, roughly 22 people; margin of error about +/-7.6 points) reports an average of 8 hours a week of repetitive admin, with 77% of the trades respondents doing it in the evenings and nearly half at weekends. The founder is quoted: "The first thing most business owners want is to stop doing admin at 9pm." <code>[practice; low-medium confidence on the number, high on the pattern]</code> (B1)
+- <strong>Quoting.</strong> In the same survey, more than a third spend over 20 minutes writing a single quote from scratch; at 6 to 10 quotes a week that is 2 to 3 hours, much of it on work that never converts. 47 respondents chase overdue payments one to seven times a month, 5 to 10 minutes each. <code>[practice, low-medium]</code> (B1)
+- <strong>Conflicting numbers.</strong> Other surveys give 5.3 hours (HeyBRB, different cut), 7 hours (Powered Now), 13.9 hours (Sage) and 18.5 hours (Tradify) a week. All are vendors selling admin software. The spread is itself a finding: nobody has a credible plumber-only number, and no plumber-specific survey was found. <code>[practice, low]</code> (B2, aggregated search results; underlying reports not opened)
+- <strong>Missed calls.</strong> A Fix Radio survey of 220-plus UK tradespeople is reported to say 34% lost work because they could not answer the phone and 60% struggle to take calls on site. Higher vendor claims of "percent of calls unanswered" (60%, 74%) have no verifiable source. <code>[practice, low]</code> (B3, secondary only)
+- <strong>Income volatility.</strong> In the US Federal Reserve survey, 29% of adults had varying income, and 59% of the self-employed did, against 28% of employees (figure from a secondary statistics site citing the Fed; not confirmed in the Fed tables). <code>[evidence, medium-low; needs primary check]</code> (B4)</p>
+<p><strong>Real products.</strong> Field-service suites (Jobber, Tradify, ServiceTitan, Powered Now, Joist) sell quote-to-cash plus an AI receptionist that answers calls and texts and books jobs; Jobber's was reported as launched in 2024 (vendor claims only). A bank and AI-lab partnership in Australia is reported to target "tradie admin" (press pointer, unread). <code>[practice]</code> (B3, B5)</p>
+<p><strong>What a capable assistant does.</strong> Catches a job request from a voicemail or text and puts a tentative slot in the calendar; drafts a quote from the last similar job; reminds the user to send the invoice the same day; tracks who has not paid and drafts the chaser; sets aside tax money from each payment; warns that a Thursday job collides with the child's school event and a tight month; finds the part number the user photographed last year.</p>
+<p><strong>General versus specialist.</strong>
+- General (baseline): capture from voice or photo, calendar, contact recall, invoice and quote <em>drafting as writing</em>, chasing tone, money-in versus money-out view, tax set-aside as arithmetic with the user's own rate, reminders, "what collides".
+- Specialist (harness): price books and material markups, job-costing templates, trade certification and safety paperwork formats, regional rules, trade vocabulary ("first fix", "second fix", "callout"), supplier part catalogues.
+- Boundary <code>[hypothesis]</code>: a plumber's quote is 80% general (customer, line items, VAT, wording, follow-up) and 20% trade (which lines go in and what they cost).</p>
+<h3>2.2 Nurse on shifts</h3>
+<p><strong>What eats time and money.</strong>
+- <strong>Documentation.</strong> The share varies widely with definition: 14% (a morning-shift study), about 18% (a Chinese ICU study), up to 25-40% claimed by a vendor blog without named studies. Time-motion studies report direct-care shares from about a third to about 70% of the shift. <code>[evidence, medium; heterogeneous methods]</code> (B6, search summary; single studies not opened)
+- A related, better-sourced physician result: Sinsky et al. (2016) observed 57 physicians for 430 hours and found 49.2% of office time on EHR and desk work against 27% face time, plus 1 to 2 hours a night of extra EHR work in a diary subset. <code>[evidence, high for physicians; transfer to nurses is a hypothesis]</code> (B7)
+- <strong>Shift work</strong> harms sleep and wellbeing in rotating-shift nurses. An Italian cross-sectional study reported lower job satisfaction, worse sleep and more chronic fatigue for night shifts; cross-sectional, so no causation. <code>[evidence, medium]</code> (B6)
+- <strong>Handover:</strong> 192 Turkish nurses averaged under 22 minutes. <code>[evidence, low relevance]</code> (B6)</p>
+<p><strong>Real products.</strong> Hospital EHR ambient scribes and shift-swap or rota apps. Not researched; thin ground.</p>
+<p><strong>What a capable assistant does.</strong> Knows the roster pattern and protects sleep windows (no call scheduled during a post-night sleep); helps swap shifts and plan childcare around changing rotas; turns a post-shift voice memo into the user's own notes <em>about their life</em> (not about patients); reminds of licensing and CPD deadlines; tracks overtime.</p>
+<p><strong>General versus specialist.</strong> General: rota-aware calendar, sleep-aware reminders, family logistics, pay and overtime tracking. Specialist: anything touching <strong>patient information</strong>. A harness that handles clinical notes crosses into regulated health data. The track recommends treating "nurse mode" in the baseline as a <em>life</em> assistant only, with clinical documentation out of scope (see Weak spots and section 6). <code>[hypothesis, flagged as a conflict with the privacy constraint]</code></p>
+<h3>2.3 Farmer</h3>
+<p><strong>What eats time and money.</strong>
+- <strong>Paperwork.</strong> SUM-IT Farmer Insights Survey 2023 (242 British farmers; farm-software vendor): some farmers spend over 15 hours a week on assurance, regulators and supply contracts, and admin time has risen over three years. An older Deloitte and RASE study (about 2001) put paperwork at about 16-19% of a roughly 70-hour week. A European Commission CAP survey, reported by the Irish Farmers Journal: a third spend over six days a year on CAP applications. <code>[practice/evidence, low-medium; dated and country-specific]</code> (B8, search summary; no primary opened)
+- Weather, seasons, livestock events, machinery maintenance and subsidy deadlines are time-critical and tend to cluster. The farm is both household and business, so family, money and work are in fact one database. <code>[hypothesis]</code></p>
+<p><strong>What a capable assistant does.</strong> A deadline calendar for applications and inspections; voice capture of records in the field ("treated heifer 14 on Tuesday") into a structured log; date-linked reminders (withdrawal periods); cash-flow awareness against seasonal income.</p>
+<p><strong>General versus specialist.</strong> General: field voice capture, deadline calendar, seasonal cash-flow view, shared family and farm logistics. Specialist: regulatory record formats (movement records, medicine books), subsidy rules by country, crop and livestock calendars, supply-chain forms. This is the clearest case where specialist content is <strong>law- and region-specific and changes every year</strong>, which makes the harness a maintenance liability (F7 in section 4).</p>
+<h3>2.4 Student</h3>
+<p><strong>What eats time and money.</strong> Deadlines and procrastination. A small 2023 survey of 100 undergraduates reported 52% frequently procrastinating; studies in Spain (910 students) and Peru (301) link poor planning and time management to procrastination and stress; one longitudinal study reported that procrastinators are less stressed early in term and more stressed by the end. <code>[evidence, low-medium; small and varied samples]</code> (B9, search summary). Nothing reliable on student finances was found; thin ground.</p>
+<p><strong>What a capable assistant does.</strong> Turns a syllabus into a dated plan; breaks assignments into steps; notices that three deadlines fall in the week of a part-time shift and a family event; tracks a tight budget (rent, stipend, loan disbursement dates); helps draft emails to lecturers.</p>
+<p><strong>General versus specialist.</strong> Almost all general: calendar, task breakdown, budget, drafting. Specialist (a study harness): citation formats, subject tutoring. Important <code>[hypothesis]</code>: a student's assistant must not do the learning for them (wave 1 <code>06-pitfalls.md</code> on dependence and deskilling), so the specialist element is as much <em>working style</em> ("coach, don't write it for me") as content.</p>
+<h3>2.5 Retiree</h3>
+<p><strong>What eats time and money.</strong> Learning and trusting technology, health and benefit admin, fixed-income budgeting, scams, and caring for a spouse.
+- <strong>Technology.</strong> Pew's 2016 survey (published 2017): 48% of those 65 and over said "When I get a new electronic device, I usually need someone else to set it up or show me how to use it" described them very well; 34% of older internet users have little or no confidence in online tasks; 42% owned a smartphone (59% at 65-69, 17% at 80-plus). <code>[evidence, high; but 2016 data, and the cohort has moved on]</code> (B10)
+- <strong>Fraud.</strong> The FTC reports that losses reported by people 60 and over rose from about $600 million in 2020 to $2.4 billion in 2024, driven by reports of losses over $100,000 and largest for investment scams. The FTC estimates the true cost is far higher, but its range is wide ($10.1 billion to $81.5 billion, as relayed by search coverage of the report). <code>[evidence, high on reported figures, low on the extrapolation]</code> (B11)
+- <strong>Retirement money.</strong> In the Fed's 2024 survey, 35% of non-retirees thought their retirement savings were on track; among retirees, health, family care or lack of work contributed to the timing of retirement for 42%. <code>[evidence, high]</code> (B4)</p>
+<p><strong>What a capable assistant does.</strong> Voice-first, slow, no jargon, no condescension (wave 1 <code>05-adaptation-and-accessibility.md</code> on elderspeak); remembers medications and appointments; reads and explains letters; flags a call that sounds like a scam <em>and says why</em>; keeps a family contact in the loop only with consent.</p>
+<p><strong>General versus specialist.</strong> General: medication and appointment reminders, letter explanation, scam awareness, plain-language mode. Specialist: Medicare or pension rules (country-specific), retiree tax filings, a caregiver harness. Scam defence belongs in the <strong>baseline</strong> because the threat arrives from outside any profession.</p>
+<h3>2.6 Freelance creative</h3>
+<p><strong>What eats time and money.</strong> Chasing late payment, and irregular income.
+- Freelancers Union (2015; 5,358 respondents): 50% had trouble getting paid in 2014; nonpayment took away 13% of the average respondent's annual income. The report text opened confirms the 13%, the 5,358 sample and the 50% headline; the dollar figure of about $5,968 comes from search coverage. <code>[evidence, medium-high; 2015, self-selected members]</code> (B12)
+- Other figures came only through secondary aggregator pages: 62% of New York freelancers lost wages to nonpayment (2022 Freelancers Union and Authors Guild survey); 29% of invoices paid at least a day late (Bonsai invoicing data, 100,000-plus freelancers). <code>[practice, low]</code> (B13)</p>
+<p><strong>What a capable assistant does.</strong> Tracks invoices and drafts escalating chasers; models cash runway on irregular income; blocks calendar time for deep work; drafts pitches and plain-language summaries of contracts; keeps a project and client log; warns when two deadlines or a tax date collide with a low-income month.</p>
+<p><strong>General versus specialist.</strong> General: invoice tracking, chasing, runway, scheduling. Specialist: discipline-specific tools (rate cards, licensing and rights templates, portfolio management). Contract review is <strong>not</strong> a baseline capability to claim (legal-advice risk, wave 1 <code>06-pitfalls.md</code>).</p>
+<h3>2.7 Parent of young children</h3>
+<p><strong>What eats time and money.</strong>
+- <strong>The mental load.</strong> Daminger (2019, <em>American Sociological Review</em> 84(4), 609-633; 70 interviews with 35 US couples, middle and upper-middle class) defines household cognitive labour as four tasks: anticipating, identifying options, deciding, monitoring. Women did more overall and more of the anticipating and monitoring, while decision-making was roughly equal. <code>[evidence, high on the framework; small, affluent, heterosexual sample]</code> (B14, abstract and secondary coverage; full text not read)
+- <strong>Money.</strong> In the Fed's 2024 survey, "Parents were almost twice as likely to use unpaid childcare as they were to pay for childcare"; 46% of parents of under-13s used some unpaid childcare, and just over half of parents who paid for childcare spent at least 50% as much on it as on housing. <code>[evidence, high]</code> (B4)</p>
+<p><strong>What a capable assistant does.</strong> The Daminger frame is a specification: <em>anticipate</em> ("school photo day Friday, forms due"), <em>identify options</em> ("three after-school clubs fit, one costs X"), <em>decide</em> (the user), <em>monitor</em> ("the form was not returned"). She sees that the nursery fee rise, a birthday party and a partner's trip fall in the same fortnight. Shared with a partner under explicit sharing rules.</p>
+<p><strong>General versus specialist.</strong> Almost wholly general. A "parent harness" would hold child-development reminders (vaccination schedules by country), school-admin formats and meal planning, but the load-bearing parts belong to the baseline. This is the persona where Lilith's <strong>whole-life database is the product</strong>, not the harness. Warning <code>[hypothesis]</code>: the second adult and the children are third parties, and a child's data is the most sensitive category (section 5, Q4).</p>
+<h3>2.8 Small shop owner</h3>
+<p><strong>What eats time and money.</strong> Compliance and tax paperwork, stock and cash flow, staff rotas. NFIB-linked figures (tax compliance costs and hours; "42% spend four hours or more a month") are old, unsourced in the form retrieved, and some are probably mis-transcribed. No current weekly figure was found. Thin ground. The HeyBRB figures (8 hours a week; 83% never calculated what admin costs) are the only recent numbers, and they are vendor-run. <code>[practice, low]</code> (B1, B15)</p>
+<p><strong>What a capable assistant does.</strong> Daily takings and bills against the month; a supplier-payment and tax-date calendar; drafts a polite rota-change text; notices that a quiet fortnight plus a lease date threatens cash flow.</p>
+<p><strong>General versus specialist.</strong> General: cash-flow awareness, calendar, staff-message drafting. Specialist: point-of-sale and stock integrations, sector regulation (alcohol licence, food hygiene). Here the real specialist cost is integration (data sits in a POS the assistant cannot read), not knowledge.</p>
+<h3>2.9 Person with a disability or low digital literacy</h3>
+<p><strong>What eats time and money.</strong> Interfaces designed for people who read quickly, type, see and hear.
+- <strong>Low literacy.</strong> OECD's 2023 Survey of Adult Skills says almost one in three adults across 31 countries and economies scored at or below Level 1 in literacy or numeracy, with the share rising in 11 of 27 countries that compare cycles (as relayed by search coverage of the OECD brochure; the OECD page returned HTTP 403). <code>[evidence, medium; secondary only]</code> (B16)
+- <strong>UK.</strong> The 2018 Essential Digital Skills data put 21% (11.3 million) without full basic digital skills; the 2025 headline figure was not found. <code>[evidence, low for the current state]</code> (B17)
+- <strong>Blind users.</strong> Two studies of <em>Be My AI</em> bear directly on the conversational lane. In a 2026 diary and lab study of 11 blind participants (418 interactions), median system responses were about 242 words in the lab against a median user input of about 20. Participants lacked verbosity controls, said they wanted "hurry mode" or automatic verbosity control, and wanted detailed description when exploring but brief answers under time pressure (arXiv 2602.16930; abstract and first half of the paper read). <code>[evidence, medium; n=11]</code> (B18)</p>
+<p><strong>What a capable assistant does.</strong> Meets the user's mode: voice in and out, short answers by default with "more" on request, plain language, reads and explains forms, never makes the user restate their situation, patient with repetition.</p>
+<p><strong>General versus specialist.</strong> Wholly baseline. This is the strongest argument that <strong>adaptation is not a harness</strong>: reading level, verbosity, modality and pace must be baseline properties, because the people who need them most are the least able to find and load a "simple mode". The specialist content here is domain help (benefit applications), and that <em>is</em> a harness.</p>
+<h3>2.10 Researcher</h3>
+<p><strong>What eats time and money.</strong> Grant administration. The Federal Demonstration Partnership faculty burden survey (Rockwell 2009, summarising a 2005 survey of 6,081 PIs) found faculty spent about 42% of their time on federally funded projects on administration. Later FDP waves report 42.3% (2012) and 44.3% (2018); the last comes from a National Academies slide deck and search coverage, and the primary 2018 report was not opened. <code>[evidence, high for 2005, medium for 2018]</code> (B19, B20)</p>
+<p><strong>What a capable assistant does.</strong> Tracks deadlines (submission, reporting, ethics renewal), the reading backlog, collaborator scheduling across time zones, and drafting.</p>
+<p><strong>General versus specialist.</strong> General: deadline tracking, drafting, scheduling. Specialist: reference managers, institution-specific compliance, field methods. Reference and literature work is where a harness is genuinely knowledge-heavy.</p>
+<h3>2.11 Manager</h3>
+<p><strong>What eats time and money.</strong> Meetings and interruption. Microsoft's 2025 Work Trend Index special report (30,000-plus knowledge workers; read only through press coverage) is reported to find an interruption roughly every two minutes (about 275 a day), 57% of meetings impromptu, and 48% of employees and 52% of leaders describing work as "chaotic and fragmented". <code>[practice, low-medium; vendor report, secondary reading]</code> (B21)</p>
+<p><strong>What a capable assistant does.</strong> Protects focus blocks; prepares one-page briefs before meetings from the user's own notes; tracks commitments made to reports; drafts difficult messages; separates work and life commitments in the calendar.</p>
+<p><strong>General versus specialist.</strong> Largely general. This is the persona closest to the "office worker" the developer probably imagines, which is a warning: the evidence base for assistants (wave 1) is dominated by office roles, so the other ten personas are where the design is least tested.</p>
+<h2>3. Cross-persona synthesis</h2>
+<h3>3.1 The pattern table</h3>
+<table>
+<thead>
+<tr>
+<th>Pain</th>
+<th>Plumber</th>
+<th>Nurse</th>
+<th>Farmer</th>
+<th>Student</th>
+<th>Retiree</th>
+<th>Freelancer</th>
+<th>Parent</th>
+<th>Shop</th>
+<th>Low-skill</th>
+<th>Researcher</th>
+<th>Manager</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>After-hours admin residue</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>medium</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>strong</td>
+<td>strong</td>
+</tr>
+<tr>
+<td>Capture away from a desk</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>weak</td>
+<td>medium</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>medium</td>
+</tr>
+<tr>
+<td>Irregular or tight money</td>
+<td>strong</td>
+<td>weak</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>strong</td>
+<td>medium</td>
+<td>weak</td>
+<td>weak</td>
+</tr>
+<tr>
+<td>Chasing owed money or paperwork</td>
+<td>strong</td>
+<td>none</td>
+<td>medium</td>
+<td>none</td>
+<td>medium</td>
+<td>strong</td>
+<td>weak</td>
+<td>strong</td>
+<td>medium</td>
+<td>none</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Carrying others' logistics</td>
+<td>medium</td>
+<td>medium</td>
+<td>strong</td>
+<td>weak</td>
+<td>medium</td>
+<td>weak</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>medium</td>
+<td>strong</td>
+</tr>
+<tr>
+<td>Deadlines with a regulatory source</td>
+<td>medium</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>medium</td>
+<td>strong</td>
+<td>strong</td>
+<td>strong</td>
+<td>weak</td>
+</tr>
+<tr>
+<td>Interruption</td>
+<td>strong</td>
+<td>strong</td>
+<td>medium</td>
+<td>medium</td>
+<td>weak</td>
+<td>medium</td>
+<td>strong</td>
+<td>strong</td>
+<td>weak</td>
+<td>medium</td>
+<td>strong</td>
+</tr>
+</tbody>
+</table>
+<p><code>[hypothesis]</code> The ratings are the track author's, built from the findings above. They are a design aid, not a measurement. Rows 1, 2, 5 and 7 are universal. Row 6 (rule-driven deadlines) is where specialisation bites. Rows 3 and 4 depend on the person's economic position.</p>
+<h3>3.2 What the baseline must always know</h3>
+<p><code>[hypothesis]</code> unless noted, derived from the table:
+1. <strong>Time:</strong> the user's real calendar <em>including irregular rotas and seasons</em>, work hours, sleep windows, and commitments to others.
+2. <strong>Money:</strong> income pattern (fixed, irregular, seasonal), obligations and dates, and how the user tolerates money being talked about (wave 1 <code>06-pitfalls.md</code> raised this; page 03 covers the harm side).
+3. <strong>People:</strong> who depends on the user and whom the user depends on, and which of them are third parties with rights over their data.
+4. <strong>Obligations with external dates:</strong> tax, licences, renewals, school forms, subsidy deadlines. The <em>dates</em> are general; the <em>rules</em> are specialist.
+5. <strong>Capture channel:</strong> how this person can talk to her right now (hands busy, driving, on a ward, in a field), and whether replies can be read now.
+6. <strong>Language and literacy level</strong>, adapted within the turn and never labelled (wave 1 <code>05-adaptation-and-accessibility.md</code>).
+7. <strong>What she cannot do</strong>, including the fact that a harness for the user's context may not exist.</p>
+<h3>3.3 The general-versus-specialist boundary</h3>
+<p><strong>A harness is warranted when at least two of these hold</strong> <code>[hypothesis]</code>:
+- It needs a <strong>document or form format</strong> the baseline cannot reasonably guess (a gas-safety record, a movement record, a handover template, a grant report).
+- It needs <strong>rules with a source and a jurisdiction</strong> that change (tax categories, subsidy criteria, safety limits).
+- It needs <strong>specialist vocabulary</strong> whose misreading would cause errors (part names, drug names, crop stages).
+- It needs <strong>calculators or lookups</strong> over structured specialist data (price books, dosage tables, feed rations).
+- It needs <strong>integration with a specialist system of record</strong> (POS, accounting, EHR, farm software).
+- It carries a <strong>different working style</strong> (coach-not-tell for a student, silent-by-default on a ward).</p>
+<p><strong>A capability is baseline if</strong> it helps roughly half or more of the personas in 3.1: capture, calendar, drafting, chasing, cash flow, reminders, document explanation, scam awareness, verbosity and modality control. Wave 1 <code>07-capability-awareness-and-handoff.md</code> already argues for a single front-stage persona that loads tools. The personas support that, and add that <em>the same person may need several harnesses</em> (a farmer who is also a parent and a part-time student).</p>
+<h3>3.4 What a harness should contain (conceptually, not architecture)</h3>
+<p><code>[hypothesis]</code> assembled from the six triggers above plus the one published pattern found for packaging agent capability:
+- A <strong>description</strong> of when it applies and what it can and cannot do (so the baseline can tell the user honestly).
+- <strong>Working-style notes</strong> (tone, verbosity, escalation rules).
+- <strong>Reference knowledge with provenance and a date</strong> (rule source, version, jurisdiction, "valid as of").
+- <strong>Templates and checklists.</strong>
+- <strong>Tools</strong> (narrow actions), each declaring whether it reads or writes.
+- <strong>Boundaries:</strong> what the harness refuses (legal, clinical or financial <em>advice</em> beyond information).</p>
+<p>Anthropic's engineering post on Agent Skills offers a working analogy: "Progressive disclosure is the core design principle that makes Agent Skills flexible and scalable", with a metadata layer giving "just enough information for Claude to know when each skill should be used", then a body, then linked files (B22, read in part). It is a statement about context economy, not about assistants for people, so it is a pattern to consider, not evidence that it works for this product. <span class="flag flag-unchecked">not checked: source could not be opened</span></p>
+<h3>3.5 How a harness should be loaded</h3>
+<p>Options (trade-offs in section 6):
+- <strong>User-initiated</strong> ("be my plumber assistant").
+- <strong>Inferred from profile</strong> (she learned the user is a plumber).
+- <strong>Inferred from the task</strong> (a quote is being drafted, so she loads the quoting harness for that turn).
+- <strong>Persistent with scoped presence</strong> (the farmer's harness is quietly always on during planting season).</p>
+<p>There is no evidence in this domain on which works best. <code>[hypothesis]</code> Task-triggered loading with a visible, user-controllable notice is the least surprising, because wave 1 (<code>07-capability-awareness-and-handoff.md</code>; its summary item 5) flags mode errors when rules change silently.</p>
+<h2>4. Findings</h2>
+<p><strong>F1. Admin residue is the one universal time sink, and it falls after hours.</strong> Trades (77% in the evenings), clinicians (1 to 2 hours a night of EHR work in a diary subset of Sinsky's physicians) and researchers (about 42-44% of project time administrative) all show it. <code>[evidence + practice; high on pattern]</code> (B1, B7, B19, B20)</p>
+<p><strong>F2. Late and irregular money is a first-class problem for the self-employed, who are a large share of the "plumber" population.</strong> 50% had trouble getting paid and nonpayment cost 13% of income (Freelancers Union 2015); 59% of the self-employed had varying income against 28% of employees (secondary). <code>[evidence; medium]</code> (B12, B4)</p>
+<p><strong>F3. Caring labour is cognitive and spans domains.</strong> Daminger's four-part frame (anticipate, identify options, decide, monitor) maps cleanly onto what a cross-domain assistant can and cannot do (the decision stays with the person). <code>[evidence; high on frame, medium on generalisation]</code> (B14)</p>
+<p><strong>F4. Adaptation is a baseline duty, not a harness.</strong> Be My AI users get answers about ten times longer than their questions and ask for verbosity control; older adults and low-skill adults are a large share of the population (Pew: 48% need help to set up devices; OECD: about one in three adults at or below Level 1 in literacy or numeracy). <code>[evidence; medium]</code> (B10, B16, B18)</p>
+<p><strong>F5. Time-use numbers for manual and small-business workers are weak.</strong> There is no plumber-specific survey; most numbers are vendor-run, small or old. The brief's confidence that "a plumber's life is X" is itself unsupported by good data. <code>[evidence of absence; high]</code> (B1, B2)</p>
+<p><strong>F6. Scams are a baseline threat across ages and professions, and the largest measurable <em>harm</em> in the evidence found.</strong> FTC: reported losses of people 60 and over rose to $2.4 billion in 2024; investment scams largest. <code>[evidence; high]</code> (B11)</p>
+<p><strong>F7. Specialist content is dominated by rules that expire.</strong> Subsidies, tax categories and licensing change every year; a harness without an update path and a "valid as of" date is a liability. <code>[hypothesis; high plausibility]</code> (reasoned from B8 and the nature of regulated domains)</p>
+<p><strong>F8. Phone calls are a revenue channel for tradespeople.</strong> The claim that tradespeople lose work to unanswered calls rests on one UK survey (34% of about 220) plus vendor claims. If true, an assistant that merely captures and returns calls is worth more than any quoting intelligence. <code>[practice; low confidence]</code> (B3)</p>
+<h2>5. What the developer did not ask</h2>
+<p><strong>Q1. Is "profession" even the right unit for a harness?</strong>
+Probably not on its own. The personas show that the <em>situation</em> (on site, on shift, at the till, at the school gate) shapes the need more than the job title. A plumber who is also a single parent has two overlapping contexts, and a farmer is household and business at once (B1, B8, B14). Hypothesis: key harnesses to <strong>tasks and situations</strong> (quoting, handover, deadline filing) as well as occupations, and allow several to be active. There is no direct evidence for this unit of design; it follows from the table in 3.1. <code>[hypothesis, medium]</code></p>
+<p><strong>Q2. What does a plumber actually do in the first week, before any harness exists?</strong>
+The plumber is the hardest user for the whole baseline. Hands are busy, the phone is in a pocket, reading during the day is unlikely, and the first hour of setup competes with the evening admin it is meant to relieve. The only evidence on what such users want comes from vendor surveys: 46% would be persuaded to automate by a free trial and 44% by a worked example from their industry; only 13% by a peer recommendation (B1; vendor, small base). Hypothesis: a <strong>worked example for this trade</strong> is a stronger onboarding hook than a feature list. This fits wave 1's task-first onboarding finding (<code>03-trust-and-onboarding.md</code>; its summary item 3).</p>
+<p><strong>Q3. The "voice and typed chat" assumption: when is each right?</strong>
+Trades, farming and nursing are hands-busy or noisy; students and managers type. The Be My AI evidence shows the <em>same</em> person needs different verbosity in different contexts (more detail when exploring, brief under time pressure; about 74% customised in professional settings against about 52% in leisure) (B18). So she needs a per-situation verbosity default, not a per-user one. <code>[evidence, low-medium; n=11 blind users]</code></p>
+<p><strong>Q4. Who owns the other people in the database, and how many of them have not consented?</strong>
+A plumber's contact list is <em>customers</em>: names, addresses, access instructions (key under the mat, alarm code), possibly vulnerable occupants. A parent's database contains children; a nurse's mental world contains patients. The user is not the only data subject in any of the eleven lives. Whole-life integration means exposure of whole <em>other people's</em> lives. Page 05 covers the regulation; the point here is that <strong>the trade sets the sensitivity</strong>: a customer's alarm code is far more dangerous than a name. <code>[hypothesis, high plausibility]</code></p>
+<p><strong>Q5. Can the baseline safely serve a nurse, a carer or a manager without becoming a clinical or HR record system?</strong>
+The track recommends an explicit scope line: in baseline use she is a <em>life</em> assistant, and professional records about third parties (patients, employees' performance) are out of scope unless a harness is built with its own consent and legal footing. That conflicts with a loose reading of "single assistant for the whole life" and is a design-session item (section 6). <code>[hypothesis; flagged against hard constraints]</code></p>
+<p><strong>Q6. What happens to someone whose life changes (new job, redundancy, bereavement, retirement)?</strong>
+The harness needs to be <em>unloadable</em> and the database needs a lifecycle. Wave 1 <code>04-digital-assistants-evidence.md</code> and its summary item 7 cover forgetting after life events (Sas and Whittaker). This track adds: a retiree used to be a plumber, and the old customers and tools should be archived, not deleted, and not suggested. <code>[hypothesis]</code></p>
+<p><strong>Q7. Who maintains a harness, and whom do you trust to write one?</strong>
+A harness is mostly <em>data and instructions</em>, which is the supply chain wave 1 flagged (<code>00-summary.md</code> item 5: indirect prompt injection from loaded content, citing Willison 2025 and Greshake et al. 2023; not re-verified here). A trade association's price book or a government's subsidy rules is exactly the kind of content that would go into a harness. Options: first-party only, curated third party, user-authored. <code>[hypothesis]</code></p>
+<p><strong>Q8. What is the cost of being wrong for each persona?</strong>
+A wrong quote loses a few hundred; a wrong drug detail harms a patient; a wrong subsidy deadline loses a farm its year; a wrong scam reassurance to a retiree loses savings (FTC median-loss data not retrieved, but reported losses over $100,000 drive the increase) (B11). Risk scales by domain, so the "I can't do that yet" line should sit in different places for different harnesses. <code>[hypothesis]</code></p>
+<p><strong>Q9. Can users say what they need?</strong>
+Wave 1 cited Taylor (1968) on compromised queries. The trades evidence adds that 83% of surveyed owners have never calculated what admin costs them (B1): they cannot describe the size of their own problem. An assistant that <em>measures</em> (for example, logs how long invoices take) could show them the problem; this is a hypothesis, not a tested method.</p>
+<p><strong>Q10. Is "Jarvis" even the right bar for most of these people?</strong>
+In Tony Stark's case the bar is that the assistant removes <em>friction between intention and action</em>. For the plumber the realistic version is "stop doing admin at 9pm" (B1, the vendor founder's phrase) and "stop losing the job when I can't pick up". Neither needs a superintelligence; both need reliability, capture and good writing. The risk is promising Jarvis and delivering a competent secretary. <code>[hypothesis]</code> <span class="flag flag-para">paraphrase: not found in the cited source</span></p>
+<p><strong>Q11. How should she handle a user with no desk, no email and no calendar app?</strong>
+Many real users keep their "database" in a notebook, paper receipts and a phone's call log. The first value is <em>building</em> the database from photos and voice, not integrating with existing systems. Photographing receipts and invoices is the plausible baseline ingest channel. There is no evidence in this track on how well that works; flagged for page 05 (integrations).</p>
+<h2>6. Design-session questions</h2>
+<ol>
+<li><strong>What is a harness keyed to?</strong> (a) Occupation, (b) task or situation, (c) both. Occupation is easy to explain and market; task or situation fits the evidence (Q1) and allows overlap. Cost: more harnesses and a harder discoverability problem (wave 1 <code>07-capability-awareness-and-handoff.md</code>).</li>
+<li><strong>What triggers loading?</strong> User-initiated (predictable, but low-literacy users may never do it); profile-inferred (smooth, but silently changes behaviour and risks mode errors, per wave 1); task-triggered with a visible badge (middle path). No conflict with hard constraints; the first two need a plain way to see what is loaded.</li>
+<li><strong>What is non-negotiably baseline?</strong> Candidate list in 3.2: capture, calendar, drafting, chasing, cash-flow awareness, scam awareness, modality and verbosity control, document explanation. Trade-off: a fat baseline means a bigger always-on knowledge surface and more to test across eleven lives; a thin baseline pushes common needs into harnesses most users never find.</li>
+<li><strong>Where does regulated knowledge live, and who updates it?</strong> Options: shipped with a dated "valid as of" and expiry; fetched from official sources; supplied by the user. <em>Conflict flag:</em> fetching rules from the internet touches local-first and the privacy design (queries can leak context); a shipped harness goes stale.</li>
+<li><strong>Scope of third-party and customer data.</strong> Options: store customers fully (useful); store minimally (safer); store references only, with the sensitive field (an alarm code) held separately under a stricter rule. <em>Conflict flag:</em> the hard constraint on tokenisation before any cloud model, against wave 1's finding that tokenising names and numbers is weak (<code>00-summary.md</code> item 2, citing Staab et al., Lukas et al., Sweeney; not re-verified here).</li>
+<li><strong>Scope line for clinical, HR and legal-adjacent personas.</strong> Options: refuse professional records entirely; allow them with an explicit consent harness; allow only de-identified personal notes. Refusing disappoints the nurse and the manager; allowing risks an unregulated product handling regulated data. <em>Likely conflict with privacy and regulatory constraints; see page 05.</em></li>
+<li><strong>Capture-first or integration-first onboarding for non-office users.</strong> Capture from voice and photos works without any accounts but needs reliable local transcription and OCR; integration needs accounts the user may not have. The former matches the plumber and farmer; the latter matches the manager.</li>
+<li><strong>Verbosity and reading level as per-situation defaults.</strong> Options: user setting, learned, inferred per context. The evidence base is small (B18). Wave 1 recommends a visible simple/full toggle; this track supports it and adds a "hurry mode" for hands-busy contexts.</li>
+<li><strong>Money talk by persona.</strong> For irregular earners runway modelling helps; for those under debt stress it may harm (page 03 has the evidence). Decision: default off and opt-in, or default on with careful framing?</li>
+<li><strong>Scam defence as baseline.</strong> Option: always-on guidance when a message or call pattern looks like a scam. Trade-off: false alarms, and she then reads incoming messages (a privacy surface).</li>
+<li><strong>Evaluation.</strong> How will the design be tested with plumber-like users who will not sit in a lab? Options: field diary studies (as in B18), paired trials with trade bodies, synthetic personas from this track. Synthetic personas are cheap but are exactly the hypothesis layer.</li>
+</ol>
+<h2>7. Weak spots (the three claims least sure of)</h2>
+<ol>
+<li><strong>The time-cost numbers for tradespeople and small businesses</strong> (8 hours a week; 5 to 18.5 hours; 34% lost work to missed calls). All are vendor-run, small-sample or secondary-only; no plumber-specific figure was found. The <em>pattern</em> (after-hours admin, quoting, chasing money) is more reliable than any number.</li>
+<li><strong>The boundary rule in 3.3</strong> (a harness is warranted when two of six triggers hold; baseline if it helps about half the personas). It is a synthesis from eleven personas, several of which (student, shop owner, manager, nurse, farmer) rest on abstracts and vendor surveys. It is a design heuristic to test, not a finding.</li>
+<li><strong>The claim that adaptation (verbosity, literacy, modality) must be baseline and cannot be a harness.</strong> The support is strong in principle (older and low-skill adults are a large share of the population), but the direct evidence is one small blind-user study (n=11) plus Pew 2016 and OECD figures read only through secondary coverage.</li>
+</ol>
+<h2>Sources</h2>
+<p>B1 to B23 in <code>sources.md</code>. No fetched page was noticed to contain instructions aimed at the reader.</p><div class="pager"><a href="01-whole-life-management.html">← Running a whole life</a><a href="03-cross-domain-synthesis-and-proactivity.html">Cross-domain synthesis →</a></div>
+<hr>
+<p class="foot-stamp">LILITH V6 RESEARCH, WAVE 2 · the whole-life assistant · gathered by AI research agents 2026-11-01, then checked by script (see the <a href="verification.html">verification report</a>) · builds on the <a href="../../index.html">assistant research</a> (wave 1) · not part of the frozen design document</p>
+</body>
+</html>
