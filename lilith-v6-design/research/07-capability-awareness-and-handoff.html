@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question 7: Capability Self-Knowledge and Generalist-to-Specialist Handoff — Lilith v6 research</title>
+<meta name="description" content="Showing capability, and handing over to a specialist.">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+</style>
+</head>
+<body class="rs">
+<h1>Question 7: Capability Self-Knowledge and Generalist-to-Specialist Handoff</h1>
+<nav class="doc-nav"><a href="../index.html">🏠 Research overview</a><a href="00-summary.html">Summary</a><a href="01-historical-roles.html">Assistants through history</a><a href="02-principles.html">The recurring principles</a><a href="03-trust-and-onboarding.html">Trust and the first weeks</a><a href="04-digital-assistants-evidence.html">What digital assistants teach</a><a href="05-adaptation-and-accessibility.html">Adapting to the user</a><a href="06-pitfalls.html">Pitfalls</a><a class="nav-active" href="07-capability-awareness-and-handoff.html">Knowing what she can do</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask</a><a href="09-implications-for-lilith.html">Implications for Lilith</a><a href="sources.html">Sources</a><a href="verification.html">Verification report</a><a href="narrative.html">🎧 Spoken guide</a></nav>
+<nav class="doc-nav"><span style="font-size:.72rem;color:var(--muted);align-self:center">Design document:</span><a href="../full-document.html"><span class="nav-icon">📖</span> Design document</a><a href="../standards.html"><span class="nav-icon">⚖</span> Standards</a><a href="../amendments.html"><span class="nav-icon">📜</span> Amendments</a><a href="../archive/overview-build-phase.html"><span class="nav-icon">🗄</span> Archived overview</a></nav>
+<div class="trust"><strong>How far to trust this page.</strong> This is an AI research agent's synthesis. Its links and quotations were then checked by script: some quotations are confirmed, many could not be checked, and some were not found in the sources they were credited to. Those are marked <span class="flag flag-unchecked">not checked</span> or <span class="flag flag-para">paraphrase</span> below. Treat the structure and the hypotheses as leads, and open a source before relying on any claim. <a href="verification.html">What was checked and what failed</a>.</div><p>A central aspiration in the developer's brief is:</p>
+<blockquote>
+<p><em>"she starts as a generic baseline assistant who knows what tools and specialist harnesses exist but does not carry all knowledge. A place he calls 'the nexus' holds specialist harnesses (a bundle of tools, knowledge and working style for one context, for example a particular profession or hobby). She loads one to be useful in that context. Specialisation changes her behaviour in that specialist mode only, not her everyday interactions. She should always know what she can do and how she can help..."</em></p>
+</blockquote>
+<p>This raises two classic problems in human-computer interaction and organisational design:
+1. <strong>Capability Discoverability</strong>: How does an assistant keep the user aware of what she can do (both natively and via the nexus) without burying them in menus or nagging them like Clippy?
+2. <strong>Generalist-to-Specialist Handoff</strong>: How does a generalist transition into a specialist context—in clinical medicine, executive support, customer service, and multi-agent AI—without losing the conversational thread or fracturing the relationship?</p>
+<hr />
+<h2>1. Capability Self-Knowledge Without Overwhelming the Principal</h2>
+<h3>1.1 Why Upfront Capability Menus Fail in Conversational Interfaces (<code>Furqan, Myers, &amp; Zhu, 2017</code>)</h3>
+<ul>
+<li><strong>Primary Sources</strong>: Anushay Furqan, Chelsea Myers, &amp; Jichen Zhu (<a class="cite" href="sources.html#S54">S54</a>, 2017, <em>Learnability through Adaptive Discovery Tools in Voice User Interfaces</em>, Drexel University &amp; <em>CHI EA '17</em>, https://doi.org/10.17918/etd-7358, <code>read fully</code>); Eric Corbett &amp; Astrid Weber (<a class="cite" href="sources.html#S48">S48</a>, 2016, <em>MobileHCI '16</em>, https://doi.org/10.1145/2935334.2935386, <code>read in part</code>); Ryen W. White (<a class="cite" href="sources.html#S76">S76</a>, 2018, <em>Communications of the ACM</em>, https://doi.org/10.1145/3185336, <code>abstract only</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>A common developer instinct is to solve discoverability by showing a complete "What Can I Say / All Tools" menu on startup. In a controlled experiment testing <em>VoiceNavigator</em>, Furqan (<a class="cite" href="sources.html#S54">S54</a>, pp. 25–27, https://doi.org/10.17918/etd-7358) proved that <strong>static upfront command menus fail</strong>:<blockquote>
+<p>"4 of the 13 participants expressed that the menu contained too much content or was overwhelming. One participant states, “When I first opened it I thought it was a lot to read”. Another states, “Its voice, I felt like I didnt want to read so much.”" <span class="flag flag-unchecked">not checked: source could not be opened</span> (p. 25)
+"Despite presenting a complete menu with commands for all functionality, 11 of the 13 participants in the control group were unable to discover the full capabilities of the system in the first session, stating only the tasks they had completed as it’s capabilities. Some were unable to identify it’s limitations, stating that it could tell them the weather or set alarms. This may be attributed to the density of the menu." <span class="flag flag-unchecked">not checked: source could not be opened</span> (p. 27)</p>
+</blockquote>
+</li>
+<li><strong>Why Silent Auto-Hiding Also Fails (<a class="cite" href="sources.html#S54">S54</a>, p. 26)</strong>: When Furqan tested an adaptive menu that automatically hid commands after the user executed them 3 times ("learned"), users became anxious and disoriented:<blockquote>
+<p>"However, when the menu automatically adapted to hide commands it marked as “learned”, some participants did not understand why the menu changed. In sessions 2 and 3, some participants expressed wanting the previous menu, “I want those prompts so badly”, “This isn’t the menu I want”, “It goes away too quickly”... another stated “it’s indicating new commands and assuming I know previous ones, which is dangerous”." <span class="flag flag-unchecked">not checked: source could not be opened</span> (p. 26)</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3>1.2 Progressive Disclosure, Training Wheels, and Mixed-Initiative Timing</h3>
+<ul>
+<li><strong>Primary Sources</strong>: Jakob Nielsen (<a class="cite" href="sources.html#S70">S70</a>, 2006, <em>Progressive Disclosure</em>, https://www.nngroup.com/articles/progressive-disclosure/, <code>read fully</code>); John M. Carroll &amp; Caroline Carrithers (<a class="cite" href="sources.html#S41">S41</a>, 1984, <em>CACM</em>, https://doi.org/10.1145/358198.358218, <code>abstract only</code>); Eric Horvitz (<a class="cite" href="sources.html#S59">S59</a>, 1999, <em>CHI '99</em>, http://erichorvitz.com/chi99horvitz.pdf, <code>read fully</code>); Saleema Amershi et al. (<a class="cite" href="sources.html#S34">S34</a>, 2019, <em>CHI '19</em>, http://teevan.org/publications/papers/chi19-guidelines.pdf, <code>read fully</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ol>
+<li><strong>Progressive Disclosure Improves Learnability, Efficiency, and Error Rates (<a class="cite" href="sources.html#S41">S41</a>, <a class="cite" href="sources.html#S70">S70</a>)</strong>:<ul>
+<li>Carroll &amp; Carrithers (<a class="cite" href="sources.html#S41">S41</a>, 1984) proved that hiding advanced error states in a "Training Wheels" interface allowed novices to learn substantially faster and score <em>higher</em> on a comprehension post-test, whereas full-interface novices spent <strong>nearly 25% of their time recovering from advanced error states</strong>.</li>
+<li>Nielsen (<a class="cite" href="sources.html#S70">S70</a>, https://www.nngroup.com/articles/progressive-disclosure/) explains why showing fewer core options upfront actually improves whole-system understanding:<blockquote>
+<p>"You might assume that by initially focusing users' attention on a few core features, they might build a limiting mental model of the system and thus be unable to understand all of their options. Research says that these are groundless worries: people understand a system better when you help them prioritize features and spend more time on the most important ones."
+"Simple as the concept may seem, there are two things you must get right when designing for progressive disclosure: You must get the right split between initial and secondary features... It must be obvious how to progress from the primary to the secondary disclosure levels." <span class="flag flag-unchecked">not checked: source could not be opened</span></p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><strong>Mixed-Initiative Timing &amp; Scoping to Uncertainty (<a class="cite" href="sources.html#S34">S34</a>, <a class="cite" href="sources.html#S59">S59</a>)</strong>:<ul>
+<li>Horvitz (<a class="cite" href="sources.html#S59">S59</a>, 1999, pp. 1–2) and Amershi et al. (<a class="cite" href="sources.html#S34">S34</a>, 2019, Table 1, p. 3) establish four foundational rules for capability communication:</li>
+<li><strong>G1 (<em>Make clear what the system can do</em>) &amp; G2 (<em>Make clear how well the system can do what it can do</em>)</strong> (<a class="cite" href="sources.html#S34">S34</a>).</li>
+<li><strong>G3 (<em>Time services based on context</em>) &amp; Horvitz Principle 3 (<em>Considering the status of a user's attention</em>)</strong>: Never interrupt high-workload execution to advertise a feature; surface capability suggestions at <strong>task completion boundaries</strong> (<a class="cite" href="sources.html#S59">S59</a>, <a class="cite" href="sources.html#S132">S132</a>).</li>
+<li><strong>G10 / Horvitz Principle 8 (<em>Scoping precision of service to match uncertainty</em>)</strong>:
+    &gt; When there is uncertainty about a user’s intentions, systems can provide functionality at a level of precision or generality that matches the uncertainty in user goals. <span class="flag flag-para">paraphrase: not found in the cited source</span> (<a class="cite" href="sources.html#S59">S59</a>, p. 2)</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h3>1.3 Four Concrete Patterns That Work in Human and Product Practice</h3>
+<p>Combining human executive-assistant practice (<a class="cite" href="sources.html#S20">S20</a>, <a class="cite" href="sources.html#S23">S23</a>, <a class="cite" href="sources.html#S30">S30</a>) with HCI evidence (<a class="cite" href="sources.html#S34">S34</a>, <a class="cite" href="sources.html#S54">S54</a>, <a class="cite" href="sources.html#S59">S59</a>, <a class="cite" href="sources.html#S70">S70</a>, <a class="cite" href="sources.html#S76">S76</a>, <a class="cite" href="sources.html#S120">S120</a>), Lilith should use four specific patterns to maintain capability awareness:</p>
+<ol>
+<li>
+<p><strong>Pattern A — The "Completed Task + 1 Adjacent Option" Receipt ("Here Is What I Did, and Could Also Do")</strong> <code>[practice — high confidence]</code>:</p>
+<ul>
+<li>Great human EAs and Private Secretaries (<a class="cite" href="sources.html#S20">S20</a>, <a class="cite" href="sources.html#S30">S30</a>) never hand a principal a bare output when an obvious next step exists; they say: I've added the Thursday 2pm call with Alex to your calendar. I also pulled the notes from your last chat with him in case you want them linked. <span class="flag flag-para">paraphrase: not found in the cited source</span></li>
+<li>In software, right after completing the user's primary task (when cognitive load drops at a task boundary, <a class="cite" href="sources.html#S132">S132</a>), Lilith appends a <strong>single-line, low-visual-weight footnote</strong> offering one directly adjacent tool or Nexus harness (<a class="cite" href="sources.html#S54">S54</a>, <a class="cite" href="sources.html#S76">S76</a>). If ignored or dismissed once, she immediately habituates and suppresses that tip in future turns (<a class="cite" href="sources.html#S34">S34</a> <em>G8</em>, <a class="cite" href="sources.html#S87">S87</a>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Pattern B — Concrete Intent Examples Beat Abstract Tool Menus</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li>Furqan (<a class="cite" href="sources.html#S54">S54</a>) and Zowghi &amp; Coulin (<a class="cite" href="sources.html#S77">S77</a>) show that users think in <strong>goals/situations</strong>, not tool API names. When the user asks <em>"What can you do?"</em> or opens the capability drawer, never list raw tool names (<code>calendar_read</code>, <code>contact_lookup</code>, <code>note_recall</code>). Group capabilities by <strong>user intent</strong> with 1-line concrete examples:<ul>
+<li><em>Prepare for a meeting</em> $\to$ <code>"Pull my last 3 notes mentioning Sarah and check our next calendar slot" <span class="flag flag-unchecked">not checked: source could not be opened</span></code></li>
+<li><em>Capture &amp; link context</em> $\to$ <code>"Save a note from this chat and pin it to Friday's review" <span class="flag flag-unchecked">not checked: source could not be opened</span></code></li>
+<li><em>Load a Specialist Harness (The Nexus)</em> $\to$ <code>"Switch to Legal Research / Python Debugging / Tax Prep mode" <span class="flag flag-unchecked">not checked: source could not be opened</span></code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Pattern C — Just-in-Time "Graceful Boundary + Adjacent Offer" When Saying "I Can't Do That Yet"</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li>As Fielding (<a class="cite" href="sources.html#S53">S53</a>, 2012, https://www.callcentrehelper.com/debunking-the-customer-effort-score-28652.htm) proved in customer-effort studies, an immediate, painless <em>"I can't do that yet"</em> preserves user loyalty, whereas high-effort non-resolution destroys it.</li>
+<li>When a user asks for an unsupported action (e.g., <em>"Send an email to Bob"</em>), Lilith should state the boundary immediately in one clause and offer the closest supported preparation step (<a class="cite" href="sources.html#S59">S59</a> Principle 8): <em>"I can't send emails directly yet, but I can look up Bob's address in your contacts and draft the message in a note for you to copy."</em></li>
+</ul>
+</li>
+<li>
+<p><strong>Pattern D — Adaptable Dual-Surface Catalog (Personal Active Bar vs. Nexus Drawer)</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li>Following McGrenere et al. (<a class="cite" href="sources.html#S120">S120</a>, 2002) and Furqan (<a class="cite" href="sources.html#S54">S54</a>, 2017), keep a clean <strong>Personal Surface</strong> showing only the user's active baseline tools (never auto-deleting learned commands without user consent, <a class="cite" href="sources.html#S54">S54</a>), paired with a 1-click <strong>Nexus Catalog</strong> where all available specialist harnesses can be browsed on demand (<a class="cite" href="sources.html#S70">S70</a>, <a class="cite" href="sources.html#S120">S120</a>).</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2>2. Generalist-to-Specialist Handoff: Human Practice and Multi-Agent AI Design</h2>
+<h3>2.1 Human Practice: Clinical Handoffs (SBAR &amp; I-PASS), Primary Care Coordination, and Warm vs. Cold Transfers</h3>
+<ol>
+<li>
+<p><strong>The Paradox of Primary Care: Why the Generalist Must Remain the Coordinator (<code>Stange &amp; Ferrer, 2009</code>)</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li>Kurt C. Stange &amp; Robert L. Ferrer (<a class="cite" href="sources.html#S73">S73</a>, 2009, <em>Annals of Family Medicine</em>, pp. 294–295, https://www.annfammed.org/content/annalsfm/7/4/293.full.pdf, <code>read fully</code>) documented a striking empirical paradox across healthcare systems:
+    &gt; The paradox of primary care is that compared with specialty care, primary care is associated with: (1) apparently poorer quality care for individual diseases, yet (2) similar functional health status at lower cost for people with chronic disease, and (3) better quality, better health, greater equity, and lower cost for whole people and populations. <span class="flag flag-para">paraphrase: not found in the cited source</span>
+    &gt; "Integrating, prioritizing, and personalizing care through ongoing person-focused, contextualized primary care relationships can allow care to be integrated and prioritized across acute and chronic illness, preventive, psychosocial, and family care."</li>
+<li><strong>Why Specialist Silos Fail Without a Generalist Anchor</strong>: A specialist views the principal exclusively through the lens of their narrow specialty—often recommending interventions that conflict with the person's broader life constraints, schedule, or values. The <strong>generalist primary care clinician</strong> holds the longitudinal relationship with the <em>whole person</em>, decides <em>when</em> a specialist is needed, briefs the specialist, and integrates the specialist's output back into the person's everyday life (<a class="cite" href="sources.html#S73">S73</a>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Clinical Handoff Protocols: SBAR and the NEJM I-PASS Trial (<code>Starmer et al., 2014</code>)</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li>Unstructured handoffs between clinicians are one of the leading causes of preventable medical harm. In a landmark multicenter study across <strong>10,740 patient admissions</strong> published in the <em>New England Journal of Medicine</em>, Amy J. Starmer et al. (<a class="cite" href="sources.html#S74">S74</a>, 2014, <em>NEJM</em>, https://doi.org/10.1056/NEJMsa1405556, <code>abstract only</code>) evaluated the <strong>I-PASS</strong> handoff bundle (<em>Illness severity, Patient summary, Action list, Situation awareness &amp; contingency plans, Synthesis by receiver</em>):
+    &gt; "In 10,740 patient admissions, the medical-error rate decreased by 23% from the preintervention period to the postintervention period (24.5 vs. 18.8 per 100 admissions, P&lt;0.001), and the rate of preventable adverse events decreased by 30% (4.7 vs. 3.3 events per 100 admissions, P&lt;0.001)... There were no significant changes from the preintervention period to the postintervention period in the duration of oral handoffs (2.4 and 2.5 minutes per patient, respectively; P=0.55)..." <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+<li>Similarly, the IHI's <strong>SBAR (Situation, Background, Assessment, Recommendation)</strong> framework (<a class="cite" href="sources.html#S16">S16</a>, <a class="cite" href="sources.html#S60">S60</a>, https://www.ihi.org/library/tools/sbar-tool-situation-background-assessment-recommendation, <code>read fully</code>) standardizes context transfer in four compact fields.</li>
+<li><strong>Notice the Secret Ingredient in I-PASS</strong>: The final step—<strong>S = Synthesis by receiver</strong> (where the receiving specialist briefly reads back the 1-sentence summary of the goal and action plan to confirm mutual grounding before starting work)—eliminates 30% of preventable handoff errors with <strong>zero added time cost</strong> (<a class="cite" href="sources.html#S74">S74</a>).</li>
+</ul>
+</li>
+<li>
+<p><strong>Warm Transfer vs. Cold Transfer in Service and Crisis Lines (<code>Dixon et al., 2010/2013</code>; <code>Fielding, 2012</code>)</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li>In customer service and crisis-line studies across thousands of interactions, Matthew Dixon, Karen Freeman, &amp; Nicholas Toman (<a class="cite" href="sources.html#S51">S51</a>, 2010/2013, https://chiefcustomerofficer.io/newsletter/the-effortless-experience, <code>read in part</code>) and G. Fielding (<a class="cite" href="sources.html#S53">S53</a>, 2012, https://www.callcentrehelper.com/debunking-the-customer-effort-score-28652.htm, <code>read fully</code>) proved that <strong>96% of users who experience high-effort interactions become disloyal</strong> (compared to 9% in low-effort interactions), and the #1 driver of frustration during a handoff is a <strong>cold transfer</strong>—being switched to another agent and <strong>forced to repeat one's story from scratch</strong> (<a class="cite" href="sources.html#S51">S51</a>, <a class="cite" href="sources.html#S53">S53</a>).</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h3>2.2 Multi-Agent AI Design: Why Single-Persona Orchestration Beats Multi-Persona Switching</h3>
+<p>In current AI-agent engineering, there are two competing UX paradigms for specialist modules ("harnesses"):
+* <strong>Paradigm 1 (Multi-Persona / Agent Select)</strong>: The generalist hands the user off to a separate specialist persona (e.g., <em>"Transferring you to @LegalBot / @CodeExpert"</em>), or asks the user to pick which specialist agent to talk to.
+* <strong>Paradigm 2 (Single-Persona Orchestration / "One For All")</strong>: The user always talks to <strong>one unified assistant persona</strong> (Lilith), who loads the specialist tools, knowledge, and working style behind the scenes ("putting on a specialist hat").</p>
+<p><strong>The empirical HCI evidence decisively favors Paradigm 2 (Single-Persona Continuity)</strong> <code>[evidence — high confidence]</code>:</p>
+<ul>
+<li><strong>Primary Sources</strong>: Christopher Clarke, Karthik Krishnamurthy, Walter Talamonti, Yiping Kang, Lingjia Tang, &amp; Jason Mars (<a class="cite" href="sources.html#S47">S47</a>, 2024, <em>One Agent Too Many: User Perspectives on Approaches to Multi-agent Conversational AI</em>, <code>arXiv:2401.07123</code>, https://arxiv.org/pdf/2401.07123v1, <code>read fully</code>); Christopher Clarke et al. (<a class="cite" href="sources.html#S46">S46</a>, 2022, <em>One Agent To Rule Them All: Towards Multi-agent Conversational AI</em>, <em>ACL Findings 2022</em>, https://aclanthology.org/2022.findings-acl.257.pdf, <code>read fully</code>); Ana Paula Chaves &amp; Marco Aurelio Gerosa (<a class="cite" href="sources.html#S44">S44</a>, 2018, <em>CHI '18</em> &amp; <a class="cite" href="sources.html#S45">S45</a>, 2021, <em>IJHCI</em>, https://arxiv.org/pdf/1904.02743v2, <code>read fully</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Chaves &amp; Gerosa (<a class="cite" href="sources.html#S44">S44</a>, 2018, cited in <a class="cite" href="sources.html#S47">S47</a>, p. 2) compared single-chatbot vs. multi-chatbot interactions and proved that users experienced significantly higher confusion and lower interactional coherence when multiple agent personas participated in a conversation.</li>
+<li>In controlled user studies comparing <strong>One For All</strong> (a single conversational agent persona orchestrating specialist back-end capabilities) against <strong>Agent Select</strong> (where users select or switch among distinct specialist agents), Clarke et al. (<a class="cite" href="sources.html#S47">S47</a>, 2024, pp. 1, 6, https://arxiv.org/pdf/2401.07123v1) measured a massive usability and accuracy gap:<blockquote>
+<p>"As a result, users are taxed with the burden of learning and adopting multiple agents leading to an increase in the cognitive load of interacting with agents, further discouraging the proliferation of their usage (Dubiel et al., 2020; Novick et al., 2018; Saltsman et al., 2019)." (<a class="cite" href="sources.html#S46">S46</a>, p. 3258)
+"Through a series of conducted user studies, we show that users have a significant preference for abstracting agent orchestration in both system usability and system performance." (<a class="cite" href="sources.html#S47">S47</a>, p. 1)
+"One For All achieved an average SUS [System Usability Scale] score of 86 (SD=8.9) compared to an average of 56 (SD=21.7) for Agent Select. In addition, One For All achieved an accuracy score of 71% across all tasks executed by participants compared to 57% by Agent Select." (<a class="cite" href="sources.html#S47">S47</a>, p. 6)</p>
+</blockquote>
+</li>
+<li><strong>Look at those numbers</strong>: A System Usability Scale (SUS) score of <strong>86</strong> is Grade-A/Excellent usability, whereas <strong>56</strong> is a failing Grade-F usability score—and task accuracy jumped from <strong>57% to 71%</strong> simply by keeping a single conversational agent persona in front of the specialist back-end (<a class="cite" href="sources.html#S47">S47</a>)!</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3>2.3 However: The Mode-Error Trap and How to Reconcile Single-Persona Continuity with Specialist Behaviour</h3>
+<p>While Clarke et al. (<a class="cite" href="sources.html#S47">S47</a>, 2024) prove that Lilith must remain <strong>one continuous persona</strong>, Donald Norman (<a class="cite" href="sources.html#S139">S139</a>, 1983, <em>Design Rules Based on Analyses of Human Error</em>, https://doi.org/10.1145/2163.358092) and Abigail Sellen, Gordon Kurtenbach, &amp; William Buxton (<a class="cite" href="sources.html#S139">S139</a>, 1992, <em>The Prevention of Mode Errors Through Sensory Feedback</em>, https://doi.org/10.1207/s15327051hci0702_1) prove a countervailing danger:
+* <strong>If a single interface changes its behavioral rules in a specialist mode without continuous, unmistakable perceptual feedback, users commit severe Mode Errors</strong> (<a class="cite" href="sources.html#S139">S139</a>, <a class="cite" href="sources.html#S82">S82</a>).</p>
+<p>Therefore, Lilith's "Nexus" handoff protocol must combine <strong>Single-Persona Relational Continuity</strong> (<a class="cite" href="sources.html#S47">S47</a>, <a class="cite" href="sources.html#S73">S73</a>) with <strong>Explicit Perceptual Mode Feedback</strong> (<a class="cite" href="sources.html#S82">S82</a>, <a class="cite" href="sources.html#S139">S139</a>) and <strong>Structured SBAR/I-PASS Context Transfer</strong> (<a class="cite" href="sources.html#S60">S60</a>, <a class="cite" href="sources.html#S74">S74</a>) <code>[hypothesis — high confidence]</code>.</p>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant U as User
+    participant B as Baseline Lilith (Generalist Coordinator)
+    participant N as Nexus Specialist Harness (Scoped Sandbox)
+
+    U-&gt;&gt;B: &quot;I need to review this freelance contract before Friday's call with Acme.&quot;
+    B-&gt;&gt;B: 1. Detect domain match (Contract/Legal Harness in Nexus)&lt;br/&gt;2. Compile SBAR/I-PASS Context Packet (Friday Acme call, user role)
+    B-&gt;&gt;U: &quot;I can load the Contract Review harness from the nexus for this.&lt;br/&gt;(Note: This harness runs locally + uses strict checklist style.) Load it?&quot;
+    U-&gt;&gt;B: &quot;Yes, load it.&quot;
+    B-&gt;&gt;N: Mount Harness + Inject Scoped SBAR Context Packet
+    Note over B,N: Visual Mode Badge + Voice Earcon Active: [Lilith • Contract Review Mode]
+    N-&gt;&gt;U: &quot;Contract Review harness loaded. Based on your Friday Acme call,&lt;br/&gt;we're checking liability &amp; payment terms first. Ready for the text.&quot;
+    U-&gt;&gt;N: [Works through contract clauses in specialist style]
+    U-&gt;&gt;N: &quot;Done, let's wrap up.&quot;
+    N-&gt;&gt;B: Export Approved Deliverable Only (1 Note + 1 Friday Calendar Checklist)
+    Note over B,N: Unmount Specialist Prompt/Tools &amp; Quarantine Raw Transcript
+    B-&gt;&gt;U: &quot;Back in baseline mode. I saved your redline summary to Notes&lt;br/&gt;and linked it to Friday's Acme call.&quot;
+</code></pre>
+<h3>2.4 The Five-Step Nexus Handoff Protocol for Lilith <code>[hypothesis — high confidence]</code></h3>
+<ol>
+<li><strong>Step 1 — Explicit Proposal &amp; Privacy/Capability Disclosure Before Loading</strong>:<ul>
+<li>When baseline Lilith detects a task suited for a Nexus harness (or the user asks for one), she proposes loading it and discloses any change in working style, tool permissions, or local/cloud routing (<a class="cite" href="sources.html#S34">S34</a> <em>G1/G2</em>, <a class="cite" href="sources.html#S64">S64</a> <em>Process</em>, <a class="cite" href="sources.html#S82">S82</a>).</li>
+</ul>
+</li>
+<li><strong>Step 2 — Automatic SBAR / I-PASS Context Carry-Over (Zero Repetition)</strong>:<ul>
+<li>Baseline Lilith compiles a compact <strong>SBAR Context Packet</strong> from the current conversation (<code>Situation</code>: user's immediate goal; <code>Background</code>: relevant calendar/note constraints; <code>Assessment</code>: identified gaps; <code>Recommendation</code>: initial specialist workflow) and passes it into the harness so the user <strong>never repeats their story</strong> (<a class="cite" href="sources.html#S51">S51</a>, <a class="cite" href="sources.html#S60">S60</a>, <a class="cite" href="sources.html#S74">S74</a>).</li>
+</ul>
+</li>
+<li><strong>Step 3 — "One Persona Wearing a Visible Hat" (Continuous Sensory Mode Feedback + I-PASS Read-Back)</strong>:<ul>
+<li>Lilith remains <strong>Lilith</strong> (<a class="cite" href="sources.html#S46">S46</a>, <a class="cite" href="sources.html#S47">S47</a>), but the UI displays an unmistakable, persistent <strong>Mode Header/Badge</strong> (and in voice mode, a brief auditory earcon + verbal confirmation, <a class="cite" href="sources.html#S82">S82</a>, <a class="cite" href="sources.html#S139">S139</a>), followed immediately by a 1-sentence <strong>I-PASS Synthesis read-back</strong> (<a class="cite" href="sources.html#S74">S74</a>): <em>"I've loaded the [X] harness. I have your context on [Y], and while in this mode I'll work through [style Z]."</em> <span class="flag flag-unchecked">not checked: source could not be opened</span></li>
+</ul>
+</li>
+<li><strong>Step 4 — Scoped Behavioural &amp; Security Isolation During Specialist Work</strong>:<ul>
+<li>While the harness is active, its specialist prompt, domain corpus, and tools govern the task without overwriting the user's global everyday Working Agreement (<a class="cite" href="sources.html#S73">S73</a>). To prevent indirect prompt injection (<a class="cite" href="sources.html#S131">S131</a>, <a class="cite" href="sources.html#S152">S152</a>), external/untrusted harness data is sandboxed from mutating personal contacts or sending external messages.</li>
+</ul>
+</li>
+<li><strong>Step 5 — Clean Unmount &amp; Structured Deliverable Return to the Generalist</strong>:<ul>
+<li>When the specialist task finishes (or the user switches topics), Lilith cleanly unmounts the specialist harness, <strong>quarantines the specialist style/transcript</strong> so it cannot pollute everyday conversational RAG (<a class="cite" href="sources.html#S127">S127</a>, <a class="cite" href="sources.html#S139">S139</a>), and exports <em>only</em> the user-approved deliverable (e.g., a saved summary note or a calendar deadline) back to baseline Lilith (<a class="cite" href="sources.html#S73">S73</a>).</li>
+</ul>
+</li>
+</ol><div class="pager"><a href="06-pitfalls.html">← Pitfalls</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask →</a></div>
+<hr>
+<p class="foot-stamp">LILITH V6 RESEARCH · what makes a good assistant · gathered by an AI research agent 2026-11-01, then checked by script (see the <a href="verification.html">verification report</a>) · not part of the frozen design document</p>
+</body>
+</html>

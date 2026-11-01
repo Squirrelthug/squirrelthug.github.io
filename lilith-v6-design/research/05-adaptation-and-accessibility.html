@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Question 5: Adapting to the User and Accessibility — Lilith v6 research</title>
+<meta name="description" content="Reading a person&#x27;s level without talking down to them.">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+  .rs { max-width: 1060px; }
+  .rs h1 { color: var(--accent); }
+  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
+  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
+  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
+  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
+  .rs a { color: var(--accent); }
+  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
+  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
+  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
+  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .rs th { background: var(--surface); color: var(--accent); }
+  .rs td { background: rgba(255,255,255,0.01); }
+  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
+  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
+  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
+  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
+  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
+  .trust strong { color: var(--amber); }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
+</style>
+</head>
+<body class="rs">
+<h1>Question 5: Adapting to the User and Accessibility</h1>
+<nav class="doc-nav"><a href="../index.html">🏠 Research overview</a><a href="00-summary.html">Summary</a><a href="01-historical-roles.html">Assistants through history</a><a href="02-principles.html">The recurring principles</a><a href="03-trust-and-onboarding.html">Trust and the first weeks</a><a href="04-digital-assistants-evidence.html">What digital assistants teach</a><a class="nav-active" href="05-adaptation-and-accessibility.html">Adapting to the user</a><a href="06-pitfalls.html">Pitfalls</a><a href="07-capability-awareness-and-handoff.html">Knowing what she can do</a><a href="08-questions-you-didnt-ask.html">Questions you did not ask</a><a href="09-implications-for-lilith.html">Implications for Lilith</a><a href="sources.html">Sources</a><a href="verification.html">Verification report</a><a href="narrative.html">🎧 Spoken guide</a></nav>
+<nav class="doc-nav"><span style="font-size:.72rem;color:var(--muted);align-self:center">Design document:</span><a href="../full-document.html"><span class="nav-icon">📖</span> Design document</a><a href="../standards.html"><span class="nav-icon">⚖</span> Standards</a><a href="../amendments.html"><span class="nav-icon">📜</span> Amendments</a><a href="../archive/overview-build-phase.html"><span class="nav-icon">🗄</span> Archived overview</a></nav>
+<div class="trust"><strong>How far to trust this page.</strong> This is an AI research agent's synthesis. Its links and quotations were then checked by script: some quotations are confirmed, many could not be checked, and some were not found in the sources they were credited to. Those are marked <span class="flag flag-unchecked">not checked</span> or <span class="flag flag-para">paraphrase</span> below. Treat the structure and the hypotheses as leads, and open a source before relying on any claim. <a href="verification.html">What was checked and what failed</a>.</div><p>Users of a desktop assistant differ vastly in digital literacy, age, neurotype, sensory/motor/speech ability, patience, and how much they want to delegate. The developer's brief asks two central questions:
+1. <em>What does accessibility research, universal design, adaptive systems, and learning science say about reading a user's level from conversation and meeting them there without condescension?</em>
+2. <em>How should she handle someone who does one thing versus someone who does many?</em></p>
+<p>Below is the empirical answer from psycholinguistics, cognitive load theory, adaptive interface studies, W3C cognitive accessibility standards, and disability/neurodiversity research.</p>
+<hr />
+<h2>1. Reading a User's Level From Conversation Without Condescension</h2>
+<h3>1.1 Conversational Grounding: How Humans Detect Expertise in 1–2 Turns Without Asking</h3>
+<ul>
+<li><strong>Primary Sources</strong>: Ellen A. Isaacs &amp; Herbert H. Clark (<a class="cite" href="sources.html#S107">S107</a>, 1987, <em>References in Conversation Between Experts and Novices</em>, <em>Journal of Experimental Psychology: General</em>, https://web.stanford.edu/~clark/1980s/Isaacs,%20E.A.%20_%20Clark,%20H.H.%20_References%20in%20conversations%20between%20experts%20and%20novices_%201987.pdf, <code>read in part</code>); Herbert H. Clark &amp; Susan E. Brennan (<a class="cite" href="sources.html#S108">S108</a>, 1991, <em>Grounding in Communication</em>, https://web.stanford.edu/~clark/1990s/Clark,%20H.H.%20_%20Brennan,%20S.E.%20_Grounding%20in%20communication_%201991.pdf, <code>read in part</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ul>
+<li><strong>Humans Do Not Use Onboarding Quizzes</strong>: In Isaacs &amp; Clark's (<a class="cite" href="sources.html#S107">S107</a>, pp. 26–30) experimental study of 32 pairs of speakers (Expert–Expert, Expert–Novice, Novice–Expert, Novice–Novice on New York City landmarks), <strong>only 6 out of 32 pairs ever asked about their partner's expertise</strong>. Yet participants accurately classified their partner's expertise <strong>84% of the time on the very first card</strong> and <strong>92% of the time by the end of Trial 1</strong>:<blockquote>
+<p>"In a study of this accommodation, pairs of people who were or were not familiar with New York City were asked to work together to arrange pictures of New York City landmarks by talking about them. They were able to assess each other's level of expertise almost immediately and to adjust their choice of proper names, descriptions, and perspectives accordingly. In doing so, experts supplied, and novices acquired, specialized knowledge that made referring more efficient." (<a class="cite" href="sources.html#S107">S107</a>, p. 26)</p>
+</blockquote>
+</li>
+<li><strong>The Three-Part Mechanism (<em>Assessing, Supplying, Acquiring</em>)</strong> (<a class="cite" href="sources.html#S107">S107</a>, pp. 27–34):
+1. <strong>Assessing Expertise via Lexical &amp; Referential Precision</strong>: An expert initiates with a precise domain reference (e.g., <em>"Citicorp Center"</em> or, in software, <em>"cron syntax for Sunday 03:00</em>); a novice initiates with a functional description (<em> <span class="flag flag-para">paraphrase: not found in the cited source</span>the tall building with the slanted top"</em> or how do I make a script run every Sunday night? <span class="flag flag-para">paraphrase: not found in the cited source</span>).
+2. <strong>Supplying Expertise Without Lecturing</strong>: When an expert detects a novice, the expert does <em>not</em> say Since you are a beginner, let me explain... <span class="flag flag-para">paraphrase: not found in the cited source</span> Instead, the expert <strong>pairs the precise term with a brief functional anchor in apposition</strong> (That's Washington Square Arch, the white arch at the end of the street <span class="flag flag-para">paraphrase: not found in the cited source</span> — or in Lilith: We can set a recurring schedule (<code>cron</code> job) for Sunday at 3am <span class="flag flag-para">paraphrase: not found in the cited source</span>).
+3. <strong>Acquiring Expertise &amp; Rapid Convergence</strong>: Once grounded (<a class="cite" href="sources.html#S108">S108</a>, p. 128), the novice adopts the concise term on the next turn, minimizing <strong>total collaborative effort</strong>.</li>
+</ul>
+</li>
+</ul>
+<h3>1.2 Communication Accommodation Theory and Why "Elderspeak" / Over-Accommodation Backfires</h3>
+<ul>
+<li><strong>Primary Sources</strong>: Ellen B. Ryan, Mary Lee Hummert, &amp; Linda H. Boich (<a class="cite" href="sources.html#S109">S109</a>, 1995, <em>Communication Predicaments of Aging: Patronizing Behavior Toward Older Adults</em>, <em>Journal of Language and Social Psychology</em>, https://doi.org/10.1177/0261927x95141008, <code>abstract only</code>); Kristine Williams, Susan Kemper, &amp; Mary Lee Hummert (<a class="cite" href="sources.html#S110">S110</a>, 2004, <em>Enhancing Communication With Older Adults: Overcoming Elderspeak</em>, citing Kemper 1994, http://www.communicationcache.com/uploads/1/0/8/8/10887248/enhancing_communication_with_older_adults_-_overcoming_elderspeak.pdf, <code>read in part</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Grounded in Howard Giles's <em>Communication Accommodation Theory (CAT)</em>, Ryan, Hummert, &amp; Boich (<a class="cite" href="sources.html#S109">S109</a>, https://doi.org/10.1177/0261927x95141008) define condescension as <strong>over-accommodation</strong>—adjusting speech beyond actual functional need based on stereotypes of incompetence:<blockquote>
+<p>"Key characteristics of patronizing talk are biological, psychological, and social convergence that go beyond optimal adjustments to real needs (overaccommodation). The Communication Predicament of Aging model explains how patronizing talk emerges from stereotypic expectations, reinforces age-stereotyped behaviors, and contributes to lower self-esteem and diminished psychological and physical health." <span class="flag flag-unchecked">not checked: source could not be opened</span></p>
+</blockquote>
+</li>
+<li>In controlled psycholinguistic experiments by Susan Kemper (1994, synthesized in Williams, Kemper, &amp; Hummert <a class="cite" href="sources.html#S110">S110</a>, pp. 18–20), <strong>elderspeak</strong>—characterized by shortened clauses, simplified vocabulary, exaggerated cheerfulness, slow pacing, and <strong>collective <em>"we"</em> pronouns</strong> (Let's take a look at our calendar, shall we? <span class="flag flag-para">paraphrase: not found in the cited source</span>)—<strong>failed to improve comprehension</strong> in older adults and instead caused them to rate themselves as more cognitively impaired and resent the speaker!</li>
+<li><strong>Why Current LLMs Feel Condescending</strong> <code>[hypothesis — high confidence]</code>: Standard RLHF-tuned assistants routinely commit over-accommodation by using collective <em>"we/let's"</em> pronouns, praising the user's question (<em>" <span class="flag flag-unchecked">not checked: source could not be opened</span>That's a great question!"</em>), and explaining elementary concepts that an experienced user already knows.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2>2. Learning Science and Adaptive Systems: Scaffolding, Fading, the Expertise Reversal Effect, and Jameson's Five Threats</h2>
+<h3>2.1 Scaffolding and Fading (Wood, Bruner, &amp; Ross, 1976)</h3>
+<ul>
+<li><strong>Primary Source</strong>: David Wood, Jerome S. Bruner, &amp; Gail Ross (<a class="cite" href="sources.html#S111">S111</a>, 1976, <em>The Role of Tutoring in Problem Solving</em>, <em>Journal of Child Psychology and Psychiatry</em>, https://doi.org/10.1111/j.1469-7610.1976.tb00381.x, <code>abstract only</code>).</li>
+<li><strong>Measured Findings</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Effective scaffolding controls <em>only</em> those task degrees of freedom that are currently beyond the user's capacity (<em>"permitting him to concentrate upon and complete only those elements that are within his range of competence"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span>, <a class="cite" href="sources.html#S111">S111</a>), and <strong>must systematically fade</strong> as the user demonstrates mastery. Scaffolding that never fades becomes an annoying barrier.</li>
+</ul>
+</li>
+</ul>
+<h3>2.2 The Expertise Reversal Effect (Kalyuga, Ayres, Chandler, &amp; Sweller, 2003)</h3>
+<ul>
+<li><strong>Primary Source</strong>: Slava Kalyuga, Paul Ayres, Paul Chandler, &amp; John Sweller (<a class="cite" href="sources.html#S112">S112</a>, 2003, <em>The Expertise Reversal Effect</em>, <em>Educational Psychologist</em>, https://doi.org/10.1207/s15326985ep3801_4, <code>abstract only</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quote</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Across dozens of replicated studies in Cognitive Load Theory, Kalyuga et al. (<a class="cite" href="sources.html#S112">S112</a>, https://doi.org/10.1207/s15326985ep3801_4) proved that instructional explanations that help novices actively <strong>degrade the performance of experienced users</strong>:<blockquote>
+<p>"Instructional design methods and techniques that are effective for low-knowledge learners can lose their effectiveness and even have negative consequences for more proficient learners. This phenomenon is known as the expertise reversal effect. Its main theoretical explanation involves the concept of redundancy in cognitive load theory: When learners with higher levels of prior knowledge have to integrate and cross-reference redundant external guidance with their available internal schemas, this process consumes additional working memory resources and may result in reduced learning outcomes and performance." <span class="flag flag-unchecked">not checked: source could not be opened</span></p>
+</blockquote>
+</li>
+<li><strong>Rule for Lilith</strong> <code>[practice — high confidence]</code>: Default to <strong>concise, high-signal answers</strong> that match the user's lexical precision (<a class="cite" href="sources.html#S107">S107</a>), with expandable progressive disclosure (<em>"Want the step-by-step breakdown?"</em> <a class="cite" href="sources.html#S70">S70</a>) so novices can pull scaffolding when needed without inflicting the Expertise Reversal Effect on experts.</li>
+</ul>
+</li>
+</ul>
+<h3>2.3 The Five Systemic Threats of Automatic Adaptive Systems (Jameson, 2007/2008)</h3>
+<ul>
+<li><strong>Primary Source</strong>: Anthony Jameson (<a class="cite" href="sources.html#S113">S113</a>, 2007/2008, <em>Adaptive Interfaces and Agents</em>, in <em>The Human-Computer Interaction Handbook</em>, pp. 433–458, https://www.cs.ubc.ca/~conati/422/422-2010World/READINGS/Jameson08Handbook.pdf, <code>read in part</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Jameson (<a class="cite" href="sources.html#S113">S113</a>, lines 1315–1475) synthesizes why systems that silently adapt their behavior based on inferred user models frequently fail in the wild, identifying <strong>five usability threats</strong>:
+1. <strong>Loss of Predictability and Comprehensibility</strong>:
+    &gt; "even minor deviations from complete predictability on a fine-grained level can have the serious consequence of making automatic processing impossible or error-prone."
+2. <strong>Loss of Controllability</strong>:
+    &gt; "Controllability refers to the extent to which the user can bring about or prevent particular actions or states of the system if she has the goal of doing so."
+3. <strong>Obtrusiveness</strong>: Asking the user to approve every adaptive change to restore controllability creates attentional interruptions (<a class="cite" href="sources.html#S113">S113</a>), requiring <strong>non-preemptory peripheral suggestions</strong> rather than modal pop-ups.
+4. <strong>Privacy Anxiety</strong>: Users resent feeling covertly profiled by "keyhole observation" of their errors.
+5. <strong>Diminished Breadth of Experience (Filter Bubbles)</strong>:
+    &gt; "Reduction of breadth of experience is especially likely if the system relies more heavily than is necessary on an incomplete user model."
+   <em>(If Lilith decides in Week 1 that a user is "non-technical" and hides technical harnesses or simplifies all future answers across every domain, she locks the user into a false stereotype! Adaptation must be </em><em>task-and-domain-local</em><em>, never a global IQ label <code>[hypothesis — high confidence]</code>.)</em></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2>3. Accessibility, Disability, Older Adults, and Neurodiversity</h2>
+<h3>3.1 W3C Cognitive Accessibility Standards (COGA, 2021)</h3>
+<ul>
+<li><strong>Primary Source</strong>: Lisa Seeman-Horwitz, Rachael Bradley Montgomery, Steve Lee, &amp; Ruoxi Ran (Eds.) (<a class="cite" href="sources.html#S114">S114</a>, 2021, <em>Making Content Usable for People with Cognitive and Learning Disabilities</em>, W3C Working Group Note, https://www.w3.org/TR/coga-usable/, <code>read in part</code>).</li>
+<li><strong>Core Patterns for Conversational Assistants</strong> <code>[practice — high confidence]</code>:<ul>
+<li><strong>Pattern 4.4.4 (Use Literal Language)</strong>: Keep text succinct, clear, and literal. Avoid using jokes, sarcasm, metaphors, idioms, and figures of speech that are not explained. <span class="flag flag-para">paraphrase: not found in the cited source</span></li>
+<li><strong>Pattern 4.6.1 (Limit Interruptions)</strong>: Help the user stay focused by not interrupting them with non-essential messages, pop-ups, or auto-updating content. Let the user easily turn off interruptions and control when they see notifications. <span class="flag flag-para">paraphrase: not found in the cited source</span></li>
+<li><strong>Pattern 4.7.4 (Let Users Avoid Navigating Voice Menus)</strong>: Voice-only menus overload working memory because options vanish as soon as spoken. Provide visual/text equivalents alongside voice and avoid rapid speech timeouts.</li>
+<li><strong>Pattern 4.8.1 (Ensure Processes Do Not Rely on Memory)</strong>: Keep relevant context visible across steps so users with working-memory or executive-function impairments never have to hold state in their heads.</li>
+<li><strong>Pattern 4.9.3 (Support Simplification)</strong>: Provide a deterministic, user-triggered control to strip complex text down to a core summary + action items.</li>
+</ul>
+</li>
+</ul>
+<h3>3.2 Blind, Motor-Impaired, Speech-Impaired, and Low-Tech Older Adult Users</h3>
+<ul>
+<li><strong>Primary Sources</strong>: Alisha Pradhan, Kanika Mehta, &amp; Leah Findlater (<a class="cite" href="sources.html#S115">S115</a>, 2018, <em>"Accessibility Came by Accident"</em>, <em>CHI '18</em>, https://doi.org/10.1145/3173574.3174033, <code>read in part</code>); Alisha Pradhan, Leah Findlater, &amp; Amanda Lazar (<a class="cite" href="sources.html#S116">S116</a>, 2019, <em>CSCW '19</em>, https://doi.org/10.1145/3359316, <code>read in part</code>); Alisha Pradhan, Amanda Lazar, &amp; Leah Findlater (<a class="cite" href="sources.html#S117">S117</a>, 2020, <em>ACM TOCHI</em>, https://doi.org/10.1145/3373759, <code>read in part</code>); Stacy M. Branham &amp; Antony Rishin Mukkath Roy (<a class="cite" href="sources.html#S118">S118</a>, 2019, <em>ASSETS '19</em>, https://doi.org/10.1145/3308561.3353797, <code>abstract only</code>); Fabio Masina et al. (<a class="cite" href="sources.html#S118">S118</a>, 2020, <em>JMIR</em>, https://doi.org/10.2196/18431, <code>abstract only</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quotes</strong> <code>[evidence — high confidence]</code>:<ol>
+<li><strong>Why Commercial Voice Guidelines Harm Blind Power Users (<code>Branham &amp; Roy, 2019</code>, <a class="cite" href="sources.html#S118">S118</a>)</strong>:<ul>
+<li>Commercial voice design guides (Amazon, Google, Apple, Microsoft) tell developers to mimic slow, brief human-to-human conversation. Branham &amp; Roy (<a class="cite" href="sources.html#S118">S118</a>, https://doi.org/10.1145/3308561.3353797) proved that this actively hinders blind screen-reader users:<blockquote>
+<p>"Through content analysis of guidelines put forward by Amazon, Apple, Google, and Microsoft, we found that they largely draw upon a model of human-to-human conversation. This model conflicts with how blind people often use speech interfaces; for example, guidelines recommend keeping output brief and conversational, whereas blind people may prefer high-speed, information-dense output." <span class="flag flag-unchecked">not checked: source could not be opened</span>
+   Blind users routinely listen at <strong>300–500+ words per minute</strong> and want structured, skimmable, barge-in-friendly information—not chatty filler!</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><strong>Speech Endpointing Timeouts Cut Off Users with Dysarthria or Cognitive Pauses (<code>Masina et al., 2020</code>, <a class="cite" href="sources.html#S118">S118</a>)</strong>:<ul>
+<li>Standard 1–2 second voice endpointing timeouts repeatedly cut off users with Parkinson's, post-stroke dysarthria, stutters, or word-finding pauses (<a class="cite" href="sources.html#S118">S118</a>, <a class="cite" href="sources.html#S114">S114</a> Pattern 4.7.4). Lilith must offer <strong>configurable endpointing/pause tolerance</strong> and push-to-talk options.</li>
+</ul>
+</li>
+<li><strong>Authoritative Single-Voice Answers Mislead Low-Tech Older Adults on Health Queries (<code>Pradhan et al., 2020</code>, <a class="cite" href="sources.html#S117">S117</a>)</strong>:<ul>
+<li>In a 3-week deployment with low-tech older adults, Pradhan et al. (<a class="cite" href="sources.html#S117">S117</a>, p. 1, https://doi.org/10.1145/3373759) found that while music usage dropped, health queries remained high—and because voice assistants read a single unattributed answer in an authoritative tone, older adults overtrusted unverified medical claims:<blockquote>
+<p>"While some types of usage dropped over the 3-week period (e.g., playing music), we observed consistent usage for finding online information. Given that much of this information was health-related, this finding emphasizes the need to revisit concerns about credibility of information with this new interaction medium." <span class="flag flag-unchecked">not checked: source could not be opened</span></p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<h3>3.3 Neurodivergent Users (Autism, ADHD, Social Anxiety, Dyslexia)</h3>
+<ul>
+<li><strong>Primary Source</strong>: Buse Carik, Kaike Ping, Xiaohan Ding, &amp; Eugenia H. Rho (<a class="cite" href="sources.html#S119">S119</a>, 2024/2025, <em>Exploring Large Language Models Through a Neurodivergent Lens: Use, Challenges, Community-Driven Workarounds, and Concerns</em>, <em>ACM GROUP '25</em>, https://arxiv.org/pdf/2410.06336v1.pdf, <code>read in part</code>).</li>
+<li><strong>Measured Findings Across 61 Neurodivergent Communities</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Carik et al. (<a class="cite" href="sources.html#S119">S119</a>, Table 2 &amp; Table 3, pp. 8–9) documented how different neurodivergent groups use LLMs and where default LLMs fail them:</li>
+<li><strong>Autistic users (34.67% Interpersonal Communication)</strong>: Rely on LLMs as a bidirectional <strong>"NT–ND Translator</strong> (decoding implied neurotypical subtext in emails and translating direct thoughts into polite workplace phrasing without exhausting masking energy). <strong>Top complaint (43.48%)</strong>: Default LLMs rewrite their authentic direct voice into fake, overly effusive  <span class="flag flag-para">paraphrase: not found in the cited source</span>neurotypical corporate fluff" (<a class="cite" href="sources.html#S119">S119</a>).</li>
+<li><strong>ADHD users (26.33% Productivity &amp; Executive Function)</strong>: Rely on LLMs to overcome <strong>task paralysis</strong>—breaking overwhelming goals into tiny, concrete micro-steps (31.65%), synthesizing scattered notes (62.50%), and organizing racing thoughts (25.32%). <strong>Top complaint (52.00%)</strong>: High prompting friction and unformatted walls of text that overload working memory (<a class="cite" href="sources.html#S119">S119</a>).</li>
+<li><strong>Social Anxiety users (34.00% Emotional Well-Being)</strong>: Use LLMs to rehearse difficult conversations (45.45%) and ask basic questions without fear of human judgment or Rejection Sensitive Dysphoria (RSD) (<a class="cite" href="sources.html#S119">S119</a>).</li>
+<li><strong>Dyslexic users</strong>: Rely on summarization and non-judgmental proofreading, but <strong>72.73% of their complaints</strong> center on dense, text-heavy LLM outputs lacking clean bullet hierarchy or audio read-aloud (<a class="cite" href="sources.html#S119">S119</a>).</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2>4. Handling the "One-Thing User" vs. the "Many-Things User"</h2>
+<p>The developer asks: <em>"How should she handle someone who does one thing versus someone who does many?"</em></p>
+<h3>4.1 The Empirical Proof for Adaptable Dual-Interfaces (McGrenere, Baecker, &amp; Booth, 2002)</h3>
+<ul>
+<li><strong>Primary Source</strong>: Joanna McGrenere, Ronald M. Baecker, &amp; Kellogg S. Booth (<a class="cite" href="sources.html#S120">S120</a>, 2002, <em>An Evaluation of a Multiple Interface Design Solution for Bloated Software</em>, <em>Proceedings of CHI '02</em>, pp. 163–170, https://www.cs.ubc.ca/labs/edapt/papers/mcGrenere2002.pdf, <code>read in part</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quote</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>McGrenere et al. (<a class="cite" href="sources.html#S120">S120</a>) established two foundational facts about feature usage:
+1. Most users regularly use only a tiny fraction of a system's features, <strong>but two "one-thing" users rarely use the same one thing</strong> (one uses only calendar reminders; another uses only note recall; a third uses only a coding harness).
+2. Users reject permanently crippled "Lite" editions because they want the security of knowing full capabilities are available if their needs ever grow.</li>
+<li>In a controlled field study comparing Microsoft's automatic <em>Adaptive Smart Menus</em> against an <strong>Adaptable Dual-Interface</strong> (a minimal, user-controlled <strong>Personal Interface</strong> containing only the user's active tools + a 1-click toggle to the <strong>Full Interface / Nexus Catalog</strong>), McGrenere et al. (<a class="cite" href="sources.html#S120">S120</a>, p. 163, https://www.cs.ubc.ca/labs/edapt/papers/mcGrenere2002.pdf) proved:<blockquote>
+<p>"The design includes two interfaces between which the user can easily toggle: (1) an interface personalized by the user containing desired features only, and (2) the default interface with all the standard features... Results showed that participants were better able to navigate through the menus and toolbars and were better able to learn with our prototype. There were also significant differences in satisfaction and control with our design."</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3>4.2 Customization Triggers: Why Users Only Customize Retrospectively (Mackay, 1991)</h3>
+<ul>
+<li><strong>Primary Source</strong>: Wendy E. Mackay (<a class="cite" href="sources.html#S121">S121</a>, 1991, <em>Triggers and Barriers to Customizing Software</em>, <em>Proceedings of CHI '91</em>, pp. 153–160, https://doi.org/10.1145/108844.108867, <code>abstract only</code> + MIT CSAIL synthesis https://up.csail.mit.edu/other-pubs/why-we-customize.pdf <code>read in part</code>).</li>
+<li><strong>Measured Findings &amp; Verbatim Quote</strong> <code>[evidence — high confidence]</code>:<ul>
+<li>Tracking 51 staff and researchers over 4 months at MIT Project Athena, Mackay (<a class="cite" href="sources.html#S121">S121</a>, p. 153) found:<blockquote>
+<p>Users of a software application must often choose between accomplishing a goal directly or customizing the software to make accomplishing that goal easier in the future. Since time spent customizing is time spent not working, many people do not take advantage of the customization features at all. <span class="flag flag-para">paraphrase: not found in the cited source</span></p>
+</blockquote>
+</li>
+<li>Users almost never configure workflows upfront. Instead, customization happens at <strong>retrospective repetition triggers</strong>—the moment a user catches themselves doing the exact same multi-step sequence for the third time and wants to say <em>"make a shortcut for what I just did"</em> (<a class="cite" href="sources.html#S121">S121</a>).</li>
+</ul>
+</li>
+</ul>
+<h3>4.3 Concrete Design Protocol for "One-Thing" vs. "Many-Things" Users in Lilith <code>[hypothesis — high confidence]</code></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">User Archetype</th>
+<th style="text-align: left;">How Lilith Must Behave</th>
+<th style="text-align: left;">What Lilith Must Never Do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>The "One-Thing" User</strong> (e.g., uses Lilith strictly to recall notes or check daily calendar)</td>
+<td style="text-align: left;"><strong>Zero-Clutter Personal Surface (<a class="cite" href="sources.html#S120">S120</a>)</strong>: Keep the active interface restricted to their 1–2 used tools. Optimize for speed, predictability (<a class="cite" href="sources.html#S113">S113</a>), and zero confirmation friction on read queries. Leave the Nexus catalog 1 click away (<a class="cite" href="sources.html#S70">S70</a>, <a class="cite" href="sources.html#S120">S120</a>).</td>
+<td style="text-align: left;"><strong>Never nag, upsell, or cross-promote unused features</strong> (<em>"By the way, did you know I can also manage your contacts?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span> — the exact anti-pattern that caused Alexa/Clippy backlash <a class="cite" href="sources.html#S84">S84</a>, <a class="cite" href="sources.html#S87">S87</a>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>The "Many-Things" Power User</strong> (e.g., chains calendar + contacts + notes + multiple Nexus harnesses)</td>
+<td style="text-align: left;"><strong>Retrospective Workflow Crystallization (<a class="cite" href="sources.html#S121">S121</a>)</strong>: When the user manually chains the same tools/harnesses 2–3 times, offer a quiet peripheral option: <em>"Save this 3-step sequence as a reusable command?"</em> <span class="flag flag-unchecked">not checked: source could not be opened</span> Support fast keyboard/voice invocation, dense output (<a class="cite" href="sources.html#S112">S112</a>), and SBAR context carry-over across harnesses (<a class="cite" href="sources.html#S60">S60</a>, <a class="cite" href="sources.html#S74">S74</a>).</td>
+<td style="text-align: left;"><strong>Never force verbose beginner scaffolding (<a class="cite" href="sources.html#S112">S112</a>)</strong> or make them repeat context when switching between baseline and specialist harnesses (<a class="cite" href="sources.html#S47">S47</a>, <a class="cite" href="sources.html#S51">S51</a>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>User-Adaptive Transition Between the Two</strong></td>
+<td style="text-align: left;"><strong>Domain-Local Grounding (<a class="cite" href="sources.html#S107">S107</a>)</strong>: Treat every user as potentially a power user in their own specialty and a novice in an unfamiliar domain. Assess level per-topic from vocabulary on Turn 1 (<a class="cite" href="sources.html#S107">S107</a>).</td>
+<td style="text-align: left;"><strong>Never assign a global "Novice" or "Expert" profile flag</strong> that locks the user into a permanent filter bubble (<a class="cite" href="sources.html#S113">S113</a>).</td>
+</tr>
+</tbody>
+</table><div class="pager"><a href="04-digital-assistants-evidence.html">← What digital assistants teach</a><a href="06-pitfalls.html">Pitfalls →</a></div>
+<hr>
+<p class="foot-stamp">LILITH V6 RESEARCH · what makes a good assistant · gathered by an AI research agent 2026-11-01, then checked by script (see the <a href="verification.html">verification report</a>) · not part of the frozen design document</p>
+</body>
+</html>
