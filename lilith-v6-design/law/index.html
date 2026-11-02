@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith v6: The Design (the law)</title>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/hub.css">
+</head>
+<body class="hub">
+<div class="crumbs"><a href="../index.html">Design home</a> › The Design</div>
+<h1>The Design</h1>
+<p class="hub-lede">The frozen design document: 29 sections, split by layer. <strong>This is the law.</strong> It was frozen on 2026-06-29 and changes only through a documented design session, recorded in the amendment ledger.</p>
+
+<div class="group-title">How to read it</div>
+<div class="cards">
+<a class="card c-blue" href="../full-document.html"><div class="icon" aria-hidden="true">📖</div><div class="title">Full document</div><div class="desc">All 29 sections in one long page. Best for searching, or for handing to an agent.</div><div class="foot"><span class="chip">generated</span><span class="go">Open →</span></div></a>
+<a class="card c-amber" href="../standards.html"><div class="icon" aria-hidden="true">⚖</div><div class="title">Non-negotiable standards</div><div class="desc">The floor below which nothing ships. Read at the start of every build session.</div><div class="foot"><span></span><span class="go">Open →</span></div></a>
+<a class="card c-purple" href="../amendments.html"><div class="icon" aria-hidden="true">📜</div><div class="title">Amendment ledger</div><div class="desc">Every change made to the law since it froze, one entry per design session.</div><div class="foot"><span class="chip">35 entries</span><span class="go">Open →</span></div></a>
+<a class="card c-green" href="../checklist.html"><div class="icon" aria-hidden="true">☑</div><div class="title">Design checklist</div><div class="desc">Every design question, resolved, with links back to its section.</div><div class="foot"><span></span><span class="go">Open →</span></div></a>
+<a class="card c-aqua" href="../systems.html"><div class="icon" aria-hidden="true">🗺</div><div class="title">Systems map</div><div class="desc">A picture of how the parts fit together.</div><div class="foot"><span></span><span class="go">Open →</span></div></a>
+</div>
+<div class="group-title">Foundation: how it is built and kept safe</div>
+<div class="cards small">
+<a class="card c-purple" href="../sections/s01.html"><span class="num">§01</span><span class="body"><span class="title">Project Structure &amp; Conventions</span><span class="desc">The layout of the code and the house rules every change must follow.</span></span></a>
+<a class="card c-purple" href="../sections/s02.html"><span class="num">§02</span><span class="body"><span class="title">Security &amp; Credential Management</span><span class="desc">Your passphrase, the system keychain, and where secrets are allowed to live.</span></span></a>
+<a class="card c-purple" href="../sections/s03.html"><span class="num">§03</span><span class="body"><span class="title">Encryption at Rest (SQLCipher)</span><span class="desc">How every database on your disk is locked.</span></span></a>
+<a class="card c-purple" href="../sections/s04.html"><span class="num">§04</span><span class="body"><span class="title">Cross-Platform Foundations</span><span class="desc">Making one app behave the same on Windows, macOS and Linux.</span></span></a>
+</div>
+<div class="group-title">Infrastructure: running reliably</div>
+<div class="cards small">
+<a class="card c-grey" href="../sections/s05.html"><span class="num">§05</span><span class="body"><span class="title">Hardware Detection &amp; Capability Tiers</span><span class="desc">Working out what your computer can run, including a local model.</span></span></a>
+<a class="card c-grey" href="../sections/s06.html"><span class="num">§06</span><span class="body"><span class="title">Process Lifecycle &amp; Recovery</span><span class="desc">Starting, stopping, and recovering safely from a crash.</span></span></a>
+<a class="card c-grey" href="../sections/s07.html"><span class="num">§07</span><span class="body"><span class="title">CI/CD Pipeline</span><span class="desc">Automated builds and checks on every change.</span></span></a>
+<a class="card c-grey" href="../sections/s08.html"><span class="num">§08</span><span class="body"><span class="title">Testing Standards</span><span class="desc">What must be tested, and how, before anything ships.</span></span></a>
+</div>
+<div class="group-title">Voice: hearing and speaking</div>
+<div class="cards small">
+<a class="card c-green" href="../sections/s09.html"><span class="num">§09</span><span class="body"><span class="title">Audio I/O &amp; Platform Audio APIs</span><span class="desc">Microphone and speakers on each system.</span></span></a>
+<a class="card c-green" href="../sections/s10.html"><span class="num">§10</span><span class="body"><span class="title">Speech-to-Text (STT)</span><span class="desc">Turning what you say into text, on your own computer.</span></span></a>
+<a class="card c-green" href="../sections/s11.html"><span class="num">§11</span><span class="body"><span class="title">Text-to-Speech (TTS)</span><span class="desc">Turning her replies into a voice.</span></span></a>
+</div>
+<div class="group-title">Intelligence: deciding and thinking</div>
+<div class="cards small">
+<a class="card c-blue" href="../sections/s12.html"><span class="num">§12</span><span class="body"><span class="title">LLM Integration &amp; Provider Abstraction</span><span class="desc">Talking to the cloud model or the local one.</span></span></a>
+<a class="card c-blue" href="../sections/s13.html"><span class="num">§13</span><span class="body"><span class="title">Two-Mode Router</span><span class="desc">Deciding whether a request gets a quick answer or a longer piece of work.</span></span></a>
+<a class="card c-blue" href="../sections/s14.html"><span class="num">§14</span><span class="body"><span class="title">Context Window Manager</span><span class="desc">Choosing exactly what the model is shown, and hiding personal details.</span></span></a>
+<a class="card c-blue" href="../sections/s15.html"><span class="num">§15</span><span class="body"><span class="title">Tool System</span><span class="desc">How she does things: the tools she can run.</span></span></a>
+</div>
+<div class="group-title">Data: what she knows and remembers</div>
+<div class="cards small">
+<a class="card c-aqua" href="../sections/s16.html"><span class="num">§16</span><span class="body"><span class="title">UCL Telemetry</span><span class="desc">Her private activity log, kept on your computer.</span></span></a>
+<a class="card c-aqua" href="../sections/s17.html"><span class="num">§17</span><span class="body"><span class="title">Enhancement Layers (L1/L2)</span><span class="desc">Background summaries of your data, ready when needed.</span></span></a>
+<a class="card c-aqua" href="../sections/s18.html"><span class="num">§18</span><span class="body"><span class="title">Memory System</span><span class="desc">What she remembers and how she finds it again.</span></span></a>
+<a class="card c-aqua" href="../sections/s19.html"><span class="num">§19</span><span class="body"><span class="title">Data Sync Pipeline</span><span class="desc">Copying in your calendar and contacts.</span></span></a>
+</div>
+<div class="group-title">Apps: the things you use</div>
+<div class="cards small">
+<a class="card c-orange" href="../sections/s20.html"><span class="num">§20</span><span class="body"><span class="title">Contacts / People App</span><span class="desc">The people she knows about.</span></span></a>
+<a class="card c-orange" href="../sections/s21.html"><span class="num">§21</span><span class="body"><span class="title">Calendar App</span><span class="desc">Her own calendar.</span></span></a>
+<a class="card c-orange" href="../sections/s22.html"><span class="num">§22</span><span class="body"><span class="title">Conversation / Chat App</span><span class="desc">The chat, and how replies appear.</span></span></a>
+</div>
+<div class="group-title">Personality: who she is</div>
+<div class="cards small">
+<a class="card c-pink" href="../sections/s23.html"><span class="num">§23</span><span class="body"><span class="title">Personality System &amp; System Prompt</span><span class="desc">Her character and how she speaks.</span></span></a>
+<a class="card c-pink" href="../sections/s24.html"><span class="num">§24</span><span class="body"><span class="title">Narrative Layer</span><span class="desc">How results become words.</span></span></a>
+<a class="card c-pink" href="../sections/s25.html"><span class="num">§25</span><span class="body"><span class="title">Onboarding Flow</span><span class="desc">The first-run setup.</span></span></a>
+</div>
+<div class="group-title">Frontend: what you see</div>
+<div class="cards small">
+<a class="card c-amber" href="../sections/s26.html"><span class="num">§26</span><span class="body"><span class="title">Frontend Framework &amp; Application Shell</span><span class="desc">The window and the app around the chat.</span></span></a>
+<a class="card c-amber" href="../sections/s27.html"><span class="num">§27</span><span class="body"><span class="title">The Orb</span><span class="desc">Her animated face.</span></span></a>
+<a class="card c-amber" href="../sections/s28.html"><span class="num">§28</span><span class="body"><span class="title">Screen Architecture &amp; Navigation</span><span class="desc">The screens and how you move between them.</span></span></a>
+</div>
+<div class="group-title">Amendment: owning your data</div>
+<div class="cards small">
+<a class="card c-aqua" href="../sections/s29.html"><span class="num">§29</span><span class="body"><span class="title">Vault Architecture &amp; Data Ownership</span><span class="desc">Your files stay yours; backups and restoring.</span></span></a>
+</div>
+<div class="hub-foot">Generated by <code>tools/build_hubs.py</code>: add a card there, not here. <a href="../index.html">Design home</a> · <a href="https://squirrelthug.github.io/">squirrelthug.github.io</a></div>
+</body>
+</html>
