@@ -102,6 +102,7 @@ lilith_events (Lilith-owned, writable) ─────────────�
       <li>When a calendar sync completes, the L1 job shall compare each incoming synced event's iCalendar UID against <code>lilith_events.ical_uid</code> and set <code>echo_of_lilith_event_id</code> on every match.</li>
       <li>While a synced event carries <code>echo_of_lilith_event_id</code>, the L1 and L2 jobs shall exclude it from agenda merging and conflict detection, so each event appears exactly once and never conflicts with itself.</li>
       <li>When a non-echo synced event overlaps in time with an active Lilith event, the L1 job shall flag the pair for user review and shall never auto-resolve, move, or cancel either event.</li>
+      <li>When the user asks in words to add, move or cancel an event, the model shall choose <code>event_add</code>, <code>event_change</code> or <code>event_cancel</code> and pass the user&rsquo;s words; code (not the model) shall read the time with the &sect;18 vague-time policy, find the event by title words, and write <code>lilith_events</code> only. A day alone keeps an event&rsquo;s time of day; an add with no time shall ask; a title matching more than one event shall ask which; a title matching only a mirrored event shall be refused in words. Each action shall be recorded in the action ledger with a before-image so &ldquo;undo&rdquo; reverses exactly it (an add is cancelled, a change is restored, a cancel makes the event again as a new event, since cancelled is terminal). The B13-06 ISO tools remain the engine&rsquo;s schemas and are not offered to the model. (design session DS-2 C, 2026-11-02)</li>
     </ul>
     <p><strong>Acceptance criteria:</strong></p>
     <ul>
@@ -116,6 +117,7 @@ lilith_events (Lilith-owned, writable) ─────────────�
     <div class="s-meta">Checklist: <a href="../checklist.html#s21">§21</a> · Note: Read-only from Google Calendar. Lilith manages her own calendar. · Touches: §17 Enhancement, §19 Sync, §26 UI, §28 Screens</div>
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §21 Finance App (named PDF adapter scope, unsupported-bank handling, duplicate review queue)</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §21 Calendar App (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection), §14 CWM, §17 Enhancement, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §21 Calendar (calendar edits chosen by the model: <code>event_add</code>, <code>event_change</code>, <code>event_cancel</code>; code-read times; ledger undo with before-images), §18 action ledger</div>
   </div>
 </details>
 
