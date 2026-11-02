@@ -81,6 +81,8 @@ The session must settle these questions:
 - How this relates to the Discord identity-bound endpoint. Discord reaches the phone with no overlay network, but routes content through a third-party cloud.
 - Whether offloading work to other machines belongs here or with FDS-3.
 
+**Developer decision, 2026-11-02: multi-node is a v7 job.** The security work is too large for v6, and the developer is content that v6 runs on the Linux desktop and the MacBook as separate instances. This supersedes the 2026-09-24 priority below (first session once the initial build works); FDS-8 remains the record of the idea and of the input above.
+
 Developer's stated priority (2026-09-24): this is the first design session wanted once the initial build is working.
 
 **Developer input, 2026-11-01 (after the first dogfood on Linux and a MacBook):** the build already runs on both machines, but as two separate Lilith instances. Nothing lets one "master" Lilith know that she is installed on other hardware for the same user. What the developer wants, as stated:
