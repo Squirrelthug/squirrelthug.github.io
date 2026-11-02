@@ -38,6 +38,7 @@
       <li><strong>Acknowledge:</strong> Artifact tools fire <code>narratives.acknowledge</code> to TTS within <code>&lt;200</code> ms after router classification.</li>
       <li><strong>Bridge:</strong> Default bridge interval is <code>8</code> s; v6 v1 uses static templates such as <code>Still working on that...</code>, with UCL-adaptive timing deferred.</li>
       <li><strong>Handoff:</strong> v6 v1 handoff is deterministic template fill from the typed tool result; PERS-2 narration is not in the first implementation.</li>
+      <li><strong>Network tools and weather (design session DS-3, 2026-11-02):</strong> a tool may reach the network only through a platform client with a compiled-in host allowlist, https only, no redirects, no proxy from the environment, a response size cap and an injectable transport for tests. The first is <code>weather</code> (Open-Meteo, keyless; its free API is for non-commercial use and its data is CC BY 4.0, so each answer carries &ldquo;Weather data by Open-Meteo.com&rdquo;). Each lookup sends at most a place name to the geocoder and coordinates to the forecast service, nothing else. Code, not the model, geocodes, fetches and writes the sentence from the returned numbers. A network tool is <strong>off until the user&rsquo;s own words turn it on</strong> (&ldquo;turn on weather&rdquo;, claimed by read dispatch and never offered to the model), the first ask shows what is sent and to whom, &ldquo;turn off weather&rdquo; reverses it, and both are recorded in the action ledger. The home city is a personal truth the user states (<code>home_city</code>, source <code>user</code>), never inferred. A lookup waits off the event-loop thread, from a snapshot of the settings. Telemetry: <code>tool.network.request</code> (provider, endpoint, outcome, duration_ms), logged ok only after the answer is accepted; never the place or the answer.</li>
       <li><strong>Telemetry:</strong> Emit <code>tool.call.start</code> (tool_name, mode), <code>tool.call.complete</code> (duration_ms, success), <code>tool.narrative.ack</code> (tool_name), and <code>tool.narrative.handoff</code> (tool_name, artifact_id).</li>
     </ul>
 
@@ -59,6 +60,7 @@ narratives:
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §13 Router, §15 YAML Safety, §26 UI, §29 Skills Friction (honest trust boundary, untrusted-skill indicator &amp; injection size cap)</div>
     <div class="s-meta">Amendment added: 2026-11-01 · Touches: §15 Tools, §14 CWM (stale-data notice voiced in words in the artifact lane)</div>
     <div class="s-meta">Amendment added: 2026-11-02 · Touches: §15 Tools, §13 Router, §14 CWM (tool locality; the model chooses, the app runs, local results never return to the model)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §15 Tools, §16 UCL Telemetry, §18 Memory (network tools: allowlisted client, consent by the user&rsquo;s words, weather; <code>tool.network.request</code>; <code>home_city</code> and <code>weather_enabled</code> as personal truths)</div>
   </div>
 </details>
 
