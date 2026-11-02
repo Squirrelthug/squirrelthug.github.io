@@ -43,6 +43,7 @@ Priority order when reading:
 | `BUILD_SEQUENCING.md` | Build milestone plan + Experiments 1–2 specs + parked post-v1 scope |
 | `assets/site.css` | Shared styles + nav (presentation only) |
 | `tools/build_fulldoc.py` | Regenerates `full-document.html` from `sections/` + `amendments.html` |
+| `tools/post_dev_sync.py` | Post-development checks an autopilot runs after amendments land: `check`, `build`, `verify <rev-range>` (see below) |
 
 ## Amendment convention
 
@@ -55,6 +56,22 @@ Amendments happen only through a documented design session. One amendment =
 4. Run `python3 tools/build_fulldoc.py` to regenerate `full-document.html`
 5. Update the touched sections' resolved-banner text in `checklist.html` if the
    resolution summary changed
+
+## Post-development automation (what an autopilot is pointed at)
+
+After one amendment branch, or a stack of them, lands on `main`:
+
+```
+git switch main && git pull
+python3 lilith-v6-design/tools/post_dev_sync.py build            # regenerate full-document.html, then check
+python3 lilith-v6-design/tools/post_dev_sync.py check            # exit 1 on: conflict markers, a stale full-document,
+                                                                 # ledger out of date order, a section amended after the last ledger entry
+python3 lilith-v6-design/tools/post_dev_sync.py verify "<last-known-good>..HEAD"
+                                                                 # every line the [amend] commits added is still in the tree
+```
+
+If `build` changed `full-document.html`, commit it as `[amend]: regenerate the full document` on a branch and open a PR to `main`.
+When merging several amendment branches that each append to `amendments.html`, resolve that file by **keeping both sides** (main's entries first), never by taking one side of a section page: a stacked merge once dropped three amendment bullets from `s18.html` that way, and only `verify` caught it. Python 3 standard library only; the same commands work on Linux, macOS and Windows (`py -3` instead of `python3`).
 
 Committed working hypotheses (tunable only via the convention above): router
 misroute-to-conversational ≤5% over a SHA-256-frozen 100-utterance set with
