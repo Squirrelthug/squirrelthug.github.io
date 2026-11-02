@@ -56,6 +56,7 @@
         </ul>
       </li>
       <li><strong>Telemetry:</strong> Emit <code>memory.write</code> (tier, action, memory_id), <code>memory.truth.update</code> (key, source), and <code>memory.recall</code> (query_hash, results_returned, stage: 'recency'|'fts5').</li>
+          <li><strong>Reminders and timers (design session DS-2 increment B, 2026-11-02):</strong> <code>memory_db</code> also holds <code>reminders</code> (<code>text</code>, <code>due_at</code>, <code>kind</code> reminder or timer, <code>status</code> pending, fired, missed or cancelled). They are Tier 1 writes: set at once, undoable, listed and cancellable. The time is read by code from the user's words and is never guessed; an unreadable time is asked for again. Delivery is honest: Lilith says a reminder works while she is running, delivers a due one in the chat, as a notification and in speech, and reports one that fell due while she was closed (or the machine slept; more than 90 seconds late) once, with its original time, never as if it were on time.</li>
     </ul>
 
     <pre>CREATE TABLE personal_truths (
@@ -74,6 +75,7 @@ CREATE TABLE memory_l2_summaries (
 );</pre>
     <div class="s-meta">Checklist: <a href="../checklist.html#s18">§18</a> · Touches: §14 CWM, §23 Personality &amp; Truths</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §03 SQLCipher, §18 Memory, BUILD_SEQUENCING.md (recall roadmap: staged hybrid retrieval, embeddings sidecar forward-compatibility, Experiment 3 promotion gate)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §18 Memory, §26 Shell (reminders and timers; honest delivery; tray notification)</div>
   </div>
 </details>
 
