@@ -58,6 +58,7 @@
       </li>
       <li><strong>Platform Detection:</strong> Evaluated once on startup using <code>sys.platform</code> (storing flags <code>IS_LINUX</code>, <code>IS_MAC</code>, <code>IS_WINDOWS</code> in <code>lilith.platform</code>). No ad-hoc, runtime environment variable checks allowed in feature code.</li>
       <li><strong>POSIX Heritage &amp; Testing Strategy:</strong> Linux and macOS share POSIX heritage (common path separators, terminal signals like SIGTERM, and file lock structures). Standard tests run on Linux first, macOS is verified as a fast follow, and Windows is validated via remote GitHub Actions runners with mock audio/keyring mocks.</li>
+      <li><strong>App control platforms (design session DS-3, 2026-11-02):</strong> installed apps are enumerated on Linux (<code>.desktop</code> files in the XDG, Flatpak and Snap directories) and macOS (<code>.app</code> bundles in the standard folders). Windows enumerates nothing in v6 v1 and the Settings group says app control is not available yet.</li>
     </ul>
 
     <pre>
@@ -103,6 +104,7 @@ APP_INTERNAL_DIR/
     <div class="s-meta">Amendment added: 2026-07-03 · Touches: §02 Security, §06 Lifecycle, §25 Onboarding, §29 Custodian Model</div>
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §03 SQLCipher, §16 UCL (Plaintext Log Boundary)</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §04 Platforms (app enumeration on Linux and macOS; Windows not yet)</div>
   </div>
 </details>
 
