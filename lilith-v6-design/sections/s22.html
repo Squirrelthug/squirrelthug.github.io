@@ -46,10 +46,12 @@ turns(
   endpoint_id   TEXT NOT NULL,
   endpoint_type TEXT NOT NULL,
   mode          TEXT CHECK(mode IN ('conversational','artifact')),
-  token_count   INTEGER
+  token_count   INTEGER,
+  tool          TEXT            -- which tool produced an artifact turn; NULL otherwise (2026-11-02)
 )</pre>
 
     <ul>
+      <li><strong>Which turns reach a model as history (design session DS-1, 2026-11-02):</strong> An artifact turn records the tool that produced it in <code>turns.tool</code>. The history sent to a model is the conversational turns plus the artifact turns whose recorded tool declares <code>locality: cloud_ok</code> (§15); a <code>local_only</code> tool's turns, and any artifact turn with no recorded tool, never reach a model.</li>
       <li><strong>Endpoint types:</strong>
         <ul>
           <li><code>desktop</code> — full artifacts OK, markdown rendered, no token cap</li>
@@ -86,6 +88,7 @@ turns(
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §06 Lifecycle, §12 LLM, §22 Conversation App (consistency pass: bearer-token keychain row, lifecycle diagram redraw, locked-box reconciliation, endpoint-authz decision)</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §14 CWM, §17 Enhancement, §21 Calendar App, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection)</div>
     <div class="s-meta">Amendment added: 2026-11-01 · Touches: §22 Chat, §26 Shell (answer panels start expanded; Ctrl+E toggles the newest)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §22 Chat, §15 Tools, §14 CWM (turns.tool; history follows the producing tool's locality)</div>
   </div>
 </details>
 
