@@ -3,192 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lilith v6 — What makes a good assistant (research)</title>
+<title>Lilith v6: Design Home</title>
 <link rel="stylesheet" href="assets/site.css">
-<style>
-  /* ---- overview dashboard (presentation only; content law lives in sections/) ---- */
-  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 26px 0; }
-  .stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-  .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
-  .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-top: 4px; }
-  .stat-note { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-  .stat-good .stat-value { color: var(--green); }
-
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 22px; margin: 18px 0; }
-  .panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px; }
-
-  .tl { list-style: none; padding: 0; }
-  .tl-item { display: flex; gap: 14px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.84rem; }
-  .tl-item:last-child { border-bottom: none; }
-  .tl-date { color: var(--accent); font-weight: 700; font-size: 0.75rem; white-space: nowrap; width: 92px; flex-shrink: 0; padding-top: 2px; }
-  .tl-body { color: var(--text); }
-  .tl-body strong { color: var(--text); }
-
-  .mile-list { list-style: none; padding: 0; }
-  .mile { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 0.84rem; }
-  .mile:last-child { border-bottom: none; }
-  .mile-icon { flex-shrink: 0; width: 16px; text-align: center; }
-  .mile-name { font-weight: 700; white-space: nowrap; flex-shrink: 0; width: 92px; }
-  .mile-desc { flex: 1; color: var(--muted); }
-  .mile-status { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
-  .mile-pending .mile-icon, .mile-pending .mile-status { color: var(--muted); }
-  .mile-pending .mile-name { color: var(--text); }
-  .mile-current .mile-icon, .mile-current .mile-status, .mile-current .mile-name { color: var(--amber); }
-  .mile-complete .mile-icon, .mile-complete .mile-status { color: var(--green); }
-
-  .dir-group { margin: 22px 0; }
-  .dir-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; margin-top: 8px; }
-  .dir-card { display: flex; align-items: baseline; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; text-decoration: none; transition: border-color 0.15s; }
-  .dir-card:hover { border-color: var(--accent); }
-  .dir-num { font-size: 0.7rem; font-weight: 700; color: var(--muted); flex-shrink: 0; }
-  .dir-title { font-size: 0.84rem; font-weight: 600; color: var(--text); }
-
-  .rs { max-width: 1060px; }
-  .rs h1 { color: var(--accent); }
-  .rs h2 { font-size: 1.25rem; color: var(--accent); margin: 34px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-  .rs h3 { font-size: 1.05rem; color: var(--text); margin: 24px 0 8px; }
-  .rs h4 { font-size: 0.95rem; color: var(--muted); margin: 18px 0 6px; }
-  .rs p, .rs li { font-size: 0.93rem; margin: 8px 0; }
-  .rs ul, .rs ol { margin: 8px 0 8px 22px; }
-  .rs a { color: var(--accent); }
-  .rs code { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; font-size: 0.84em; }
-  .rs blockquote { border-left: 3px solid var(--border); margin: 12px 0; padding: 4px 14px; color: var(--muted); }
-  .rs table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.82rem; display: block; overflow-x: auto; }
-  .rs th, .rs td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
-  .rs th { background: var(--surface); color: var(--accent); }
-  .rs td { background: rgba(255,255,255,0.01); }
-  .cite { font-size: 0.72em; vertical-align: super; text-decoration: none; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 4px; }
-  .flag { font-size: 0.72rem; border-radius: 3px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; border: 1px solid; }
-  .flag-unchecked { color: var(--amber); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.08); }
-  .flag-para { color: var(--red); border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
-  .flag-moved { color: var(--purple); border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); }
-  .trust { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--amber); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0 24px; font-size: 0.86rem; }
-  .trust strong { color: var(--amber); }
-  .pager { display: flex; justify-content: space-between; gap: 12px; margin: 40px 0 10px; font-size: 0.85rem; }
-
-  .rs a.big-btn { color:#0a0a0f; } .rs a.big-btn.alt { color:var(--accent); }
-  .big-btn { display:inline-block; font-weight:700; color:#0a0a0f; background:var(--accent); border-radius:6px; padding:11px 20px; text-decoration:none; margin:6px 10px 6px 0; }
-</style>
+<link rel="stylesheet" href="assets/hub.css">
 </head>
-<body class="rs">
-<h1>Lilith v6 — What makes a good assistant</h1>
-<p class="doc-subtitle">Research on professional assistants, trust, and digital assistants, gathered to shape how Lilith meets and serves a user.</p>
+<body class="hub">
 
-<nav class="doc-nav">
-  <a class="nav-active" href="index.html"><span class="nav-icon">🏠</span> Research overview</a>
-  <a href="research/narrative.html"><span class="nav-icon">🎧</span> Spoken guide</a>
-  <a href="full-document.html"><span class="nav-icon">📖</span> Design document</a>
-  <a href="checklist.html"><span class="nav-icon">☑</span> Design Checklist</a>
-  <a href="standards.html"><span class="nav-icon">⚖</span> Non-Negotiable Standards</a>
-  <a href="systems.html"><span class="nav-icon">🗺</span> Systems Map</a>
-  <a href="amendments.html"><span class="nav-icon">📜</span> Amendment Ledger</a>
-  <a href="archive/overview-build-phase.html"><span class="nav-icon">🗄</span> Archived overview</a>
-</nav>
-
-<div class="status-banner">
-  <div class="status-phase">Research · partly verified</div>
-  <p style="margin: 8px 0; font-size: 0.88rem;">The frozen design document is unchanged: all 29 sections, the standards and the amendment ledger are below and in the navigation above. The build-phase overview that used to live on this page has moved to the <a href="archive/overview-build-phase.html" style="color:var(--accent)">archive</a>. This page now leads with research that will feed the next design session. It is not law.</p>
-  <div class="status-note"><strong>Verification:</strong> 154 sources and 315 quotations were checked by script. 88 quotations were confirmed, 128 could not be checked because the source blocks scripts, and 53 were not found in the sources they were credited to. 14 links are dead. <a href="research/verification.html" style="color:var(--accent)">Read the report</a> before relying on any claim.</div>
+<h1>Lilith v6</h1>
+<p class="hub-lede">A personal assistant that lives on your own computer, built so that she costs less to run and keeps your information at home. Choose a card to go in; every page below can be reached from here.</p>
+<div class="hub-status"><span><strong>Where it stands:</strong> build phase, now being used by its builder</span><span>Design frozen 2026-06-29 · cleared for build 2026-07-17</span><span><a href="https://github.com/Squirrelthug/LILITH/blob/main/HANDOFF.md" target="_blank" rel="noopener">Current state in detail →</a></span></div>
+<div class="group-title">Explore</div>
+<div class="cards big">
+<a class="card c-teal" href="lilith-for-everyone.pdf"><div class="icon" aria-hidden="true">🌟</div><div class="title">Lilith in plain words</div><div class="desc">An eight-page guide for anyone: what she does today, what is already decided, why she costs less, how she protects your information, and where Nexus could take her.</div><div class="foot"><span class="chip">PDF · 8 pages</span><span class="go">Read →</span></div></a>
+<a class="card c-blue" href="law/index.html"><div class="icon" aria-hidden="true">📖</div><div class="title">The Design</div><div class="desc">The frozen design document: 29 sections by layer, the standards, and every amendment. This is the law.</div><div class="foot"><span class="chip">Law · 29 sections</span><span class="go">Open →</span></div></a>
+<a class="card c-green" href="build/index.html"><div class="icon" aria-hidden="true">🛠</div><div class="title">Build &amp; Progress</div><div class="desc">The plan, the sprints, the chapter reports, and where the build stands right now.</div><div class="foot"><span class="chip">9 sprints · 8 reports</span><span class="go">Open →</span></div></a>
+<a class="card c-purple" href="research/index.html"><div class="icon" aria-hidden="true">🔬</div><div class="title">Research</div><div class="desc">What makes a good assistant, in two waves. Gathered by agents and checked by script. Leads, not law.</div><div class="foot"><span class="chip">Not law · 2 waves</span><span class="go">Open →</span></div></a>
+<a class="card c-amber" href="future/index.html"><div class="icon" aria-hidden="true">🔮</div><div class="title">Beyond v1</div><div class="desc">Nexus, proactive help, more devices and the other ideas that are not built yet.</div><div class="foot"><span class="chip">Ideas</span><span class="go">Open →</span></div></a>
+<a class="card c-grey" href="archive/index.html"><div class="icon" aria-hidden="true">🗄</div><div class="title">Archive &amp; History</div><div class="desc">Earlier home pages, the blog, the design-phase records, and version 5.</div><div class="foot"><span class="chip">Reference</span><span class="go">Open →</span></div></a>
 </div>
-
-<h2 style="font-size: 1.1rem; color: var(--accent); margin: 28px 0 8px;">Start here</h2>
-<p style="margin-bottom:8px">
-  <a class="big-btn" href="research/narrative.html">🎧 Spoken guide (copy for text to speech)</a>
-  <a class="big-btn alt" href="research/00-summary.html" style="background:var(--surface);border:1px solid var(--accent)">The ten findings</a>
-</p>
-<p style="font-size:.88rem;color:var(--muted)">The brief behind this research: Lilith starts as a generic baseline assistant who knows what tools and specialist harnesses exist, helps the user find the gaps in what they ask for, adapts to each person, and moves from getting to know each other, to familiarity, to deeper work. The research asks what experts and history say about doing exactly that.</p>
-
-<h2 style="font-size: 1.1rem; color: var(--accent); margin: 28px 0 8px;">Wave 2: the whole-life assistant</h2>
-<p style="font-size:.88rem;color:var(--muted)">How Lilith should serve a whole life (schedules, money, people, responsibilities) in her everyday conversation, with specialist tools on top, so a plumber gains as much as anyone. Five research tracks, partly verified by script.</p>
-<p style="margin-bottom:8px">
-  <a class="big-btn" href="research/whole-life/narrative.html">🎧 Spoken guide, wave 2 (copy for text to speech)</a>
-  <a class="big-btn alt" href="research/whole-life/index.html" style="background:var(--surface);border:1px solid var(--accent)">Wave 2 research pages</a>
-</p>
-
-<h2 style="font-size: 1.1rem; color: var(--accent); margin: 28px 0 4px;">The research, wave 1</h2>
-<div class="dir-cards"><a class="dir-card" href="research/00-summary.html"><span class="dir-num">00</span><span class="dir-title">Summary<br><span style="color:var(--muted);font-size:.78rem">The ten findings that matter most for building Lilith.</span></span></a><a class="dir-card" href="research/01-historical-roles.html"><span class="dir-num">01</span><span class="dir-title">Assistants through history<br><span style="color:var(--muted);font-size:.78rem">Scribes to chiefs of staff: what separated excellent from adequate.</span></span></a><a class="dir-card" href="research/02-principles.html"><span class="dir-num">02</span><span class="dir-title">The recurring principles<br><span style="color:var(--muted);font-size:.78rem">What holds across professions, ranked by strength of evidence.</span></span></a><a class="dir-card" href="research/03-trust-and-onboarding.html"><span class="dir-num">03</span><span class="dir-title">Trust and the first weeks<br><span style="color:var(--muted);font-size:.78rem">A phase model of the relationship, and what should be explicit.</span></span></a><a class="dir-card" href="research/04-digital-assistants-evidence.html"><span class="dir-num">04</span><span class="dir-title">What digital assistants teach<br><span style="color:var(--muted);font-size:.78rem">Siri, Alexa, Clippy, companions, AI gadgets, LLM memory.</span></span></a><a class="dir-card" href="research/05-adaptation-and-accessibility.html"><span class="dir-num">05</span><span class="dir-title">Adapting to the user<br><span style="color:var(--muted);font-size:.78rem">Reading a person&#x27;s level without talking down to them.</span></span></a><a class="dir-card" href="research/06-pitfalls.html"><span class="dir-num">06</span><span class="dir-title">Pitfalls<br><span style="color:var(--muted);font-size:.78rem">How this goes wrong, how badly, and what practitioners do.</span></span></a><a class="dir-card" href="research/07-capability-awareness-and-handoff.html"><span class="dir-num">07</span><span class="dir-title">Knowing what she can do<br><span style="color:var(--muted);font-size:.78rem">Showing capability, and handing over to a specialist.</span></span></a><a class="dir-card" href="research/08-questions-you-didnt-ask.html"><span class="dir-num">08</span><span class="dir-title">Questions you did not ask<br><span style="color:var(--muted);font-size:.78rem">What an expert would raise that the brief missed.</span></span></a><a class="dir-card" href="research/09-implications-for-lilith.html"><span class="dir-num">09</span><span class="dir-title">Implications for Lilith<br><span style="color:var(--muted);font-size:.78rem">Design hypotheses and questions for the design session.</span></span></a><a class="dir-card" href="research/sources.html"><span class="dir-num">··</span><span class="dir-title">Sources<br><span style="color:var(--muted);font-size:.78rem">154 numbered sources with the link check.</span></span></a><a class="dir-card" href="research/verification.html"><span class="dir-num">··</span><span class="dir-title">Verification report<br><span style="color:var(--muted);font-size:.78rem">What was checked, how, and what failed.</span></span></a></div>
-
-<hr>
-<h2 style="font-size: 1.1rem; color: var(--accent); margin: 36px 0 4px;">The 29 Sections</h2>
-<p style="font-size: 0.84rem; color: var(--muted); margin-bottom: 6px;">Each section is its own page, verbatim from the frozen document. Sprints are generated per section; a section's sprints must guarantee that section is complete.</p>
-
-  <div class="dir-group">
-    <div class="layer l-found">Foundation Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-found" href="sections/s01.html"><span class="dir-num">§01</span><span class="dir-title">Project Structure &amp; Conventions</span></a>
-      <a class="dir-card card-l-found" href="sections/s02.html"><span class="dir-num">§02</span><span class="dir-title">Security &amp; Credential Management</span></a>
-      <a class="dir-card card-l-found" href="sections/s03.html"><span class="dir-num">§03</span><span class="dir-title">Encryption at Rest — SQLCipher</span></a>
-      <a class="dir-card card-l-found" href="sections/s04.html"><span class="dir-num">§04</span><span class="dir-title">Cross-Platform Foundations</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-infra">Infrastructure Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-infra" href="sections/s05.html"><span class="dir-num">§05</span><span class="dir-title">Hardware Detection &amp; Capability Tiers</span></a>
-      <a class="dir-card card-l-infra" href="sections/s06.html"><span class="dir-num">§06</span><span class="dir-title">Process Lifecycle &amp; Recovery</span></a>
-      <a class="dir-card card-l-infra" href="sections/s07.html"><span class="dir-num">§07</span><span class="dir-title">CI/CD Pipeline</span></a>
-      <a class="dir-card card-l-infra" href="sections/s08.html"><span class="dir-num">§08</span><span class="dir-title">Testing Standards</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-voice">Voice Pipeline</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-voice" href="sections/s09.html"><span class="dir-num">§09</span><span class="dir-title">Audio I/O &amp; Platform Audio APIs</span></a>
-      <a class="dir-card card-l-voice" href="sections/s10.html"><span class="dir-num">§10</span><span class="dir-title">Speech-to-Text (STT)</span></a>
-      <a class="dir-card card-l-voice" href="sections/s11.html"><span class="dir-num">§11</span><span class="dir-title">Text-to-Speech (TTS)</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-intel">Intelligence Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-intel" href="sections/s12.html"><span class="dir-num">§12</span><span class="dir-title">LLM Integration &amp; Provider Abstraction</span></a>
-      <a class="dir-card card-l-intel" href="sections/s13.html"><span class="dir-num">§13</span><span class="dir-title">Two-Mode Router</span></a>
-      <a class="dir-card card-l-intel" href="sections/s14.html"><span class="dir-num">§14</span><span class="dir-title">Context Window Manager</span></a>
-      <a class="dir-card card-l-intel" href="sections/s15.html"><span class="dir-num">§15</span><span class="dir-title">Tool System</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-data">Data Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-data" href="sections/s16.html"><span class="dir-num">§16</span><span class="dir-title">UCL Telemetry</span></a>
-      <a class="dir-card card-l-data" href="sections/s17.html"><span class="dir-num">§17</span><span class="dir-title">Enhancement Layers (L1/L2)</span></a>
-      <a class="dir-card card-l-data" href="sections/s18.html"><span class="dir-num">§18</span><span class="dir-title">Memory System</span></a>
-      <a class="dir-card card-l-data" href="sections/s19.html"><span class="dir-num">§19</span><span class="dir-title">Data Sync Pipeline</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-app">Application Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-app" href="sections/s20.html"><span class="dir-num">§20</span><span class="dir-title">Contacts / People App</span></a>
-      <a class="dir-card card-l-app" href="sections/s21.html"><span class="dir-num">§21</span><span class="dir-title">Calendar App</span></a>
-      <a class="dir-card card-l-app" href="sections/s22.html"><span class="dir-num">§22</span><span class="dir-title">Conversation / Chat App</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-pers">Personality &amp; Response Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-pers" href="sections/s23.html"><span class="dir-num">§23</span><span class="dir-title">Personality System &amp; System Prompt</span></a>
-      <a class="dir-card card-l-pers" href="sections/s24.html"><span class="dir-num">§24</span><span class="dir-title">Narrative Layer</span></a>
-      <a class="dir-card card-l-pers" href="sections/s25.html"><span class="dir-num">§25</span><span class="dir-title">Onboarding Flow</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-ui">Frontend Layer</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-ui" href="sections/s26.html"><span class="dir-num">§26</span><span class="dir-title">Frontend Framework &amp; Application Shell</span></a>
-      <a class="dir-card card-l-ui" href="sections/s27.html"><span class="dir-num">§27</span><span class="dir-title">The Orb</span></a>
-      <a class="dir-card card-l-ui" href="sections/s28.html"><span class="dir-num">§28</span><span class="dir-title">Screen Architecture &amp; Navigation</span></a>
-    </div>
-  </div>
-  <div class="dir-group">
-    <div class="layer l-data">Amendment — Data Ownership</div>
-    <div class="dir-cards">
-      <a class="dir-card card-l-data" href="sections/s29.html"><span class="dir-num">§29</span><span class="dir-title">Vault Architecture &amp; Data Ownership</span></a>
-    </div>
-  </div>
-
-
-<hr>
-<p class="foot-stamp">LILITH V6 · design document FROZEN 2026-06-29 · CLEARED FOR BUILD 2026-07-17 · amendment history: <a href="amendments.html">Amendment Ledger</a> · research gathered 2026-11-01</p>
+<div class="group-title">Jump straight to</div>
+<div class="cards small">
+<a class="card c-blue" href="full-document.html"><span class="num">📖</span><span class="body"><span class="title">Full document</span><span class="desc">All 29 sections on one page.</span></span></a>
+<a class="card c-amber" href="standards.html"><span class="num">⚖</span><span class="body"><span class="title">Standards</span><span class="desc">The floor nothing ships below.</span></span></a>
+<a class="card c-purple" href="amendments.html"><span class="num">📜</span><span class="body"><span class="title">Amendment ledger</span><span class="desc">35 recorded changes.</span></span></a>
+<a class="card c-blue" href="research/narrative.html"><span class="num">🎧</span><span class="body"><span class="title">Spoken research guide</span><span class="desc">Copy it into text-to-speech.</span></span></a>
+</div>
+<div class="hub-foot">Generated by <code>tools/build_hubs.py</code>: add a card there, not here. <a href="index.html">Design home</a> · <a href="https://squirrelthug.github.io/">squirrelthug.github.io</a></div>
 </body>
 </html>
