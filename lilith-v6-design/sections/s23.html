@@ -41,6 +41,7 @@
 4. CWM context blocks ← intent-driven: memory_recall, entity_context, tool_context</pre>
 
     <ul>
+      <li><strong><code>tool_context</code> is generated (DS-0, 2026-11-01; AD-113):</strong> The <code>tool_context</code> block is built from what is actually wired in the running app (the tools a turn can reach, and whether the calendar and contacts stores are attached), so &ldquo;what can you do?&rdquo; is answered from fact, not guessed. It lists only what is available, states that there are no others, and never names things Lilith cannot do (such a list turns false the day one is built). It tells the model that the app, not the model, runs these abilities, and that one runs only when the user's message plainly asks for it. It is the first block evicted when over the volatile cap (§14).</li>
       <li><strong>Prompt caching:</strong> EDICTS + VOICE are stable documents — they are the Anthropic <code>cache_control</code> prefix. The cache break point sits between VOICE and personal_truths so the stable prefix gets maximum cache hits.</li>
       <li><strong>PERS-2 personality model:</strong> Hardware-gated at Tier 1+ (RTX 3060 12GB or equivalent). 3–7B local model. Artifact mode only. Takes raw artifact content + VOICE.md → produces Lilith's spoken handoff in her voice. <strong>Design-only in v6 v1</strong> — not implemented. Gated behind <code>FEATURE_PERS2 = False</code> flag in <code>config.py</code>.</li>
       <li><strong>v6 EDICTS + VOICE are new documents.</strong> v5 files are reference material for the principles that carry forward — core identity, honesty, ambient attentiveness, warmth without softness. The v6 versions are written clean at the start of the build sprint.</li>
@@ -50,6 +51,7 @@
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §14 CWM, §17 Enhancement, §23 EDICTS (staleness-gate refresh, absence disclosure &amp; anti-fabrication)</div>
     <div class="s-meta">Amendment added: 2026-10-25 · Touches: §13 Router, §23 System Prompt, BUILD_SEQUENCING §3</div>
+    <div class="s-meta">Amendment added: 2026-11-01 · Touches: §23 System Prompt, §13 Router, §14 CWM (generated capability block as tool_context)</div>
   </div>
 </details>
 
