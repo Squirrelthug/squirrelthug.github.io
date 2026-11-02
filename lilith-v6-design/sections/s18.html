@@ -57,6 +57,7 @@
       </li>
       <li><strong>Telemetry:</strong> Emit <code>memory.write</code> (tier, action, memory_id), <code>memory.truth.update</code> (key, source), and <code>memory.recall</code> (query_hash, results_returned, stage: 'recency'|'fts5').</li>
           <li><strong>Reminders and timers (design session DS-2 increment B, 2026-11-02):</strong> <code>memory_db</code> also holds <code>reminders</code> (<code>text</code>, <code>due_at</code>, <code>kind</code> reminder or timer, <code>status</code> pending, fired, missed or cancelled). They are Tier 1 writes: set at once, undoable, listed and cancellable. The time is read by code from the user's words and is never guessed; an unreadable time is asked for again. Delivery is honest: Lilith says a reminder works while she is running, delivers a due one in the chat, as a notification and in speech, and reports one that fell due while she was closed (or the machine slept; more than 90 seconds late) once, with its original time, never as if it were on time.</li>
+          <li><strong>Vague-time policy (design session DS-2, 2026-11-02):</strong> a fuzzy time word is <em>resolved</em>, <em>defaulted</em> (the confirmation states what was assumed, and one word undoes it) or <em>asked</em> (one short question naming the options); never &ldquo;couldn&rsquo;t tell&rdquo; for a word she understands. &ldquo;Tonight&rdquo; means the next night the user will live through, or the one they are in: before the evening starts it defaults to 8 pm; in the evening it asks what time; in the small hours it asks whether they mean later tonight or that calendar day&rsquo;s evening; &ldquo;tonight at H&rdquo; is always resolved (6&ndash;11 pm, 12 midnight, 1&ndash;4 the small hours) and, if past, asks about tomorrow. &ldquo;Later&rdquo;/&ldquo;soon&rdquo; ask; &ldquo;end of day&rdquo; is 5 pm; &ldquo;this weekend&rdquo; is Saturday 9 am; &ldquo;next week&rdquo; is Monday 9 am. The evening-start (default 17) and night-end (default 5) hours are the user&rsquo;s own <code>personal_truths</code> (<code>evening_starts_hour</code>, <code>night_ends_hour</code>, source <code>user</code>), never inferred. Telemetry: <code>when.policy</code> (word from a fixed vocabulary, outcome asked|defaulted|resolved), never the user&rsquo;s words.</li>
     </ul>
 
     <pre>CREATE TABLE personal_truths (
@@ -76,6 +77,7 @@ CREATE TABLE memory_l2_summaries (
     <div class="s-meta">Checklist: <a href="../checklist.html#s18">§18</a> · Touches: §14 CWM, §23 Personality &amp; Truths</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §03 SQLCipher, §18 Memory, BUILD_SEQUENCING.md (recall roadmap: staged hybrid retrieval, embeddings sidecar forward-compatibility, Experiment 3 promotion gate)</div>
     <div class="s-meta">Amendment added: 2026-11-02 · Touches: §18 Memory, §26 Shell (reminders and timers; honest delivery; tray notification)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §18 Memory (vague-time policy; the user's day boundaries as personal truths; <code>when.policy</code> event)</div>
   </div>
 </details>
 
