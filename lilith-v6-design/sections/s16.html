@@ -39,6 +39,7 @@
       <li><strong>LLM boundary:</strong> LLMs never read <code>ucl_events</code> directly; L1 aggregates telemetry into stats tables, and L2 writes narrative summaries for CWM injection.</li>
       <li><strong>Search:</strong> Create <code>ucl_events_fts</code> as an external-content FTS5 table over serialized <code>payload</code> text for developer/debug search; assert <code>ENABLE_FTS5</code> from <code>pragma_compile_options</code> at startup and CI.</li>
       <li><strong>Concurrency:</strong> Open <code>ucl_db</code> through <code>sqlcipher3-wheels==0.5.7</code>, set <code>PRAGMA journal_mode=WAL</code> and <code>PRAGMA busy_timeout=5000</code>, and use one connection per thread/job.</li>
+      <li><strong><code>tool.network.request</code> outcomes for web search (design session DS-3, 2026-11-02):</strong> provider <code>searxng</code>, endpoints <code>search</code> and <code>health</code>; outcomes add <code>rate_limited</code>, <code>unreachable</code> (the service is not running) and <code>json_disabled</code>; never the query or a result.</li>
     </ul>
 
     <pre>CREATE TABLE ucl_events (
@@ -59,6 +60,7 @@
     <div class="s-meta">Checklist: <a href="../checklist.html#s16">§16</a> · Touches: §17 Enhancement, §12 LLM, §13 Router, §14 CWM, §15 Tools</div>
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §01 Logging, §03 SQLCipher, §04 Cross-Platform, §08 Testing (Telemetry Hygiene)</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §16 UCL (<code>tool.network.request</code> web-search outcomes)</div>
   </div>
 </details>
 

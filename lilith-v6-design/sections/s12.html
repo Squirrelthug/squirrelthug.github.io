@@ -87,6 +87,7 @@ CWM messages + system -&gt; adapter.complete(..., stream=True) -&gt; text deltas
       <li><strong>AC-007 (Tampered Artifact on Resume):</strong> Given an interrupted setup with a persisted marker whose downloaded artifact was modified on disk during the interruption, when Lilith restarts and resumes the setup flow, then re-verification of the artifact's SHA-256 hash fails and Lilith takes the identical abort path as AC-005 — delete the artifact, write <code>error.ollama.install_integrity_failed</code>, display the integrity error — without executing the artifact, despite the persisted consent.</li>
       <li><strong>AC-008 (No Silent Elevation):</strong> Given a verified installer that requires elevated privileges, when Lilith launches it, then the operating system's standard elevation prompt (UAC / polkit / macOS Authorization Services) is presented to the user and installation proceeds only after the user approves at the OS level; at no point does Lilith elevate without the OS prompt being shown.</li>
       <li><strong>AC-009 (Verified Install Audit Trail):</strong> Given an installation that passed integrity verification and completed successfully, when the setup flow finishes, then the UCL contains a <code>sync.ollama.install_verified</code> event recording the installer version and the verified SHA-256 hash.</li>
+      <li><strong>The cloud research call (design session DS-8, 2026-11-02):</strong> on the user&rsquo;s &ldquo;go faster&rdquo; during a deep search, one isolated artifact-mode request on the pinned model sends only the question and a fixed instruction, with Anthropic&rsquo;s <code>web_search</code> and <code>web_fetch</code> server tools capped by <code>max_uses</code> and <code>max_content_tokens</code>, and no client tools, history or private context. Web search there costs money on the user&rsquo;s Anthropic account (checked 2026-11-02: $10 per 1,000 searches plus tokens; fetch costs tokens only). <code>llm.call.complete</code> adds search and fetch counts.</li>
     </ul>
 
     <p><strong>Error Handling</strong></p>
@@ -152,6 +153,7 @@ CWM messages + system -&gt; adapter.complete(..., stream=True) -&gt; text deltas
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §11 Voice, §12 LLM, §13 Router, §14 CWM (tokenization lifecycle, streaming &amp; latency accounting)</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §06 Lifecycle, §12 LLM, §22 Conversation App (consistency pass: bearer-token keychain row, lifecycle diagram redraw, locked-box reconciliation, endpoint-authz decision)</div>
     <div class="s-meta">Amendment added: 2026-07-17 · Touches: §12 LLM (round-3 security review SEC-026: installer verification trust anchor pinned in the application)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §12 LLM (an isolated cloud research call with capped server tools)</div>
   </div>
 </details>
 

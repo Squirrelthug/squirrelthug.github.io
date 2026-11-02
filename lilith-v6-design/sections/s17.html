@@ -38,6 +38,7 @@
       <li><strong>Overlap control:</strong> Scheduler defaults are <code>coalesce=True</code>, <code>max_instances=1</code>, <code>misfire_grace_time=60</code>; stale <code>running</code> jobs reset to <code>queued</code> on startup.</li>
       <li><strong>CWM freshness:</strong> §14 thresholds apply to L2 summaries: tool context 5m, calendar/contact entity context 30m, memory recall 24h, personal truths 7d, system identity 24h.</li>
       <li><strong>Telemetry:</strong> Emit <code>sync.l1.complete</code> (db_name, rows_processed, watermark) and <code>sync.l2.complete</code> (db_name, summaries_written, source_watermark).</li>
+      <li><strong>Web pages read by a model in isolation (design session DS-8, 2026-11-02):</strong> an exception to the template-only rule for third-party text: deep search may have a model read web pages, because each such call is isolated by construction: it sees only the question and the page text inside a data fence, has no tools, no history, no personal truths, no calendar, contacts or notes, and cannot act. Private data, untrusted content and an outbound action are therefore never in one context. Calendar and contacts L2 stay template-only.</li>
     </ul>
 
     <pre>DB write -&gt; log_event(...) -&gt; enhancement queue
@@ -48,6 +49,7 @@
     <div class="s-meta">Amendment added: 2026-07-04 · Touches: §02 Security, §14 CWM, §17 Enhancement, §19 Sync, §23 Personality</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §14 CWM, §17 Enhancement, §23 EDICTS (staleness-gate refresh, absence disclosure &amp; anti-fabrication)</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §14 CWM, §17 Enhancement, §21 Calendar App, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §17 Enhancement (isolated model reading of web pages; an exception to template-only third-party text)</div>
   </div>
 </details>
 

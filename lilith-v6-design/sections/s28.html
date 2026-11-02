@@ -56,9 +56,13 @@
       <li><strong>Screen implementations:</strong> each screen is a <code>QWidget</code> subclass in <code>lilith/ui/screens/</code>. Screens do not communicate with each other — all inter-screen data flows through UICommandBus or the backend.</li>
       <li><strong>Sidebar:</strong> fixed-width icon + label nav. Active screen item highlighted. Hidden during onboarding flow.</li>
       <li><strong>UCL events:</strong> <code>user.screen.navigate</code> (from_screen, to_screen) on every navigation</li>
+      <li><strong>Settings &gt; Apps (design session DS-3, 2026-11-02):</strong> a Settings group with the installed apps (icons, a filter) and &ldquo;Apps she may open&rdquo;: the user drags an app in (or presses Allow) to grant it and presses Remove to take it back; the group explains in one sentence what a grant allows. Where app control is not available the group says so instead of showing lists.</li>
+      <li><strong>Settings &gt; What I can do and What I know about you (design session DS-4, 2026-11-02):</strong> two read-mostly Settings groups. &ldquo;What I can do&rdquo; lists every ability from the same generated list the model&rsquo;s capability block comes from, marks the ones that use the internet, and shows how to turn on the ones that are off. &ldquo;What I know about you&rdquo; lists each stored personal truth with its value, whether it came from the user or from setup, and the date, with Forget per row (undoable); the user&rsquo;s name cannot be forgotten there. No new screen id.</li>
     </ul>
     <div class="s-meta">Checklist: <a href="../checklist.html#s28">§28</a> · Touches: §22 Conversation App, §26 Frontend, §27 Orb</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §14 CWM, §17 Enhancement, §21 Calendar App, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §28 Screens (Settings &gt; Apps: drag an app in to allow it)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §28 Screens (Settings &gt; What I can do, What I know about you)</div>
   </div>
 </details>
 

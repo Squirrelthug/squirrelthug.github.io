@@ -164,6 +164,7 @@ local_data = any file exists under APP_INTERNAL_DIR / "databases"  # DBs, salts.
         </ul>
       </li>
       <li><strong>UCL events:</strong> <code>onboarding.start</code>, <code>onboarding.step.complete</code> (step_name), <code>onboarding.complete</code></li>
+      <li><strong>First-run preferences asked after a task (design session DS-4, 2026-11-02):</strong> besides the onboarding steps, Lilith may ask for a missing preference (home city, evening-start hour, night-end hour, in that order) as one extra sentence after a successful tool answer: at most one question a day, each preference at most once in 30 days, never after a refusal, a settings change or a model-written reply. Showing the question counts as asking; ignoring it is the dismissal. Telemetry: <code>pref.ask</code> (pref).</li>
     </ul>
     <div class="s-meta">Checklist: <a href="../checklist.html#s25">§25</a> · Touches: §02 Security, §03 SQLCipher, §19 Sync, §26 Frontend</div>
     <div class="s-meta">Amendment added: 2026-07-03 · Touches: §02 Security, §06 Lifecycle, §29 Custodian Model</div>
@@ -173,6 +174,7 @@ local_data = any file exists under APP_INTERNAL_DIR / "databases"  # DBs, salts.
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §25 Onboarding (Linux keychain-tier warning &amp; recorded default decision)</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §03 SQLCipher, §06 Lifecycle, §16 UCL, §25 Onboarding (passphrase rotation &amp; re-lock)</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §02 Security, §04 Cross-Platform, §06 Lifecycle, §08 Testing, §25 Onboarding, §29 Custodian Model (external backup residency &amp; restore entry point)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §25 Onboarding, §18 Memory (preferences asked after a task; one a day; 30-day silence; <code>pref.ask</code>)</div>
   </div>
 </details>
 

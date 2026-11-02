@@ -62,10 +62,12 @@
       <li><strong>AC-STS-002 (Voice-only turn):</strong> Given a user-enrolled skill matches an artifact task on a voice-only turn, when the handoff is spoken, then the indicator is visible on the session (conversation) screen at answer time, and the turn's entry in the transcript view permanently carries the badge.</li>
       <li><strong>AC-STS-003 (Curated skill):</strong> Given a curated skill matches an artifact task, when the reply is delivered, then no untrusted-skill indicator is shown, and the §12 provider indicator is unaffected.</li>
       <li><strong>AC-STS-004 (Oversize skill — nothing injected, nothing indicated):</strong> Given an enrolled skill whose <code>SKILL.md</code> exceeds <code>SKILL_MAX_INJECTED_BYTES</code>, when it is the highest-confidence match for an artifact task, then the router refuses injection, emits <code>router.skill.oversize</code>, the task runs as if no skill matched, and no untrusted-skill indicator is displayed.</li>
+      <li><strong>The spider indicator and view (design session DS-8, 2026-11-02):</strong> while a deep search runs, the shell shows a small &ldquo;Researching… N of M pages&rdquo; indicator; clicking it opens an optional view where procedurally drawn spiders act out each page&rsquo;s state on a web of threads (crawl to fetch, circle while reading, the node lights when done, a spider turns back when a site says no). It shows host names only, never page text or paths, stops drawing when hidden, and is not needed for the work.</li>
     </ul>
     <div class="s-meta">Checklist: <a href="../checklist.html#s26">§26</a> · Decision: PySide6 6.11.1 + ModernGL 5.x (Qt Quick 3D dropped). · Touches: §04 Cross-Platform, §27 Orb, §28 Screens</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §13 Router, §15 YAML Safety, §26 UI, §29 Skills Friction (honest trust boundary, untrusted-skill indicator &amp; injection size cap)</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §14 CWM, §17 Enhancement, §21 Calendar App, §22 Conversation App, §24 Narrative, §26 UI, §28 Screens, BUILD_SEQUENCING.md (finance app shelved to post-v1; calendar app added: mirrored read-only user events, Lilith-owned writable events, ICS subscription feed, echo detection)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §26 Shell (the spider indicator and optional view)</div>
   </div>
 </details>
 
