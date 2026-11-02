@@ -83,6 +83,25 @@ The session must settle these questions:
 
 Developer's stated priority (2026-09-24): this is the first design session wanted once the initial build is working.
 
+**Developer input, 2026-11-01 (after the first dogfood on Linux and a MacBook):** the build already runs on both machines, but as two separate Lilith instances. Nothing lets one "master" Lilith know that she is installed on other hardware for the same user. What the developer wants, as stated:
+- **First run asks what this install is:** a *new* Lilith, or an *extra node* of the user's existing Lilith. The developer's own order would be the desktop first, fully set up, then the MacBook as a node.
+- **Hardware-aware use of nodes:** the system uses the user's available machines to best advantage, and if the user installed in a different order the system *reorganises* to suit.
+- **Adapting to nodes going down.** The developer flagged this as likely very complex and possibly something to shelve to v7, or to build as a tool.
+- **Security may force a ground-up v7:** a design where several machines share one user's data may not be reachable by extending the v6 single-machine security model.
+
+How this meets the existing FDS-8 text (agent's reading, for the session to confirm):
+- Enrolment ("new, or join an existing Lilith") is the natural *first-run* form of FDS-8's open question "how the hub authenticates a device and the person holding it". It also needs an answer for the opposite case: what a node does with data it already holds when it joins.
+- Hardware-aware use fits FDS-8's "the hub can hand background work to other machines" and FDS-3 (per-task model choice); the new need is that nodes *advertise capabilities* (the §05 tier profile already exists per machine) so the hub can choose.
+- **Node loss splits into two very different problems.** A *worker* node going down is graceful degradation: the hub stops routing to it. The *hub* going down is a failover problem: another node must hold the keys and a current copy of the data, which is exactly the encrypted replication and conflict resolution the 2026-09-24 working assumption ("hub and endpoints only, never peer-to-peer database sync") rejected as out of proportion. Automatic reorganisation therefore means either keeping that assumption (fixed hub; hub down means unavailable) or reversing it.
+- The security question is a research step, not an assumption: whether §02 (credentials) and §03 (SQLCipher key model, same-user boundary) can extend to a second machine without a rewrite. If they cannot, that is the case for a v7 built for multi-node from the start.
+
+Options for the session to weigh (none decided):
+1. **v6 FDS-8 scoped to a fixed hub:** first-run enrolment, capability advertisement, worker-node degradation; hub failover and automatic reorganisation shelved to v7.
+2. **Hub with a standby replica:** adds encrypted replication and a failover rule; large, security-sensitive.
+3. **v7 ground-up multi-node design:** only if the research step shows the v6 security model cannot extend.
+
+Note for sequencing: the first-run question exists today as a one-way door. A v6 install has no "join" path, so whatever the first-run flow (§25) records about its own identity should not assume it is the only Lilith for the user. That is a constraint on the current build only if the session picks option 1 or 2.
+
 ## FDS-9 · Telemetry Lifecycle, Diagnostics & Precise-Data Artifacts — added 2026-10-25
 
 **Vision:** Lilith sees everything that happens inside her, and so can the developer and the agents building her. No LLM ever pays for that in raw tokens. The full-fidelity record is kept as space allows. A background process turns it into short narratives backed by data tables, and that is all the conversational path ever reads. When the user, or Lilith on the user's behalf, needs the precise numbers, the request becomes an **artifact**: generated in the slow lane and served as tables and a report when ready, never computed on the conversational path. v1 leaves three things undefined:
