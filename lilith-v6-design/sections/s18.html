@@ -56,7 +56,7 @@
         </ul>
       </li>
       <li><strong>Telemetry:</strong> Emit <code>memory.write</code> (tier, action, memory_id), <code>memory.truth.update</code> (key, source), and <code>memory.recall</code> (query_hash, results_returned, stage: 'recency'|'fts5').</li>
-          <li><strong>Reminders and timers (design session DS-2 increment B, 2026-11-02):</strong> <code>memory_db</code> also holds <code>reminders</code> (<code>text</code>, <code>due_at</code>, <code>kind</code> reminder or timer, <code>status</code> pending, fired, missed or cancelled). They are Tier 1 writes: set at once, undoable, listed and cancellable. The time is read by code from the user's words and is never guessed; an unreadable time is asked for again. Delivery is honest: Lilith says a reminder works while she is running, delivers a due one in the chat, as a notification and in speech, and reports one that fell due while she was closed (or the machine slept; more than 90 seconds late) once, with its original time, never as if it were on time.</li>
+          <li><strong>Notes and the action ledger (design session DS-2, 2026-11-02):</strong> <code>memory_db</code> also holds <code>notes</code> (<code>id</code>, <code>text</code>, nullable <code>subject</code>, <code>source</code> always <code>user</code>, <code>session_id</code> as provenance, <code>created_at</code>, soft <code>deleted_at</code>) with an FTS5 index, and <code>action_ledger</code> (<code>tool</code>, a one-line <code>summary</code>, <code>undo_kind</code>, <code>undo_ref</code>, <code>undone_at</code>). A note is only what the user asked Lilith to keep, in their words; nothing is inferred. A Tier 1 action (local and reversible: saving a note) runs at once, says how to take it back, and is recorded in the ledger so "undo" reverses exactly the last action. Recall searches notes first. Events carry an action and an id or tool name, never the text (<code>memory.write</code> with <code>note_create</code>/<code>note_delete</code>; <code>action.ledger</code> with <code>recorded</code>/<code>undone</code>). Action tiers: Tier 0 reads, Tier 1 local and reversible writes (this), Tier 2 external or irreversible actions, staged for explicit confirmation (not yet built).</li>
     </ul>
 
     <pre>CREATE TABLE personal_truths (
@@ -75,7 +75,7 @@ CREATE TABLE memory_l2_summaries (
 );</pre>
     <div class="s-meta">Checklist: <a href="../checklist.html#s18">§18</a> · Touches: §14 CWM, §23 Personality &amp; Truths</div>
     <div class="s-meta">Amendment added: 2026-07-27 · Touches: §03 SQLCipher, §18 Memory, BUILD_SEQUENCING.md (recall roadmap: staged hybrid retrieval, embeddings sidecar forward-compatibility, Experiment 3 promotion gate)</div>
-    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §18 Memory, §26 Shell (reminders and timers; honest delivery; tray notification)</div>
+    <div class="s-meta">Amendment added: 2026-11-02 · Touches: §18 Memory, §15 Tools, §16 UCL (notes, the action ledger, Tier 1 undo)</div>
   </div>
 </details>
 
