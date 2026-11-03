@@ -234,7 +234,7 @@ def build_pages():
             group("The plan", [
                 card("Build sequencing", "The milestone plan, the two de-risking experiments, and what is parked beyond v1.", "../BUILD_SEQUENCING.md", icon="🧭", color="amber", chip="Markdown"),
                 card("Build guide", "Fourteen sequential chapters and the experiment gates.", "../sprints/BUILD_GUIDE.md", icon="🛠", color="orange", chip="Markdown"),
-                card("Future design sessions", "Ideas that are part of the intent but not in v1: the tool bridge, proactive help, cost ledger, more devices.", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="purple", chip="Markdown"),
+                card("Future design sessions", "Ideas that are part of the intent but not in v1: the tool bridge, proactive help, cost ledger, more devices, the Nexus, the daily rhythm, how she speaks.", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="purple", chip="Markdown"),
                 card("Calendar app spec", "A worked feature specification (§21).", "../specs/calendar-app.spec.md", icon="📅", color="aqua", chip="Markdown"),
             ], "big", note="Markdown pages open as plain text in the browser."),
             group("Sprints", [card(t, "", f"../sprints/{f}", color="orange", num=n) for n, t, f in SPRINTS]
@@ -248,12 +248,13 @@ def build_pages():
         "Where Lilith is going. <strong>Nothing here is built, and none of it is law.</strong> Each idea becomes real only through a design session.",
         "\n".join([
             group("The big idea", [
-                card("Nexus: Lilith plus your other tools", "Lilith as the coordinator that lets separate devices and services work as one system, such as a smart home, over a shared tool standard (MCP). Conceptual: the last chapter of the plain-words guide.", "../lilith-for-everyone.pdf", icon="🔗", color="purple", chip="PDF, chapter 7"),
-                card("Future design sessions", "The parking list: tool bridge, proactive help, more models, cost ledger, installers, storage tiers, many devices.", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="amber", chip="Markdown"),
+                card("Nexus: where Lilith specialises", "A business-shaped tree of cells, each with a ready harness that any agent can step into. Lilith travels it, holds design conversations there and hands agreed designs to the cells, but never straps in. Reports roll up a level at a time.", "../vision/index.html#nexus", icon="🔗", color="purple", chip="Pictures · FDS-11"),
+                card("Lilith, the whole picture", "The vision in diagrams: what she can do, a day with her, how she speaks, how the code and the design work, the Nexus, and a direction check of the build against the vision.", "../vision/index.html", icon="🧭", color="teal", chip="Page + PDF"),
+                card("Future design sessions", "The parking list: tool bridge, proactive help, cost ledger, storage, many devices, the inner loop, the Nexus, the daily rhythm, and how she speaks (FDS-1 to FDS-13).", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="amber", chip="Markdown"),
             ], "big"),
             group("Decided next, in the build repository", [
                 card("Design sessions DS-0 to DS-5", "The briefs behind writing, reminders, weather, first run, and relationship cards.", f"{LILITH}/docs/design-sessions/README.md", icon="🗒", color="blue", chip="GitHub"),
-                card("Autopilot plan P01", "The next 27 tasks: places, an app launcher, web search, first run. A draft awaiting approval.", f"{LILITH}/tasks/P01-sprint-draft.md", icon="🚀", color="green", chip="GitHub"),
+                card("Autopilot plan P01", "31 tasks: places and units, an app launcher, web and deep search, first run. Approved 2026-11-02 and being built by the autopilot.", f"{LILITH}/tasks/P01-sprint-draft.md", icon="🚀", color="green", chip="GitHub"),
                 card("Multiple devices (v7)", "One Lilith across several computers. Decided as a v7 job, because the security work is large.", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🖥", color="grey", chip="Markdown"),
             ], "big"),
         ]), depth=1, crumbs=back)
@@ -278,7 +279,8 @@ def build_pages():
               '<span>Design frozen 2026-06-29 · cleared for build 2026-07-17</span>'
               f'<span><a href="{LILITH}/HANDOFF.md" target="_blank" rel="noopener">Current state in detail →</a></span></div>')
     top = [
-        card("Lilith in plain words", "An eight-page guide for anyone: what she does today, what is already decided, why she costs less, how she protects your information, and where Nexus could take her.", "lilith-for-everyone.pdf", icon="🌟", color="teal", chip="PDF · 8 pages", go="Read"),
+        card("Lilith in plain words", "An eight-page guide for anyone: what she does today, what is already decided, why she costs less, how she protects your information, and what the Nexus is.", "lilith-for-everyone.pdf", icon="🌟", color="teal", chip="PDF · 8 pages", go="Read"),
+        card("Lilith, the whole picture", "The vision in diagrams, with a direction check: is the build in the right place and heading the right way? Includes the Nexus, a day with her, and how the code and design work.", "vision/index.html", icon="🧭", color="purple", chip="Pictures · 20-page PDF", go="Look"),
         card("The Design", "The frozen design document: 29 sections by layer, the standards, and every amendment. This is the law.", "law/index.html", icon="📖", color="blue", chip="Law · 29 sections"),
         card("Build & Progress", "The plan, the sprints, the chapter reports, and where the build stands right now.", "build/index.html", icon="🛠", color="green", chip="9 sprints · 8 reports"),
         card("Research", "What makes a good assistant, in two waves. Gathered by agents and checked by script. Leads, not law.", "research/index.html", icon="🔬", color="purple", chip="Not law · 2 waves"),

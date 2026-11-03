@@ -36,7 +36,7 @@ from reportlab.platypus import (
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE.parent / "lilith-for-everyone.pdf"
-FONTS = Path("/usr/share/fonts/truetype/dejavu")
+FONTS = next((p for p in (Path("/usr/share/fonts/truetype/dejavu"), Path("C:/Windows/Fonts")) if (p / "DejaVuSans.ttf").exists()), Path("/usr/share/fonts/truetype/dejavu"))
 pdfmetrics.registerFont(TTFont("Sans", str(FONTS / "DejaVuSans.ttf")))
 pdfmetrics.registerFont(TTFont("Sans-Bold", str(FONTS / "DejaVuSans-Bold.ttf")))
 pdfmetrics.registerFontFamily("Sans", normal="Sans", bold="Sans-Bold", italic="Sans", boldItalic="Sans-Bold")
@@ -167,30 +167,27 @@ def privacy_diagram() -> Drawing:
 
 
 def nexus_diagram() -> Drawing:
-    import math
-
-    d = Drawing(BODY_W, 150)
-    cx, cy = BODY_W / 2, 75
-    spokes = [
-        ("Lights", PURPLE),
-        ("Heating", PURPLE),
-        ("Door locks", PURPLE),
-        ("Cameras", PURPLE),
-        ("Your files", PURPLE),
-        ("Appliances", PURPLE),
-        ("Work tools", PURPLE),
-        ("Car", PURPLE),
-    ]
-    r = 58
-    for i, (name, col) in enumerate(spokes):
-        a = math.radians(90 - i * 360 / len(spokes) - 22.5)
-        x, y = cx + 1.55 * r * math.cos(a), cy + r * math.sin(a)
-        d.add(Line(cx, cy, x, y, strokeColor=col, strokeWidth=1.1, strokeDashArray=[3, 3]))
-        d.add(Rect(x - 36, y - 11, 72, 22, rx=11, ry=11, fillColor=colors.white, strokeColor=col, strokeWidth=1))
-        d.add(String(x, y - 3, name, textAnchor="middle", fontName="Sans", fontSize=8.2, fillColor=INK))
-    d.add(Circle(cx, cy, 36, fillColor=TEAL_SOFT, strokeColor=TEAL, strokeWidth=1.6))
-    d.add(String(cx, cy + 2, "Nexus", textAnchor="middle", fontName="Sans-Bold", fontSize=11, fillColor=TEAL))
-    d.add(String(cx, cy - 10, "with Lilith", textAnchor="middle", fontName="Sans", fontSize=7.6, fillColor=MUTED))
+    d = Drawing(BODY_W, 176)
+    # Lilith beside the tree: she travels it, she never straps in.
+    d.add(Circle(34, 140, 26, fillColor=TEAL_SOFT, strokeColor=TEAL, strokeWidth=1.6))
+    d.add(String(34, 142, "Lilith", textAnchor="middle", fontName="Sans-Bold", fontSize=9.6, fillColor=TEAL))
+    d.add(String(34, 131, "travels it", textAnchor="middle", fontName="Sans", fontSize=6.8, fillColor=MUTED))
+    mx, mw = BODY_W / 2 - 80, 160
+    box(d, mx, 126, mw, 30, "MASTER nexus", colors.white, PURPLE, 9.6, "manager · overview · schedule")
+    d.add(Line(60, 141, mx, 141, strokeColor=TEAL, strokeWidth=1.2, strokeDashArray=[3, 3]))
+    divisions = [("Programming", ["Lilith", "an addon"]), ("Writing", ["a novel", "a script"]), ("Podcast", ["episode 033", "news digest"])]
+    dw = 132
+    gap = (BODY_W - 3 * dw) / 4
+    for i, (name, cells) in enumerate(divisions):
+        x = gap + i * (dw + gap)
+        d.add(Line(mx + mw / 2, 126, x + dw / 2, 104, strokeColor=PURPLE, strokeWidth=1))
+        box(d, x, 76, dw, 28, name, PAPER, PURPLE, 8.8, "division: editor / publisher")
+        cw = (dw - 8) / 2
+        for k, cell in enumerate(cells):
+            cx = x + k * (cw + 8)
+            d.add(Line(x + dw / 2, 76, cx + cw / 2, 52, strokeColor=LINE, strokeWidth=1))
+            box(d, cx, 22, cw, 30, cell, colors.white, TEAL, 7.6, "cell + harness", bold=False)
+    d.add(String(BODY_W / 2, 6, "Reports flow up a level at a time; anyone can step into a cell and read its full report.", textAnchor="middle", fontName="Sans", fontSize=7.4, fillColor=MUTED))
     return d
 
 
@@ -383,42 +380,43 @@ def build_story() -> list:
     s += [PageBreak()]
 
     # ---------------- 7. nexus ----------------
-    s += [P("7 · BEYOND ONE ASSISTANT", KICK), P("Nexus: one coordinator for your whole setup", H1)]
-    s += [P(f"{LATER} &nbsp; This page is a plan, not a product. Nexus is not built, and nothing here is promised for a date.", BODY)]
+    s += [P("7 · BEYOND ONE ASSISTANT", KICK), P("Nexus: where Lilith goes to specialise", H1)]
+    s += [P(f"{LATER} &nbsp; This page is a plan, not a product. Nexus is a separate project in its research phase, and nothing here is promised for a date.", BODY)]
     s += [
         P(
-            "Lilith on her own is a capable assistant for your calendar, your people, your notes and your day. Nexus is the next idea: let her connect to the other tools in your life, "
-            "so that they stop being a pile of separate things and become one working system.",
+            "Lilith looks after your day. Nexus is where serious work lives: a structure of teams, shaped like a business, where each project has everything an agent needs to pick it up and carry on.",
             LEAD,
         )
     ]
     s += [nexus_diagram()]
-    s += [P("A smart home, not a pile of smart devices", H2)]
+    s += [P("A mech suit she walks through, not one she wears", H2)]
     s += [
         P(
-            "Today a house with smart bulbs, a thermostat, door locks and cameras is usually four apps and four accounts, each clever and none aware of the others. "
-            "With a coordinator, you say “I’m heading to bed” once. The lights dim, the doors lock, the heating drops, and the morning reminder is set, because something knows all of them and knows you."
+            "A MASTER nexus manager sees every project at a glance; below it are divisions (programming, writing, a podcast) and below those the projects, called cells. "
+            "Every cell already has its harness (standards, history, where things were left), so even a brand-new agent can start work. "
+            "Lilith never straps in. She moves through it, talks it over with you, and hands an agreed design to the cell that builds it."
         )
     ]
     s += [P("How it would work, in plain terms", H2)]
     s += bullets(
         [
-            "Each device or service keeps doing its own job. Nexus does not replace your thermostat. It <b>uses</b> it, on your behalf.",
-            "A shared standard for connecting tools (MCP, the Model Context Protocol) is how outside tools would plug in. One connection method means a new tool is a new plug, not a new project.",
-            "Lilith stays the face you talk to. Nexus is what lets what you say reach the right tool.",
-            "The same house rules apply to every new tool: it asks permission first, it is listed so you can see and remove it, and what it returns is treated as untrusted until checked.",
+            "<b>Say “let’s code” and she changes rooms.</b> She takes on that cell’s context; when you leave, the detail stays there.",
+            "<b>Reports go up one level at a time.</b> Each layer reads the full reports below it, so nothing is a summary of a summary.",
+            "<b>Work waits for budget.</b> The next job runs when an allowance resets or an account is topped up.",
+            "<b>What a cell makes is yours.</b> It joins your own knowledge, catalogued with where it came from.",
+            "<b>The creative choices stay yours.</b> A story missing an act gets advice and research; you decide what fills it.",
         ]
     )
     s += [Spacer(1, 6)]
     s += [
         callout(
-            "<b>Why it is not built yet.</b> A single assistant that holds your private data, reads outside content and can act in the world is exactly the combination that security researchers warn about. "
-            "The design deliberately learns to keep your information safe on one computer first, and treats the connected version as its own careful design step.",
+            "<b>Why it is not built yet.</b> Nexus needs things v1 deliberately leaves out: a safe way to use outside tools, work that runs while you are away, and a running cost display. "
+            "Each is its own design step. The pictures on the design site (<b>Lilith, the whole picture</b>) show the full idea.",
             PURPLE,
         )
     ]
     s += [Spacer(1, 6)]
-    s += [P("Also on the longer list, each its own future decision: Lilith reaching out to you when something needs attention (instead of only answering when asked); a running cost display; the same Lilith across several of your computers.", SMALL)]
+    s += [P("Also on the longer list: Lilith reaching out first, a morning brief, choosing how much she speaks (or staying silent), and one Lilith on your phone and computers.", SMALL)]
 
     return s
 

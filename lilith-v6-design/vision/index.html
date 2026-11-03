@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lilith, the Whole Picture</title>
+<meta name="description" content="Picture-led explainer of Lilith v6: what she can do, how she organises a day, how the code and the design work, and how she uses the Nexus.">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #111118; --surface2: #16161f; --border: #232336;
+    --text: #e2e8f0; --muted: #8a93a3; --faint: #4b5263;
+    --accent: #4fc3c9; --amber: #f59e0b; --green: #10b981; --red: #ef4444;
+    --purple: #a78bfa; --pink: #f472b6; --blue: #60a5fa; --orange: #fb923c;
+    --built: var(--green); --now: var(--blue); --next: var(--amber); --vision: var(--purple);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15.5px; line-height: 1.7; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 40px 80px; }
+  a { color: var(--accent); }
+  .crumbs { font-size: .8rem; color: var(--muted); margin-bottom: 18px; }
+  .crumbs a { text-decoration: none; }
+  h1 { font-size: 2.5rem; line-height: 1.15; color: var(--accent); margin-bottom: 12px; letter-spacing: -.01em; }
+  .lede { font-size: 1.15rem; color: var(--text); max-width: 760px; margin-bottom: 14px; }
+  .sub { color: var(--muted); max-width: 760px; }
+  h2 { font-size: 1.6rem; margin: 72px 0 6px; color: var(--text); letter-spacing: -.01em; }
+  h2 .k { display: block; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+  h3 { font-size: 1.12rem; margin: 40px 0 6px; color: var(--text); }
+  p { margin: 8px 0; max-width: 780px; }
+  .muted { color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 22px 0 6px; font-size: .82rem; color: var(--muted); }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 12px; font-size: .72rem; font-weight: 700; letter-spacing: .03em; border: 1px solid; white-space: nowrap; }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .s-built { color: var(--built); border-color: rgba(16,185,129,.35); background: rgba(16,185,129,.08); }
+  .s-now { color: var(--now); border-color: rgba(96,165,250,.35); background: rgba(96,165,250,.08); }
+  .s-next { color: var(--next); border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+  .s-vision { color: var(--vision); border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.08); }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; }
+  nav.toc a { font-size: .8rem; font-weight: 600; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 5px 13px; }
+  nav.toc a:hover { border-color: var(--accent); }
+  figure { margin: 22px 0 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  figure .scroll { overflow-x: auto; }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption { font-size: .84rem; color: var(--muted); margin-top: 10px; }
+  .grid { display: grid; gap: 14px; margin: 22px 0; }
+  .g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+  .card h4 { font-size: 1rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card ul { list-style: none; }
+  .card li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px dashed var(--border); font-size: .9rem; }
+  .card li:first-child { border-top: 0; }
+  .card li .chip { flex: none; }
+  .quote { border-left: 3px solid var(--purple); background: rgba(167,139,250,.06); padding: 14px 18px; border-radius: 0 10px 10px 0; margin: 20px 0; max-width: 820px; }
+  .quote p { margin: 0; }
+  .quote .who { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+  .callout { border: 1px solid rgba(79,195,201,.35); background: rgba(79,195,201,.06); border-radius: 10px; padding: 14px 18px; margin: 18px 0; max-width: 820px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; margin: 18px 0; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+  .tablewrap { overflow-x: auto; }
+  .persona { text-align: left; }
+  .persona .big { font-size: 1.6rem; }
+  .meter { height: 8px; border-radius: 4px; background: var(--border); margin: 10px 0 4px; overflow: hidden; }
+  .meter span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--purple)); }
+  footer { margin-top: 70px; padding-top: 20px; border-top: 1px solid var(--border); font-size: .82rem; color: var(--muted); }
+
+  /* SVG vocabulary */
+  svg text { font-family: 'Segoe UI', system-ui, sans-serif; fill: var(--text); }
+  svg .t-m { fill: var(--muted); }
+  svg .t-s { font-size: 11px; }
+  svg .t-xs { font-size: 10px; }
+  svg .t-b { font-weight: 700; }
+  svg .t-acc { fill: var(--accent); }
+  svg .t-pur { fill: var(--purple); }
+  svg .t-amb { fill: var(--amber); }
+  svg .t-grn { fill: var(--green); }
+  svg .t-blu { fill: var(--blue); }
+  svg .t-red { fill: var(--red); }
+  svg .box { fill: var(--surface2); stroke: var(--border); stroke-width: 1.2; }
+  svg .b-acc { fill: rgba(79,195,201,.10); stroke: var(--accent); }
+  svg .b-pur { fill: rgba(167,139,250,.10); stroke: var(--purple); }
+  svg .b-amb { fill: rgba(245,158,11,.10); stroke: var(--amber); }
+  svg .b-grn { fill: rgba(16,185,129,.10); stroke: var(--green); }
+  svg .b-blu { fill: rgba(96,165,250,.10); stroke: var(--blue); }
+  svg .b-pnk { fill: rgba(244,114,182,.10); stroke: var(--pink); }
+  svg .b-org { fill: rgba(251,146,60,.10); stroke: var(--orange); }
+  svg .b-gry { fill: rgba(138,147,163,.08); stroke: var(--faint); }
+  svg .ln { stroke: var(--faint); stroke-width: 1.4; fill: none; }
+  svg .ln-acc { stroke: var(--accent); }
+  svg .ln-pur { stroke: var(--purple); }
+  svg .ln-amb { stroke: var(--amber); }
+  svg .ln-grn { stroke: var(--green); }
+  svg .ln-red { stroke: var(--red); }
+  svg .dash { stroke-dasharray: 5 5; }
+  svg .hatch { fill: url(#hatch); stroke: var(--amber); stroke-width: 1.2; }
+
+  @media print {
+    :root { --bg: #ffffff; --surface: #f7f8fa; --surface2: #ffffff; --border: #d9dee5; --text: #1b2430; --muted: #5b6675; --faint: #9aa3b0; --accent: #17868d; --purple: #6a54c4; --amber: #b86e00; --green: #1f8a5b; --blue: #2f6fc0; --pink: #c2417f; --orange: #c2601c; --red: #c0392b; }
+    @page { size: A4; margin: 14mm 12mm; }
+    body { font-size: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .wrap { max-width: none; padding: 0; }
+    nav.toc, .crumbs, .print-hide { display: none; }
+    h1 { font-size: 26px; }
+    h2 { margin-top: 0; padding-top: 6mm; break-before: page; font-size: 20px; }
+    h3 { margin-top: 18px; break-after: avoid; }
+    figure, .card, tr, .callout, .quote { break-inside: avoid; }
+    figure { padding: 10px; }
+    figure .scroll { overflow: visible; }
+    figure .scroll svg { min-width: 0; }
+    a { color: var(--accent); text-decoration: none; }
+  }
+  @media (max-width: 760px) {
+    .wrap { padding: 28px 16px 60px; }
+    h1 { font-size: 1.9rem; }
+    h2 { font-size: 1.35rem; margin-top: 56px; }
+    .g2, .g3 { grid-template-columns: 1fr; }
+    figure { padding: 12px; }
+    figure .scroll svg { min-width: 660px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="crumbs"><a href="../index.html">Design home</a> › Lilith, the whole picture</div>
+
+<h1>Lilith, the whole picture</h1>
+<p class="lede">Lilith is another you, but digital: an assistant who handles the things you would otherwise forget, keeps your life in order without getting attached, and, when there is real work to do, goes where that work lives and becomes a specialist there.</p>
+<p class="sub">This page explains her in pictures: what she can do, how she shapes a day, how she speaks, how the code and the design fit together, and how she uses the Nexus. The plain-words guide (<a href="../lilith-for-everyone.pdf">PDF</a>) tells the same story in prose. Every picture is marked with how real it is.</p>
+
+<div class="legend">
+  <span class="chip s-built">Built</span> works in the build today
+  <span class="chip s-now">Being built</span> in the current autopilot run (P01)
+  <span class="chip s-next">Designed next</span> decided, not yet built
+  <span class="chip s-vision">Vision</span> recorded idea, needs a design session
+</div>
+
+<nav class="toc" aria-label="On this page">
+  <a href="#what">What she is</a>
+  <a href="#can">What she can do</a>
+  <a href="#day">A day with her</a>
+  <a href="#speak">How she speaks</a>
+  <a href="#code">How the code works</a>
+  <a href="#design">How the design works</a>
+  <a href="#nexus">The Nexus</a>
+  <a href="#keyboard">Keyboard optional</a>
+  <a href="#people">Different people</a>
+  <a href="#record">Where it is recorded</a>
+  <a href="#direction">Direction check</a>
+</nav>
+<p class="muted print-hide" style="margin-top:14px;font-size:.88rem">Also as a printable document: <a href="../lilith-the-whole-picture.pdf">Lilith, the whole picture (PDF)</a>.</p>
+
+<!-- ============================================================ WHAT -->
+<h2 id="what"><span class="k">1 · What she is</span>One face, four ways of reaching things</h2>
+<p>You talk to Lilith. She does not hold everything herself. Some things live in her own encrypted stores, some live wherever you keep them, some come from tools, and serious work lives in the Nexus. Her job is to know where each thing is and to go and get it.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 430" role="img" aria-label="You talk to Lilith; she reaches her own stores, your things where they live, her tools, and the Nexus">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4b5263"/></marker>
+    <marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4fc3c9"/></marker>
+    <marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a78bfa"/></marker>
+    <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="rgba(245,158,11,.06)"/><line x1="0" y1="0" x2="0" y2="8" stroke="rgba(245,158,11,.45)" stroke-width="3"/></pattern>
+  </defs>
+  <!-- you -->
+  <rect class="box b-gry" x="20" y="170" width="150" height="90" rx="14"/>
+  <text x="95" y="208" text-anchor="middle" class="t-b">You</text>
+  <text x="95" y="228" text-anchor="middle" class="t-m t-s">voice · text · cards</text>
+  <path class="ln ln-acc" d="M170 215 H 262" marker-end="url(#arA)" marker-start="url(#arA)"/>
+  <!-- lilith -->
+  <circle cx="340" cy="215" r="76" class="box b-acc" />
+  <text x="340" y="208" text-anchor="middle" class="t-b t-acc" style="font-size:20px">Lilith</text>
+  <text x="340" y="230" text-anchor="middle" class="t-m t-s">knows where things are</text>
+  <text x="340" y="246" text-anchor="middle" class="t-m t-s">and goes to get them</text>
+  <!-- four destinations -->
+  <path class="ln" d="M410 180 C 470 120, 500 70, 560 70" marker-end="url(#ar)"/>
+  <path class="ln" d="M416 205 C 480 190, 510 170, 560 170" marker-end="url(#ar)"/>
+  <path class="ln" d="M416 228 C 480 245, 510 265, 560 265" marker-end="url(#ar)"/>
+  <path class="ln ln-pur dash" d="M408 250 C 470 320, 500 365, 560 365" marker-end="url(#arP)"/>
+  <rect class="box b-grn" x="560" y="30" width="320" height="80" rx="10"/>
+  <text x="576" y="56" class="t-b">Her own stores</text>
+  <text x="576" y="76" class="t-m t-s">memory, notes, calendar, people, the ledger of</text>
+  <text x="576" y="92" class="t-m t-s">what she did. Encrypted, on your computer.</text>
+  <rect class="box b-amb" x="560" y="130" width="320" height="80" rx="10"/>
+  <text x="576" y="156" class="t-b">Your things, where they live</text>
+  <text x="576" y="176" class="t-m t-s">a podcast on an external drive, files in your own</text>
+  <text x="576" y="192" class="t-m t-s">cloud: she finds it, fetches it, plays or hands it over.</text>
+  <rect class="box b-blu" x="560" y="225" width="320" height="80" rx="10"/>
+  <text x="576" y="251" class="t-b">Tools</text>
+  <text x="576" y="271" class="t-m t-s">clock, calculator, weather, places, web search,</text>
+  <text x="576" y="287" class="t-m t-s">deep search, the apps you allow her to open.</text>
+  <rect class="box b-pur" x="560" y="325" width="320" height="80" rx="10"/>
+  <text x="576" y="351" class="t-b">The Nexus</text>
+  <text x="576" y="371" class="t-m t-s">where serious work lives: code, writing, the podcast.</text>
+  <text x="576" y="387" class="t-m t-s">She visits; she never straps in (section 7).</text>
+  <text x="20" y="420" class="t-m t-xs">Green: built today · Amber: fetching from your drives is a recorded idea (FDS-7) · Blue: built or in P01 · Purple: vision (FDS-11)</text>
+</svg>
+</div>
+<figcaption>Her context window stays on your machine. A cloud model, when one is used, sees only what a single answer needs, with personal details masked.</figcaption>
+</figure>
+
+<!-- ============================================================ CAN -->
+<h2 id="can"><span class="k">2 · What she can do</span>Today, this week, and later</h2>
+<p>Grouped the way you would think about your life rather than the way the code is laid out. The status chips come from the build's own record (HANDOFF and the P01 plan) as of 3 November 2026.</p>
+<div class="grid g3">
+  <div class="card"><h4>🗓 Your day and time</h4><ul>
+    <li>Calendar: add, move, cancel by asking <span class="chip s-built">Built</span></li>
+    <li>Reminders and timers <span class="chip s-built">Built</span></li>
+    <li>"Tomorrow evening" means your evening <span class="chip s-built">Built</span></li>
+    <li>Reminders while the window is closed <span class="chip s-next">Next</span></li>
+    <li>Morning brief, real durations, prep time <span class="chip s-vision">Vision</span></li>
+  </ul></div>
+  <div class="card"><h4>🧠 Memory and notes</h4><ul>
+    <li>Notes, recall, undo by words <span class="chip s-built">Built</span></li>
+    <li>Forgetting in stages, never silently <span class="chip s-built">Built</span></li>
+    <li>A visible Undo button <span class="chip s-now">P01</span></li>
+    <li>Fetch your stored files and media <span class="chip s-vision">Vision</span></li>
+    <li>Ingest and catalogue Nexus work <span class="chip s-vision">Vision</span></li>
+  </ul></div>
+  <div class="card"><h4>👥 People</h4><ul>
+    <li>Contacts and who you talked to <span class="chip s-built">Built</span></li>
+    <li>Relationship cards before you meet someone <span class="chip s-next">Later</span></li>
+    <li>Nudges when a thread goes quiet <span class="chip s-vision">Vision</span></li>
+  </ul></div>
+  <div class="card"><h4>🌦 The outside world</h4><ul>
+    <li>Weather at home <span class="chip s-built">Built</span></li>
+    <li>Named places, units <span class="chip s-now">P01</span></li>
+    <li>Web search on your own SearXNG <span class="chip s-now">P01</span></li>
+    <li>Deep search: the spider and reports <span class="chip s-now">P01</span></li>
+  </ul></div>
+  <div class="card"><h4>💻 Your computer</h4><ul>
+    <li>Clock and calculator <span class="chip s-built">Built</span></li>
+    <li>Open apps you dragged into her allow-list <span class="chip s-now">P01</span></li>
+    <li>"What I can do" list and first run <span class="chip s-now">P01</span></li>
+    <li>One Lilith on phone, laptop, desktop <span class="chip s-vision">v7</span></li>
+  </ul></div>
+  <div class="card"><h4>🎙 Voice, look and manner</h4><ul>
+    <li>Voice in and out, the orb, the tray <span class="chip s-built">Built</span></li>
+    <li>Persona charter: warm, never a companion <span class="chip s-now">P01</span></li>
+    <li>Personality presets with dials <span class="chip s-next">Next run</span></li>
+    <li>Choose speech, text or silence <span class="chip s-vision">Vision</span></li>
+  </ul></div>
+</div>
+
+<!-- ============================================================ DAY -->
+<h2 id="day"><span class="k">3 · A day with her</span>She knows how long things take</h2>
+<p>A brief when you wake, as long or short as you want. Time between things that need it. Reminders that say <em>why</em>, so you always know what is happening. And when you step away from work, she carries only the facts of it, not the detail.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 300" role="img" aria-label="Timeline of a day: morning brief, work session in the Nexus, outside with family, a prep buffer, dinner">
+  <line x1="40" y1="150" x2="870" y2="150" class="ln" />
+  <!-- hour ticks -->
+  <g class="t-m t-xs">
+    <text x="40" y="172" text-anchor="middle">7:00</text><text x="160" y="172" text-anchor="middle">9:00</text>
+    <text x="340" y="172" text-anchor="middle">12:00</text><text x="520" y="172" text-anchor="middle">15:00</text>
+    <text x="640" y="172" text-anchor="middle">17:00</text><text x="760" y="172" text-anchor="middle">19:00</text><text x="860" y="172" text-anchor="middle">21:00</text>
+  </g>
+  <!-- blocks -->
+  <rect x="40" y="120" width="40" height="30" rx="5" class="box b-acc"/>
+  <rect x="160" y="120" width="180" height="30" rx="5" class="box b-pur"/>
+  <rect x="360" y="120" width="230" height="30" rx="5" class="box b-grn"/>
+  <rect x="590" y="120" width="50" height="30" rx="5" class="hatch"/>
+  <rect x="640" y="120" width="100" height="30" rx="5" class="box b-org"/>
+  <text x="250" y="140" text-anchor="middle" class="t-s t-b">Work: programming cell</text>
+  <text x="475" y="140" text-anchor="middle" class="t-s t-b">Outside with family</text>
+  <text x="690" y="140" text-anchor="middle" class="t-s t-b">Dinner</text>
+  <!-- callouts above -->
+  <path class="ln" d="M60 120 V 70"/><rect x="20" y="20" width="200" height="50" rx="8" class="box b-acc"/>
+  <text x="32" y="40" class="t-s t-b t-acc">Morning brief</text>
+  <text x="32" y="58" class="t-xs t-m">"Two things today. Dinner at 5."</text>
+  <path class="ln" d="M250 120 V 90"/><rect x="240" y="40" width="200" height="50" rx="8" class="box b-pur"/>
+  <text x="252" y="60" class="t-s t-b t-pur">She steps into the cell</text>
+  <text x="252" y="78" class="t-xs t-m">you agree a design; agents build it</text>
+  <path class="ln" d="M615 120 V 90"/><rect x="520" y="40" width="200" height="50" rx="8" class="box b-amb"/>
+  <text x="532" y="60" class="t-s t-b t-amb">Prep time, kept free</text>
+  <text x="532" y="78" class="t-xs t-m">shower, change, 20 min drive</text>
+  <!-- callouts below -->
+  <path class="ln" d="M475 150 V 200"/><rect x="330" y="200" width="290" height="70" rx="8" class="box b-grn"/>
+  <text x="342" y="220" class="t-s t-b t-grn">In your ear, no detail in her head</text>
+  <text x="342" y="238" class="t-xs t-m">"This morning we worked on the launcher and</text>
+  <text x="342" y="254" class="t-xs t-m">two tasks finished since. Nothing needs you."</text>
+  <path class="ln" d="M600 150 V 215 H 630"/><rect x="630" y="200" width="250" height="70" rx="8" class="box b-org"/>
+  <text x="642" y="220" class="t-s t-b" style="fill:var(--orange)">A reminder with its reason</text>
+  <text x="642" y="238" class="t-xs t-m">"Time to head in: you need 40 minutes</text>
+  <text x="642" y="254" class="t-xs t-m">to get ready and drive before dinner."</text>
+  <rect x="40" y="200" width="270" height="70" rx="8" class="box b-gry"/>
+  <text x="52" y="220" class="t-s t-b">Meanwhile, in the Nexus</text>
+  <text x="52" y="238" class="t-xs t-m">cells keep running on their own when budget</text>
+  <text x="52" y="254" class="t-xs t-m">allows, and write reports for later.</text>
+</svg>
+</div>
+<figcaption><span class="chip s-vision">Vision</span> FDS-12 (daily rhythm) and FDS-2 (proactive help). Today she has the calendar, reminders and your day boundaries; she does not yet speak first.</figcaption>
+</figure>
+
+<!-- ============================================================ SPEAK -->
+<h2 id="speak"><span class="k">4 · How she speaks</span>Dials, not a fixed voice, and silence is an answer</h2>
+<p>Some people want a talker; some want a nod. Personality presets set the starting point and the dials tune it. Under every setting the same charter holds: useful and warm, never a companion, no emotional attachment.</p>
+<div class="grid g2">
+<figure style="margin:0">
+<svg viewBox="0 0 440 300" role="img" aria-label="Four dials: initiative, channel, length, silence">
+  <g>
+    <text x="20" y="34" class="t-s t-b">Initiative</text>
+    <line x1="20" y1="52" x2="420" y2="52" class="ln" style="stroke-width:6;stroke-linecap:round"/>
+    <circle cx="150" cy="52" r="10" fill="#4fc3c9"/>
+    <text x="20" y="74" class="t-xs t-m">waits to be spoken to</text><text x="420" y="74" text-anchor="end" class="t-xs t-m">speaks first</text>
+  </g>
+  <g>
+    <text x="20" y="108" class="t-s t-b">Channel</text>
+    <rect x="20" y="118" width="128" height="30" rx="15" class="box b-acc"/><text x="84" y="138" text-anchor="middle" class="t-s">speech</text>
+    <rect x="156" y="118" width="128" height="30" rx="15" class="box"/><text x="220" y="138" text-anchor="middle" class="t-s t-m">text</text>
+    <rect x="292" y="118" width="128" height="30" rx="15" class="box"/><text x="356" y="138" text-anchor="middle" class="t-s t-m">confirm only</text>
+  </g>
+  <g>
+    <text x="20" y="182" class="t-s t-b">Length and observations</text>
+    <line x1="20" y1="200" x2="420" y2="200" class="ln" style="stroke-width:6;stroke-linecap:round"/>
+    <circle cx="300" cy="200" r="10" fill="#a78bfa"/>
+    <text x="20" y="222" class="t-xs t-m">one line, no asides</text><text x="420" y="222" text-anchor="end" class="t-xs t-m">explains, shares thoughts</text>
+  </g>
+  <g>
+    <text x="20" y="258" class="t-s t-b">May reply with silence</text>
+    <rect x="300" y="242" width="56" height="26" rx="13" fill="rgba(16,185,129,.25)" stroke="#10b981"/>
+    <circle cx="342" cy="255" r="9" fill="#10b981"/>
+    <text x="370" y="260" class="t-xs t-grn">on</text>
+  </g>
+</svg>
+<figcaption><span class="chip s-next">Presets: next run</span> <span class="chip s-vision">Channel and silence: FDS-13</span></figcaption>
+</figure>
+<div class="card">
+  <h4>The same words, three settings</h4>
+  <p class="muted" style="font-size:.88rem">You say: <strong style="color:var(--text)">"Heading out with the kids."</strong></p>
+  <ul>
+    <li><span>Chatty, speaks first</span><span class="muted" style="text-align:right">"Have fun. It's 18° and dry; dinner is at five, I'll call you in at half past three."</span></li>
+    <li><span>Brief</span><span class="muted" style="text-align:right">"Noted. Reminder at 3:30."</span></li>
+    <li><span>Quiet</span><span class="muted" style="text-align:right">No words. The reminder is set; a tick appears on your phone.</span></li>
+  </ul>
+  <p class="muted" style="font-size:.84rem;margin-top:12px">A silent reply is still logged, so it is never a blind spot: you can always ask "did you get that?"</p>
+</div>
+</div>
+
+<!-- ============================================================ CODE -->
+<h2 id="code"><span class="k">5 · How the code works</span>One request, start to finish</h2>
+<p>Everything on the left runs on your computer. The cloud is optional, and a cloud model sees only the trimmed context for one answer. Tool results marked local never go back to a model at all.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 420" role="img" aria-label="Request pipeline: voice or text, speech to text, router, context window manager, model, tools, narrative, voice out; encrypted stores below">
+  <rect x="10" y="10" width="640" height="400" rx="14" fill="none" stroke="#10b981" stroke-dasharray="6 6"/>
+  <text x="26" y="34" class="t-xs t-b t-grn">YOUR COMPUTER</text>
+  <rect x="665" y="10" width="225" height="250" rx="14" fill="none" stroke="#f59e0b" stroke-dasharray="6 6"/>
+  <text x="681" y="34" class="t-xs t-b t-amb">THE INTERNET (OPTIONAL)</text>
+  <!-- row 1 -->
+  <rect x="30" y="56" width="110" height="56" rx="9" class="box b-gry"/><text x="85" y="80" text-anchor="middle" class="t-s t-b">You speak</text><text x="85" y="97" text-anchor="middle" class="t-xs t-m">or type</text>
+  <rect x="165" y="56" width="110" height="56" rx="9" class="box b-grn"/><text x="220" y="80" text-anchor="middle" class="t-s t-b">Speech to text</text><text x="220" y="97" text-anchor="middle" class="t-xs t-m">§10, on device</text>
+  <rect x="300" y="56" width="140" height="56" rx="9" class="box b-blu"/><text x="370" y="80" text-anchor="middle" class="t-s t-b">Router</text><text x="370" y="97" text-anchor="middle" class="t-xs t-m">§13 quick or slow lane</text>
+  <rect x="465" y="56" width="165" height="56" rx="9" class="box b-blu"/><text x="547" y="80" text-anchor="middle" class="t-s t-b">Context manager</text><text x="547" y="97" text-anchor="middle" class="t-xs t-m">§14 only what is needed</text>
+  <path class="ln" d="M140 84 H 163" marker-end="url(#ar)"/><path class="ln" d="M275 84 H 298" marker-end="url(#ar)"/><path class="ln" d="M440 84 H 463" marker-end="url(#ar)"/>
+  <!-- model -->
+  <rect x="465" y="150" width="165" height="56" rx="9" class="box b-blu"/><text x="547" y="174" text-anchor="middle" class="t-s t-b">Local model</text><text x="547" y="191" text-anchor="middle" class="t-xs t-m">§12 when you choose it</text>
+  <rect x="690" y="56" width="180" height="56" rx="9" class="box b-amb"/><text x="780" y="80" text-anchor="middle" class="t-s t-b">Cloud model</text><text x="780" y="97" text-anchor="middle" class="t-xs t-m">personal details masked</text>
+  <path class="ln ln-amb" d="M630 84 H 688" marker-end="url(#ar)"/>
+  <path class="ln" d="M547 112 V 148" marker-end="url(#ar)"/>
+  <rect x="690" y="150" width="180" height="56" rx="9" class="box b-amb"/><text x="780" y="174" text-anchor="middle" class="t-s t-b">Outside services</text><text x="780" y="191" text-anchor="middle" class="t-xs t-m">weather, your SearXNG</text>
+  <!-- tools row -->
+  <rect x="300" y="150" width="140" height="56" rx="9" class="box b-org"/><text x="370" y="174" text-anchor="middle" class="t-s t-b">Tools</text><text x="370" y="191" text-anchor="middle" class="t-xs t-m">§15 the model picks</text>
+  <path class="ln" d="M465 178 H 442" marker-end="url(#ar)"/>
+  <path class="ln ln-amb dash" d="M440 165 C 560 130, 640 150, 688 172" />
+  <rect x="165" y="150" width="110" height="56" rx="9" class="box b-pnk"/><text x="220" y="174" text-anchor="middle" class="t-s t-b">Narrative</text><text x="220" y="191" text-anchor="middle" class="t-xs t-m">§24 results to words</text>
+  <path class="ln" d="M300 178 H 277" marker-end="url(#ar)"/>
+  <rect x="30" y="150" width="110" height="56" rx="9" class="box b-grn"/><text x="85" y="174" text-anchor="middle" class="t-s t-b">Voice and orb</text><text x="85" y="191" text-anchor="middle" class="t-xs t-m">§11 §27 · chat §22</text>
+  <path class="ln" d="M165 178 H 142" marker-end="url(#ar)"/>
+  <text x="300" y="228" class="t-xs t-red">local-only tool results never return to a model</text>
+  <!-- stores -->
+  <text x="30" y="268" class="t-xs t-b t-m">ENCRYPTED STORES (§03 SQLCipher)</text>
+  <rect x="30" y="280" width="110" height="46" rx="8" class="box b-acc"/><text x="85" y="308" text-anchor="middle" class="t-s">Memory §18</text>
+  <rect x="150" y="280" width="110" height="46" rx="8" class="box b-acc"/><text x="205" y="308" text-anchor="middle" class="t-s">Calendar §21</text>
+  <rect x="270" y="280" width="110" height="46" rx="8" class="box b-acc"/><text x="325" y="308" text-anchor="middle" class="t-s">People §20</text>
+  <rect x="390" y="280" width="110" height="46" rx="8" class="box b-acc"/><text x="445" y="308" text-anchor="middle" class="t-s">Telemetry §16</text>
+  <rect x="510" y="280" width="120" height="46" rx="8" class="box b-acc"/><text x="570" y="308" text-anchor="middle" class="t-s">Your vault §29</text>
+  <path class="ln dash" d="M370 206 V 278"/>
+  <rect x="30" y="344" width="600" height="50" rx="8" class="box b-gry"/>
+  <text x="46" y="366" class="t-s t-b">Background layers §17</text>
+  <text x="46" y="384" class="t-xs t-m">summaries of your data, prepared ahead, so a conversation reads a short page instead of the raw records</text>
+  <text x="681" y="290" class="t-xs t-m">Keys stay in your system keychain (§02).</text>
+  <text x="681" y="308" class="t-xs t-m">Every action is written to the</text>
+  <text x="681" y="324" class="t-xs t-m">telemetry ledger, so nothing she</text>
+  <text x="681" y="340" class="t-xs t-m">does is invisible.</text>
+</svg>
+</div>
+<figcaption><span class="chip s-built">Built</span> The section numbers link to the frozen design: <a href="../law/index.html">the 29 sections by layer</a>.</figcaption>
+</figure>
+
+<h3>The nine layers of the design</h3>
+<p>The 29 sections stack like a building: the foundation at the bottom, what you see at the top.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 330" role="img" aria-label="Stack of nine design layers">
+  <g class="t-s">
+  <rect x="140" y="10"  width="620" height="30" rx="6" class="box b-amb"/><text x="160" y="30" class="t-b">Frontend: what you see</text><text x="740" y="30" text-anchor="end" class="t-m t-xs">§26 shell · §27 orb · §28 screens</text>
+  <rect x="120" y="45"  width="660" height="30" rx="6" class="box b-pnk"/><text x="140" y="65" class="t-b">Personality: who she is</text><text x="760" y="65" text-anchor="end" class="t-m t-xs">§23 personality · §24 narrative · §25 onboarding</text>
+  <rect x="100" y="80"  width="700" height="30" rx="6" class="box b-org"/><text x="120" y="100" class="t-b">Apps: the things you use</text><text x="780" y="100" text-anchor="end" class="t-m t-xs">§20 people · §21 calendar · §22 chat</text>
+  <rect x="80"  y="115" width="740" height="30" rx="6" class="box b-acc"/><text x="100" y="135" class="t-b">Data: what she knows</text><text x="800" y="135" text-anchor="end" class="t-m t-xs">§16 telemetry · §17 layers · §18 memory · §19 sync · §29 vault</text>
+  <rect x="60"  y="150" width="780" height="30" rx="6" class="box b-blu"/><text x="80" y="170" class="t-b">Intelligence: deciding and thinking</text><text x="820" y="170" text-anchor="end" class="t-m t-xs">§12 models · §13 router · §14 context · §15 tools</text>
+  <rect x="40"  y="185" width="820" height="30" rx="6" class="box b-grn"/><text x="60" y="205" class="t-b">Voice: hearing and speaking</text><text x="840" y="205" text-anchor="end" class="t-m t-xs">§09 audio · §10 speech to text · §11 text to speech</text>
+  <rect x="20"  y="220" width="860" height="30" rx="6" class="box b-gry"/><text x="40" y="240" class="t-b">Infrastructure: running reliably</text><text x="860" y="240" text-anchor="end" class="t-m t-xs">§05 hardware · §06 lifecycle · §07 CI · §08 testing</text>
+  <rect x="0"   y="255" width="900" height="34" rx="6" class="box b-pur"/><text x="20" y="277" class="t-b">Foundation: built and kept safe</text><text x="880" y="277" text-anchor="end" class="t-m t-xs">§01 structure · §02 credentials · §03 encryption · §04 cross-platform</text>
+  </g>
+  <text x="450" y="318" text-anchor="middle" class="t-m t-xs">§29 (owning your data) was added as an amendment and sits with the data layer.</text>
+</svg>
+</div>
+</figure>
+
+<!-- ============================================================ DESIGN -->
+<h2 id="design"><span class="k">6 · How the design works</span>Nothing is built that is not written first</h2>
+<p>The design was frozen in June 2026 and is the law. A gap found while using her becomes a design session; the decision becomes an amendment; the amendment becomes tasks; agents build them; the manager checks them; and every session ends with a journal entry and a fresh handoff. Ideas that are not ready wait in the parking list.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 300" role="img" aria-label="The design loop: law, design session, amendment, sprint, agents, review, journal and handoff">
+  <g>
+  <rect x="20"  y="40" width="130" height="60" rx="10" class="box b-blu"/><text x="85" y="66" text-anchor="middle" class="t-s t-b">The law</text><text x="85" y="84" text-anchor="middle" class="t-xs t-m">29 frozen sections</text>
+  <rect x="190" y="40" width="130" height="60" rx="10" class="box b-amb"/><text x="255" y="66" text-anchor="middle" class="t-s t-b">Design session</text><text x="255" y="84" text-anchor="middle" class="t-xs t-m">DS-1 … DS-8</text>
+  <rect x="360" y="40" width="130" height="60" rx="10" class="box b-pur"/><text x="425" y="66" text-anchor="middle" class="t-s t-b">Amendment</text><text x="425" y="84" text-anchor="middle" class="t-xs t-m">A-1 … A-8, on the site</text>
+  <rect x="530" y="40" width="130" height="60" rx="10" class="box b-grn"/><text x="595" y="66" text-anchor="middle" class="t-s t-b">Sprint plan</text><text x="595" y="84" text-anchor="middle" class="t-xs t-m">P01: 31 tasks</text>
+  <rect x="700" y="40" width="180" height="60" rx="10" class="box b-acc"/><text x="790" y="66" text-anchor="middle" class="t-s t-b">Agents build</text><text x="790" y="84" text-anchor="middle" class="t-xs t-m">code agent · docs agent</text>
+  <rect x="700" y="170" width="180" height="60" rx="10" class="box b-acc"/><text x="790" y="196" text-anchor="middle" class="t-s t-b">Manager reviews</text><text x="790" y="214" text-anchor="middle" class="t-xs t-m">reads the diff, runs the gates</text>
+  <rect x="440" y="170" width="200" height="60" rx="10" class="box b-gry"/><text x="540" y="196" text-anchor="middle" class="t-s t-b">Journal + handoff</text><text x="540" y="214" text-anchor="middle" class="t-xs t-m">history kept, present rewritten</text>
+  <rect x="190" y="170" width="190" height="60" rx="10" class="box b-gry"/><text x="285" y="196" text-anchor="middle" class="t-s t-b">You use her</text><text x="285" y="214" text-anchor="middle" class="t-xs t-m">gaps found by dogfooding</text>
+  </g>
+  <path class="ln" d="M150 70 H 188" marker-end="url(#ar)"/><path class="ln" d="M320 70 H 358" marker-end="url(#ar)"/><path class="ln" d="M490 70 H 528" marker-end="url(#ar)"/><path class="ln" d="M660 70 H 698" marker-end="url(#ar)"/>
+  <path class="ln" d="M790 100 V 168" marker-end="url(#ar)"/><path class="ln" d="M700 200 H 642" marker-end="url(#ar)"/><path class="ln" d="M440 200 H 382" marker-end="url(#ar)"/>
+  <path class="ln" d="M255 170 V 102" marker-end="url(#ar)"/>
+  <rect x="20" y="170" width="130" height="60" rx="10" class="box b-pur" stroke-dasharray="5 4"/><text x="85" y="196" text-anchor="middle" class="t-s t-b">Parking list</text><text x="85" y="214" text-anchor="middle" class="t-xs t-m">FDS-1 … FDS-13</text>
+  <path class="ln ln-pur dash" d="M190 200 H 152" marker-end="url(#arP)"/>
+  <text x="450" y="275" text-anchor="middle" class="t-xs t-m">The autopilot runs this loop unattended, session after session, each one capped at a small context window.</text>
+</svg>
+</div>
+<figcaption>Links: <a href="../amendments.html">amendment ledger</a> · <a href="../build/index.html">build and progress</a> · <a href="../sprints/FUTURE_DESIGN_SESSIONS.md">the parking list</a>.</figcaption>
+</figure>
+
+<!-- ============================================================ NEXUS -->
+<h2 id="nexus"><span class="k">7 · The Nexus</span>Where Lilith goes to specialise</h2>
+<p>The Nexus is not a smart-home hub and not a bundle of connected gadgets. It is how Lilith specialises, and how that specialisation stays where it belongs. It is a structure of teams shaped like a business, where serious work lives: programming, writing, the podcast, game story design, scripts, novels.</p>
+<div class="quote"><p>"It's a massive mech suit she can travel all over and know anything she requests from it, but each active cell is running autonomously when it does run. She is never going to be the agent that straps into the harness."</p><div class="who">The developer, 3 November 2026</div></div>
+
+<h3>The tree: a business, with a harness in every cell</h3>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 400" role="img" aria-label="The Nexus tree: Lilith beside a MASTER nexus, divisions, and cells with harnesses">
+  <circle cx="90" cy="70" r="52" class="box b-acc"/>
+  <text x="90" y="66" text-anchor="middle" class="t-b t-acc" style="font-size:17px">Lilith</text>
+  <text x="90" y="86" text-anchor="middle" class="t-xs t-m">travels the tree</text>
+  <rect x="330" y="40" width="240" height="62" rx="10" class="box b-pur"/>
+  <text x="450" y="66" text-anchor="middle" class="t-b">MASTER nexus</text>
+  <text x="450" y="86" text-anchor="middle" class="t-xs t-m">manager: overview, schedule, budgets</text>
+  <path class="ln ln-acc dash" d="M142 70 H 328" marker-end="url(#arA)"/>
+  <text x="235" y="62" text-anchor="middle" class="t-xs t-acc">talks with the manager</text>
+  <!-- divisions -->
+  <g>
+  <path class="ln ln-pur" d="M450 102 L 140 160"/><path class="ln ln-pur" d="M450 102 L 360 160"/><path class="ln ln-pur" d="M450 102 L 580 160"/><path class="ln ln-pur" d="M450 102 L 790 160"/>
+  <rect x="60"  y="160" width="170" height="54" rx="9" class="box b-blu"/><text x="145" y="183" text-anchor="middle" class="t-s t-b">Programming</text><text x="145" y="200" text-anchor="middle" class="t-xs t-m">engineering lead</text>
+  <rect x="280" y="160" width="170" height="54" rx="9" class="box b-pnk"/><text x="365" y="183" text-anchor="middle" class="t-s t-b">Writing</text><text x="365" y="200" text-anchor="middle" class="t-xs t-m">editor / publisher</text>
+  <rect x="500" y="160" width="170" height="54" rx="9" class="box b-org"/><text x="585" y="183" text-anchor="middle" class="t-s t-b">Podcast</text><text x="585" y="200" text-anchor="middle" class="t-xs t-m">producer</text>
+  <rect x="720" y="160" width="160" height="54" rx="9" class="box b-amb"/><text x="800" y="183" text-anchor="middle" class="t-s t-b">Game story</text><text x="800" y="200" text-anchor="middle" class="t-xs t-m">narrative director</text>
+  </g>
+  <!-- cells -->
+  <g class="t-xs">
+  <path class="ln" d="M110 214 V 260"/><path class="ln" d="M180 214 V 260"/>
+  <rect x="62" y="260" width="80" height="62" rx="8" class="box b-grn"/><text x="102" y="284" text-anchor="middle" class="t-b">Lilith</text><text x="102" y="300" text-anchor="middle" class="t-m">harness ✓</text>
+  <rect x="150" y="260" width="80" height="62" rx="8" class="box b-grn"/><text x="190" y="284" text-anchor="middle" class="t-b">an addon</text><text x="190" y="300" text-anchor="middle" class="t-m">harness ✓</text>
+  <path class="ln" d="M330 214 V 260"/><path class="ln" d="M400 214 V 260"/>
+  <rect x="282" y="260" width="80" height="62" rx="8" class="box b-grn"/><text x="322" y="284" text-anchor="middle" class="t-b">a novel</text><text x="322" y="300" text-anchor="middle" class="t-m">harness ✓</text>
+  <rect x="370" y="260" width="80" height="62" rx="8" class="box b-gry"/><text x="410" y="284" text-anchor="middle" class="t-b">a script</text><text x="410" y="300" text-anchor="middle" class="t-m">idle</text>
+  <path class="ln" d="M550 214 V 260"/><path class="ln" d="M620 214 V 260"/>
+  <rect x="502" y="260" width="80" height="62" rx="8" class="box b-grn"/><text x="542" y="284" text-anchor="middle" class="t-b">episodes</text><text x="542" y="300" text-anchor="middle" class="t-m">harness ✓</text>
+  <rect x="590" y="260" width="80" height="62" rx="8" class="box b-gry"/><text x="630" y="284" text-anchor="middle" class="t-b">news digest</text><text x="630" y="300" text-anchor="middle" class="t-m">idle</text>
+  <path class="ln" d="M800 214 V 260"/>
+  <rect x="740" y="260" width="120" height="62" rx="8" class="box b-gry"/><text x="800" y="284" text-anchor="middle" class="t-b">world bible</text><text x="800" y="300" text-anchor="middle" class="t-m">sub-cells inside</text>
+  </g>
+  <text x="20" y="360" class="t-xs t-m">Each cell holds its standards, its full history and "where we left off", so any agent, even a brand-new one with no context, can step in and start its job.</text>
+  <text x="20" y="380" class="t-xs t-m">Not everything runs at once and nothing must be used. Grey cells are idle until there is a reason and a budget.</text>
+</svg>
+</div>
+<figcaption><span class="chip s-vision">Vision</span> FDS-11 on the Lilith side; the Nexus itself is its own project (<a href="https://github.com/Squirrelthug/zsz_nexus">zsz_nexus</a>), in research.</figcaption>
+</figure>
+
+<h3>Lilith visits; agents strap in</h3>
+<div class="grid g2">
+  <div class="card" style="border-color:rgba(79,195,201,.4)"><h4 style="color:var(--accent)">Lilith</h4><ul>
+    <li>Moves anywhere in the tree and asks it anything</li>
+    <li>Holds design conversations with you about a cell</li>
+    <li>Hands an agreed design to the ready harness, if it meets the cell's schema</li>
+    <li>Carries only the facts back out: "we spent time on x, y and z"</li>
+    <li>Never does the cell's work herself</li>
+  </ul></div>
+  <div class="card" style="border-color:rgba(167,139,250,.4)"><h4 style="color:var(--purple)">Agents in a cell</h4><ul>
+    <li>Strap into the harness and do one job</li>
+    <li>Run on their own when the cell runs</li>
+    <li>Work inside a small window (our autopilot sessions stop near 80k tokens)</li>
+    <li>Write a full report when they finish</li>
+    <li>Can be swapped: the harness, not the agent, holds the context</li>
+  </ul></div>
+</div>
+
+<h3>Changing modes is moving down the tree</h3>
+<p>"Time to code" takes Lilith down a level or two into programming. "Let's check on the podcast" takes her across. She arrives as a specialist because the cell's context is loaded, not because she memorised it. When you leave, the detail stays in the cell.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 200" role="img" aria-label="Lilith's context while moving between levels">
+  <g class="t-s">
+  <rect x="20" y="30" width="250" height="140" rx="10" class="box b-acc"/>
+  <text x="36" y="54" class="t-b t-acc">At the top: everyday Lilith</text>
+  <rect x="36" y="68" width="218" height="16" rx="3" fill="rgba(79,195,201,.35)"/><text x="40" y="80" class="t-xs">your day, people, reminders</text>
+  <rect x="36" y="90" width="100" height="16" rx="3" fill="rgba(167,139,250,.35)"/><text x="40" y="102" class="t-xs">Nexus overview</text>
+  <text x="36" y="150" class="t-xs t-m">small, broad, no specifics</text>
+  <path class="ln" d="M272 100 H 318" marker-end="url(#ar)"/><text x="295" y="90" text-anchor="middle" class="t-xs t-m">"let's code"</text>
+  <rect x="320" y="30" width="250" height="140" rx="10" class="box b-blu"/>
+  <text x="336" y="54" class="t-b t-blu">In the programming cell</text>
+  <rect x="336" y="68" width="60" height="16" rx="3" fill="rgba(79,195,201,.35)"/><text x="340" y="80" class="t-xs">day</text>
+  <rect x="336" y="90" width="218" height="16" rx="3" fill="rgba(96,165,250,.4)"/><text x="340" y="102" class="t-xs">cell report, standards, open work</text>
+  <rect x="336" y="112" width="150" height="16" rx="3" fill="rgba(96,165,250,.25)"/><text x="340" y="124" class="t-xs">the design you are discussing</text>
+  <text x="336" y="150" class="t-xs t-m">deep, narrow, a specialist</text>
+  <path class="ln" d="M572 100 H 618" marker-end="url(#ar)"/><text x="595" y="90" text-anchor="middle" class="t-xs t-m">you leave</text>
+  <rect x="620" y="30" width="260" height="140" rx="10" class="box b-acc"/>
+  <text x="636" y="54" class="t-b t-acc">Back outside</text>
+  <rect x="636" y="68" width="228" height="16" rx="3" fill="rgba(79,195,201,.35)"/><text x="640" y="80" class="t-xs">your day, people, reminders</text>
+  <rect x="636" y="90" width="170" height="16" rx="3" fill="rgba(167,139,250,.35)"/><text x="640" y="102" class="t-xs">"we worked on the launcher"</text>
+  <text x="636" y="150" class="t-xs t-m">the detail stays in the cell</text>
+  </g>
+</svg>
+</div>
+</figure>
+
+<h3>Reports roll up; you can always zoom in</h3>
+<p>The lowest agents write full reports. Each layer above reads <em>all</em> the full reports of the layer below and writes its own. Nobody summarises a summary, so mistakes do not compound on the way up. Lilith or the MASTER nexus can step into any cell and read its full, verbose report instead of the short version at the top.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 330" role="img" aria-label="Report roll-up from cells to divisions to master, with a direct zoom path">
+  <g class="t-s">
+  <text x="20" y="40" class="t-xs t-b t-m">LEVEL</text>
+  <text x="20" y="80" class="t-m t-xs">MASTER</text><text x="20" y="170" class="t-m t-xs">DIVISION</text><text x="20" y="260" class="t-m t-xs">CELL</text>
+  <rect x="320" y="56" width="260" height="44" rx="8" class="box b-pur"/><text x="450" y="76" text-anchor="middle" class="t-b">Master report</text><text x="450" y="92" text-anchor="middle" class="t-xs t-m">one line per division</text>
+  <rect x="140" y="146" width="250" height="44" rx="8" class="box b-blu"/><text x="265" y="166" text-anchor="middle" class="t-b">Programming report</text><text x="265" y="182" text-anchor="middle" class="t-xs t-m">reads every cell report in full</text>
+  <rect x="510" y="146" width="250" height="44" rx="8" class="box b-pnk"/><text x="635" y="166" text-anchor="middle" class="t-b">Writing report</text><text x="635" y="182" text-anchor="middle" class="t-xs t-m">reads every cell report in full</text>
+  <g class="t-xs">
+  <rect x="120" y="236" width="90" height="56" rx="6" class="box b-grn"/><text x="165" y="258" text-anchor="middle" class="t-b">cell A</text><text x="165" y="276" text-anchor="middle" class="t-m">full report</text>
+  <rect x="220" y="236" width="90" height="56" rx="6" class="box b-grn"/><text x="265" y="258" text-anchor="middle" class="t-b">cell B</text><text x="265" y="276" text-anchor="middle" class="t-m">full report</text>
+  <rect x="320" y="236" width="90" height="56" rx="6" class="box b-grn"/><text x="365" y="258" text-anchor="middle" class="t-b">cell C</text><text x="365" y="276" text-anchor="middle" class="t-m">full report</text>
+  <rect x="540" y="236" width="90" height="56" rx="6" class="box b-grn"/><text x="585" y="258" text-anchor="middle" class="t-b">cell D</text><text x="585" y="276" text-anchor="middle" class="t-m">full report</text>
+  <rect x="640" y="236" width="90" height="56" rx="6" class="box b-grn"/><text x="685" y="258" text-anchor="middle" class="t-b">cell E</text><text x="685" y="276" text-anchor="middle" class="t-m">full report</text>
+  </g>
+  </g>
+  <path class="ln" d="M165 236 L 230 192" marker-end="url(#ar)"/><path class="ln" d="M265 236 V 192" marker-end="url(#ar)"/><path class="ln" d="M365 236 L 300 192" marker-end="url(#ar)"/>
+  <path class="ln" d="M585 236 L 620 192" marker-end="url(#ar)"/><path class="ln" d="M685 236 L 650 192" marker-end="url(#ar)"/>
+  <path class="ln" d="M265 146 L 400 102" marker-end="url(#ar)"/><path class="ln" d="M635 146 L 500 102" marker-end="url(#ar)"/>
+  <!-- zoom -->
+  <circle cx="830" cy="78" r="30" class="box b-acc"/><text x="830" y="83" text-anchor="middle" class="t-s t-b t-acc">Lilith</text>
+  <path class="ln ln-acc dash" d="M810 100 C 790 190, 760 230, 732 252" marker-end="url(#arA)"/>
+  <text x="800" y="200" class="t-xs t-acc">steps straight in to read</text>
+  <text x="800" y="214" class="t-xs t-acc">cell E's full report</text>
+  <path class="ln ln-acc" d="M800 78 H 582" marker-end="url(#arA)"/>
+  <text x="700" y="70" text-anchor="middle" class="t-xs t-acc">reads the top line</text>
+  <text x="450" y="318" text-anchor="middle" class="t-xs t-m">Some text is read more than once on purpose. The navigation conventions keep that cheap, and every layer keeps its own history.</text>
+</svg>
+</div>
+</figure>
+
+<h3>A tree for command, a graph for connections</h3>
+<p>The tree is who reports to whom. Things also connect across it: a podcast episode cites research from a writing cell; a game's lore and a novel share a world. A relational database across the whole Nexus keeps those links, with provenance on every record, so the MASTER nexus and Lilith can ask "what else touches this?"</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 260" role="img" aria-label="Tree links and cross links between cells">
+  <rect x="380" y="20" width="140" height="40" rx="8" class="box b-pur"/><text x="450" y="45" text-anchor="middle" class="t-s t-b">MASTER</text>
+  <g class="t-s">
+  <rect x="80" y="100" width="150" height="40" rx="8" class="box b-blu"/><text x="155" y="125" text-anchor="middle">Programming</text>
+  <rect x="375" y="100" width="150" height="40" rx="8" class="box b-pnk"/><text x="450" y="125" text-anchor="middle">Writing</text>
+  <rect x="670" y="100" width="150" height="40" rx="8" class="box b-org"/><text x="745" y="125" text-anchor="middle">Podcast</text>
+  </g>
+  <path class="ln" d="M450 60 L 155 100"/><path class="ln" d="M450 60 V 100"/><path class="ln" d="M450 60 L 745 100"/>
+  <g class="t-xs">
+  <rect x="60" y="190" width="100" height="40" rx="7" class="box b-grn"/><text x="110" y="214" text-anchor="middle">game build</text>
+  <rect x="170" y="190" width="100" height="40" rx="7" class="box b-grn"/><text x="220" y="214" text-anchor="middle">site</text>
+  <rect x="355" y="190" width="100" height="40" rx="7" class="box b-grn"/><text x="405" y="214" text-anchor="middle">novel</text>
+  <rect x="465" y="190" width="100" height="40" rx="7" class="box b-grn"/><text x="515" y="214" text-anchor="middle">world bible</text>
+  <rect x="650" y="190" width="100" height="40" rx="7" class="box b-grn"/><text x="700" y="214" text-anchor="middle">episode 033</text>
+  <rect x="760" y="190" width="100" height="40" rx="7" class="box b-grn"/><text x="810" y="214" text-anchor="middle">articles</text>
+  </g>
+  <path class="ln" d="M155 140 L 110 190"/><path class="ln" d="M155 140 L 220 190"/><path class="ln" d="M450 140 L 405 190"/><path class="ln" d="M450 140 L 515 190"/><path class="ln" d="M745 140 L 700 190"/><path class="ln" d="M745 140 L 810 190"/>
+  <path class="ln ln-amb dash" d="M110 230 C 200 270, 420 270, 515 230"/>
+  <path class="ln ln-amb dash" d="M455 210 H 465"/>
+  <path class="ln ln-amb dash" d="M700 230 C 640 262, 560 262, 515 232"/>
+  <path class="ln ln-amb dash" d="M220 190 C 300 160, 700 160, 810 190"/>
+  <text x="20" y="252" class="t-xs t-amb">dashed: relational links (shared lore, citations, reused assets)</text>
+</svg>
+</div>
+</figure>
+
+<h3>Work waits for budget, then runs</h3>
+<p>Costs limit how much runs. The MASTER nexus manager and Lilith line up the next jobs and start them as allowances open: a plan window resets, a quota returns, an account is topped up. This already happened for real: on the night of 2 November the autopilot ran out of every code allowance, waited, and picked the work back up the next morning.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 250" role="img" aria-label="Swimlanes of allowances with queued tasks placed into open windows">
+  <g class="t-xs t-m"><text x="20" y="60">Code agent A</text><text x="20" y="110">Plan agent</text><text x="20" y="160">Cloud credit</text></g>
+  <line x1="130" y1="200" x2="880" y2="200" class="ln"/>
+  <g class="t-xs t-m"><text x="130" y="218">21:00</text><text x="310" y="218">23:00</text><text x="490" y="218">03:00</text><text x="670" y="218">07:00</text><text x="840" y="218">10:00</text></g>
+  <!-- lanes -->
+  <rect x="130" y="44" width="150" height="26" rx="5" class="box b-grn"/><text x="205" y="61" text-anchor="middle" class="t-xs">P01-01 … 05</text>
+  <rect x="280" y="44" width="370" height="26" rx="5" class="hatch"/><text x="465" y="61" text-anchor="middle" class="t-xs t-amb">out of quota: queue waits, nothing is lost</text>
+  <rect x="650" y="44" width="230" height="26" rx="5" class="box b-grn"/><text x="765" y="61" text-anchor="middle" class="t-xs">P01-07, 09, 08 …</text>
+  <rect x="130" y="94" width="560" height="26" rx="5" class="hatch"/><text x="410" y="111" text-anchor="middle" class="t-xs t-amb">monthly limit (reset with the new month)</text>
+  <rect x="690" y="94" width="190" height="26" rx="5" class="box b-blu"/><text x="785" y="111" text-anchor="middle" class="t-xs">available, used as overflow</text>
+  <rect x="130" y="144" width="750" height="26" rx="5" class="box b-gry"/><text x="505" y="161" text-anchor="middle" class="t-xs t-m">spent</text>
+  <path class="ln ln-acc" d="M650 30 V 190"/><text x="656" y="28" class="t-xs t-acc">quota back: work resumes</text>
+</svg>
+</div>
+<figcaption>Today this scheduling is done by the developer's autopilot tooling; in the Nexus it becomes the MASTER manager's job (FDS-11, with the cost ledger FDS-4).</figcaption>
+</figure>
+
+<h3>From a conversation to a finished thing</h3>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 190" role="img" aria-label="Design conversation, agreed design, schema gate, harness, artifacts, your knowledge">
+  <g class="t-s">
+  <rect x="10" y="50" width="130" height="64" rx="10" class="box b-acc"/><text x="75" y="76" text-anchor="middle" class="t-b">Talk it over</text><text x="75" y="94" text-anchor="middle" class="t-xs t-m">you and Lilith</text>
+  <rect x="160" y="50" width="130" height="64" rx="10" class="box b-acc"/><text x="225" y="76" text-anchor="middle" class="t-b">"Build that"</text><text x="225" y="94" text-anchor="middle" class="t-xs t-m">the agreed design</text>
+  <polygon points="365,40 425,82 365,124 305,82" class="box b-amb"/><text x="365" y="78" text-anchor="middle" class="t-xs t-b">meets the</text><text x="365" y="92" text-anchor="middle" class="t-xs t-b">schema?</text>
+  <rect x="445" y="50" width="130" height="64" rx="10" class="box b-pur"/><text x="510" y="76" text-anchor="middle" class="t-b">Cell harness</text><text x="510" y="94" text-anchor="middle" class="t-xs t-m">agents run it</text>
+  <rect x="595" y="50" width="130" height="64" rx="10" class="box b-grn"/><text x="660" y="76" text-anchor="middle" class="t-b">Artifacts</text><text x="660" y="94" text-anchor="middle" class="t-xs t-m">code, chapters, audio</text>
+  <rect x="745" y="50" width="145" height="64" rx="10" class="box b-acc"/><text x="817" y="76" text-anchor="middle" class="t-b">Your knowledge</text><text x="817" y="94" text-anchor="middle" class="t-xs t-m">catalogued, with source</text>
+  </g>
+  <path class="ln" d="M140 82 H 158" marker-end="url(#ar)"/><path class="ln" d="M290 82 H 303" marker-end="url(#ar)"/><path class="ln ln-grn" d="M425 82 H 443" marker-end="url(#ar)"/><path class="ln" d="M575 82 H 593" marker-end="url(#ar)"/><path class="ln" d="M725 82 H 743" marker-end="url(#ar)"/>
+  <path class="ln ln-red dash" d="M365 124 V 160 H 75 V 116" marker-end="url(#ar)"/><text x="220" y="152" text-anchor="middle" class="t-xs t-red">not yet: back to the conversation</text>
+  <path class="ln ln-acc dash" d="M817 50 C 817 10, 75 10, 75 48" marker-end="url(#arA)"/><text x="450" y="22" text-anchor="middle" class="t-xs t-acc">later: "play me that episode", "what did we decide about act two?"</text>
+</svg>
+</div>
+</figure>
+
+<h3>Creative cells have gates, and the choices stay yours</h3>
+<p>Creative cells are built on the teaching literature of their craft. When a novel turns out to be missing an act, the cell says so, offers advice and does research for you, but what fills it is yours to decide. You can tell Lilith to generate it anyway; the cell records that this was your call, because a gap filled by an agent is rarely good, and a hesitant person is still a better author than a confident machine.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 210" role="img" aria-label="Novel pipeline with gates; a missing act triggers advice and research, the author fills it">
+  <g class="t-s">
+  <rect x="10" y="40" width="120" height="50" rx="9" class="box b-pnk"/><text x="70" y="70" text-anchor="middle">Premise</text>
+  <rect x="160" y="40" width="120" height="50" rx="9" class="box b-pnk"/><text x="220" y="70" text-anchor="middle">Outline</text>
+  <rect x="310" y="40" width="120" height="50" rx="9" class="box b-red" style="fill:rgba(239,68,68,.08);stroke:#ef4444"/><text x="370" y="62" text-anchor="middle" class="t-b">Act two</text><text x="370" y="79" text-anchor="middle" class="t-xs t-red">missing</text>
+  <rect x="460" y="40" width="120" height="50" rx="9" class="box b-gry"/><text x="520" y="70" text-anchor="middle" class="t-m">Draft</text>
+  <rect x="610" y="40" width="120" height="50" rx="9" class="box b-gry"/><text x="670" y="70" text-anchor="middle" class="t-m">Edit</text>
+  <rect x="760" y="40" width="120" height="50" rx="9" class="box b-gry"/><text x="820" y="70" text-anchor="middle" class="t-m">Publish</text>
+  </g>
+  <g class="t-xs t-amb"><text x="145" y="34" text-anchor="middle">gate</text><text x="295" y="34" text-anchor="middle">gate</text><text x="445" y="34" text-anchor="middle">gate</text><text x="595" y="34" text-anchor="middle">gate</text><text x="745" y="34" text-anchor="middle">gate</text></g>
+  <path class="ln" d="M130 65 H 158" marker-end="url(#ar)"/><path class="ln" d="M280 65 H 308" marker-end="url(#ar)"/><path class="ln dash" d="M430 65 H 458" marker-end="url(#ar)"/><path class="ln dash" d="M580 65 H 608" marker-end="url(#ar)"/><path class="ln dash" d="M730 65 H 758" marker-end="url(#ar)"/>
+  <path class="ln" d="M370 90 V 120"/>
+  <rect x="150" y="120" width="200" height="66" rx="9" class="box b-acc"/><text x="164" y="142" class="t-s t-b t-acc">The cell helps</text><text x="164" y="160" class="t-xs t-m">explains what the act must do,</text><text x="164" y="174" class="t-xs t-m">researches examples, asks you</text>
+  <rect x="390" y="120" width="200" height="66" rx="9" class="box b-grn"/><text x="404" y="142" class="t-s t-b t-grn">You decide</text><text x="404" y="160" class="t-xs t-m">you write or describe the act;</text><text x="404" y="174" class="t-xs t-m">agents carry it from there</text>
+  <rect x="630" y="120" width="250" height="66" rx="9" class="box b-amb"/><text x="644" y="142" class="t-s t-b t-amb">"Just generate it"</text><text x="644" y="160" class="t-xs t-m">allowed, and recorded as your call:</text><text x="644" y="174" class="t-xs t-m">the consequences are yours</text>
+  <path class="ln" d="M350 153 H 388" marker-end="url(#ar)"/><path class="ln ln-amb dash" d="M590 153 H 628" marker-end="url(#ar)"/>
+</svg>
+</div>
+</figure>
+
+<h3>Inside herself: the same pattern, smaller</h3>
+<p>Lilith runs her own life-management the same way, on a small scale. Narrow "researchers" each watch one thing (your day, her resources, how her tools are doing), file reports into a memory box, and a reviewer reads the box on a cycle. Code, not tokens, decides what goes in the box, and nothing is processed just because time passed. This is recorded as FDS-10, the Synthetic Conscious Loop, and shares its vocabulary with the Nexus.</p>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 170" role="img" aria-label="Researchers file reports to a memory box; a reviewer reads it">
+  <g class="t-xs">
+  <rect x="20" y="20" width="150" height="34" rx="7" class="box b-grn"/><text x="95" y="42" text-anchor="middle">your day</text>
+  <rect x="20" y="64" width="150" height="34" rx="7" class="box b-grn"/><text x="95" y="86" text-anchor="middle">storage and quota</text>
+  <rect x="20" y="108" width="150" height="34" rx="7" class="box b-grn"/><text x="95" y="130" text-anchor="middle">tool outcomes</text>
+  </g>
+  <path class="ln" d="M170 37 C 250 37, 270 80, 330 80" marker-end="url(#ar)"/><path class="ln" d="M170 81 H 328" marker-end="url(#ar)"/><path class="ln" d="M170 125 C 250 125, 270 82, 330 82" marker-end="url(#ar)"/>
+  <rect x="330" y="46" width="180" height="70" rx="10" class="box b-amb"/><text x="420" y="76" text-anchor="middle" class="t-s t-b">Memory box</text><text x="420" y="96" text-anchor="middle" class="t-xs t-m">filled by triggers in code</text>
+  <path class="ln" d="M510 81 H 568" marker-end="url(#ar)"/>
+  <rect x="570" y="46" width="150" height="70" rx="10" class="box b-pur"/><text x="645" y="76" text-anchor="middle" class="t-s t-b">Reviewer</text><text x="645" y="96" text-anchor="middle" class="t-xs t-m">on a review cycle</text>
+  <path class="ln" d="M720 81 H 768" marker-end="url(#ar)"/>
+  <circle cx="820" cy="81" r="44" class="box b-acc"/><text x="820" y="78" text-anchor="middle" class="t-s t-b t-acc">Lilith</text><text x="820" y="94" text-anchor="middle" class="t-xs t-m">acts, or says</text>
+</svg>
+</div>
+<figcaption><span class="chip s-vision">Vision</span> FDS-10. The user owns a cost dial: off means data is kept and processed only when needed.</figcaption>
+</figure>
+
+<!-- ============================================================ KEYBOARD -->
+<h2 id="keyboard"><span class="k">8 · Keyboard optional</span>Touch a computer only when you want to</h2>
+<p>The end state is that the only choice you make about screens is how big a one you want to read on. You speak to her through whatever is at hand. Anything worth reading arrives as a short-lived card with a live view on your phone or tablet. The desk is for when you choose it.</p>
+<div class="grid g3">
+  <div class="card"><h4>🎧 In your ear</h4><p class="muted" style="font-size:.9rem">Out with the family: she answers, reminds, and stays quiet when you want quiet.</p></div>
+  <div class="card"><h4>📱 Phone and tablet</h4><p class="muted" style="font-size:.9rem">Cards that come and go: today's plan, a Nexus check-in, a draft to approve. Manage her from here.</p></div>
+  <div class="card"><h4>🖥 The desk</h4><p class="muted" style="font-size:.9rem">For the last 20%: you edit what the cells produced until it is the thing you wanted.</p></div>
+</div>
+<figure>
+<svg viewBox="0 0 900 90" role="img" aria-label="Agents do 80 percent of the work; you do the last 20 percent">
+  <rect x="20" y="30" width="688" height="34" rx="6" class="box b-pur"/><text x="364" y="52" text-anchor="middle" class="t-s">agents in the cells: the first 80%, run on their own</text>
+  <rect x="712" y="30" width="168" height="34" rx="6" class="box b-acc"/><text x="796" y="52" text-anchor="middle" class="t-s t-b">you: the last 20%</text>
+  <text x="20" y="20" class="t-xs t-m">Possible because you can hand over enough context for work to run without you.</text>
+</svg>
+<figcaption><span class="chip s-vision">Vision</span> FDS-13 (how she speaks) and the phone note in FDS-8. Full multi-device Lilith is a v7 job.</figcaption>
+</figure>
+
+<!-- ============================================================ PEOPLE -->
+<h2 id="people"><span class="k">9 · Different people</span>She can do a lot, a little, or almost nothing</h2>
+<p>Lilith scales to the person. Most people will use a small part of her. The developer builds her for many things because they do many things.</p>
+<div class="grid g3">
+  <div class="card persona"><div class="big">⚙</div><h4>The script automator</h4><p class="muted" style="font-size:.9rem">Wants a handful of jobs run reliably. Never opens the Nexus.</p><div class="meter"><span style="width:18%"></span></div><p class="muted" style="font-size:.78rem">how much of her is used</p></div>
+  <div class="card persona"><div class="big">📌</div><h4>The collector</h4><p class="muted" style="font-size:.9rem">Talks through her relationships with Lilith and has her find rare enamel pins online.</p><div class="meter"><span style="width:42%"></span></div><p class="muted" style="font-size:.78rem">how much of her is used</p></div>
+  <div class="card persona"><div class="big">🎙</div><h4>The builder</h4><p class="muted" style="font-size:.9rem">Podcast, programming, game story design, scripts and novels, all through the Nexus.</p><div class="meter"><span style="width:92%"></span></div><p class="muted" style="font-size:.78rem">how much of her is used</p></div>
+</div>
+
+<!-- ============================================================ RECORD -->
+<h2 id="record"><span class="k">10 · Where it is recorded</span>Every idea on this page has a home</h2>
+<p>Nothing here changes the frozen design by itself. Built things are in the law and the build; new ideas are parked as future design sessions until a session decides them.</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Idea</th><th>Recorded in</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Encrypted stores, router, context manager, tools, voice</td><td><a href="../law/index.html">The 29 sections</a></td><td><span class="chip s-built">Built</span></td></tr>
+    <tr><td>Places, units, app launcher, web and deep search, first run, persona charter</td><td>Sprint P01 (<a href="https://github.com/Squirrelthug/LILITH">LILITH repo</a>), amendments A-1 to A-8</td><td><span class="chip s-now">Being built</span></td></tr>
+    <tr><td>Personality presets with dials</td><td>DS-7 (next run, amendment A-7)</td><td><span class="chip s-next">Designed next</span></td></tr>
+    <tr><td>Relationship cards</td><td>DS-5</td><td><span class="chip s-next">Later</span></td></tr>
+    <tr><td>Speaking first, nudges</td><td><a href="../sprints/FUTURE_DESIGN_SESSIONS.md">FDS-2</a></td><td><span class="chip s-vision">Vision</span></td></tr>
+    <tr><td>Fetching your stored files and media ("go get it")</td><td>FDS-7, note of 3 Nov 2026</td><td><span class="chip s-vision">Vision</span></td></tr>
+    <tr><td>Phone and tablet cards as the main surface</td><td>FDS-8, note of 3 Nov 2026 (multi-node is v7)</td><td><span class="chip s-vision">Vision</span></td></tr>
+    <tr><td>Researchers, memory box, reviewer inside Lilith</td><td>FDS-10</td><td><span class="chip s-vision">Vision</span></td></tr>
+    <tr><td>Lilith and the Nexus: specialising, report roll-up, budgets, ingesting cell work, creative gates</td><td>FDS-11; the Nexus project <a href="https://github.com/Squirrelthug/zsz_nexus">zsz_nexus</a></td><td><span class="chip s-vision">Vision</span></td></tr>
+    <tr><td>Morning brief, real durations, prep time, reminders with reasons</td><td>FDS-12</td><td><span class="chip s-vision">Vision</span></td></tr>
+    <tr><td>Speech, text or confirmation; initiative; replying with silence</td><td>FDS-13</td><td><span class="chip s-vision">Vision</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ DIRECTION -->
+<h2 id="direction"><span class="k">11 · Direction check</span>Is she in the right place, heading the right way?</h2>
+<div class="callout"><strong>Short answer: yes, with four decisions to make.</strong> The foundation is the one the vision needs: one machine, encrypted, everything logged, a closed catalogue of tools, and a slow lane for long work. The frozen design already has an extension point for every part of the vision on this page. The build is in the phase you described, building broad tools before tuning how she feels. Where it falls short of the vision is where v1 deliberately stops: she does not speak first, cannot use outside tool providers, has no phone surface and no cost ledger. Nothing built so far contradicts the vision. Four parts need a design session before they can start, and one (the phone) needs a call against the v7 decision.</div>
+
+<h3>Where she is on the road</h3>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 200" role="img" aria-label="Roadmap from the design freeze to the Nexus, with the current position marked">
+  <line x1="30" y1="100" x2="870" y2="100" class="ln" style="stroke-width:4"/>
+  <line x1="30" y1="100" x2="388" y2="100" style="stroke:#10b981;stroke-width:4"/>
+  <g class="t-xs">
+  <circle cx="40" cy="100" r="8" fill="#10b981"/><text x="40" y="76" text-anchor="middle" class="t-b">Design frozen</text><text x="40" y="128" text-anchor="middle" class="t-m">29 Jun 2026</text>
+  <circle cx="140" cy="100" r="8" fill="#10b981"/><text x="140" y="76" text-anchor="middle" class="t-b">Build cleared</text><text x="140" y="128" text-anchor="middle" class="t-m">17 Jul</text>
+  <circle cx="250" cy="100" r="8" fill="#10b981"/><text x="250" y="76" text-anchor="middle" class="t-b">CH-01…14 built</text><text x="250" y="128" text-anchor="middle" class="t-m">28 Oct</text>
+  <circle cx="330" cy="100" r="8" fill="#10b981"/><text x="330" y="62" text-anchor="middle" class="t-b">Dogfood, DS-1…3</text><text x="330" y="128" text-anchor="middle" class="t-m">1–2 Nov</text>
+  <circle cx="400" cy="100" r="13" fill="none" stroke="#4fc3c9" stroke-width="3"/><circle cx="400" cy="100" r="6" fill="#4fc3c9"/>
+  <text x="400" y="40" text-anchor="middle" class="t-b t-acc">You are here</text><text x="400" y="54" text-anchor="middle" class="t-acc">P01 running</text>
+  <circle cx="480" cy="100" r="7" fill="#f59e0b"/><text x="480" y="76" text-anchor="middle">Presets</text><text x="480" y="128" text-anchor="middle" class="t-m">DS-7</text>
+  <circle cx="560" cy="100" r="7" fill="#a78bfa"/><text x="560" y="76" text-anchor="middle">Outside tools</text><text x="560" y="128" text-anchor="middle" class="t-m">FDS-1</text>
+  <circle cx="640" cy="100" r="7" fill="#a78bfa"/><text x="640" y="62" text-anchor="middle">Speaks first, brief</text><text x="640" y="128" text-anchor="middle" class="t-m">FDS-2, 12</text>
+  <circle cx="720" cy="100" r="7" fill="#a78bfa"/><text x="720" y="76" text-anchor="middle">Phone</text><text x="720" y="128" text-anchor="middle" class="t-m">FDS-8</text>
+  <circle cx="820" cy="100" r="9" fill="#a78bfa"/><text x="820" y="62" text-anchor="middle" class="t-b t-pur">Nexus</text><text x="820" y="128" text-anchor="middle" class="t-m">FDS-11</text>
+  </g>
+  <text x="450" y="180" text-anchor="middle" class="t-xs t-m">Order to the right of "you are here" is the recommendation below, not a decision.</text>
+</svg>
+</div>
+</figure>
+
+<h3>Each part of the vision against the build</h3>
+<p class="muted">The bars are a judgement of how far the build has come toward each part, not a measurement.</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th style="width:22%">Part of the vision</th><th style="width:36%">What exists today</th><th style="width:26%">What is missing</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Everyday assistant</strong><div class="meter"><span style="width:70%"></span></div></td><td>Calendar edits by asking, reminders and timers, notes, undo by words, staged forgetting, contacts, the user's own day boundaries. Confirmed on a real display.</td><td>Reminders while the window is closed (DS-6); a visible Undo button (P01).</td><td><span class="chip s-built">On track</span></td></tr>
+    <tr><td><strong>The world and your computer</strong><div class="meter"><span style="width:45%"></span></div></td><td>Clock, calculator, weather at home. P01 has finished places and units and is building the app launcher now.</td><td>Web search, deep search, first run, all in P01. On Windows, app control is deferred.</td><td><span class="chip s-now">In progress</span></td></tr>
+    <tr><td><strong>Memory with provenance, no blind spots</strong><div class="meter"><span style="width:55%"></span></div></td><td>Every turn and every change is written to the encrypted telemetry ledger (<code>router.dispatch</code> on every typed turn). Calendar entries and notes record where they came from. A development-time ledger reader exists.</td><td>Retention and diagnostics (FDS-9); provenance on every kind of memory; a way for her to read her own telemetry (needs a design session).</td><td><span class="chip s-built">Mostly on track</span></td></tr>
+    <tr><td><strong>"Go and get it"</strong><div class="meter"><span style="width:10%"></span></div></td><td>Note vaults are indexed where they live (§29), the pointer-not-copy model the vision needs.</td><td>A registry of where your things are, reachability checks, fetching and serving media (FDS-7).</td><td><span class="chip s-vision">Not started</span></td></tr>
+    <tr><td><strong>Daily rhythm, speaking first</strong><div class="meter"><span style="width:15%"></span></div></td><td>Reminders, day boundaries and the vague-time policy. The ledger now collects real dogfooding rhythms, which FDS-2 asks for.</td><td>She is reactive by law. No morning brief, durations or prep time (FDS-2, FDS-12).</td><td><span class="chip s-vision">Needs design</span></td></tr>
+    <tr><td><strong>How she speaks</strong><div class="meter"><span style="width:25%"></span></div></td><td>Persona charter (P01-22). Presets with dials designed (DS-7).</td><td>Choosing speech, text or a confirmation; replying with silence (FDS-13).</td><td><span class="chip s-next">Next run</span></td></tr>
+    <tr><td><strong>Phone and tablet, keyboard optional</strong><div class="meter"><span style="width:5%"></span></div></td><td>The endpoint model in §22 already separates devices by what they can do and how far they are trusted.</td><td>Any endpoint beyond the desktop. Multi-node Lilith was decided as v7.</td><td><span class="chip s-next">Decision needed</span></td></tr>
+    <tr><td><strong>The Nexus</strong><div class="meter"><span style="width:8%"></span></div></td><td>A separate project in research. Inside Lilith, P01-01 adds a <code>network</code> flag to tool contracts, and P01's deep-search reports are her first long background jobs: both are precursors.</td><td>Outside tool providers (FDS-1), the Lilith side (FDS-11), and the Nexus design itself.</td><td><span class="chip s-vision">Early, by design</span></td></tr>
+    <tr><td><strong>Cost and budgets</strong><div class="meter"><span style="width:20%"></span></div></td><td>Local-first, small cached contexts, and per-call token telemetry. Budget-aware scheduling works today in the developer's autopilot tooling, outside Lilith.</td><td>The cost ledger (FDS-4) and scheduling as a Nexus job.</td><td><span class="chip s-vision">Pattern proven</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Things to watch</h3>
+<div class="grid g2">
+  <div class="card"><h4>⚠ Risks</h4><ul>
+    <li><span><strong>No hosted CI.</strong> GitHub Actions refuses every job because of billing, so the checks only run locally.</span></li>
+    <li><span><strong>Build speed depends on budget.</strong> On 2–3 November every code allowance ran out and the run idled overnight.</span></li>
+    <li><span><strong>Speaking first is the riskiest feature.</strong> The research's own conflict (helpful vs shaming or creepy) applies. Design it from logged rhythms, not guesses.</span></li>
+    <li><span><strong>Private data plus outside content plus actions</strong> is the combination security researchers warn about. The Nexus and outside tools make it bigger; DS-1's rule that local results never reach a model is the right base.</span></li>
+  </ul></div>
+  <div class="card"><h4>📋 Loose ends</h4><ul>
+    <li><span><strong>Developer-only evidence is waiting</strong>: real-display onboarding, voice, Google Connect, signing and the v6.0.0 tag.</span></li>
+    <li><span><strong>App control on Windows</strong> is deferred, though the desktop that runs the autopilot is Windows.</span></li>
+    <li><span><strong>Documentation drift</strong>: the guide described the Nexus wrongly until today, and the FDS-10 idea had sat unmerged since 27 Oct (both fixed today). The Nexus research is still on its branch.</span></li>
+    <li><span><strong>The phone</strong>: the vision leans on it, but multi-node is v7. A read-mostly phone talking to one hub may fit in v6 (FDS-8 option 1).</span></li>
+  </ul></div>
+</div>
+
+<h3>Recommended order of the next design sessions</h3>
+<figure>
+<div class="scroll">
+<svg viewBox="0 0 900 150" role="img" aria-label="Recommended order of design sessions">
+  <g class="t-xs">
+  <rect x="10" y="30" width="135" height="80" rx="10" class="box b-amb"/><text x="77" y="54" text-anchor="middle" class="t-s t-b">1 · Presets</text><text x="77" y="72" text-anchor="middle" class="t-m">DS-7 + FDS-13</text><text x="77" y="88" text-anchor="middle" class="t-m">cheap, felt daily</text>
+  <rect x="160" y="30" width="135" height="80" rx="10" class="box b-pur"/><text x="227" y="54" text-anchor="middle" class="t-s t-b">2 · Outside tools</text><text x="227" y="72" text-anchor="middle" class="t-m">FDS-1</text><text x="227" y="88" text-anchor="middle" class="t-m">gates the Nexus</text>
+  <rect x="310" y="30" width="135" height="80" rx="10" class="box b-pur"/><text x="377" y="54" text-anchor="middle" class="t-s t-b">3 · Speaks first</text><text x="377" y="72" text-anchor="middle" class="t-m">FDS-2 + FDS-12</text><text x="377" y="88" text-anchor="middle" class="t-m">after weeks of logs</text>
+  <rect x="460" y="30" width="135" height="80" rx="10" class="box b-pur"/><text x="527" y="54" text-anchor="middle" class="t-s t-b">4 · Go get it</text><text x="527" y="72" text-anchor="middle" class="t-m">FDS-7</text><text x="527" y="88" text-anchor="middle" class="t-m">small after FDS-1</text>
+  <rect x="610" y="30" width="135" height="80" rx="10" class="box b-pur"/><text x="677" y="54" text-anchor="middle" class="t-s t-b">5 · The phone</text><text x="677" y="72" text-anchor="middle" class="t-m">FDS-8 option 1</text><text x="677" y="88" text-anchor="middle" class="t-m">or wait for v7</text>
+  <rect x="760" y="30" width="130" height="80" rx="10" class="box b-pur"/><text x="825" y="54" text-anchor="middle" class="t-s t-b">6 · The Nexus</text><text x="825" y="72" text-anchor="middle" class="t-m">FDS-11 + FDS-4</text><text x="825" y="88" text-anchor="middle" class="t-m">when research ends</text>
+  </g>
+  <path class="ln" d="M145 70 H 158" marker-end="url(#ar)"/><path class="ln" d="M295 70 H 308" marker-end="url(#ar)"/><path class="ln" d="M445 70 H 458" marker-end="url(#ar)"/><path class="ln" d="M595 70 H 608" marker-end="url(#ar)"/><path class="ln" d="M745 70 H 758" marker-end="url(#ar)"/>
+  <text x="450" y="138" text-anchor="middle" class="t-xs t-m">A recommendation for the developer to accept or reorder. None of these is decided.</text>
+</svg>
+</div>
+</figure>
+
+<footer>
+  Written 3 November 2026 from the developer's description of the vision, and checked against the build's handoff and the P01 plan. Not law: the frozen design and its amendments are the law. ·
+  <a href="../index.html">Design home</a> · <a href="../lilith-for-everyone.pdf">Plain-words guide (PDF)</a> · <a href="../future/index.html">Beyond v1</a>
+</footer>
+</div>
+</body>
+</html>
