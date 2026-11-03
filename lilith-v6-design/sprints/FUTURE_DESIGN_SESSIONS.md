@@ -4,6 +4,8 @@ Companion to `BUILD_SEQUENCING.md` §5 (parked *scope*). This file parks *vision
 
 The governing idea (recorded 2026-08-03): **Lilith is the kind of harness that intends to use all other harnesses.** She is a conversational agent who keeps the context window on the user's machine, hands any model exactly the context it needs — sufficient, minimal, cached when efficient — and wields a growing catalog of tools and external systems on the user's behalf, so the user makes well-informed decisions without doing the homework (the 80% principle).
 
+**Developer restatement, 2026-11-03:** she is *another me, but digital*, able to handle all the things the user forgets. She does not hold everything herself: asked for a podcast stored away on a drive, she goes and gets it and serves it (FDS-7). How much she does scales with the person: one user has her automate scripts, another talks through relationships with her and has her find rare enamel pins online, the developer uses her across podcasting, programming, game story design, scripts and novels through the Nexus (FDS-11). She can do a lot, a little or almost nothing. The picture-led explainer of this vision is the site page `vision/index.html`.
+
 ---
 
 ## FDS-1 · MCP / External Tool-Provider Bridge
@@ -19,6 +21,8 @@ The governing idea (recorded 2026-08-03): **Lilith is the kind of harness that i
 **Not in v1 because:** v1 Lilith speaks only when spoken to; an initiating engine is a large behavioral surface with its own failure modes (nagging, interrupting, misjudged urgency) that deserves its own reviewed design. v5's AL-era prototypes (delivery routing, daily roundup, work-schedule awareness) are the lessons bank.
 **The seam:** the L1/L2 job machinery (§17) + UCL telemetry (§16) already compute and store everything a proactivity engine would read; the narrative layer (§24) and endpoint capability model (§22) define how it would speak.
 **Session prerequisites:** several weeks of real dogfooding telemetry, so proactive triggers are designed against observed rhythms rather than guessed ones.
+
+**Developer input, 2026-11-03:** the morning brief, learned durations and prep time between events are recorded as their own entry, FDS-12, which depends on this one.
 
 ## FDS-3 · Multi-Provider Expansion ("pipelines per model")
 
@@ -54,6 +58,8 @@ The governing idea (recorded 2026-08-03): **Lilith is the kind of harness that i
 **Not in v1 because:** no section defines a locality registry, a remote-status model, or a storage-pressure monitor. §29 explicitly defers cloud-drive integration (Drive/iCloud/OneDrive) to v6.1+ and confines v1 to "local filesystem paths and pointers". Proactively initiating an offload is also initiating behaviour, which v1 does not do at all (see FDS-2) — and a custodian that *moves* user data is a materially larger trust surface than one that only reads it, so it needs its own reviewed design and its own never-delete guarantees.
 **The seam:** §29's custodian model is already pointer-based rather than copy-based — indexing files where they live is exactly the primitive a locality registry generalises. §17's `refresh_capability` field, with its `manual_source` value and the §14 absence-disclosure path (`status=source_unsupported`, "unavailable this turn; do not guess"), is already the honest-about-unreachable-data machinery a remote location would reuse unchanged. §05's hardware detection is the seam for reading disk state; §16's telemetry and §17's L1/L2 job machinery are where a pressure monitor would live; §15's tool catalog is how an offload would be executed under user consent.
 **Session prerequisites:** FDS-2 (autonomy) should resolve first or alongside — a storage-pressure monitor that only *notices* is a small feature, while one that *proposes and acts* inherits every question FDS-2 exists to answer about initiative, urgency, and nagging. Also needs the §29 cloud-integration deferral lifted, since facilitating an offload to a third-party service is precisely what v1 excludes. Real dogfooding data on how much Lilith actually accumulates, so the pressure thresholds are measured rather than guessed.
+
+**Developer input, 2026-11-03 (go and get it):** knowing where a thing is must extend to fetching it. Asked for a podcast episode stored on an external drive or in the user's own cloud, Lilith locates it through the registry, retrieves it (with consent, reporting honestly if the drive is not reachable) and serves it: plays it, or hands it to the device the user is on. Retrieval is read-only and never moves the original.
 
 ## FDS-8 · Multi-Device Lilith: One Hub, Many Endpoints — added 2026-09-24
 
@@ -104,6 +110,8 @@ Options for the session to weigh (none decided):
 
 Note for sequencing: the first-run question exists today as a one-way door. A v6 install has no "join" path, so whatever the first-run flow (§25) records about its own identity should not assume it is the only Lilith for the user. That is a constraint on the current build only if the session picks option 1 or 2.
 
+**Developer input, 2026-11-03:** the phone or tablet is meant to become the main way the developer manages Lilith: speaking to her through it and reading short-lived cards with a dynamic view (the Surface idea, the 12-column card model in the Nexus research). Screen size is then the only thing the user chooses. This raises the priority of a thin, read-mostly endpoint even while full multi-node stays a v7 job.
+
 ## FDS-9 · Telemetry Lifecycle, Diagnostics & Precise-Data Artifacts — added 2026-10-25
 
 **Vision:** Lilith sees everything that happens inside her, and so can the developer and the agents building her. No LLM ever pays for that in raw tokens. The full-fidelity record is kept as space allows. A background process turns it into short narratives backed by data tables, and that is all the conversational path ever reads. When the user, or Lilith on the user's behalf, needs the precise numbers, the request becomes an **artifact**: generated in the slow lane and served as tables and a report when ready, never computed on the conversational path. v1 leaves three things undefined:
@@ -148,6 +156,53 @@ The M1 dev-log stand-in has already shown the value. On 2026-10-25, joining `voi
 - Several weeks of dogfooding telemetry, so triggers and pressure signals come from observed behaviour, not guesses.
 - A research step (res-NN style) on prior art: global workspace and blackboard architectures, affective/homeostatic agent models, interoception, and trust research on systems that explain their own state.
 - The cost of a standing background layer measured on the floor machine.
+
+**Developer input, 2026-11-03:** within herself, Lilith applies the same principles as the Nexus (FDS-11) to manage the user's life: compartments, reports, review, and no emotional attachment.
+
+## FDS-11 · Lilith and the Nexus: Specialisation by Context, Never by Strapping In — added 2026-11-03
+
+**Vision (developer, 2026-11-03):** Nexus is how Lilith specialises and how that specialisation stays where it belongs. It is **not** a hub for smart-home devices or outside services; that is FDS-1's territory, and the plain-words guide described it wrongly before 2026-11-03. The developer's description, in order:
+- **A tree of cells shaped like businesses.** At the top is the **MASTER nexus**, run by a manager. Below it are divisions (programming, writing, the podcast, game story design, film and TV scripts, novels), and below those the projects, each a **cell**. A division such as writing is an editor or publisher layer over every writing cell beneath it. Cells can nest. The rigid business-like structure is where the standards live, so once a pipeline is built it can be driven from any seat along the structure.
+- **Every cell has a harness already in place.** Any agent, even a fresh one with no prior context, can step into a cell and start its job, because the cell holds the standards, the history and the "where we left off" record.
+- **Lilith never straps into a harness.** The Nexus is a vast mech suit she can travel all over and ask anything of; she knows what is in each level and can talk to the user about it, and hold design conversations there. The cells themselves run autonomously when they run. When the user agrees a design with her and it meets the cell's schema standards, she hands it to the ready harness and the cell builds it.
+- **Moving into a mode is moving down the tree.** When the user decides it is time to code, or to manage a running project, Lilith steps into that level's context (programming is one or more levels down) and is a specialist there. When they leave, the specialisation stays in the cell; her own window keeps only the facts ("we spent the afternoon on x, y and z").
+- **Reports roll up, nothing compounds.** The lowest agents write full reports. The layer above reads all of them and writes its own report, and so on to the top. Every layer reads the full reports of the layer below for each brief, so summaries are never summaries of summaries; and Lilith or the MASTER nexus can step into any cell and read its full verbose report instead of the abbreviated ones higher up. Some text is processed more than once by design; the navigation conventions must make that efficient.
+- **Small windows everywhere.** Standing at the top never floods the context. Like the autopilot's managers (capped near 80k tokens), every agent in the Nexus works inside a bounded window, because the work is compartmentalised and layered. Only walking the tree gives more context, and even then it is abbreviated.
+- **Tree plus graph.** The tree is the chain of command; a relational database across the whole Nexus links cells that share things (a podcast episode that cites a research artifact from a writing cell). The MASTER nexus, and Lilith working with it, query the graph.
+- **History is the truth.** Constant history keeps everything straight. Memory is a database with provenance and telemetry built in: no blind spots.
+- **Budget-aware scheduling.** Not everything runs at once, and nothing has to be used. The MASTER nexus manager coordinates with Lilith to schedule sequential work as budgets open: a plan window resets, an account is topped up, a quota returns.
+- **What a cell produces is the user's.** Data, insights and artifacts made in Nexus sessions are part of the user's personal knowledge network: Lilith ingests and catalogues them with provenance, so she can recall and serve them later.
+- **Gates that keep the work the user's.** Creative cells are built on the educational literature of their craft. When a novel turns out to lack an act, the cell says so, gives advice and does research on the user's behalf, but the user decides what fills it. The user may tell Lilith to generate it anyway; the cell records that the choice and its consequences are the user's, because agent-filled creative gaps are rarely good.
+- **The end state.** The user gives agents enough context to run work autonomously, edits the last 20%, and checks in when they come back to that headspace.
+
+**Not in v1 because:** the Nexus is a separate project (`Squirrelthug/zsz_nexus`, research phase: design draft, passes R01..R06, the departments-and-narrators idea of 2026-10-27, and the Surface idea that gates its design). v6 v1 has no external tool surface (FDS-1), no standing background work (FDS-2) and no cost ledger (FDS-4), and all three are prerequisites for Lilith using a Nexus.
+**The seam:**
+- §15 tool system and FDS-1: Lilith reaches the Nexus as a governed tool provider (the Nexus design already plans an MCP surface), so reading a cell or handing it a design is a tool call with a narrative, telemetry and consent.
+- §13 artifact lane: a hand-off to a cell is slow-lane work; Lilith narrates while it runs.
+- §18 memory and §29 vault: ingesting cell outputs as pointers with provenance, under the custodian model (index where it lives; never copy without consent).
+- §16 telemetry and FDS-9: one event vocabulary, so a check-in reads telemetry, not transcripts.
+- §14 context window manager: stepping into a cell is the CWM loading that cell's context block instead of her everyday one.
+- FDS-10: the same researcher-report-reviewer pattern; the two should share vocabulary.
+
+**Session prerequisites:**
+- The zsz_nexus design past its research phase (R05 tool abstraction, R11 departments and narrators) and the Surface idea resolved.
+- FDS-1 designed (how any outside tool provider is trusted), and FDS-4 at least scoped (budget-aware scheduling needs a ledger).
+- A research step on cognitive-apprenticeship and craft-education literature for the gate design of creative cells.
+- The autopilot's lessons (account routing as data, a workspace lease, session caps) carried in as the first worked example of a cell harness.
+
+## FDS-12 · The Daily Rhythm: the Morning Brief, Real Durations and Time Between Things — added 2026-11-03
+
+**Vision (developer, 2026-11-03):** Lilith wakes up with the user and gets them started on the day, the way JARVIS briefs Tony Stark: as much or as little as they need. Over time, with built-in presets as starting points, she finds the best way to communicate with this user after they wake, so they do not have to think about or remember things. She knows how long things take and when they clash. There is preparation between playing outside and going to dinner, so those are never scheduled back to back. Reminders say what is happening and why (the prep time, the travel, what clashes), so the user is informed at all times. When the user is away from the desk, she can say factually what was worked on (x, y and z) without carrying the specifics.
+**Not in v1 because:** v1 Lilith speaks only when spoken to (FDS-2); §21 events have no duration model beyond start and end, and no transition, travel or preparation time; there is no wake-time routine.
+**The seam:** §21 calendar (events, `when` policy, the user's day boundaries from DS-2 and P01's `evening_starts_hour`/`night_ends_hour`); DS-6 background reminders (delivery while the window is closed); §17 L2 profiles (learned durations and rhythms); §24 narrative (what the brief sounds like); DS-7 presets (how much she says).
+**Session prerequisites:** FDS-2 designed, since a morning brief is initiated speech; weeks of dogfooding calendar and reminder telemetry, so durations and buffers are learned rather than guessed; DS-6 decided; research on interruption and briefing design (the research wave 2 conflict "proactivity vs shame and creepiness" applies).
+
+## FDS-13 · How She Speaks: Modality, Initiative and the Right to Stay Silent — added 2026-11-03
+
+**Vision (developer, 2026-11-03):** Lilith adapts how she communicates to the user. Some users do not want her voice to change, or do not want her to speak much even when they speak to her; they may want text, or only a confirmation. Personality layers let her stay useful while choosing how she speaks and which thoughts or observations she shares: more proactive, or more inclined to wait to be spoken to. She does not reply to everything the user says; **silence is a valid reply**. The aim is that the user only touches a keyboard or a computer when they want to: speech through whatever device is at hand, and short-lived cards with a dynamic view on a phone or tablet for anything that must be read (the Surface idea, FDS-8).
+**Not in v1 because:** v1 answers every turn; the router has no "no reply" outcome; output modality is fixed per endpoint (§22), not chosen per user and per moment. DS-7 presets add dials for chattiness, humour, formality and volunteering, but not modality, and not silence.
+**The seam:** §13 router (a `silent` outcome alongside the existing ones, logged in `router.dispatch` telemetry so a silence is never a blind spot); §22 endpoint capabilities (text, speech, confirmation-only); §23 personality and DS-7's VOICE files and dials; §24 narrative; the persona charter (P01-22), which holds under every setting: warm, never a companion, no emotional attachment.
+**Session prerequisites:** DS-7 built; telemetry on which replies users skip, interrupt or ask to shorten; a research step on conversational turn-taking and when an assistant's silence reads as rude rather than respectful; FDS-8 or the Surface idea for the card side.
 
 ---
 
