@@ -204,6 +204,34 @@ The M1 dev-log stand-in has already shown the value. On 2026-10-25, joining `voi
 **The seam:** §13 router (a `silent` outcome alongside the existing ones, logged in `router.dispatch` telemetry so a silence is never a blind spot); §22 endpoint capabilities (text, speech, confirmation-only); §23 personality and DS-7's VOICE files and dials; §24 narrative; the persona charter (P01-22), which holds under every setting: warm, never a companion, no emotional attachment.
 **Session prerequisites:** DS-7 built; telemetry on which replies users skip, interrupt or ask to shorten; a research step on conversational turn-taking and when an assistant's silence reads as rude rather than respectful; FDS-8 or the Surface idea for the card side.
 
+## FDS-14 · Messaging Channels: Reaching Her Through the Apps People Already Use — added 2026-11-04
+
+**Vision (developer, 2026-11-03):** Lilith ships able to talk through the channels people already use to talk to each other: Discord first, then others such as Telegram, Signal, SMS and email. They are a reliable way to exchange messages *and files* with anyone who has internet access, at little or no cost. Today the only way to reach her is from a machine on the user's own network, which is limiting and is not her final design. A channel is a way *in* to the one Lilith on the user's hub, not a second Lilith: the same memory, the same tools and the same persona, with a lane of its own. It works away from home with no overlay network and no app of hers to install. v5 had a Discord integration; v6 has none yet.
+**Not in v1 because:** §22 defines only the `desktop` endpoint for v1. ADR-013's binding migration trigger says endpoint-authorization policy must move from `config.json` into an encrypted, UCL-audited database before any identity-bound endpoint (§22 names Discord as the example) ships. Every channel sends the user's words and files through a third party's servers, which meets DS-1's "nothing private leaves" and EDICTS 5 head on. Every inbound message is untrusted text arriving with the user's authority, so the prompt-injection defences must be in place before a channel opens. FDS-2 (speaking first) is parked, so she could only reply, never message first.
+**The seam:** §22 already has most of the shape:
+- per-endpoint lanes with no shared active context, and the desktop chat's side-by-side view of lanes;
+- capability profiles that the router checks before generating;
+- the **Identity-Bound** tier ("can be configured to filter and respond only to an authorized user identity, ignoring all other requests") and **Zero-Clearance** for devices that cannot prove who is speaking;
+- artifacts "deferred to desktop hub".
+
+Elsewhere: ADR-013 (the policy store migration); §02 (each channel's bot token in the keyring); §06 (where a channel listener starts and stops); DS-1 and the tool-argument guard (what may leave through a channel reply as well as through a tool); §17 and the cloud masking path (a channel message is cloud-bound text twice over: once to the channel's servers, once to a cloud model); FDS-13 (text and confirmation-only replies suit channels); FDS-8 (the hub; its open question "how this relates to the Discord identity-bound endpoint" moves here); FDS-2 (messaging first, later).
+**Session prerequisites:**
+- **The ADR-013 migration landed**, since it is a hard prerequisite for any identity-bound endpoint.
+- **The developer's security review items for untrusted input closed**, since a channel turns every inbound message into third-party text.
+- **A research step (res-NN style)** on prior art:
+  - OpenClaw (formerly Clawdbot): one gateway process with an adapter per channel, and pairing before an unknown sender is answered. Its public security problems are as instructive as its features.
+  - v5's Discord wiring.
+  - Each candidate channel's identity guarantees, encryption (end-to-end or not), file limits, rate limits, cost, bot terms of service, and what the provider keeps.
+
+The session must settle these questions:
+- **Which channels ship first.** The working assumption is Discord alone, then one end-to-end-encrypted channel (Signal or similar) if the research supports it.
+- **How a channel account is bound to the user:** pairing from the desktop, a one-time code, and revocation in one step.
+- **The clearance tier per channel**, and what a channel may carry. Candidates: no unmasked personal data in replies by default; a per-category opt-in (health, money, location, in line with FDS-6); files only from an allow-listed folder; a "check your desktop" reply for anything private.
+- **Inbound files:** quarantine, type and size caps, and never parsed by the model as instructions.
+- **Groups and other people:** a channel is for the user only, and she ignores everyone else unless a later session (DS-5, multi-user) says otherwise.
+- **Telemetry:** every channel turn and refusal logged with `endpoint_id`, with no message text in the payload.
+- **The edge of the scope:** the podcast-operator Discord bot (HANDOFF §3) stays a separate tool exposed through FDS-1, not part of this entry.
+
 ---
 
 *Add new entries only with a dated line and the same four fields. When a session convenes and its outcome amends the law, move the entry to a "Resolved" section at the bottom with a pointer to the amendment ledger entry.*
