@@ -250,7 +250,7 @@ def build_pages():
             group("The big idea", [
                 card("Nexus: where Lilith specialises", "A business-shaped tree of cells, each with a ready harness that any agent can step into. Lilith travels it, holds design conversations there and hands agreed designs to the cells, but never straps in. Reports roll up a level at a time.", "../vision/index.html#nexus", icon="🔗", color="purple", chip="Pictures · FDS-11"),
                 card("Lilith, the whole picture", "The vision in diagrams: what she can do, a day with her, how she speaks, how the code and the design work, the Nexus, and a direction check of the build against the vision.", "../vision/index.html", icon="🧭", color="teal", chip="Page + PDF"),
-                card("Future design sessions", "The parking list: tool bridge, proactive help, cost ledger, storage, many devices, the inner loop, the Nexus, the daily rhythm, and how she speaks (FDS-1 to FDS-13).", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="amber", chip="Markdown"),
+                card("Future design sessions", "The parking list: tool bridge, proactive help, cost ledger, storage, many devices, the inner loop, the Nexus, the daily rhythm, how she speaks, and messaging channels (FDS-1 to FDS-14).", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="amber", chip="Markdown"),
             ], "big"),
             group("Decided next, in the build repository", [
                 card("Design sessions DS-0 to DS-5", "The briefs behind writing, reminders, weather, first run, and relationship cards.", f"{LILITH}/docs/design-sessions/README.md", icon="🗒", color="blue", chip="GitHub"),
