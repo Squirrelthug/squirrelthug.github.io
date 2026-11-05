@@ -232,6 +232,15 @@ The session must settle these questions:
 - **Telemetry:** every channel turn and refusal logged with `endpoint_id`, with no message text in the payload.
 - **The edge of the scope:** the podcast-operator Discord bot (HANDOFF §3) stays a separate tool exposed through FDS-1, not part of this entry.
 
+**Developer constraints, 2026-11-04.** These bind the design session. They apply to every outside endpoint and every account import, not only to messaging channels.
+1. **Safe by construction.** Every outside source is untrusted. Design to shrink the attack surface: least privilege, the narrowest scopes a provider offers, and data from outside treated as data, never as instructions.
+2. **Easy for the user to take part.** Security must not make the feature hard to use. The user simply tells Lilith they want to talk to her over a channel ("I'd like to talk to you on Discord" or "on Slack"), and she walks them through it. Hand-editing config and copying tokens about are not the user's job.
+3. **Account imports: full user control, single sign-on, then automated.** When the user brings data in from an online account, they connect it with an easy single sign-on flow (OAuth consent or the like, as Google Connect already does), not API keys. **They choose exactly what is read and what is stored in Lilith** (which categories, and which items where it matters), they can see what was taken, and they can change or withdraw it later. After that choice, syncing runs on its own.
+4. **A short list of endpoints, on purpose.** Lilith owns the complexity of each integration, including the third-party API, terms and auth changes that will keep coming. So the supported list stays short for practical reasons: a few channels and imports kept working well, not many kept half-working. A new endpoint is added only when someone can maintain it.
+5. **Offered at first run.** Once built, channels and imports are offered during the start-up experience (§25 onboarding, DS-4 "what I can do"), so a new user sees them when first installing Lilith. They are optional and skippable, and each can also be set up later by asking her.
+
+How these meet the entry (agent's reading, for the session to confirm): (2) and (5) make the pairing and binding question a guided conversation and an onboarding step, not a settings screen. (3) generalises the Google Connect consent pattern into the per-category opt-in already listed above, and adds a visible "what I took from where" record. (4) is the reason the session picks the first channels and imports by maintenance cost as well as reach.
+
 ---
 
 *Add new entries only with a dated line and the same four fields. When a session convenes and its outcome amends the law, move the entry to a "Resolved" section at the bottom with a pointer to the amendment ledger entry.*
