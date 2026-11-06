@@ -223,7 +223,7 @@ def build_pages():
     # ---- build
     pages["build/index.html"] = page(
         "Lilith v6: Build and progress", "Build & Progress",
-        "How the design becomes software: the plan, the sprints, the story of each stretch of chapters, and where the build stands right now.",
+        "How the design became software: where the build stands, the story of each stretch of chapters, and a link to the plan in the private build repository.",
         "\n".join([
             group("Where it stands now", [
                 card("Handoff: the present state", "What is built, what is verified and what to do next. Rewritten at the end of every working session.", f"{LILITH}/HANDOFF.md", icon="📍", color="green", chip="GitHub"),
@@ -232,13 +232,10 @@ def build_pages():
                 card("The code", "The Lilith v6 repository.", f"{GH}/LILITH", icon="💻", color="aqua", chip="GitHub"),
             ], "big"),
             group("The plan", [
-                card("Build sequencing", "The milestone plan, the two de-risking experiments, and what is parked beyond v1.", "../BUILD_SEQUENCING.md", icon="🧭", color="amber", chip="Markdown"),
-                card("Build guide", "Fourteen sequential chapters and the experiment gates.", "../sprints/BUILD_GUIDE.md", icon="🛠", color="orange", chip="Markdown"),
+                card("The build plan (private)", "Build sequencing, the build guide (all 14 chapters complete) and every sprint now live in the private build repository. The current roadmap is design session DS-9.", f"{LILITH}/docs/plan/README.md", icon="🧭", color="amber", chip="GitHub"),
                 card("Future design sessions", "Ideas that are part of the intent but not in v1: the tool bridge, proactive help, cost ledger, more devices, the Nexus, the daily rhythm, how she speaks.", "../sprints/FUTURE_DESIGN_SESSIONS.md", icon="🔮", color="purple", chip="Markdown"),
                 card("Calendar app spec", "A worked feature specification (§21).", "../specs/calendar-app.spec.md", icon="📅", color="aqua", chip="Markdown"),
             ], "big", note="Markdown pages open as plain text in the browser."),
-            group("Sprints", [card(t, "", f"../sprints/{f}", color="orange", num=n) for n, t, f in SPRINTS]
-                  , "small"),
             group("Chapter reports: the story in plain English", [card(t, d, f"../reports/{f}", color="blue", num=n) for n, t, d, f in REPORTS], "small"),
         ]), depth=1, crumbs=back)
 

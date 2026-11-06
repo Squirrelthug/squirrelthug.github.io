@@ -1,6 +1,6 @@
 # Report 00 — Introduction: How We Got Here, and What We're Actually Building
 
-*This is the first of eight build reports. The other seven each cover a stretch of the build (two or three chapters from `../sprints/BUILD_GUIDE.md`) and tell the story of how we'll work through that stretch and what we'll be thinking about while we do. This one covers no chapters. It exists so that anyone — an agent picking up a sprint task, a reader of the blog, or the developer himself two years from now — understands what this project is, where it came from, and what kind of thing v6 is supposed to be.*
+*This is the first of eight build reports. The other seven each cover a stretch of the build (two or three chapters from `https://github.com/Squirrelthug/LILITH/blob/main/docs/plan/BUILD_GUIDE.md`) and tell the story of how we'll work through that stretch and what we'll be thinking about while we do. This one covers no chapters. It exists so that anyone — an agent picking up a sprint task, a reader of the blog, or the developer himself two years from now — understands what this project is, where it came from, and what kind of thing v6 is supposed to be.*
 
 ---
 
@@ -36,7 +36,7 @@ And then there is v5 itself: 507 commits of a working-but-hacked-together system
 
 **v6 is the second version that works — but the first version that defines the future.** That sentence is the frame for everything below.
 
-The v6 design phase then did something none of the earlier eras did: it finished before building started. Fifteen research reports (licensing, packaging, every audio and crypto library choice), a dozen planning documents, a 29-section design document written one section at a time by agents working from a sprint spec, three rounds of adversarial review, a signed amendment ledger, and a freeze: design locked 2026-06-29, cleared for build 2026-07-17. The design document — the 29 section pages — is *the law*. Nothing gets built that isn't written there, and nothing written there gets changed outside a documented design session. The build itself is sequenced in `../BUILD_SEQUENCING.md` and mapped chapter-by-chapter in `../sprints/BUILD_GUIDE.md`, with a kanban board tracking all fifteen chapters. These reports sit alongside that machinery as its plain-English narration.
+The v6 design phase then did something none of the earlier eras did: it finished before building started. Fifteen research reports (licensing, packaging, every audio and crypto library choice), a dozen planning documents, a 29-section design document written one section at a time by agents working from a sprint spec, three rounds of adversarial review, a signed amendment ledger, and a freeze: design locked 2026-06-29, cleared for build 2026-07-17. The design document — the 29 section pages — is *the law*. Nothing gets built that isn't written there, and nothing written there gets changed outside a documented design session. The build itself is sequenced in `https://github.com/Squirrelthug/LILITH/blob/main/docs/plan/BUILD_SEQUENCING.md` and mapped chapter-by-chapter in `https://github.com/Squirrelthug/LILITH/blob/main/docs/plan/BUILD_GUIDE.md`, with a kanban board tracking all fifteen chapters. These reports sit alongside that machinery as its plain-English narration.
 
 ## What Lilith actually is
 

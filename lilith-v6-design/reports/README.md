@@ -1,6 +1,6 @@
 # Lilith v6 — Build Reports
 
-Plain-English narrative companions to the build. Where `../sprints/BUILD_GUIDE.md` defines *what* gets built and in what order, each report tells the story of *how we'll think* through a stretch of chapters: implementation goals, design-level reasoning, and high-level engineering posture. Reports carry vision as well as law — anything that is post-v1 direction rather than frozen v1 scope is explicitly marked as such in the text. The section pages in `../sections/` remain the only law.
+Plain-English narrative companions to the build. Where `https://github.com/Squirrelthug/LILITH/blob/main/docs/plan/BUILD_GUIDE.md` defines *what* gets built and in what order, each report tells the story of *how we'll think* through a stretch of chapters: implementation goals, design-level reasoning, and high-level engineering posture. Reports carry vision as well as law — anything that is post-v1 direction rather than frozen v1 scope is explicitly marked as such in the text. The section pages in `../sections/` remain the only law.
 
 | Report | Chapters | Title |
 |:--|:--|:--|
