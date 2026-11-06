@@ -29,8 +29,8 @@
     <p><strong>A GitHub Actions matrix runs build-and-test sequences across Linux, macOS, and Windows, generating platform-specific packages via PyInstaller --onedir mode to guarantee LGPL Relinking compliance.</strong></p>
 
     <ul>
-      <li><strong>Pipeline Triggers:</strong> Executes automatically on <code>push</code> to the <code>main</code> branch and on all <code>pull_request</code> events targeting <code>main</code>.</li>
-      <li><strong>Multi-Platform Runner Matrix:</strong>
+      <li><strong>Pipeline Triggers:</strong> Executes automatically on <code>push</code> to the <code>main</code> branch and on all <code>pull_request</code> events targeting <code>main</code>. A newer run for the same pull request, or for <code>main</code>, cancels the older one, because it tests a superset of that code.</li>
+      <li><strong>Multi-Platform Runner Matrix:</strong> the full three-OS matrix runs on every <code>pull_request</code>. A <code>push</code> to <code>main</code> runs <code>ubuntu-latest</code> only: the pull request has already built and tested that code on all three, and macOS costs about ten times Linux per minute.
         <ul>
           <li><code>ubuntu-latest</code> (Linux AppImage output)</li>
           <li><code>macos-latest</code> (macOS Apple Silicon/Intel .dmg output)</li>
@@ -45,7 +45,7 @@
           <li>Run test suite via <code>pytest --timeout=60 -v</code> (skips hardware-bound audio/keyring tests).</li>
           <li>Compile resources via <code>pyside6-rcc lilith/ui/resources.qrc -o lilith/ui/resources_rc.py</code>.</li>
           <li>Run PyInstaller via <code>pyinstaller lilith.spec --onedir</code>.</li>
-          <li>Upload compiled directory as build artifact via <code>actions/upload-artifact@v4</code>.</li>
+          <li>Upload compiled directory as build artifact via <code>actions/upload-artifact@v4</code>, kept for three days.</li>
         </ol>
       </li>
       <li><strong>Windows Build Environment:</strong> The <code>windows-latest</code> runner utilizes its pre-installed MSVC C++ Build Tools to resolve source compilations if wheels fail. Developer signing keys are injected securely via GitHub Secrets.</li>
@@ -133,6 +133,7 @@ jobs:
     </pre>
     <div class="s-meta">Checklist: <a href="../checklist.html#s7">§07</a> · Touches: §04 Cross-Platform, §08 Testing</div>
     <div class="s-meta">Amendment added: 2026-07-12 · Touches: §07 CI Pipeline (mandatory security tooling jobs: bandit, semgrep, pip-audit, gitleaks)</div>
+    <div class="s-meta">Amendment added: 2026-11-05 · Touches: §07 CI Pipeline (A-9: macOS and Windows build on pull requests only; a newer run cancels the older one; build artifacts kept three days)</div>
   </div>
 </details>
 
