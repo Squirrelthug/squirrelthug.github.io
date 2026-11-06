@@ -1,6 +1,6 @@
 # Report 04 — Proving the Bets (CH-07, CH-08, EXP-3)
 
-*Covers Chapter CH-07 (Experiment 1: Walking-Skeleton Latency Benchmark), Chapter CH-08 (Experiment 2: Router Dry-Run), and the floating gate EXP-3 (Encrypted Vector Feasibility). The law for this stretch is `../BUILD_SEQUENCING.md` §3, executed exactly as written. This report is about why we stop building to run experiments — and why we've pre-committed to consequences we might not like.*
+*Covers Chapter CH-07 (Experiment 1: Walking-Skeleton Latency Benchmark), Chapter CH-08 (Experiment 2: Router Dry-Run), and the floating gate EXP-3 (Encrypted Vector Feasibility). The law for this stretch is `https://github.com/Squirrelthug/LILITH/blob/main/docs/plan/BUILD_SEQUENCING.md` §3, executed exactly as written. This report is about why we stop building to run experiments — and why we've pre-committed to consequences we might not like.*
 
 ---
 

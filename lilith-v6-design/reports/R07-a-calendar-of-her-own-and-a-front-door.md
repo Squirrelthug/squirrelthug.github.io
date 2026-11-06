@@ -36,7 +36,7 @@ CH-13's order: the two stores and their schemas first (UID/SEQUENCE/STATUS seman
 
 CH-14's order: onboarding flow first (it exercises everything and will surface integration debt), then skills enrollment, then the orb state machine (independent track, animation-heavy), then the audit-tag-release sequence. Onboarding testing means fresh VMs and fresh eyes — the developer cannot experience a first run anymore, so the sprint should recruit at least one genuine stranger to the system, watch them, and treat their confusion as bug reports.
 
-What we defer without guilt — now formally, into the post-v1 parking list: everything in `../BUILD_SEQUENCING.md` §5, from the kitchen speaker to cloud backup sync to the interactive skills library, plus every vision thread marked as *direction* across these reports. Deferred is not abandoned; it's sequenced behind a v1 that actually exists.
+What we defer without guilt — now formally, into the post-v1 parking list: everything in `https://github.com/Squirrelthug/LILITH/blob/main/docs/plan/BUILD_SEQUENCING.md` §5, from the kitchen speaker to cloud backup sync to the interactive skills library, plus every vision thread marked as *direction* across these reports. Deferred is not abandoned; it's sequenced behind a v1 that actually exists.
 
 ## What done feels like
 
